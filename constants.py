@@ -1,7 +1,4 @@
-"""
-Credits to the Gepard program by K. Kumericki 
-
-Constants, with their numerical values, not to be changed by user.
+"""Constants, with their numerical values, not to be changed by user.
 
 Also, fixed dictionaries.
 """
