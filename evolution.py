@@ -216,11 +216,3 @@ def evolop(j: complex, nf: int, Q: float) -> np.ndarray:
     evo_dsum[:evola0NS.shape[0],:evola0NS.shape[1]] = evola0NS
     evo_dsum[evola0NS.shape[0]:,evola0NS.shape[1]:] = evola0
     return evo_dsum
-
-nftemp = 5
-
-jtest = 0.5
-
-evo = evolop(jtest, nftemp, 2* Init_Scale_Q)
-
-print(evo)
