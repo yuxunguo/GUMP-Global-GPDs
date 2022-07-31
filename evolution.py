@@ -1,34 +1,130 @@
-"""GPD evolution operator mathcal{E}.
+"""
+LO QCD evolution of moment space GPD. Credits to K. Kumericki at https://github.com/kkumer/gepard.
 
-Returns:
-   Numpy array evol[p, k, j]  where flavor index j takes values
-   in the evolution basis:
-   (1) -- singlet quark
-   (2) -- gluon
-   (3) -- NS(+)
-   (4) -- NS(-)  (not tested!)
+We used RunDec for the running strong coupling constant alphaS instead and made slight modifications.
 
-Notes:
-   GPD models may be defined in different basis and should
-   provide appropriate transformation matrix
-
-Todo:
-    * Array indices ordering is a bit of a mess
+Note:
+    Functions in this module have as first argument Mellin moment
+    n = j + 1, where j is conformal moment used everywhere else.
+    Thus, they should always be called as f(j+1, ...).
 
 """
-
-from typing import Tuple
+# from cmath import exp
+# from scipy.special import loggamma as clngamma
+#from this import d
 
 import numpy as np
+import rundec
+from scipy.special import psi
+from typing import Tuple
 
-from . import adim, constants, evolution, qcd, quadrature, special
+"""
+***********************QCD constants***************************************
+Refer to the constants.py at https://github.com/kkumer/gepard.
+"""
 
+NC = 3
+CF = (NC**2 - 1) / (2 * NC)
+CA = NC
+CG = CF - CA/2
+TF = 0.5
+Alpha_Mz = 0.1181
+# All unit in GeV for dimensional quantities.
+Mz = 91.1876
+# Two loop accuracy for running strong coupling constant.
+nloop_alphaS = 2
+# Initial scale of distribution functions at 2 GeV.
+Init_Scale_Q = 2
 
-def lambdaf(gam0) -> np.ndarray:
-    """Eigenvalues of the LO singlet anomalous dimensions matrix.
+"""
+***********************pQCD running coupling constant***********************
+Here rundec is used instead.
+"""
+
+B00 = 11./3. * CA
+B01 = -4./3. * TF
+
+def beta0(nf: int) -> float:
+    """ LO beta function of pQCD, will be used for LO GPD evolution. """
+    return - B00 - B01 * nf
+
+def AlphaS(nloop: int, nf: int, Q: float) -> float:
+    """
+    Alpha strong with initial scale set by Z boson mass Mz and alpha strong there alphaS = Alpha_Mz.
 
     Args:
-          gam0: matrix of LO anomalous dimensions
+        nloop: number of pQCD loop (order) of alpha strong
+        nf: effective Fermion number
+        Q: final scale
+    
+    Returns:
+        single value of alphaS at final scale Q.
+
+    """
+    return rundec.CRunDec().AlphasExact(Alpha_Mz, Mz, Q, nf, nloop)
+
+def beta_alphaS(nloop: int, nf: int, Q: float) -> float:
+    rundec.CRunDec().SetBeta()
+
+"""
+***********************Anomalous dimensions of GPD in the moment space*****
+Refer to the adim.py at https://github.com/kkumer/gepard.
+"""
+
+def S1(z: complex) -> complex:
+    """ Harmonic sum S_1. """
+    return np.euler_gamma + psi(z+1)
+
+def non_singlet_LO(n: complex, nf: int, prty: int = 1) -> complex:
+    """
+    Non-singlet LO anomalous dimension.
+
+    Args:
+        n (complex): which moment (= Mellin moment for integer n)
+        nf (int): number of active quark flavors
+        prty (int): 1 for NS^{+}, -1 for NS^{-}, irrelevant at LO
+
+    Returns:
+        Non-singlet LO anomalous dimension.
+
+    """
+    return CF*(-3.0-2.0/(n*(1.0+n))+4.0*S1(n))
+
+def singlet_LO(n: complex, nf: int, prty: int = 1) -> np.ndarray:
+    """
+    Singlet LO anomalous dimensions.
+
+    Args:
+        n (complex): which moment (= Mellin moment for integer n)
+        nf (int): number of active quark flavors
+        prty (int): C parity, irrelevant at LO
+
+    Returns:
+        2x2 complex matrix ((QQ, QG),
+                            (GQ, GG))
+
+    """
+    qq0 = CF*(-3.0-2.0/(n*(1.0+n))+4.0*S1(n))
+    qg0 = (-4.0*nf*TF*(2.0+n+n*n))/(n*(1.0+n)*(2.0+n))
+    gq0 = (-2.0*CF*(2.0+n+n*n))/((-1.0+n)*n*(1.0+n))
+    gg0 = (-22*CA/3.-8.0*CA*(1/((-1.0+n)*n)+1/((1.0+n)*(2.0+n))-S1(n))+8*nf*TF/3.)/2.
+
+    return np.array([[qq0, qg0],
+                     [gq0, gg0]])
+
+"""
+***********************Evolution operator of GPD in the moment space*******
+Refer to the evolution.py at https://github.com/kkumer/gepard. Modifications are made.
+"""
+
+def lambdaf(n: complex, nf: int, prty: int = 1) -> np.ndarray:
+    """
+    Eigenvalues of the LO singlet anomalous dimensions matrix.
+
+    Args:
+        n (complex): which moment (= Mellin moment for integer n)
+        nf (int): number of active quark flavors
+        prty (int): 1 for NS^{+}, -1 for NS^{-}, irrelevant at LO
 
     Returns:
         lam[a, k]
@@ -37,19 +133,22 @@ def lambdaf(gam0) -> np.ndarray:
     """
     # To avoid crossing of the square root cut on the
     # negative real axis we use trick by Dieter Mueller
-    aux = ((gam0[..., 0, 0] - gam0[..., 1, 1]) *
-           np.sqrt(1. + 4.0 * gam0[..., 0, 1] * gam0[..., 1, 0] /
-                   (gam0[..., 0, 0] - gam0[..., 1, 1])**2))
-    lam1 = 0.5 * (gam0[..., 0, 0] + gam0[..., 1, 1] - aux)
+    gam0 = singlet_LO(n, nf, prty)
+    aux = ((gam0[0, 0] - gam0[1, 1]) *
+           np.sqrt(1. + 4.0 * gam0[0, 1] * gam0[1, 0] /
+                   (gam0[0, 0] - gam0[1, 1])**2))
+    lam1 = 0.5 * (gam0[0, 0] + gam0[1, 1] - aux)
     lam2 = lam1 + aux
     return np.stack([lam1, lam2])
 
-
-def projectors(gam0) -> Tuple[np.ndarray, np.ndarray]:
-    """Projectors on evolution quark-gluon singlet eigenaxes.
+def projectors(n: complex, nf: int, prty: int = 1) -> Tuple[np.ndarray, np.ndarray]:
+    """
+    Projectors on evolution quark-gluon singlet eigenaxes.
 
     Args:
-          gam0: LO anomalous dimension
+        n (complex): which moment (= Mellin moment for integer n)
+        nf (int): number of active quark flavors
+        prty (int): 1 for NS^{+}, -1 for NS^{-}, irrelevant at LO
 
     Returns:
          lam: eigenvalues of LO an. dimm matrix lam[a, k]  # Eq. (123)
@@ -59,9 +158,9 @@ def projectors(gam0) -> Tuple[np.ndarray, np.ndarray]:
                i,j in {Q, G}
 
     """
-    lam = lambdaf(gam0)
+    gam0 = singlet_LO(n, nf, prty)    
+    lam = lambdaf(n, nf, prty)
     den = 1. / (lam[0, ...] - lam[1, ...])
-
     # P+ and P-
     ssm = gam0 - np.einsum('...,ij->...ij', lam[1, ...], np.identity(2))
     ssp = gam0 - np.einsum('...,ij->...ij', lam[0, ...], np.identity(2))
@@ -71,280 +170,57 @@ def projectors(gam0) -> Tuple[np.ndarray, np.ndarray]:
     pr = np.stack([prp, prm], axis=-3)
     return lam, pr
 
-
-def rnlof(m, j) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
-    """Return projected NLO mu-independent P(bet*gam0 - gam1)P.
+def evolop(j: complex, nf: int, Q: float) -> np.ndarray:
+    """
+    GPD evolution operator E(j, nf, Q)[a,b].
 
     Args:
-          m: instance of the model
-          j: MB contour points (overrides m.jpoints)
+         j: MB contour points (Note: n = j + 1 !!)
+         nf: number of effective fermion
+         Q: final scale of evolution 
 
     Returns:
-         Tuple of three arrays, namely:
-         lam: eigenvalues of LO an. dimm matrix lam[a, k]  # Eq. (123)
-         pr: Projector pr[k, a, i, j]  # Eq. (122)
-         r1proj: r1proj[a,b] = sum_ij pr[a,i,j] R1[i,j] pr[b,i,j]  # Eq. (124)
-         a,b in {+,-};  i,j in {Q, G}
+         Evolution operator E(j, nf, Q)[a,b] at given j nf and Q as 3-by-3 matrix
+         - a and b are in the flavor space (non-singlet, singlet, gluon)
 
     """
-    # cf. my DIS notes p. 61
-    gam0 = adim.singlet_LO(j+1, m.nf).transpose((2, 0, 1))  # LO singlet an. dim.
-    gam1 = adim.singlet_NLO(j+1, m.nf).transpose((2, 0, 1))  # NLO singlet an. dim.
-    lam, pr = projectors(gam0)
-    inv = 1.0 / qcd.beta(0, m.nf)
-    # Cf. Eq. (124), but defined with opposite sign
-    # and with additional 1/b0, as in gepard-fortran
-    r1 = inv * (gam1 - 0.5 * inv * qcd.beta(1, m.nf) * gam0)
-    r1proj = np.einsum('kaim,kmn,kbnj->kabij', pr, r1, pr)
+    #Alpha-strong ratio.
+    R = AlphaS(nloop_alphaS, nf, Q)/AlphaS(nloop_alphaS, nf, Init_Scale_Q)
 
-    return lam, pr, r1proj
+    #LO singlet anomalous dimensions and projectors
+    lam, pr = projectors(j+1, nf)    
 
+    #LO pQCD beta function of GPD evolution
+    b0 = beta0(nf)
 
-def rnlonsf(m, j, prty) -> np.ndarray:
-    """Return NLO mu-independent part of evolution operator.
+    #Singlet LO evolution factor (alpha(mu)/alpha(mu0))^(-gamma/beta0) in (+,-) space
+    Rfact = R**(-lam/b0)     
 
-    Args:
-          m: instance of the model
-          j: MB contour points (overrides m.jpoints)
-          prty: 1 for NS^{+}, -1 for NS^{-}
-
-    Returns:
-         r1: beta/gama ratio from Eq. (117)
-
+    #Singlet LO evolution matrix in (u+d, g) space
     """
-    # cf. my DIS notes p. 61
-    gam0 = adim.non_singlet_LO(j+1, m.nf, prty)   # LO non-singlet an. dim.
-    gam1 = adim.non_singlet_NLO(j+1, m.nf, prty)  # NLO non-singlet an. dim.
-    inv = 1.0 / qcd.beta(0, m.nf)
-    # Cf. Eq. (117), but defined with opposite sign as in gepard-fortran
-    r1 = inv * (gam1 - 0.5 * inv * qcd.beta(1, m.nf) * gam0)
-    return gam0, r1
-
-
-def erfunc(m, lamj, lamk, R) -> np.ndarray:
-    """Mu-dep. part of NLO evolution operator. Eq. (126)."""
-    b0 = qcd.beta(0, m.nf)
-    levi_civita = np.array([[0, 1], [-1, 0]])
-    bll = np.einsum('...,ij->...ij', lamj[0, ...] - lamk[1, ...], levi_civita)
-    bll = b0 * np.ones_like(bll) + bll
-
-    er1 = (np.ones_like(bll) - (1./R)**(bll/b0)) / bll  # Eq. (126)
-    er1 = b0 * er1   # as defined in gepard-fortran
-    return er1
-
-
-def erfunc_nd(m, lamj, lamk, R) -> np.ndarray:
-    """Mu-dep. part of NLO evolution operator. Eq. (126)."""
-    assert lamk.shape == (2,)  # FIX THIS
-    b0 = qcd.beta(0, m.nf)
-    bll = np.subtract.outer(lamj.transpose(), lamk)
-    bll = b0 * np.ones_like(bll) + bll
-
-    er1 = (np.ones_like(bll) - (1./R)**(bll/b0)) / bll  # Eq. (126)
-    er1 = b0 * er1   # as defined in gepard-fortran
-    return er1
-
-
-def cb1(m, Q2, zn, zk, NS: bool = False):
-    """Non-diagonal part of NLO evol op.
-
-    Args:
-          m: instance of the model
-          Q2: evolution point
-          zn: non-diagonal evolution Mellin-Barnes integration point (array)
-          zk: COPE Mellin-Barnes integration point (not array! - FIXME)
-          NS: do we want non-singlet?
-
-    Returns:
-         B_jk: non-diagonal part of evol. op. from Eq. (140)
-
-    Note:
-         It's multiplied by GAMMA(3/2) GAMMA(K+3) / (2^(K+1) GAMMA(K+5/2))
-         so it's ready to be combined with diagonally evolved C_K = 1 + ...
-         where in the end everything will be multiplied by
-        (2^(K+1) GAMMA(K+5/2))  / ( GAMMA(3/2) GAMMA(K+3) )
-
-    """
-    asmuf2 = qcd.as2pf(m.p, m.nf, Q2, m.asp[m.p], m.r20)
-    asQ02 = qcd.as2pf(m.p, m.nf, m.Q02, m.asp[m.p], m.r20)
-    R = asmuf2/asQ02
-    b0 = qcd.beta(0, m.nf)
-    AAA = (special.S1((zn+zk+2)/2) -
-           special.S1((zn-zk-2)/2) +
-           2*special.S1(zn-zk-1) -
-           special.S1(zn+1))
-    # GOD = "G Over D" = g_jk / d_jk
-    GOD_11 = 2 * constants.CF * (
-            2*AAA + (AAA - special.S1(zn+1))*(zn-zk)*(
-                zn+zk + 3)/(zk+1)/(zk+2))
-    nzero = np.zeros_like(GOD_11)
-    GOD_12 = nzero
-    GOD_21 = 2*constants.CF*(zn-zk)*(zn+zk+3)/zn/(zk+1)/(zk+2)
-    GOD_22 = 2 * constants.CA * (2*AAA + (AAA - special.S1(
-        zn + 1)) * (special.poch(zn, 4) / special.poch(zk, 4) -
-                    1) + 2 * (zn-zk) * (
-            zn+zk + 3) / special.poch(zk, 4)) * zk / zn
-    god = np.array([[GOD_11, GOD_12], [GOD_21, GOD_22]])
-    dm_22 = zk/zn
-    dm_11 = np.ones_like(dm_22)
-    dm_12 = np.zeros_like(dm_22)
-    dm = np.array([[dm_11, dm_12], [dm_12, dm_22]])
-    fac = (zk+1)*(zk+2)*(2*zn+3)/(zn+1)/(zn+2)/(zn-zk)/(zn+zk+3)
-    if NS:
-        gamn = adim.non_singlet_LO(zn+1, m.nf)
-        gamk = adim.non_singlet_LO(zk+1, m.nf)
-        r1 = (1 - (1/R)**((b0 + gamn - gamk)/b0)) / (b0+gamn-gamk)
-        cb1 = r1 * (gamn-gamk) * (b0 - gamk + GOD_11) * R**(-gamk/b0)
-        cb1 = fac * cb1
-    else:
-        gamn = adim.singlet_LO(zn+1, m.nf).transpose((2, 0, 1))
-        gamk = adim.singlet_LO(zk+1, m.nf)
-        lamn, pn = evolution.projectors(gamn)
-        lamk, pk = evolution.projectors(gamk)
-        proj_DM = np.einsum('naif,fgn,bgj->nabij', pn, dm, pk)
-        proj_GOD = np.einsum('naif,fgn,bgj->nabij', pn, god, pk)
-        er1 = evolution.erfunc_nd(m, lamn, lamk, R)
-        bet_proj_DM = np.einsum('b,nabij->nabij', b0-lamk, proj_DM)
-        cb1 = np.einsum('n,nab,nabij,b->nij', fac,
-                        er1*np.subtract.outer(lamn.transpose(), lamk),
-                        bet_proj_DM + proj_GOD,
-                        R**(-lamk/b0)) / b0
-    return cb1
-
-
-def evolop(m, j, Q2: float, process_class: str) -> np.ndarray:
-    """GPD evolution operator.
-
-    Args:
-         m: instance of the model
-         j: MB contour points (overrides m.jpoints)
-         Q2: final evolution momentum squared
-         process_class: DIS, DVCS or DVMP
-
-    Returns:
-         Array corresponding Eq. (121) of Towards DVCS paper.
-         evolop[k, p, i, j]
-         -  k is index of point on MB contour,
-         -  p is pQCD order (0=LO, 1=NLO)
-         -  i, j in [Q, G]
-
-    Todo:
-        Argument should not be a process class but GPD vs PDF, or we
-        should avoid it altogether somehow. This serves here only
-        to get the correct choice of evolution scheme (msbar vs csbar).
-
-    """
-    # 1. Alpha-strong ratio.
-    # When m.p=1 (NLO), LO part of the evolution operator
-    # will still be multiplied by ratio of alpha_strongs
-    # evaluated at NLO, as it should.
-    asmuf2 = qcd.as2pf(m.p, m.nf, Q2, m.asp[m.p], m.r20)
-    asQ02 = qcd.as2pf(m.p, m.nf, m.Q02, m.asp[m.p], m.r20)
-    R = asmuf2/asQ02
-
-    # 2. egeinvalues, projectors, projected mu-indep. part
-    lam, pr, r1proj = rnlof(m, j)
-
-    # 3. LO errfunc
-    b0 = qcd.beta(0, m.nf)
-    er1 = erfunc(m, lam, lam, R)
-
-    Rfact = R**(-lam/b0)  # LO evolution (alpha(mu)/alpha(mu0))^(-gamma/beta0)
+    # The Gepard code by K. Kumericki reads:
     evola0ab = np.einsum('kaij,ab->kabij', pr,  np.identity(2))
     evola0 = np.einsum('kabij,bk->kij', evola0ab, Rfact)
+    # We use instead
+    """ 
+    evola0 = np.einsum('aij,a->ij', pr, Rfact)
 
-    if m.p == 1:
-        # Cf. eq. (124), but with opposite sign, as in gepard-fortran
-        evola1ab = - np.einsum('kab,kabij->kabij', er1, r1proj)
-        evola1 = np.einsum('kabij,bk->kij', evola1ab, Rfact)
-        # adding non-diagonal evolution when needed or asked for
-        # if ((process_class == 'DVMP') or (
-        #        process_class == 'DVCS' and m.scheme == 'msbar')):
-        if ((process_class != 'DIS') and (m.scheme == 'msbar')):
-            # FIXME: find a way to do it array-wise i.e. get rid of j_single
-            nd = []
-            for j_single in j:
-                znd, wgnd = quadrature.nd_mellin_barnes()
-                ndphij = 1.57j
-                ephnd = np.exp(ndphij)
-                tginv = ephnd/np.tan(np.pi*znd/2)
-                tginvc = ephnd.conjugate()/np.tan(np.pi*znd.conjugate()/2)
-                cb1f = cb1(m, Q2, j_single + znd + 2, j_single)
-                cb1fc = cb1(m, Q2, j_single + znd.conjugate() + 2, j_single)
-                ndint = np.einsum('n,nij,n->ij', wgnd, cb1f, tginv)
-                ndint -= np.einsum('n,nij,n->ij', wgnd, cb1fc, tginvc)
-                ndint = ndint * 0.25j
-                nd.append(ndint)
-            evola1 += np.array(nd)
-    else:
-        evola1 = np.zeros_like(evola0)
+    #Non-singlet LO anomalous dimension
+    gam0NS = non_singlet_LO(j+1, nf)
 
-    evola = np.stack((evola0, evola1), axis=1)
+    #Non-singlet evolution factor (1 by 1 matrix)
+    evola0NS =np.einsum('...,ij->...ij', R**(-gam0NS/b0), np.identity(1))
 
-    return evola
+    # Direct sum of the 1-by-1 NS matrix and and the 2-by-2 Singlet matrix
+    evo_dsum = np.zeros(np.add(evola0NS.shape, evola0.shape))
+    evo_dsum[:evola0NS.shape[0],:evola0NS.shape[1]] = evola0NS
+    evo_dsum[evola0NS.shape[0]:,evola0NS.shape[1]:] = evola0
+    return evo_dsum
 
+nftemp = 5
 
-def evolopns(m, j, Q2: float, process_class: str) -> np.ndarray:
-    """GPD evolution operator (NSP case only atm).
+jtest = 0.5
 
-    Args:
-         m: instance of the model
-         j: MB contour points (overrides m.jpoints)
-         Q2: final evolution momentum squared
-         process_class: DIS, DVCS or DVMP
+evo = evolop(jtest, nftemp, 2* Init_Scale_Q)
 
-    Returns:
-         Array corresponding Eq. (116) of Towards DVCS paper.
-         evolopns[k, p]
-         -  k is index of point on MB contour,
-         -  p is pQCD order (0=LO, 1=NLO)
-
-    Notes:
-        Code duplication, should be merged with evolop function
-
-    """
-    # 1. Alpha-strong ratio.
-    # When m.p=1 (NLO), LO part of the evolution operator
-    # will still be multiplied by ratio of alpha_strongs
-    # evaluated at NLO, as it should.
-    asmuf2 = qcd.as2pf(m.p, m.nf, Q2, m.asp[m.p], m.r20)
-    asQ02 = qcd.as2pf(m.p, m.nf, m.Q02, m.asp[m.p], m.r20)
-    R = asmuf2/asQ02
-
-    # 2. mu-indep. part
-    gam0, r1 = rnlonsf(m, j, 1)   # prty=1 fixed
-
-    # 2. LO errfunc
-    b0 = qcd.beta(0, m.nf)
-    aux1 = - (1 - 1 / R) * r1  # Cf. eq. (117), but with opposite sign
-    aux0 = np.ones_like(aux1)
-
-    evola0 = aux0 * R**(-gam0/b0)  # LO evolution (alpha(mu)/alpha(mu0))^(-gamma/beta0)
-
-    if m.p == 1:
-        evola1 = aux1 * R**(-gam0/b0)
-        # adding non-diagonal evolution when needed or asked for
-        # if ((process_class == 'DVMP') or (
-        #    process_class == 'DVCS' and m.scheme == 'msbar')):
-        if ((process_class != 'DIS') and (m.scheme == 'msbar')):
-            # FIXME: find a way to do it array-wise i.e. get rid of j_single
-            nd = []
-            for j_single in j:
-                znd, wgnd = quadrature.nd_mellin_barnes()
-                ndphij = 1.57j
-                ephnd = np.exp(ndphij)
-                tginv = ephnd/np.tan(np.pi*znd/2)
-                tginvc = ephnd.conjugate()/np.tan(np.pi*znd.conjugate()/2)
-                cb1f = cb1(m, Q2, j_single + znd + 2, j_single, NS=True)
-                cb1fc = cb1(m, Q2, j_single + znd.conjugate() + 2, j_single, NS=True)
-                ndint = np.sum(wgnd * cb1f * tginv)
-                ndint -= np.sum(wgnd * cb1fc * tginvc)
-                ndint = ndint * 0.25j
-                nd.append(ndint)
-            evola1 += np.array(nd)
-    else:
-        evola1 = np.zeros_like(evola0)
-
-    evola = np.stack((evola0, evola1), axis=1)
-
-    return evola
+print(evo)
