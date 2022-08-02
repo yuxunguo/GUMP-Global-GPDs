@@ -212,7 +212,7 @@ def evolop(j: complex, nf: int, Q: float) -> np.ndarray:
     evola0NS =np.einsum('...,ij->...ij', R**(-gam0NS/b0), np.identity(1))
 
     # Direct sum of the 1-by-1 NS matrix and and the 2-by-2 Singlet matrix
-    evo_dsum = np.zeros(np.add(evola0NS.shape, evola0.shape))
+    evo_dsum = np.zeros(np.add(evola0NS.shape, evola0.shape),dtype=np.complex_)
     evo_dsum[:evola0NS.shape[0],:evola0NS.shape[1]] = evola0NS
     evo_dsum[evola0NS.shape[0]:,evola0NS.shape[1]:] = evola0
     return evo_dsum
