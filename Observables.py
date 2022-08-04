@@ -5,8 +5,11 @@ With the GPDs ansatz, observables with LO evolution are calculated
 
 import scipy as sp
 import numpy as np
+from mpmath import mp, hyp2f1
 from scipy.integrate import quad_vec
+from scipy.special import gamma
 from Evolution import evolop
+
 """
 ***********************GPD moments***************************************
 """
@@ -15,6 +18,12 @@ inv_Mellin_intercept = 0.35
 
 #Cutoff for inverse Mellin transformation
 inv_Mellin_cutoff = 50
+
+#Cutoff for Mellin Barnes integral
+Mellin_Barnes_intercept = 0.35
+
+#Cutoff for Mellin Barnes integral
+Mellin_Barnes_cutoff = 20
 
 #Number of effective fermions
 NFEFF = 5
@@ -33,7 +42,7 @@ def ConfMoment(ParaSet: np.ndarray, j: complex, k: int, t: float) -> complex:
             norm = ParaSet[0]: overall normalization constant
             alpha = ParaSet[1], beta = ParaSet[2]: the two parameters corresponding to x ^ (-alpha) * (1 - x) ^ beta
             alphap = ParaSet[3]: regge trajectory alpha(t) = alpha + alphap * t
-        j: conformal moment j
+        j: conformal spin j (conformal spin is actually j+2 but anyway)
         k: xi powers xi ^ (2 * k)
         t: momentum transfer squared t
 
@@ -47,7 +56,70 @@ def ConfMoment(ParaSet: np.ndarray, j: complex, k: int, t: float) -> complex:
     return norm * beta_loggamma (j + 1 - alpha, 1 + beta) * (j + 1 - k - alpha)/ (j + 1 - k - alpha - alphap * t)
 
 def Moment_Sum(ParaSets: np.ndarray, j: complex, k: int, t: float) -> complex:
+    """
+    Sum of the conformal moments when the ParaSets contain more than just one set of parameters 
+
+    Args:
+        ParaSets: contains [ParaSet1, ParaSet0, ParaSet2,...] with each ParaSet = [norm, alpha, beta ,alphap]
+        j: conformal spin j (conformal spin is actually j+2 but anyway)
+        k: xi powers xi ^ (2 * k)
+        t: momentum transfer squared t
+
+    Returns:
+        sum of conformal moments over all the ParaSet
+    """
+
     return sum(list(map(lambda paraset: ConfMoment(paraset, j, k, t), ParaSets)))
+
+def Moment_Evo(j: complex, t: float, nf: int, Q: float, ParasSet_NS, ParaSet_S, ParaSet_G):
+    """
+    Evolution of moments in the flavor space (non-singlet, singlet, gluon)
+
+    Args:
+        j: conformal spin j (conformal spin is actually j+2 but anyway)
+        t: momentum transfer squared
+        nf: number of effective fermions
+        Q: final evolution scale
+        ParasSet_NS: parameter sets for non-singlet quark (both sea and valence)
+        ParasSet_S: parameter sets for singlet quark (both sea and valence)
+        ParasSet_G: parameter sets for gluon
+
+    Returns:
+        Evolved conformal moments in flavor space (non-singlet, singlet, gluon)
+    """
+    ConfNS = Moment_Sum(ParasSet_NS, j, 0, t)
+    ConfS = Moment_Sum(ParaSet_S, j, 0, t)
+    ConfG = Moment_Sum(ParaSet_G, j, 0, t)
+    Evo = evolop(j, nf, Q)
+    return np.einsum('...i,i->...', Evo, [ConfNS, ConfS, ConfG])
+# precision for the hypergeometric function
+mp.dps = 10
+
+def ConfWaveFunc(j: complex, x: float, xi: float) -> complex:
+    """ 
+    conformal wave function p_j(x,xi)
+
+    Args:
+        j: conformal spin j (conformal spin is actually j+2 but anyway)
+        x: momentum fraction x
+        xi: skewness parameter xi
+
+    Returns:
+        conformal wave function p_j(x,xi)
+    """
+    if(x > xi):
+        pDGLAP = np.sin(np.pi * (j+1))/ np.pi * x**(-j-1) * complex(hyp2f1( (j+1)/2, (j+2)/2, j+5/2, (xi/x) ** 2)) 
+        return pDGLAP
+
+    if(x > -xi):
+        pERBL = 2 ** (1+j) * gamma(5/2+j) / (gamma(1/2) * gamma(1+j)) * xi ** (-j-1) * (1+x/xi) * complex(hyp2f1(-1-j,j+2,2, (x+xi)/(2*xi)))
+        return pERBL
+    
+    return 0
+
+def CWilson(j: complex) -> complex:
+    return 2 ** (1+j) * gamma(5/2+j) / (gamma(3/2) * gamma(3+j))
+
 
 """
 ***********************Observables***************************************
@@ -78,43 +150,62 @@ class GPDobserv (object) :
         self.t = init_t
         self.Q = init_Q
 
-    def tPDF(self, Para_NSV, Para_NSS, Para_SV, Para_SS, Para_G):
+    def tPDF(self, Para_NS, Para_S, Para_G):
         """
         t-denpendent PDF in flavor space (non-singlet, singlet, gluon)
         Args:
-            Para_NSV: parameter set for non-singlet valence quark
-            Para_NSS: parameter set for non-singlet sea quark
-            Para_SV: parameter set for singlet valence quark
-            Para_SS: parameter set for singlet sea quark
+            Para_NS: parameter set for non-singlet quark (both sea and valence)
+            Para_S: parameter set for singlet quark (both sea and valence)
             Para_G: parameter set for gluon
 
         Returns:
             f(x,t) in (non-singlet, singlet, gluon) space
         """
-        def Integrand_Inv_Mellin(j):
-            """
-                define the integrand function for the inverse Mellin transform
-            """
-            ConfNS = Moment_Sum(Para_NSV, j, 0, self.t) + Moment_Sum(Para_NSS, j, 0, self.t)
-            ConfS = Moment_Sum(Para_SV, j, 0, self.t) + Moment_Sum(Para_SS, j, 0, self.t)
-            ConfG = Moment_Sum(Para_G, j, 0, self.t)
-            Evo = evolop(j, NFEFF, self.Q)
-            return np.einsum('...i,i->...', Evo, [ConfNS, ConfS, ConfG])
-        
+
         # The contour for inverse Meliin transform. Note that S here is the analytically continued n which is j + 1 not j !
         reS = inv_Mellin_intercept + 1
-        Max_ImS = inv_Mellin_cutoff 
-        return quad_vec(lambda imS : ( np.real(self.x ** (- reS - 1j * imS) * Integrand_Inv_Mellin(reS - 1 + 1j * imS)) / (2 * np.pi) ), - Max_ImS , + Max_ImS )[0]
+        Max_imS = inv_Mellin_cutoff 
+        return quad_vec(lambda imS : (np.real(self.x ** (- reS - 1j * imS) * Moment_Evo(reS - 1 + 1j * imS, self.t, NFEFF, self.Q, Para_NS, Para_S, Para_G)) / (2 * np.pi)), - Max_imS, + Max_imS)[0]
 
+    def GPD(self, Para_NS, Para_S, Para_G):
+        """
+        GPD F(x, xi, t) in flavor space (non-singlet, singlet, gluon)
+        Args:
+            Para_NS: parameter set for non-singlet quark (both sea and valence)
+            Para_S: parameter set for singlet quark (both sea and valence)
+            Para_G: parameter set for gluon
 
+        Returns:
+            f(x,xi,t) in (non-singlet, singlet, gluon) space
+        """
+        # The contour for Mellin-Barnes integral in terms of j not n.
+        reJ = Mellin_Barnes_intercept 
+        Max_imJ = Mellin_Barnes_cutoff 
+        return quad_vec(lambda imJ : (np.real(ConfWaveFunc(reJ + 1j * imJ, self.x, self.xi) * Moment_Evo(reJ + 1j * imJ, self.t, NFEFF, self.Q, Para_NS, Para_S, Para_G) / (2 * np.sin((reJ + 1j * imJ+1) * np.pi)))), - Max_imJ, + Max_imJ)[0]
 
+    def CFF(self, Para_NS, Para_S, Para_G):
+        """
+        CFF \mathcal{F}(xi, t) in flavor space (non-singlet, singlet, gluon)
+        Args:
+            Para_NS: parameter set for non-singlet quark (both sea and valence)
+            Para_S: parameter set for singlet quark (both sea and valence)
+            Para_G: parameter set for gluon
 
-TestGPD = GPDobserv(0.1, 0, 0, 5)
+        Returns:
+            CFF \mathcal{F}(xi, t) in (non-singlet, singlet, gluon) space
+        """
+        # The contour for Mellin-Barnes integral in terms of j not n.
+        reJ = Mellin_Barnes_intercept 
+        Max_imJ = Mellin_Barnes_cutoff 
+        return quad_vec(lambda imJ : (self.xi ** (-reJ - 1j * imJ - 1) * CWilson(reJ + 1j * imJ) * (1j + np.tan((reJ + 1j * imJ) * np.pi / 2)) * Moment_Evo(reJ + 1j * imJ, self.t, NFEFF, self.Q, Para_NS, Para_S, Para_G) / 2), - Max_imJ, + Max_imJ)[0]
 
+TestGPD = GPDobserv(0.1, 0.1, 0., 5.)
 import time
 start_time = time.time()
-print(TestGPD.tPDF(Init_Para_NS_Valence,Init_Para_NS_Sea, Init_Para_S_Valence, Init_Para_S_Sea, Init_Para_G))
+Init_Para_NS = np.vstack([Init_Para_NS_Valence, Init_Para_NS_Sea])
+Init_Para_S =  np.vstack([Init_Para_S_Valence, Init_Para_S_Sea])
+print(TestGPD.GPD(Init_Para_NS, Init_Para_S, Init_Para_G)*np.pi)
 print("--- %s seconds ---" % (time.time() - start_time))
-
-
-
+start_time = time.time()
+print(TestGPD.CFF(Init_Para_NS, Init_Para_S, Init_Para_G))
+print("--- %s seconds ---" % (time.time() - start_time))
