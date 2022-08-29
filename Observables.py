@@ -49,10 +49,7 @@ def ConfMoment(ParaSet: np.ndarray, j: complex, t: float) -> complex:
     Returns:
         Conformal moment in j space F(j,t)
     """
-    norm = ParaSet[0]
-    alpha = ParaSet[1]
-    beta = ParaSet[2]
-    alphap = ParaSet[3]
+    [norm, alpha, beta, alphap] = ParaSet
     return norm * beta_loggamma (j + 1 - alpha, 1 + beta) * (j + 1  - alpha)/ (j + 1 - alpha - alphap * t)
 
 def Moment_Sum(ParaSets: np.ndarray, j: complex, t: float) -> complex:
@@ -60,37 +57,43 @@ def Moment_Sum(ParaSets: np.ndarray, j: complex, t: float) -> complex:
     Sum of the conformal moments when the ParaSets contain more than just one set of parameters 
 
     Args:
-        ParaSets: contains [ParaSet1, ParaSet0, ParaSet2,...] with each ParaSet = [norm, alpha, beta ,alphap]
+        ParaSets = [ParaSea, ParaValence]        
+        ParaValence/ParaSea : contains [ParaSet1, ParaSet0, ParaSet2,...] with each ParaSet = [norm, alpha, beta ,alphap] for valence and sea distributions repsectively.        
         j: conformal spin j (conformal spin is actually j+2 but anyway)
         t: momentum transfer squared t
 
     Returns:
         sum of conformal moments over all the ParaSet
     """
+    
+    [ParaSea, ParaValence] = ParaSets
+    return sum(list(map(lambda paraset: ConfMoment(paraset, j, t), ParaValence))) + sum(list(map(lambda paraset: ConfMoment(paraset, j, t),ParaSea)))
 
-    return sum(list(map(lambda paraset: ConfMoment(paraset, j, t), ParaSets)))
-
-def Moment_Evo(j: complex, t: float, nf: int, Q: float, ParasSet_NS, ParaSet_S, ParaSet_G):
+def Moment_Evo(j: complex, t: float, nf: int, Q: float, ParasSet_Flavor):
     """
     Evolution of moments in the flavor space (non-singlet, singlet, gluon)
 
     Args:
+        ParasSet_Flavor = [ParasSet_NS, ParasSet_S, ParasSet_G] 
+        ParaSets_NS: parameter sets for non-singlet quark (both sea and valence)
+        ParaSets_S: parameter sets for singlet quark (both sea and valence)
+        ParaSets_G: parameter sets for gluon
         j: conformal spin j (conformal spin is actually j+2 but anyway)
         t: momentum transfer squared
         nf: number of effective fermions
         Q: final evolution scale
-        ParasSet_NS: parameter sets for non-singlet quark (both sea and valence)
-        ParasSet_S: parameter sets for singlet quark (both sea and valence)
-        ParasSet_G: parameter sets for gluon
-
+        
     Returns:
         Evolved conformal moments in flavor space (non-singlet, singlet, gluon)
     """
-    ConfNS = Moment_Sum(ParasSet_NS, j, t)
-    ConfS = Moment_Sum(ParaSet_S, j, t)
-    ConfG = Moment_Sum(ParaSet_G, j, t)
+    [ParaSets_NS, ParaSets_S, ParaSets_G] = ParasSet_Flavor 
+
+    ConfNS = Moment_Sum(ParaSets_NS, j, t)
+    ConfS = Moment_Sum(ParaSets_S, j, t)
+    ConfG = Moment_Sum(ParaSets_G, j, t)
     Evo = evolop(j, nf, Q)
     return np.einsum('...i,i->...', Evo, [ConfNS, ConfS, ConfG])
+
 # precision for the hypergeometric function
 mp.dps = 25
 
@@ -123,30 +126,6 @@ def CWilson(j: complex) -> complex:
 """
 ***********************Observables***************************************
 """
-# Number of ansatz,  combinations of multiple ansatz x^alpha (1-x)^beta might be needed for more flexiblity but 1 should be good to start with
-init_NumofAnsatz = 1
-
-# Initial parameters for the non-singlet valence and sea quark distributions
-Init_Para_NS_Valence = [[1, 0.2 , 3, 1]] * init_NumofAnsatz
-Init_Para_NS_Sea = [[1, 0.8 , 8, 1]] * init_NumofAnsatz
-
-# Initial parameters for the non-singlet valence and sea quark distributions for the xi^2 terms
-Init_Para_NS_Valence_xi_2 = [[1, 0.2 , 3, 1]] * init_NumofAnsatz
-Init_Para_NS_Sea_xi_2 = [[1, 0.8 , 8, 1]] * init_NumofAnsatz
-
-# Initial parameters for the singlet quark distributions
-Init_Para_S_Valence = [[1, 0.2 , 3, 1]] * init_NumofAnsatz
-Init_Para_S_Sea = [[1, 0.8 , 8, 1]] * init_NumofAnsatz
-
-# Initial parameters for the singlet quark distributions for the xi^2 terms
-Init_Para_S_Valence_xi_2 = [[1, 0.2 , 3, 1]] * init_NumofAnsatz
-Init_Para_S_Sea_xi_2 = [[1, 0.8 , 8, 1]] * init_NumofAnsatz
-
-# Initial parameters for the gluon distributions (only sea distributions)
-Init_Para_G = [[1, 0.8 , 8, 1]] * init_NumofAnsatz
-
-# Initial parameters for the gluon distributions for the xi^2 terms
-Init_Para_G_xi_2 = [[1, 0.8 , 8, 1]] * init_NumofAnsatz
 
 # Class for observables
 class GPDobserv (object) :
@@ -157,13 +136,16 @@ class GPDobserv (object) :
         self.t = init_t
         self.Q = init_Q
 
-    def tPDF(self, Para_NS, Para_S, Para_G):
+    def tPDF(self, ParaAll):
         """
         t-denpendent PDF in flavor space (non-singlet, singlet, gluon)
         Args:
-            Para_NS: parameter set for non-singlet quark (both sea and valence)
-            Para_S: parameter set for singlet quark (both sea and valence)
-            Para_G: parameter set for gluon
+            ParaAll = [Para_All_Forward, Para_All_xi2]
+            Para_All_Forward = [Para_NS, Para_S, Para_G]
+            Para_NS: parameter set for non-singlet quark (both sea and valence) in the forward limit 
+            Para_S: parameter set for singlet quark (both sea and valence) in the forward limit
+            Para_G: parameter set for gluon in the forward limit
+            Para_All_xi2: only matter for non-zero xi (NOT needed here but the parameters are passed for consistency with GPDs)
 
         Returns:
             f(x,t) in (non-singlet, singlet, gluon) space
@@ -174,17 +156,20 @@ class GPDobserv (object) :
         Max_imS = inv_Mellin_cutoff 
 
         def Integrand_inv_Mellin(s: complex):
-            return self.x ** (-s) * Moment_Evo(s - 1, self.t, NFEFF, self.Q, Para_NS, Para_S, Para_G)/(2 * np.pi)
+            return self.x ** (-s) * Moment_Evo(s - 1, self.t, NFEFF, self.Q, ParaAll[0])/(2 * np.pi)
 
         return quad_vec(lambda imS : np.real(Integrand_inv_Mellin(reS + 1j * imS)) , - Max_imS, + Max_imS)[0]
 
-    def GPD(self, Para_NS, Para_S, Para_G, Para_NS_xi_2, Para_S_xi_2, Para_G_xi_2):
+    def GPD(self, ParaAll):
         """
         GPD F(x, xi, t) in flavor space (non-singlet, singlet, gluon)
         Args:
-            Para_NS: parameter set for non-singlet quark (both sea and valence)
-            Para_S: parameter set for singlet quark (both sea and valence)
-            Para_G: parameter set for gluon
+            ParaAll = [Para_All_Forward, Para_All_xi2]
+            Para_All_Forward = [Para_NS, Para_S, Para_G]
+            Para_NS: parameter set for non-singlet quark (both sea and valence) in the forward limit 
+            Para_S: parameter set for singlet quark (both sea and valence) in the forward limit
+            Para_G: parameter set for gluon in the forward limit
+            Para_All_xi2 = [Para_NS_2, Para_S_2, Para_G_2]
             Para_NS_2: parameter set for non-singlet quark (both sea and valence) for the xi^2 terms
             Para_S_2: parameter set for singlet quark (both sea and valence) for the xi^2 terms
             Para_G_2: parameter set for gluon for the xi^2 terms
@@ -192,50 +177,38 @@ class GPDobserv (object) :
         Returns:
             f(x,xi,t) in (non-singlet, singlet, gluon) space
         """
-        # The contour for Mellin-Barnes integral in terms of j not n.
+        # The contour for Mellin-Barnes integral in terms of j not n.        
         reJ = Mellin_Barnes_intercept 
         Max_imJ = Mellin_Barnes_cutoff 
 
         def Integrand_Mellin_Barnes(j: complex):
-            return ConfWaveFunc(j, self.x, self.xi) * Moment_Evo(j, self.t, NFEFF, self.Q, Para_NS, Para_S, Para_G) + self.xi ** 2 * ConfWaveFunc(j + 2, self.x, self.xi) * Moment_Evo(j, self.t, NFEFF, self.Q, Para_NS_xi_2, Para_S_xi_2, Para_G_xi_2)
+            return ConfWaveFunc(j, self.x, self.xi) * Moment_Evo(j, self.t, NFEFF, self.Q, ParaAll[0]) + self.xi ** 2 * ConfWaveFunc(j + 2, self.x, self.xi) * Moment_Evo(j, self.t, NFEFF, self.Q, ParaAll[1])
 
         return quad_vec(lambda imJ : np.real(Integrand_Mellin_Barnes(reJ + 1j* imJ) / (2 * np.sin((reJ + 1j * imJ+1) * np.pi)) ), - Max_imJ, + Max_imJ)[0]
 
-    def CFF(self, Para_NS, Para_S, Para_G, Para_NS_xi_2, Para_S_xi_2, Para_G_xi_2):
+    def CFF(self, ParaAll):
         """
         CFF \mathcal{F}(xi, t) in flavor space (non-singlet, singlet, gluon)
         Args:
-            Para_NS: parameter set for non-singlet quark (both sea and valence)
-            Para_S: parameter set for singlet quark (both sea and valence)
-            Para_G: parameter set for gluon
+            ParaAll = [Para_All_Forward, Para_All_xi2]
+            Para_All_Forward = [Para_NS, Para_S, Para_G]
+            Para_NS: parameter set for non-singlet quark (both sea and valence) in the forward limit 
+            Para_S: parameter set for singlet quark (both sea and valence) in the forward limit
+            Para_G: parameter set for gluon in the forward limit
+            Para_All_xi2 = [Para_NS_2, Para_S_2, Para_G_2]
+            Para_NS_2: parameter set for non-singlet quark (both sea and valence) for the xi^2 terms
+            Para_S_2: parameter set for singlet quark (both sea and valence) for the xi^2 terms
+            Para_G_2: parameter set for gluon for the xi^2 terms
 
         Returns:
             CFF \mathcal{F}(xi, t) in (non-singlet, singlet, gluon) space
         """
+
         # The contour for Mellin-Barnes integral in terms of j not n.
         reJ = Mellin_Barnes_intercept 
         Max_imJ = Mellin_Barnes_cutoff 
 
         def Integrand_Mellin_Barnes_CFF(j: complex):
-            return CWilson(j) * Moment_Evo(j, self.t, NFEFF, self.Q, Para_NS, Para_S, Para_G) + CWilson(j+2) * Moment_Evo(j, self.t, NFEFF, self.Q, Para_NS_xi_2, Para_S_xi_2, Para_G_xi_2)
+            return CWilson(j) * Moment_Evo(j, self.t, NFEFF, self.Q, ParaAll[0]) + CWilson(j+2) * Moment_Evo(j, self.t, NFEFF, self.Q,  ParaAll[1])
 
         return quad_vec(lambda imJ : self.xi ** (-reJ - 1j * imJ - 1) * (1j + np.tan((reJ + 1j * imJ) * np.pi / 2)) *Integrand_Mellin_Barnes_CFF(reJ + 1j * imJ) / 2, - Max_imJ, + Max_imJ)[0]
-
-TestGPD = GPDobserv(0.1, 0.1, 0, 2.5)
-import time
-Init_Para_NS = np.vstack([Init_Para_NS_Valence, Init_Para_NS_Sea])
-Init_Para_S =  np.vstack([Init_Para_S_Valence, Init_Para_S_Sea])
-Init_Para_NS_xi_2 = np.vstack([Init_Para_NS_Valence_xi_2, Init_Para_NS_Sea_xi_2])
-Init_Para_S_xi_2 =  np.vstack([Init_Para_S_Valence_xi_2, Init_Para_S_Sea_xi_2])
-
-start_time = time.time()
-print(TestGPD.tPDF(Init_Para_NS, Init_Para_S, Init_Para_G))
-print("--- %s seconds ---" % (time.time() - start_time))
-
-start_time = time.time()
-print(TestGPD.GPD(Init_Para_NS, Init_Para_S, Init_Para_G, Init_Para_NS_xi_2, Init_Para_S_xi_2, Init_Para_G_xi_2)*np.pi)
-print("--- %s seconds ---" % (time.time() - start_time))
-
-start_time = time.time()
-print(TestGPD.CFF(Init_Para_NS, Init_Para_S, Init_Para_G, Init_Para_NS_xi_2, Init_Para_S_xi_2, Init_Para_G_xi_2))
-print("--- %s seconds ---" % (time.time() - start_time))
