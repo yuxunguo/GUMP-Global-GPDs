@@ -36,6 +36,17 @@ nloop_alphaS = 2
 # Initial scale of distribution functions at 2 GeV.
 Init_Scale_Q = 2
 
+# Transform the original flavor basis to the evolution basis (qVal, q_du_plus, q_du_minus, qSigma, g)
+# The same basis for PDF evolution are used, check references.
+
+flav_trans =[[1, 0, 1, 0, 0],
+             [-1, -2, 1, 2, 0],
+             [-1, 0, 1, 0 , 0],
+             [1, 2, 1, 2, 0],
+             [0, 0, 0, 0, 1]]
+
+inv_flav_trans = np.linalg.inv(flav_trans)
+
 """
 ***********************pQCD running coupling constant***********************
 Here rundec is used instead.
@@ -208,11 +219,42 @@ def evolop(j: complex, nf: int, Q: float) -> np.ndarray:
     #Non-singlet LO anomalous dimension
     gam0NS = non_singlet_LO(j+1, nf)
 
-    #Non-singlet evolution factor (1 by 1 matrix)
-    evola0NS =np.einsum('...,ij->...ij', R**(-gam0NS/b0), np.identity(1))
+    #Non-singlet evolution factor 
+    evola0NS = R**(-gam0NS/b0)
 
-    # Direct sum of the 1-by-1 NS matrix and and the 2-by-2 Singlet matrix
-    evo_dsum = np.zeros(np.add(evola0NS.shape, evola0.shape),dtype=np.complex_)
-    evo_dsum[:evola0NS.shape[0],:evola0NS.shape[1]] = evola0NS
-    evo_dsum[evola0NS.shape[0]:,evola0NS.shape[1]:] = evola0
-    return evo_dsum
+    return [evola0NS, evola0]
+
+def Moment_Evo(j: complex, nf: int, Q: float, ConfFlav: np.array):
+    """
+    Evolution of moments in the flavor space 
+
+    Args:
+        uneolved conformal moments in flavor space ConfFlav = [ConfMoment_uV, ConfMoment_ubar, ConfMoment_dV, ConfMoment_dbar, ConfMoment_g] 
+        j: conformal spin j (conformal spin is actually j+2 but anyway) 
+        t: momentum transfer squared
+        nf: number of effective fermions
+        Q: final evolution scale
+        
+    Returns:
+        Evolved conformal moments in flavor space (non-singlet, singlet, gluon)
+    """
+    # Transform the unevolved moments to evolution basis
+    ConfEvoBasis = np.einsum('...j,j', flav_trans, ConfFlav)
+    # Taking the non-singlet and singlet parts of the conformal moments
+    ConfNS = ConfEvoBasis[:3]
+    ConfS = ConfEvoBasis[-2:]
+
+    # Calling evolution mulitiplier 
+    [evons, evoa] = evolop(j, nf, Q)
+
+    # non-singlet part evolves multiplicatively
+    EvoConfNS = evons * ConfNS
+    # singlet part mixes with the gluon 
+    EvoConfS = np.einsum('...j,j', evoa, ConfS)
+
+    # Recombing the non-singlet and singlet parts 
+    EvoConf = np.concatenate((EvoConfNS, EvoConfS))
+    # Inverse transform the evolved moments back to the flavor basis
+    EvoConfFlav = np.einsum('...j,j', inv_flav_trans, EvoConf)
+    
+    return EvoConfFlav
