@@ -7,9 +7,11 @@ import numpy as np
 import pandas as pd
 from iminuit import Minuit
 
+#Using the ansatz norm * x ** (- alpha) * (1 - x) ** (beta) to fit PDF (equivalent to the moment space ansatz norm* beta( s- alpha, 1 + beta))
 def PDF_Ansatz(x:float, norm: float, alpha: float, beta: float):
     return norm * x ** (- alpha) * (1 - x) ** (beta)
 
+#PDF fit class, read the data from the file and run chi2 minimization using iminuit
 class PDFFit(object) :
     def __init__(self, data_Path) -> None:
         self.data = pd.read_csv(data_Path, names = ["x", "f(x)","delta f(x)"])

@@ -224,7 +224,7 @@ def evolop(j: complex, nf: int, Q: float) -> np.ndarray:
 
     return [evola0NS, evola0]
 
-def Moment_Evo(j: complex, nf: int, Q: float, ConfFlav: np.array):
+def Moment_Evo(j: complex, nf: int, Q: float, ConfFlav: np.array) -> np.array:
     """
     Evolution of moments in the flavor space 
 

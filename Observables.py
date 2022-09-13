@@ -74,7 +74,7 @@ mp.dps = 25
 
 def ConfWaveFuncQ(j: complex, x: float, xi: float) -> complex:
     """ 
-    Quark conformal wave function p_j(x,xi)
+    Quark conformal wave function p_j(x,xi) check e.g. https://arxiv.org/pdf/hep-ph/0509204.pdf
 
     Args:
         j: conformal spin j (conformal spin is actually j+2 but anyway)
@@ -96,23 +96,26 @@ def ConfWaveFuncQ(j: complex, x: float, xi: float) -> complex:
 
 def ConfWaveFuncG(j: complex, x: float, xi: float) -> complex:
     """ 
-    Gluon conformal wave function p_j(x,xi)
+    Gluon conformal wave function p_j(x,xi) check e.g. https://arxiv.org/pdf/hep-ph/0509204.pdf
 
     Args:
-        j: conformal spin j (conformal spin is actually j+2 but anyway)
+        j: conformal spin j (actually conformal spin is j+2 but anyway)
         x: momentum fraction x
         xi: skewness parameter xi
 
     Returns:
         gluon conformal wave function p_j(x,xi)
-    """  
+    """ 
+    # An extra minus sign defined different from the orginal definition to absorb the extra minus sign of MB integral for gluon
+    
+    Minus = -1
     if(x > xi):
         pDGLAP = np.sin(np.pi * j)/ np.pi * x**(-j) * complex(hyp2f1( j/2, (j+1)/2, j+5/2, (xi/x) ** 2)) 
-        return pDGLAP
+        return Minus * pDGLAP
 
     if(x > -xi):
         pERBL = 2 ** j * gamma(5/2+j) / (gamma(1/2) * gamma(j)) * xi ** (-j) * (1+x/xi) ** 2 * complex(hyp2f1(-1-j,j+2,3, (x+xi)/(2*xi)))
-        return pERBL
+        return Minus * pERBL
     
     return 0
 
@@ -182,8 +185,8 @@ class GPDobserv (object) :
 
         def Integrand_Mellin_Barnes_CFF(j: complex):
             ConfFlav = np.array( list(map(lambda paraset: Moment_Sum(j, self.t, paraset), Para_Forward)) )
-            ConfFlav_xi2 = np.array( list(map(lambda paraset: Moment_Sum(j, self.t, paraset), Para_xi2)) )
-            return CWilson(j) * Moment_Evo(j, self.t, NFEFF, self.Q, ParaAll[0]) + CWilson(j+2) * Moment_Evo(j, self.t, NFEFF, self.Q,  ParaAll[1])
+            ConfFlav_xi2 = np.array( list(map(lambda paraset: Moment_Sum(j+2, self.t, paraset), Para_xi2)) )
+            return (CWilson(j) * Moment_Evo(j, NFEFF, self.Q, ConfFlav) + CWilson(j+2) * Moment_Evo(j+2, NFEFF, self.Q, ConfFlav_xi2))[:4]
 
         if (self.p == 0):
             return quad_vec(lambda imJ : self.xi ** (-reJ - 1j * imJ - 1) * (1j + np.tan((reJ + 1j * imJ) * np.pi / 2)) *Integrand_Mellin_Barnes_CFF(reJ + 1j * imJ) / 2, - Max_imJ, + Max_imJ)[0]
@@ -212,6 +215,21 @@ class GPDobserv (object) :
         Max_imJ = Mellin_Barnes_cutoff 
 
         def Integrand_Mellin_Barnes(j: complex):
-            return ConfWaveFuncQ(j, self.x, self.xi) * Moment_Evo(j, self.t, NFEFF, self.Q, ParaAll[0]) + self.xi ** 2 * ConfWaveFuncQ(j + 2, self.x, self.xi) * Moment_Evo(j, self.t, NFEFF, self.Q, ParaAll[1])
+            ConfFlav = np.array( list(map(lambda paraset: Moment_Sum(j, self.t, paraset), Para_Forward)) )
+            ConfFlav_xi2 = np.array( list(map(lambda paraset: Moment_Sum(j+2, self.t, paraset), Para_xi2)) )
+
+            ConfWaveList = np.array([ConfWaveFuncQ(j, self.x, self.xi),
+                                     ConfWaveFuncQ(j, self.x, self.xi),
+                                     ConfWaveFuncQ(j, self.x, self.xi),
+                                     ConfWaveFuncQ(j, self.x, self.xi),
+                                     ConfWaveFuncG(j, self.x, self.xi)])
+            
+            ConfWaveList_xi2 = np.array([ConfWaveFuncQ(j+2, self.x, self.xi),
+                                         ConfWaveFuncQ(j+2, self.x, self.xi),
+                                         ConfWaveFuncQ(j+2, self.x, self.xi),
+                                         ConfWaveFuncQ(j+2, self.x, self.xi),
+                                         ConfWaveFuncG(j+2, self.x, self.xi)]) * self.xi ** 2 
+                                            
+            return ConfWaveList * Moment_Evo(j, NFEFF, self.Q, ConfFlav) + ConfWaveList_xi2 * Moment_Evo(j+2, NFEFF, self.Q, ConfFlav_xi2)
 
         return quad_vec(lambda imJ : np.real(Integrand_Mellin_Barnes(reJ + 1j* imJ) / (2 * np.sin((reJ + 1j * imJ+1) * np.pi)) ), - Max_imJ, + Max_imJ)[0]

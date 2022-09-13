@@ -39,49 +39,47 @@ def ParaConvert(Allparameter: np.array):
     return nDParam
 
 # Initial parameters for the non-singlet valence and sea quark distributions
-Init_Para_NS_Valence = [[1, 0.2 , 3, 1]] * init_NumofAnsatz
-Init_Para_NS_Sea = [[1, 0.8 , 8, 1]] * init_NumofAnsatz
+Init_Para_uV = [[1, 0.2 , 3, 1]] * init_NumofAnsatz
+Init_Para_ubar = [[1, 0.8 , 8, 1]] * init_NumofAnsatz
 
-# Initial parameters for the non-singlet valence and sea quark distributions for the xi^2 terms
-Init_Para_NS_Valence_xi2 = [[1, 0.2 , 3, 1]] * init_NumofAnsatz
-Init_Para_NS_Sea_xi2 = [[1, 0.8 , 8, 1]] * init_NumofAnsatz
 
 # Initial parameters for the singlet quark distributions
-Init_Para_S_Valence = [[1, 0.2 , 3, 1]] * init_NumofAnsatz
-Init_Para_S_Sea = [[1, 0.8 , 8, 1]] * init_NumofAnsatz
-
-# Initial parameters for the singlet quark distributions for the xi^2 terms
-Init_Para_S_Valence_xi2 = [[1, 0.2 , 3, 1]] * init_NumofAnsatz
-Init_Para_S_Sea_xi2 = [[1, 0.8 , 8, 1]] * init_NumofAnsatz
+Init_Para_dV = [[1, 0.2 , 3, 1]] * init_NumofAnsatz
+Init_Para_dbar = [[1, 0.8 , 8, 1]] * init_NumofAnsatz
 
 # Initial parameters for the gluon distributions (only sea distributions)
-Init_Para_G_Valence = [[0,0,0,0]] * init_NumofAnsatz
-Init_Para_G_Sea = [[1, 0.8 , 8, 1]] * init_NumofAnsatz
+Init_Para_g = [[10, 0.8 , 8, 1]] * init_NumofAnsatz
+
+# Initial parameters for the non-singlet valence and sea quark distributions for the xi^2 terms
+Init_Para_uV_xi2 = [[1, 0.2 , 3, 1]] * init_NumofAnsatz
+Init_Para_ubar_xi2 = [[1, 0.8 , 8, 1]] * init_NumofAnsatz
+
+# Initial parameters for the singlet quark distributions for the xi^2 terms
+Init_Para_dV_xi2 = [[1, 0.2 , 3, 1]] * init_NumofAnsatz
+Init_Para_dbar_xi2 = [[1, 0.8 , 8, 1]] * init_NumofAnsatz
 
 # Initial parameters for the gluon distributions for the xi^2 terms
-Init_Para_G_Valence_xi2 = [[0,0,0,0]] * init_NumofAnsatz
-Init_Para_G_Sea_xi2 = [[1, 0.8 , 8, 1]] * init_NumofAnsatz
+Init_Para_g_xi2 = [[10, 0.8 , 8, 1]] * init_NumofAnsatz
 
-TestGPD = GPDobserv(0.1, 0.1, 0, 2.5)
+TestGPD = GPDobserv(0.1, 0.1, 0, 2, 0)
 
 import time
 
-Init_Para_NS = [Init_Para_NS_Valence, Init_Para_NS_Sea, ]
-Init_Para_S =  [Init_Para_S_Sea, Init_Para_S_Valence]
-Init_Para_G = [Init_Para_G_Sea, Init_Para_G_Valence]
+Init_Para_forward = [Init_Para_uV, Init_Para_ubar, Init_Para_dV, Init_Para_dbar,Init_Para_g ]
 
-Init_Para_forward = [Init_Para_NS, Init_Para_S, Init_Para_G]
-
-Init_Para_NS_xi2 = [Init_Para_NS_Sea_xi2, Init_Para_NS_Valence_xi2]
-Init_Para_S_xi2 = [Init_Para_S_Sea_xi2, Init_Para_S_Valence_xi2]
-Init_Para_G_xi2 = [Init_Para_G_Sea_xi2, Init_Para_G_Valence_xi2]
-
-Init_Para_xi2 = [Init_Para_NS_xi2, Init_Para_S_xi2, Init_Para_G_xi2]
+Init_Para_xi2 = [Init_Para_uV_xi2, Init_Para_ubar_xi2, Init_Para_dV_xi2, Init_Para_dbar_xi2,Init_Para_g_xi2 ]
 
 Init_Para_All = [Init_Para_forward, Init_Para_xi2]
 
-print(np.array(Init_Para_All).shape)
-
-print(TestGPD.GPD(Init_Para_All))
-
+start = time.time()
 print(TestGPD.CFF(Init_Para_All))
+end = time.time()
+print(end - start)
+
+start = time.time()
+print(TestGPD.GPD(Init_Para_All) * np.pi)
+end = time.time()
+print(end - start)
+
+
+
