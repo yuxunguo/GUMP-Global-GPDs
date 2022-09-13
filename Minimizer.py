@@ -61,7 +61,7 @@ Init_Para_dbar_xi2 = [[1, 0.8 , 8, 1]] * init_NumofAnsatz
 # Initial parameters for the gluon distributions for the xi^2 terms
 Init_Para_g_xi2 = [[10, 0.8 , 8, 1]] * init_NumofAnsatz
 
-TestGPD = GPDobserv(0.1, 0.1, 0, 2, 0)
+TestGPD = GPDobserv(0.5, 0.1, 0, 5, 0)
 
 import time
 
@@ -81,5 +81,9 @@ print(TestGPD.GPD(Init_Para_All) * np.pi)
 end = time.time()
 print(end - start)
 
+start = time.time()
+print(TestGPD.tPDF(Init_Para_All) * np.pi)
+end = time.time()
+print(end - start)
 
 
