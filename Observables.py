@@ -3,6 +3,7 @@ Here we define the GPD ansatz based on the moment space expression norm * x^ alp
 With the GPDs ansatz, observables with LO evolution are calculated
 """
 
+from math import factorial
 from platform import python_branch
 import scipy as sp
 import numpy as np
@@ -186,7 +187,7 @@ class GPDobserv (object) :
         def Integrand_Mellin_Barnes_CFF(j: complex):
             ConfFlav = np.array( list(map(lambda paraset: Moment_Sum(j, self.t, paraset), Para_Forward)) )
             ConfFlav_xi2 = np.array( list(map(lambda paraset: Moment_Sum(j+2, self.t, paraset), Para_xi2)) )
-            return (CWilson(j) * Moment_Evo(j, NFEFF, self.Q, ConfFlav) + CWilson(j+2) * Moment_Evo(j+2, NFEFF, self.Q, ConfFlav_xi2))[:4]
+            return (CWilson(j) * Moment_Evo(j, NFEFF, self.Q, ConfFlav) + CWilson(j+2) * Moment_Evo(j+2, NFEFF, self.Q, ConfFlav_xi2))[:5]
 
         if (self.p == 0):
             return quad_vec(lambda imJ : self.xi ** (-reJ - 1j * imJ - 1) * (1j + np.tan((reJ + 1j * imJ) * np.pi / 2)) *Integrand_Mellin_Barnes_CFF(reJ + 1j * imJ) / 2, - Max_imJ, + Max_imJ)[0]
@@ -233,3 +234,19 @@ class GPDobserv (object) :
             return ConfWaveList * Moment_Evo(j, NFEFF, self.Q, ConfFlav) + ConfWaveList_xi2 * Moment_Evo(j+2, NFEFF, self.Q, ConfFlav_xi2)
 
         return quad_vec(lambda imJ : np.real(Integrand_Mellin_Barnes(reJ + 1j* imJ) / (2 * np.sin((reJ + 1j * imJ+1) * np.pi)) ), - Max_imJ, + Max_imJ)[0]
+    
+    def Generalized_Form_Factors_Forward(self, ParaAll, j: int):
+        """
+        Generalized Form Factors A_{j0}(t) which is the xi^0 term of the nth (n= j+1)  Mellin moment of GPD \int dx x^j F(x,\xi,t) 
+        """
+        Para_Forward = ParaAll[0]
+        ConfFlav = np.array( list(map(lambda paraset: Moment_Sum(j, self.t, paraset), Para_Forward)) )
+
+        Coeff = gamma(5/2 + j)
+        return 0
+    
+    def Generalized_Form_Factors_xi2(self, ParaAll):
+        [Para_Forward, Para_xi2] = ParaAll
+        ConfFlav = np.array( list(map(lambda paraset: Moment_Sum(0, self.t, paraset), Para_Forward)) )
+        ConfFlav_xi2 = np.array( list(map(lambda paraset: Moment_Sum(2, self.t, paraset), Para_xi2)) )
+        return 0
