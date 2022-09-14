@@ -219,20 +219,22 @@ class GPDobserv (object) :
         # The contour for Mellin-Barnes integral in terms of j not n.        
         reJ = Mellin_Barnes_intercept 
         Max_imJ = Mellin_Barnes_cutoff 
-        def ConfWaveConvert(j: complex):
-            ConfWaveConv = np.array([[ConfWaveFuncQ(j, self.x, self.xi), ConfWaveFuncQ(j, self.x, self.xi) - ConfWaveFuncQ(j, -self.x, self.xi),0,0,0],
-                                     [0,0,ConfWaveFuncQ(j, self.x, self.xi), ConfWaveFuncQ(j, self.x, self.xi) - ConfWaveFuncQ(j, -self.x, self.xi),0],
-                                     [0,0,0,0, ConfWaveFuncG(j, self.x, self.xi)-ConfWaveFuncG(j, -self.x, self.xi)]])
-            return ConfWaveConv
+        def ConfWaveLst(j: complex):
+
+            ConfWaveL = np.array([ConfWaveFuncQ(j, self.x, self.xi),
+                                  ConfWaveFuncQ(j, self.x, self.xi),
+                                  ConfWaveFuncQ(j, self.x, self.xi),
+                                  ConfWaveFuncQ(j, self.x, self.xi),
+                                  ConfWaveFuncG(j, self.x, self.xi)])
+
+            return ConfWaveL
     
         def Integrand_Mellin_Barnes(j: complex):
+
             ConfFlav = np.array( list(map(lambda paraset: Moment_Sum(j, self.t, paraset), Para_Forward)) )
             ConfFlav_xi2 = np.array( list(map(lambda paraset: Moment_Sum(j+2, self.t, paraset), Para_xi2)) )
-            
-            Int_forward = np.einsum('...j,j', ConfWaveConvert(j), Moment_Evo(j, NFEFF, self.p, self.Q, ConfFlav))
-            Int_forward_xi2 = self.xi ** 2 * np.einsum('...j,j', ConfWaveConvert(j+2), Moment_Evo(j+2, NFEFF, self.p, self.Q, ConfFlav_xi2))
 
-            return Int_forward  + Int_forward_xi2
+            return ConfWaveLst(j) * Moment_Evo(j, NFEFF, self.p, self.Q, ConfFlav) +  self.xi **2 * ConfWaveLst(j+2) * Moment_Evo(j+2, NFEFF, self.p, self.Q, ConfFlav_xi2)
 
         # Adding a j = 0 term because the contour do not enclose the j = 0 pole which should be the 0th conformal moment.
         # We cannot change the Mellin_Barnes_intercept > 0 to enclose the j = 0 pole only, due to the pomeron pole around j = 0.
@@ -240,24 +242,13 @@ class GPDobserv (object) :
             ConfFlav = np.array( list(map(lambda paraset: Moment_Sum(0, self.t, paraset), Para_Forward)) )
             ConfFlav_xi2 = np.array( list(map(lambda paraset: Moment_Sum(2, self.t, paraset), Para_xi2)) )
 
-            ConfWaveList = np.array([ConfWaveFuncQ(0, self.x, self.xi),
-                                     ConfWaveFuncQ(0, self.x, self.xi),
-                                     ConfWaveFuncQ(0, self.x, self.xi),
-                                     ConfWaveFuncQ(0, self.x, self.xi),
-                                     ConfWaveFuncG(0, self.x, self.xi)])
-            
-            ConfWaveList_xi2 = np.array([ConfWaveFuncQ(2, self.x, self.xi),
-                                         ConfWaveFuncQ(2, self.x, self.xi),
-                                         ConfWaveFuncQ(2, self.x, self.xi),
-                                         ConfWaveFuncQ(2, self.x, self.xi),
-                                         ConfWaveFuncG(2, self.x, self.xi)]) * self.xi ** 2 
             if(self.p == 1):
-                return ConfWaveList * ConfFlav + ConfWaveList_xi2 * Moment_Evo(2, NFEFF, self.p, self.Q, ConfFlav_xi2)
+                return ConfWaveLst(0) * ConfFlav + self.xi **2 * ConfWaveLst(2) * Moment_Evo(2, NFEFF, self.p, self.Q, ConfFlav_xi2)
 
             if(self.p == -1):
-                return ConfWaveList * Moment_Evo(0, NFEFF, self.p, self.Q, ConfFlav) + ConfWaveList_xi2 * Moment_Evo(2, NFEFF, self.p, self.Q, ConfFlav_xi2)
+                return Integrand_Mellin_Barnes(0)
 
-        return quad_vec(lambda imJ : np.real(Integrand_Mellin_Barnes(reJ + 1j* imJ) / (2 * np.sin((reJ + 1j * imJ+1) * np.pi)) ), - Max_imJ, + Max_imJ)[0]
+        return np.real(GPD0()) + quad_vec(lambda imJ : np.real(Integrand_Mellin_Barnes(reJ + 1j* imJ) / (2 * np.sin((reJ + 1j * imJ+1) * np.pi)) ), - Max_imJ, + Max_imJ)[0]
 
     def GFFj0(self, ParaAll, j: int):
         """

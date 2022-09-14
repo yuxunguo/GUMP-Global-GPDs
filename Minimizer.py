@@ -6,10 +6,8 @@ Extra efforts needed to convert the form of the parameters.
 """
 # Number of GPD species, 4 leading-twist GPDs including H, E Ht, Et are needed.
 NumofGPDSpecies = 4
-# Number of Fermion flavor
-NF = 2
 # Number of flavor factor, Flavor_Factor = 2 * nf + 1 needed including 2 * nf quark (antiquark) and one gluon
-Flavor_Factor = 2 * NF + 1
+Flavor_Factor = 2 * 2 + 1
 # Number of ansatz, 1 set of (N, alpha, beta, alphap) will be used to start with
 init_NumofAnsatz = 1
 # Size of one parameter set, a set of parameters (N, alpha, beta, alphap) contain 4 parameters
@@ -61,7 +59,7 @@ Init_Para_dbar_xi2 = [[1, 0.8 , 8, 1]] * init_NumofAnsatz
 # Initial parameters for the gluon distributions for the xi^2 terms
 Init_Para_g_xi2 = [[10, 0.8 , 8, 1]] * init_NumofAnsatz
 
-TestGPD = GPDobserv(0.1, 0.1, 0, 5, -1)
+TestGPD = GPDobserv(0.1, 0.1, 0, 5, 1)
 
 import time
 
