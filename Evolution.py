@@ -39,11 +39,11 @@ Init_Scale_Q = 2
 # Transform the original flavor basis to the evolution basis (qVal, q_du_plus, q_du_minus, qSigma, g)
 # The same basis for PDF evolution are used, check references.
 
-flav_trans =[[1, 0, 1, 0, 0],
-             [-1, -2, 1, 2, 0],
-             [-1, 0, 1, 0 , 0],
-             [1, 2, 1, 2, 0],
-             [0, 0, 0, 0, 1]]
+flav_trans =np.array([[1, 0, 1, 0, 0],
+                     [-1, -2, 1, 2, 0],
+                     [-1, 0, 1, 0 , 0],
+                     [1, 2, 1, 2, 0],
+                     [0, 0, 0, 0, 1]])
 
 inv_flav_trans = np.linalg.inv(flav_trans)
 

@@ -49,4 +49,6 @@ qbar_Pol = PDFFit("PDFDATA/qbar_Pol.csv")
 
 g_Pol = PDFFit("PDFDATA/g_Pol.csv")
 
-print(uV_Unp.PDFparam())
+print(g_Unp.minuit_PDF().params)
+
+print(qbar_Pol.minuit_PDF().params)
