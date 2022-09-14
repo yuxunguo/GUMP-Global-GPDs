@@ -60,7 +60,7 @@ def Moment_Sum(j: complex, t: float, ParaSets: np.ndarray) -> complex:
 
     Args:
         ParaSets : contains [ParaSet1, ParaSet0, ParaSet2,...] with each ParaSet = [norm, alpha, beta ,alphap] for valence and sea distributions repsectively.        
-        j: conformal spin j (conformal spin is actually j+2 but anyway)
+        j: conformal spin j (or j+2 but anyway)
         t: momentum transfer squared t
 
     Returns:
@@ -130,7 +130,7 @@ def CWilson(j: complex) -> complex:
 
 # Class for observables
 class GPDobserv (object) :
-    #Initialization of observables. Each is a function of (x, xi ,t, Q), p for parity: p = 0 for vector GPDs (H, E) and p = 1 for axial-vector GPDs (Ht, Et)
+    #Initialization of observables. Each is a function of (x, xi ,t, Q), p for parity: p = 1 for vector GPDs (H, E) and p = -1 for axial-vector GPDs (Ht, Et)
     def __init__(self, init_x: float, init_xi: float, init_t: float, init_Q: float, p: int) -> None:
         self.x = init_x
         self.xi = init_xi
@@ -160,7 +160,7 @@ class GPDobserv (object) :
         def Integrand_inv_Mellin(s: complex):
             # Calculate the unevolved moments in the orginal flavor basis
             ConfFlav = np.array( list(map(lambda paraset: Moment_Sum(s - 1, self.t, paraset), Para_Forward)) )
-            return self.x ** (-s) * Moment_Evo(s - 1, NFEFF, self.Q, ConfFlav)/(2 * np.pi)
+            return self.x ** (-s) * Moment_Evo(s - 1, NFEFF, self.p, self.Q, ConfFlav)/(2 * np.pi)
 
         return quad_vec(lambda imS : np.real(Integrand_inv_Mellin(reS + 1j * imS)) , - Max_imS, + Max_imS)[0]
 
@@ -187,13 +187,13 @@ class GPDobserv (object) :
         def Integrand_Mellin_Barnes_CFF(j: complex):
             ConfFlav = np.array( list(map(lambda paraset: Moment_Sum(j, self.t, paraset), Para_Forward)) )
             ConfFlav_xi2 = np.array( list(map(lambda paraset: Moment_Sum(j+2, self.t, paraset), Para_xi2)) )
-            return (CWilson(j) * Moment_Evo(j, NFEFF, self.Q, ConfFlav) + CWilson(j+2) * Moment_Evo(j+2, NFEFF, self.Q, ConfFlav_xi2))[:5]
+            return (CWilson(j) * Moment_Evo(j, NFEFF, self.p, self.Q, ConfFlav) + CWilson(j+2) * Moment_Evo(j+2, NFEFF, self.p, self.Q, ConfFlav_xi2))[:5]
 
-        if (self.p == 0):
+        if (self.p == 1):
             return quad_vec(lambda imJ : self.xi ** (-reJ - 1j * imJ - 1) * (1j + np.tan((reJ + 1j * imJ) * np.pi / 2)) *Integrand_Mellin_Barnes_CFF(reJ + 1j * imJ) / 2, - Max_imJ, + Max_imJ)[0]
         
-        if (self.p == 1):
-            return quad_vec(lambda imJ : self.xi ** (-reJ - 1j * imJ - 1) * (1j - np.cot((reJ + 1j * imJ) * np.pi / 2)) *Integrand_Mellin_Barnes_CFF(reJ + 1j * imJ) / 2, - Max_imJ, + Max_imJ)[0]
+        if (self.p == -1):
+            return quad_vec(lambda imJ : self.xi ** (-reJ - 1j * imJ - 1) * (1j - 1/np.tan((reJ + 1j * imJ) * np.pi / 2)) *Integrand_Mellin_Barnes_CFF(reJ + 1j * imJ) / 2, - Max_imJ, + Max_imJ)[0]
 
     def GPD(self, ParaAll):
         """
@@ -231,22 +231,38 @@ class GPDobserv (object) :
                                          ConfWaveFuncQ(j+2, self.x, self.xi),
                                          ConfWaveFuncG(j+2, self.x, self.xi)]) * self.xi ** 2 
                                             
-            return ConfWaveList * Moment_Evo(j, NFEFF, self.Q, ConfFlav) + ConfWaveList_xi2 * Moment_Evo(j+2, NFEFF, self.Q, ConfFlav_xi2)
+            return ConfWaveList * Moment_Evo(j, NFEFF, self.p, self.Q, ConfFlav) + ConfWaveList_xi2 * Moment_Evo(j+2, NFEFF, self.p, self.Q, ConfFlav_xi2)
 
-        return quad_vec(lambda imJ : np.real(Integrand_Mellin_Barnes(reJ + 1j* imJ) / (2 * np.sin((reJ + 1j * imJ+1) * np.pi)) ), - Max_imJ, + Max_imJ)[0]
-    
-    def Generalized_Form_Factors_Forward(self, ParaAll, j: int):
+        # Adding a j = 0 term because the contour do not enclose the j = 0 pole which should be the 0th conformal moment.
+        # We cannot change the Mellin_Barnes_intercept > 0 to enclose the j = 0 pole only, due to the pomeron pole around j = 0.
+        def GPD0():
+            ConfFlav = np.array( list(map(lambda paraset: Moment_Sum(0, self.t, paraset), Para_Forward)) )
+            ConfFlav_xi2 = np.array( list(map(lambda paraset: Moment_Sum(2, self.t, paraset), Para_xi2)) )
+
+            ConfWaveList = np.array([ConfWaveFuncQ(0, self.x, self.xi),
+                                     ConfWaveFuncQ(0, self.x, self.xi),
+                                     ConfWaveFuncQ(0, self.x, self.xi),
+                                     ConfWaveFuncQ(0, self.x, self.xi),
+                                     ConfWaveFuncG(0, self.x, self.xi)])
+            
+            ConfWaveList_xi2 = np.array([ConfWaveFuncQ(2, self.x, self.xi),
+                                         ConfWaveFuncQ(2, self.x, self.xi),
+                                         ConfWaveFuncQ(2, self.x, self.xi),
+                                         ConfWaveFuncQ(2, self.x, self.xi),
+                                         ConfWaveFuncG(2, self.x, self.xi)]) * self.xi ** 2 
+                                            
+            return ConfWaveList * ConfFlav + ConfWaveList_xi2 * ConfFlav_xi2
+
+        return np.real(GPD0()) + quad_vec(lambda imJ : np.real(Integrand_Mellin_Barnes(reJ + 1j* imJ) / (2 * np.sin((reJ + 1j * imJ+1) * np.pi)) ), - Max_imJ, + Max_imJ)[0]
+
+    def GFFj0(self, ParaAll, j: int):
         """
-        Generalized Form Factors A_{j0}(t) which is the xi^0 term of the nth (n= j+1)  Mellin moment of GPD \int dx x^j F(x,\xi,t) 
+            Generalized Form Factors A_{j0}(t) which is the xi^0 term of the nth (n= j+1) Mellin moment of GPD int dx x^j F(x,xi,t)
+            Note for gluon, GPD reduce to x*g(x), not g(x) so the Mellin moment will have a mismatch
         """
         Para_Forward = ParaAll[0]
         ConfFlav = np.array( list(map(lambda paraset: Moment_Sum(j, self.t, paraset), Para_Forward)) )
-
-        Coeff = gamma(5/2 + j)
-        return 0
-    
-    def Generalized_Form_Factors_xi2(self, ParaAll):
-        [Para_Forward, Para_xi2] = ParaAll
-        ConfFlav = np.array( list(map(lambda paraset: Moment_Sum(0, self.t, paraset), Para_Forward)) )
-        ConfFlav_xi2 = np.array( list(map(lambda paraset: Moment_Sum(2, self.t, paraset), Para_xi2)) )
-        return 0
+        if (j == 0):
+            return ConfFlav
+        
+        return Moment_Evo(j, NFEFF, self.p, self.Q, ConfFlav)

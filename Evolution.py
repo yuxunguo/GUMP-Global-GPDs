@@ -74,9 +74,6 @@ def AlphaS(nloop: int, nf: int, Q: float) -> float:
     """
     return rundec.CRunDec().AlphasExact(Alpha_Mz, Mz, Q, nf, nloop)
 
-def beta_alphaS(nloop: int, nf: int, Q: float) -> float:
-    rundec.CRunDec().SetBeta()
-
 """
 ***********************Anomalous dimensions of GPD in the moment space*****
 Refer to the adim.py at https://github.com/kkumer/gepard.
@@ -86,13 +83,14 @@ def S1(z: complex) -> complex:
     """ Harmonic sum S_1. """
     return np.euler_gamma + psi(z+1)
 
-def non_singlet_LO(n: complex, nf: int, prty: int = 1) -> complex:
+def non_singlet_LO(n: complex, nf: int, p: int, prty: int = 1) -> complex:
     """
     Non-singlet LO anomalous dimension.
 
     Args:
         n (complex): which moment (= Mellin moment for integer n)
         nf (int): number of active quark flavors
+        p (int): 1 for vector-like GPD (Ht, Et), -1 for axial-vector-like GPDs (Ht, Et)
         prty (int): 1 for NS^{+}, -1 for NS^{-}, irrelevant at LO
 
     Returns:
@@ -101,13 +99,14 @@ def non_singlet_LO(n: complex, nf: int, prty: int = 1) -> complex:
     """
     return CF*(-3.0-2.0/(n*(1.0+n))+4.0*S1(n))
 
-def singlet_LO(n: complex, nf: int, prty: int = 1) -> np.ndarray:
+def singlet_LO(n: complex, nf: int, p: int, prty: int = 1) -> np.ndarray:
     """
     Singlet LO anomalous dimensions.
 
     Args:
         n (complex): which moment (= Mellin moment for integer n)
         nf (int): number of active quark flavors
+        p (int): 1 for vector-like GPD (Ht, Et), -1 for axial-vector-like GPDs (Ht, Et)
         prty (int): C parity, irrelevant at LO
 
     Returns:
@@ -115,26 +114,38 @@ def singlet_LO(n: complex, nf: int, prty: int = 1) -> np.ndarray:
                             (GQ, GG))
 
     """
-    qq0 = CF*(-3.0-2.0/(n*(1.0+n))+4.0*S1(n))
-    qg0 = (-4.0*nf*TF*(2.0+n+n*n))/(n*(1.0+n)*(2.0+n))
-    gq0 = (-2.0*CF*(2.0+n+n*n))/((-1.0+n)*n*(1.0+n))
-    gg0 = (-22*CA/3.-8.0*CA*(1/((-1.0+n)*n)+1/((1.0+n)*(2.0+n))-S1(n))+8*nf*TF/3.)/2.
+    if(p == 1):
+        qq0 = CF*(-3.0-2.0/(n*(1.0+n))+4.0*S1(n))
+        qg0 = (-4.0*nf*TF*(2.0+n+n*n))/(n*(1.0+n)*(2.0+n))
+        gq0 = (-2.0*CF*(2.0+n+n*n))/((-1.0+n)*n*(1.0+n))
+        gg0 = -4.0*CA*(1/((-1.0+n)*n)+1/((1.0+n)*(2.0+n))-S1(n)) -11*CA/3. + 4*nf*TF/3.
 
-    return np.array([[qq0, qg0],
-                     [gq0, gg0]])
+        return np.array([[qq0, qg0],
+                        [gq0, gg0]])
+    
+    if(p == -1):
+        qq0 = CF*(-3.0-2.0/(n*(1.0+n))+4.0*S1(n))
+        qg0 = (-4.0*nf*TF*(-1.0+n))/(n*(1.0+n))
+        gq0 = (-2.0*CF*(2.0+n))/(n*(1.0+n))
+        gg0 = -4.0*CA*(2/(n*(1.0+n))-S1(n)) -11*CA/3. + 4*nf*TF/3.
+
+        return np.array([[qq0, qg0],
+                        [gq0, gg0]])
+
 
 """
 ***********************Evolution operator of GPD in the moment space*******
 Refer to the evolution.py at https://github.com/kkumer/gepard. Modifications are made.
 """
 
-def lambdaf(n: complex, nf: int, prty: int = 1) -> np.ndarray:
+def lambdaf(n: complex, nf: int, p: int, prty: int = 1) -> np.ndarray:
     """
     Eigenvalues of the LO singlet anomalous dimensions matrix.
 
     Args:
         n (complex): which moment (= Mellin moment for integer n)
         nf (int): number of active quark flavors
+        p (int): 1 for vector-like GPD (Ht, Et), -1 for axial-vector-like GPDs (Ht, Et)
         prty (int): 1 for NS^{+}, -1 for NS^{-}, irrelevant at LO
 
     Returns:
@@ -144,7 +155,7 @@ def lambdaf(n: complex, nf: int, prty: int = 1) -> np.ndarray:
     """
     # To avoid crossing of the square root cut on the
     # negative real axis we use trick by Dieter Mueller
-    gam0 = singlet_LO(n, nf, prty)
+    gam0 = singlet_LO(n, nf, p, prty)
     aux = ((gam0[0, 0] - gam0[1, 1]) *
            np.sqrt(1. + 4.0 * gam0[0, 1] * gam0[1, 0] /
                    (gam0[0, 0] - gam0[1, 1])**2))
@@ -152,13 +163,14 @@ def lambdaf(n: complex, nf: int, prty: int = 1) -> np.ndarray:
     lam2 = lam1 + aux
     return np.stack([lam1, lam2])
 
-def projectors(n: complex, nf: int, prty: int = 1) -> Tuple[np.ndarray, np.ndarray]:
+def projectors(n: complex, nf: int, p: int, prty: int = 1) -> Tuple[np.ndarray, np.ndarray]:
     """
     Projectors on evolution quark-gluon singlet eigenaxes.
 
     Args:
         n (complex): which moment (= Mellin moment for integer n)
         nf (int): number of active quark flavors
+        p (int): 1 for vector-like GPD (Ht, Et), -1 for axial-vector-like GPDs (Ht, Et)
         prty (int): 1 for NS^{+}, -1 for NS^{-}, irrelevant at LO
 
     Returns:
@@ -169,8 +181,8 @@ def projectors(n: complex, nf: int, prty: int = 1) -> Tuple[np.ndarray, np.ndarr
                i,j in {Q, G}
 
     """
-    gam0 = singlet_LO(n, nf, prty)    
-    lam = lambdaf(n, nf, prty)
+    gam0 = singlet_LO(n, nf, p, prty)    
+    lam = lambdaf(n, nf, p, prty)
     den = 1. / (lam[0, ...] - lam[1, ...])
     # P+ and P-
     ssm = gam0 - np.einsum('...,ij->...ij', lam[1, ...], np.identity(2))
@@ -181,13 +193,14 @@ def projectors(n: complex, nf: int, prty: int = 1) -> Tuple[np.ndarray, np.ndarr
     pr = np.stack([prp, prm], axis=-3)
     return lam, pr
 
-def evolop(j: complex, nf: int, Q: float) -> np.ndarray:
+def evolop(j: complex, nf: int, p: int, Q: float):
     """
     GPD evolution operator E(j, nf, Q)[a,b].
 
     Args:
          j: MB contour points (Note: n = j + 1 !!)
          nf: number of effective fermion
+         p (int): 1 for vector-like GPD (Ht, Et), -1 for axial-vector-like GPDs (Ht, Et)
          Q: final scale of evolution 
 
     Returns:
@@ -199,7 +212,7 @@ def evolop(j: complex, nf: int, Q: float) -> np.ndarray:
     R = AlphaS(nloop_alphaS, nf, Q)/AlphaS(nloop_alphaS, nf, Init_Scale_Q)
 
     #LO singlet anomalous dimensions and projectors
-    lam, pr = projectors(j+1, nf)    
+    lam, pr = projectors(j+1, nf, p)    
 
     #LO pQCD beta function of GPD evolution
     b0 = beta0(nf)
@@ -217,14 +230,14 @@ def evolop(j: complex, nf: int, Q: float) -> np.ndarray:
     evola0 = np.einsum('aij,a->ij', pr, Rfact)
 
     #Non-singlet LO anomalous dimension
-    gam0NS = non_singlet_LO(j+1, nf)
+    gam0NS = non_singlet_LO(j+1, nf, p)
 
     #Non-singlet evolution factor 
     evola0NS = R**(-gam0NS/b0)
 
     return [evola0NS, evola0]
 
-def Moment_Evo(j: complex, nf: int, Q: float, ConfFlav: np.array) -> np.array:
+def Moment_Evo(j: complex, nf: int, p: int, Q: float, ConfFlav: np.array) -> np.array:
     """
     Evolution of moments in the flavor space 
 
@@ -233,6 +246,7 @@ def Moment_Evo(j: complex, nf: int, Q: float, ConfFlav: np.array) -> np.array:
         j: conformal spin j (conformal spin is actually j+2 but anyway) 
         t: momentum transfer squared
         nf: number of effective fermions
+        p (int): 1 for vector-like GPD (Ht, Et), -1 for axial-vector-like GPDs (Ht, Et)
         Q: final evolution scale
         
     Returns:
@@ -245,7 +259,7 @@ def Moment_Evo(j: complex, nf: int, Q: float, ConfFlav: np.array) -> np.array:
     ConfS = ConfEvoBasis[-2:]
 
     # Calling evolution mulitiplier 
-    [evons, evoa] = evolop(j, nf, Q)
+    [evons, evoa] = evolop(j, nf, p, Q)
 
     # non-singlet part evolves multiplicatively
     EvoConfNS = evons * ConfNS
