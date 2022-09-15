@@ -219,34 +219,33 @@ class GPDobserv (object) :
         # The contour for Mellin-Barnes integral in terms of j not n.        
         reJ = Mellin_Barnes_intercept 
         Max_imJ = Mellin_Barnes_cutoff 
-        def ConfWaveLst(j: complex):
+        def ConfWaveConv(j: complex):
 
-            ConfWaveL = np.array([ConfWaveFuncQ(j, self.x, self.xi),
-                                  ConfWaveFuncQ(j, self.x, self.xi),
-                                  ConfWaveFuncQ(j, self.x, self.xi),
-                                  ConfWaveFuncQ(j, self.x, self.xi),
-                                  ConfWaveFuncG(j, self.x, self.xi)])
+            ConfWaveC = np.array([[ConfWaveFuncQ(j, self.x, self.xi), ConfWaveFuncQ(j, self.x, self.xi) - self.p * ConfWaveFuncQ(j, -self.x, self.xi),0,0,0],
+                                  [0,0,ConfWaveFuncQ(j, self.x, self.xi), ConfWaveFuncQ(j, self.x, self.xi) - self.p * ConfWaveFuncQ(j, -self.x, self.xi),0],
+                                  [0,0,0,0,ConfWaveFuncG(j, self.x, self.xi)+ self.p * ConfWaveFuncG(j, -self.x, self.xi)]])
 
-            return ConfWaveL
+            return ConfWaveC
     
         def Integrand_Mellin_Barnes(j: complex):
 
             ConfFlav = np.array( list(map(lambda paraset: Moment_Sum(j, self.t, paraset), Para_Forward)) )
             ConfFlav_xi2 = np.array( list(map(lambda paraset: Moment_Sum(j+2, self.t, paraset), Para_xi2)) )
-
-            return ConfWaveLst(j) * Moment_Evo(j, NFEFF, self.p, self.Q, ConfFlav) +  self.xi **2 * ConfWaveLst(j+2) * Moment_Evo(j+2, NFEFF, self.p, self.Q, ConfFlav_xi2)
-
+             
+            return np.einsum('...j,j', ConfWaveConv(j), Moment_Evo(j, NFEFF, self.p, self.Q, ConfFlav))  +  self.xi ** 2 * np.einsum('...j,j', ConfWaveConv(j+2), Moment_Evo(j+2, NFEFF, self.p, self.Q, ConfFlav_xi2)) 
+        
         # Adding a j = 0 term because the contour do not enclose the j = 0 pole which should be the 0th conformal moment.
         # We cannot change the Mellin_Barnes_intercept > 0 to enclose the j = 0 pole only, due to the pomeron pole around j = 0.
         def GPD0():
-            ConfFlav = np.array( list(map(lambda paraset: Moment_Sum(0, self.t, paraset), Para_Forward)) )
-            ConfFlav_xi2 = np.array( list(map(lambda paraset: Moment_Sum(2, self.t, paraset), Para_xi2)) )
-
-            if(self.p == 1):
-                return ConfWaveLst(0) * ConfFlav + self.xi **2 * ConfWaveLst(2) * Moment_Evo(2, NFEFF, self.p, self.Q, ConfFlav_xi2)
-
             if(self.p == -1):
                 return Integrand_Mellin_Barnes(0)
+
+            if(self.p == 1):
+                
+                ConfFlav = np.array( list(map(lambda paraset: Moment_Sum(0, self.t, paraset), Para_Forward)) )
+                ConfFlav_xi2 = np.array( list(map(lambda paraset: Moment_Sum(2, self.t, paraset), Para_xi2)) )
+
+                return np.einsum('...j,j', ConfWaveConv(0),ConfFlav) +  self.xi ** 2 * np.einsum('...j,j', ConfWaveConv(2), Moment_Evo(2, NFEFF, self.p, self.Q, ConfFlav_xi2)) 
 
         return np.real(GPD0()) + quad_vec(lambda imJ : np.real(Integrand_Mellin_Barnes(reJ + 1j* imJ) / (2 * np.sin((reJ + 1j * imJ+1) * np.pi)) ), - Max_imJ, + Max_imJ)[0]
 
