@@ -202,7 +202,7 @@ class GPDobserv (object) :
 
     def GPD(self, ParaAll):
         """
-        GPD F(x, xi, t) in flavor space (u, d, gluon)
+        GPD F(x, xi, t) in flavor space (uV, ubar, dV, dbar, gluon)
         Args:
             ParaAll = [Para_Forward, Para_xi2]
 
@@ -212,7 +212,7 @@ class GPDobserv (object) :
             Para_xi2_i: xi^2 parameter sets for valence u quark (uV), sea u quark (ubar), valence d quark (dV), sea d quark (dbar) and gluon (g)
 
         Returns:
-            f(x,xi,t) in (u, d, gluon) space
+            f(x,xi,t) in (uV, ubar, dV, dbar, gluon) space
         """
         [Para_Forward, Para_xi2] = ParaAll
 
