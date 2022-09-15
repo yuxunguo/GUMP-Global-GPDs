@@ -7,6 +7,8 @@ import numpy as np
 import pandas as pd
 from iminuit import Minuit
 
+from DVCS_cross_section import M
+
 #Using the ansatz norm * x ** (- alpha) * (1 - x) ** (beta) to fit PDF (equivalent to the moment space ansatz norm* beta( s- alpha, 1 + beta))
 def PDF_Ansatz(x:float, norm: float, alpha: float, beta: float):
     return norm * x ** (- alpha) * (1 - x) ** (beta)
@@ -25,11 +27,6 @@ class PDFFit(object) :
         m.migrad()
         m.hesse()
         return m
-    
-    def PDFparam(self):
-        m = self.minuit_PDF()
-        return np.transpose([np.array(m.values), np.array(m.errors)])
-
 
 uV_Unp = PDFFit("PDFDATA/uV_Unp.csv")
 
@@ -48,7 +45,3 @@ dV_Pol = PDFFit("PDFDATA/dV_Pol.csv")
 qbar_Pol = PDFFit("PDFDATA/qbar_Pol.csv")
 
 g_Pol = PDFFit("PDFDATA/g_Pol.csv")
-
-print(g_Unp.minuit_PDF().params)
-
-print(qbar_Pol.minuit_PDF().params)
