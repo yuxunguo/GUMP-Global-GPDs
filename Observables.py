@@ -160,7 +160,7 @@ class GPDobserv (object) :
         Max_imS = inv_Mellin_cutoff 
 
         def Integrand_inv_Mellin(s: complex):
-            if(self.x < 0)
+            if(self.x < 0):
                 return np.array([0,0,0,0,0])
             # Calculate the unevolved moments in the orginal flavor basis
             ConfFlav = np.array( list(map(lambda paraset: Moment_Sum(s - 1, self.t, paraset), Para_Forward)) )

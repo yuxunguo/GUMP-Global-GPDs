@@ -16,11 +16,11 @@ def PDF_Ansatz(x:float, norm: float, alpha: float, beta: float):
 #PDF fit class, read the data from the file and run chi2 minimization using iminuit
 class PDFFit(object) :
     def __init__(self, data_Path) -> None:
-        self.data = pd.read_csv(data_Path, names = ["x", "f(x)","delta f(x)"])
+        self.data = pd.read_csv(data_Path, names = ["x", "f","delta f"])
 
     def chi2(self, norm: float, alpha: float, beta: float):
         PDF_Pred = PDF_Ansatz(self.data["x"],norm, alpha, beta)
-        return np.sum(((PDF_Pred - self.data["f(x)"])/ self.data["delta f(x)"]) ** 2 )
+        return np.sum(((PDF_Pred - self.data["f"])/ self.data["delta f"]) ** 2 )
 
     def minuit_PDF(self):
 
@@ -48,18 +48,11 @@ g_Unp = np.array(g_Unp_f.minuit_PDF().values)
 uV_Pol_f = PDFFit("PDFDATA/uV_Pol.csv")
 uV_Pol = np.array(uV_Pol_f.minuit_PDF().values)
 
-print(uV_Pol_f.minuit_PDF().params)
-
 dV_Pol_f = PDFFit("PDFDATA/dV_Pol.csv")
 dV_Pol = np.array(dV_Pol_f.minuit_PDF().values)
-
-print(dV_Pol_f.minuit_PDF().params)
 
 qbar_Pol_f = PDFFit("PDFDATA/qbar_Pol.csv")
 qbar_Pol = np.array(qbar_Pol_f.minuit_PDF().values)
 
-print(qbar_Pol_f.minuit_PDF().params)
-
 g_Pol_f = PDFFit("PDFDATA/g_Pol.csv")
 g_Pol = np.array(g_Pol_f.minuit_PDF().values)
-print(g_Pol_f.minuit_PDF().params)

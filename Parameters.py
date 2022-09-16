@@ -26,10 +26,8 @@ The parameters will form a 5-dimensional matrix such that each para[#1,#2,#3,#4,
 #5 = [0,1,2,3] correspond to [norm, alpha, beta, alphap] as a set of parameters
 """
 
-from Observables import GPDobserv
 import numpy as np
 import PDF_Fitting as fit
-
 
 def ParaManager(Paralst: np.array):
 
@@ -131,5 +129,3 @@ def ParaManager(Paralst: np.array):
                       [Et_uV_xi2, Et_ubar_xi2, Et_dV_xi2, Et_dbar_xi2, Et_g_xi2]])
 
     return np.array([Hlst, Elst, Htlst, Etlst])
-
-print(ParaManager([1,1,1,1,1,1,1,1,1,1]).shape)
