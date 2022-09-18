@@ -75,6 +75,39 @@ def Moment_Sum(j: complex, t: float, ParaSets: np.ndarray) -> complex:
 # precision for the hypergeometric function
 mp.dps = 25
 
+def InvMellinWaveFuncQ(s: complex, x: float) -> complex:
+    """ 
+    Quark wave function for inverse Mellin transformation: x^(-s) for x>0 and 0 for x<0
+
+    Args:
+        s: Mellin moment s (= n)
+        x: momentum fraction x
+
+    Returns:
+        Wave function for inverse Mellin transformation: x^(-s) for x>0 and 0 for x<0
+    """  
+    if(x > 0):
+        return x ** (-s)
+    
+    return 0
+
+def InvMellinWaveFuncG(s: complex, x: float) -> complex:
+    """ 
+    Gluon wave function for inverse Mellin transformation: x^(-s+1) for x>0 and 0 for x<0
+
+    Args:
+        s: Mellin moment s (= n)
+        x: momentum fraction x
+
+    Returns:
+        Gluon wave function for inverse Mellin transformation: x^(-s+1) for x>0 and 0 for x<0
+    """  
+    if(x > 0):
+        return x ** (-s+1)
+    
+    return 0
+
+
 def ConfWaveFuncQ(j: complex, x: float, xi: float) -> complex:
     """ 
     Quark conformal wave function p_j(x,xi) check e.g. https://arxiv.org/pdf/hep-ph/0509204.pdf
@@ -159,14 +192,20 @@ class GPDobserv (object) :
         reS = inv_Mellin_intercept + 1
         Max_imS = inv_Mellin_cutoff 
 
-        def Integrand_inv_Mellin(s: complex):
-            if(self.x < 0):
-                return np.array([0,0,0,0,0])
-            # Calculate the unevolved moments in the orginal flavor basis
-            ConfFlav = np.array( list(map(lambda paraset: Moment_Sum(s - 1, self.t, paraset), Para_Forward)) )
-            return self.x ** (-s) * Moment_Evo(s - 1, NFEFF, self.p, self.Q, ConfFlav)/(2 * np.pi)
+        def InvMellinWaveConf(s: complex):
 
-        return quad_vec(lambda imS : np.real(Integrand_inv_Mellin(reS + 1j * imS)) , - Max_imS, + Max_imS)[0]
+            InvMellinWaveC = np.array([[InvMellinWaveFuncQ(s, self.x), InvMellinWaveFuncQ(s, self.x) - self.p * InvMellinWaveFuncQ(s, -self.x),0,0,0],
+                                       [0,0,InvMellinWaveFuncQ(s, self.x), InvMellinWaveFuncQ(s, self.x) - self.p * InvMellinWaveFuncQ(s, -self.x),0],
+                                       [0,0,0,0,(InvMellinWaveFuncG(s, self.x)+ self.p * InvMellinWaveFuncG(s, -self.x))]])
+
+            return InvMellinWaveC
+
+        def Integrand_inv_Mellin(s: complex):
+            # Calculate the unevolved moments in the orginal flavor basis
+            ConfFlav = np.array( list(map(lambda paraset: Moment_Sum(s - 1, self.t, paraset), Para_Forward)) )            
+            return np.einsum('...j,j', InvMellinWaveConf(s), Moment_Evo(s - 1, NFEFF, self.p, self.Q, ConfFlav))
+
+        return quad_vec(lambda imS : np.real(Integrand_inv_Mellin(reS + 1j * imS)/(2 * np.pi)) , - Max_imS, + Max_imS)[0]
 
     def CFF(self, ParaAll):
         """
@@ -251,15 +290,20 @@ class GPDobserv (object) :
 
         return np.real(GPD0()) + quad_vec(lambda imJ : np.real(Integrand_Mellin_Barnes(reJ + 1j* imJ) / (2 * np.sin((reJ + 1j * imJ+1) * np.pi)) ), - Max_imJ, + Max_imJ)[0]
 
-    def GFFj0(self, ParaAll, j: int):
+    def GFFj0(self, j: int, ParaAll):
         """
             Generalized Form Factors A_{j0}(t) which is the xi^0 term of the nth (n= j+1) Mellin moment of GPD int dx x^j F(x,xi,t)
             Note for gluon, GPD reduce to x*g(x), not g(x) so the Mellin moment will have a mismatch
         """
         Para_Forward = ParaAll[0]
+
+        GFF_trans = np.array([[1,1+(-1)**j,0,0,0],
+                              [0,0,1,1+(-1)**j,0],
+                              [0,0,0,0,1]])
+
         ConfFlav = np.array( list(map(lambda paraset: Moment_Sum(j, self.t, paraset), Para_Forward)) )
         if (j == 0):
             if(self.p == 1):
-                return ConfFlav
+                return np.einsum('...j,j', GFF_trans, ConfFlav)
         
-        return Moment_Evo(j, NFEFF, self.p, self.Q, ConfFlav)
+        return np.einsum('...j,j', GFF_trans, Moment_Evo(j, NFEFF, self.p, self.Q, ConfFlav))

@@ -35,7 +35,7 @@ def ParaManager(Paralst: np.array):
      Here is the parameters manager, as there are over 100 free parameters. Therefore not all of them can be set free.
      Each element F_{q} is a two-dimensional matrix with init_NumofAnsatz = 1 row and Single_Param_Size = 4 columns
     """
-    [alphapV_H, alphapS_H, R_H_xi2, R_E, R_E_xi2, alphapV_Ht, alphapS_Ht, R_Ht_xi2, R_Et, R_Et_xi2] = Paralst
+    [alphapV_H, alphapS_H, R_H_xi2, R_E_u, R_E_d, R_E_g, R_E_xi2, alphapV_Ht, alphapS_Ht, R_Ht_xi2, R_Et_u, R_Et_d, R_Et_g, R_Et_xi2] = Paralst
     # Initial forward parameters for the H of (uV, ubar, dV, dbar,g) distributions
     """
         Two free parameters alphapV_H, alphapS_H for the valence Regge slope and sea Pomeron slope
@@ -62,11 +62,11 @@ def ParaManager(Paralst: np.array):
     """
         One free parameter R_E for the E/H ratio 
     """
-    E_uV =   np.einsum('...i,i->...i', H_uV,   [R_E,1,1,1])
-    E_ubar = np.einsum('...i,i->...i', H_ubar, [R_E,1,1,1])
-    E_dV =   np.einsum('...i,i->...i', H_dV,   [R_E,1,1,1])
-    E_dbar = np.einsum('...i,i->...i', H_dV,   [R_E,1,1,1])
-    E_g =    np.einsum('...i,i->...i', H_g,    [R_E,1,1,1])
+    E_uV =   np.einsum('...i,i->...i', H_uV,   [R_E_u,1,1,1])
+    E_ubar = np.einsum('...i,i->...i', H_ubar, [R_E_u,1,1,1])
+    E_dV =   np.einsum('...i,i->...i', H_dV,   [R_E_d,1,1,1])
+    E_dbar = np.einsum('...i,i->...i', H_dV,   [R_E_d,1,1,1])
+    E_g =    np.einsum('...i,i->...i', H_g,    [R_E_g,1,1,1])
 
     # Initial xi^2 parameters for the E of (uV, ubar, dV, dbar,g) distributions
     """
@@ -100,11 +100,11 @@ def ParaManager(Paralst: np.array):
     """
         One free parameter R_Et for the Et/Ht ratio 
     """
-    Et_uV =   np.einsum('...i,i->...i', Ht_uV,   [R_Et,1,1,1])
-    Et_ubar = np.einsum('...i,i->...i', Ht_ubar, [R_Et,1,1,1])
-    Et_dV =   np.einsum('...i,i->...i', Ht_dV,   [R_Et,1,1,1])
-    Et_dbar = np.einsum('...i,i->...i', Ht_dbar, [R_Et,1,1,1])
-    Et_g =    np.einsum('...i,i->...i', Ht_g,    [R_Et,1,1,1])
+    Et_uV =   np.einsum('...i,i->...i', Ht_uV,   [R_Et_u,1,1,1])
+    Et_ubar = np.einsum('...i,i->...i', Ht_ubar, [R_Et_u,1,1,1])
+    Et_dV =   np.einsum('...i,i->...i', Ht_dV,   [R_Et_d,1,1,1])
+    Et_dbar = np.einsum('...i,i->...i', Ht_dbar, [R_Et_d,1,1,1])
+    Et_g =    np.einsum('...i,i->...i', Ht_g,    [R_Et_g,1,1,1])
 
     # Initial xi^2 parameters for the Et of (uV, ubar, dV, dbar,g) distributions
     """
