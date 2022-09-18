@@ -8,6 +8,9 @@ import pandas as pd
 
 Minuit_Counter = 1
 
+tPDF_data = pd.read_csv("GUMPDATA/tPDFdata.csv", names = ["x", "t", "Q", "f", "delta f", "spe", "flv"])   
+GFF_data = pd.read_csv("GUMPDATA/GFFdata.csv", names = ["j", "t", "Q", "f", "delta f", "spe", "flv"])
+
 def tPDF_theo(tPDF_input: np.array, Para: np.array):
 
     [x, t, Q, f, delta_f, spe, flv] = tPDF_input
@@ -60,24 +63,21 @@ def cost_GUMP(alphapV_H, alphapS_H, R_H_xi2, R_E_u, R_E_d, R_E_g, R_E_xi2, alpha
     Minuit_Counter = Minuit_Counter + 1
 
     Paralst = [alphapV_H, alphapS_H, R_H_xi2, R_E_u, R_E_d, R_E_g, R_E_xi2, alphapV_Ht, alphapS_Ht, R_Ht_xi2, R_Et_u, R_Et_d, R_Et_g, R_Et_xi2]
-
     Para_all = ParaManager(Paralst)
-    #pool = Pool(6)
+    
     #[H_para, E_para, Ht_Para, Et_para] = Para_all
-
-    tPDF_data = pd.read_csv("GUMPDATA/tPDFdata.csv", names = ["x", "t", "Q", "f", "delta f", "spe", "flv"])    
-    tPDF_pred = np.array(list(map(partial(tPDF_theo, Para = Para_all), np.array(tPDF_data))))
+     
+    tPDF_pred = np.array(list(pool.map(partial(tPDF_theo, Para = Para_all), np.array(tPDF_data))))
     cost_tPDF = np.sum(((tPDF_pred - tPDF_data["f"])/ tPDF_data["delta f"]) ** 2 )
 
-    GFF_data = pd.read_csv("GUMPDATA/GFFdata.csv", names = ["j", "t", "Q", "f", "delta f", "spe", "flv"])
-    GFF_pred = np.array(list(map(partial(GFF_theo, Para = Para_all), np.array(GFF_data))))
+    GFF_pred = np.array(list(pool.map(partial(GFF_theo, Para = Para_all), np.array(GFF_data))))
     cost_GFF = np.sum(((GFF_pred - GFF_data["f"])/ GFF_data["delta f"]) ** 2 )
 
-    #pool.close()
-    #pool.join()
     return cost_tPDF + cost_GFF
 
 if __name__ == '__main__':
+
+    pool = Pool()
     NDOF = 313 + 12  - 8
     fit_gump = Minuit(cost_GUMP, alphapV_H = 1, alphapS_H = 1, R_H_xi2 = 1, R_E_u = 1, R_E_d = 1, R_E_g = 1, R_E_xi2 = 1, alphapV_Ht = 1, alphapS_Ht = 1, R_Ht_xi2 = 1, R_Et_u = 1, R_Et_d = 1, R_Et_g = 1, R_Et_xi2 = 1)
     fit_gump.errordef = 1
@@ -91,5 +91,7 @@ if __name__ == '__main__':
     fit_gump.hesse()
     print(fit_gump.fval/NDOF)
     print(fit_gump.params)
+    pool.close()
+    pool.join()
 
 
