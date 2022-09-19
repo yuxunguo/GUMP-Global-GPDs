@@ -47,9 +47,6 @@ def ParaManager(Paralst: np.array):
      Norm_Htg,    alpha_Htg,    beta_Htg,    alphap_HtS,
      R_Ht_xi2,    R_Et_u,       R_Et_d,      R_Et_g,      R_Et_xi2] = Paralst
     # Initial forward parameters for the H of (uV, ubar, dV, dbar,g) distributions
-    """
-        Two free parameters alphapV_H, alphapS_H for the valence Regge slope and sea Pomeron slope
-    """
     H_uV =   np.array([[Norm_HuV, alpha_HuV, beta_HuV ,alphap_HuV]])
     H_ubar = np.array([[Norm_Hubar, alpha_Hubar, beta_Hubar ,alphap_HS]])
     H_dV =   np.array([[Norm_HdV, alpha_HdV, beta_HdV ,alphap_HdV]])
@@ -69,7 +66,7 @@ def ParaManager(Paralst: np.array):
 
     # Initial forward parameters for the E of (uV, ubar, dV, dbar,g) distributions
     """
-        One free parameter R_E for the E/H ratio 
+        Three free parameter R_E_u, R_E_d, R_E_g for the E/H ratio 
     """
     E_uV =   np.einsum('...i,i->...i', H_uV,   [R_E_u,1,1,1])
     E_ubar = np.einsum('...i,i->...i', H_ubar, [R_E_u,1,1,1])
@@ -79,7 +76,7 @@ def ParaManager(Paralst: np.array):
 
     # Initial xi^2 parameters for the E of (uV, ubar, dV, dbar,g) distributions
     """
-        One free parameter R_E_xi2 for the ratio to the forward PDF E for u, d ang g
+        One free parameter R_E_xi2 for the ratio to the forward PDF E
     """
     E_uV_xi2 =   np.einsum('...i,i->...i', E_uV,   [R_E_xi2,1,1,1])
     E_ubar_xi2 = np.einsum('...i,i->...i', E_ubar,   [R_E_xi2,1,1,1])
@@ -107,7 +104,7 @@ def ParaManager(Paralst: np.array):
 
     # Initial forward parameters for the Et of (uV, ubar, dV, dbar,g) distributions
     """
-        One free parameter R_Et for the Et/Ht ratio 
+        Three free parameter R_Et_u, R_Et_d, R_E_g for the Et/Ht ratio 
     """
     Et_uV =   np.einsum('...i,i->...i', Ht_uV,   [R_Et_u,1,1,1])
     Et_ubar = np.einsum('...i,i->...i', Ht_ubar, [R_Et_u,1,1,1])
