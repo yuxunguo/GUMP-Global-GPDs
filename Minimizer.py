@@ -138,6 +138,31 @@ if __name__ == '__main__':
                                  Norm_Htg = 1,    alpha_Htg = 1,    beta_Htg = 1,    alphap_HtS = 1,
                                  R_Ht_xi2 = 1,    R_Et_u = 1,       R_Et_d = 1,      R_Et_g = 1,      R_Et_xi2 = 1)
     fit_gump.errordef = 1
+
+    fit_gump.limits["alpha_HuV"] = (-2, 1.2)
+    fit_gump.limits["alpha_Hubar"] = (-2, 1.2)
+    fit_gump.limits["alpha_HdV"] = (-2, 1.2)
+    fit_gump.limits["alpha_Hdbar"] = (-2, 1.2)
+    fit_gump.limits["alpha_Hg"] = (-2, 1.2)
+
+    fit_gump.limits["beta_HuV"] = (0, 15)
+    fit_gump.limits["beta_Hubar"] = (0, 15)
+    fit_gump.limits["beta_HdV"] = (0, 15)
+    fit_gump.limits["beta_Hdbar"] = (0, 15)
+    fit_gump.limits["beta_Hg"] = (0, 15)
+
+    fit_gump.limits["alpha_HtuV"] = (-2, 1.2)
+    fit_gump.limits["alpha_Htubar"] = (-2, 1.2)
+    fit_gump.limits["alpha_HtdV"] = (-2, 1.2)
+    fit_gump.limits["alpha_Htdbar"] = (-2, 1.2)
+    fit_gump.limits["alpha_Htg"] = (-2, 1.2)
+
+    fit_gump.limits["beta_HtuV"] = (0, 15)
+    fit_gump.limits["beta_Htubar"] = (0, 15)
+    fit_gump.limits["beta_HtdV"] = (0, 15)
+    fit_gump.limits["beta_Htdbar"] = (0, 15)
+    fit_gump.limits["beta_Htg"] = (0, 15)
+
     fit_gump.fixed["R_H_xi2"] = True
     fit_gump.fixed["alphap_HS"] = True
     fit_gump.fixed["R_E_g"] = True
@@ -150,6 +175,8 @@ if __name__ == '__main__':
     fit_gump.fixed["R_Et_d"] = True
     fit_gump.fixed["R_Et_g"] = True
     fit_gump.fixed["R_Et_xi2"] = True
+
+
     fit_gump.migrad()
     fit_gump.hesse()
     time_now = time.time() -time_start    
