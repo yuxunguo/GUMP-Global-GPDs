@@ -88,7 +88,7 @@ def cost_GUMP(Norm_HuV,    alpha_HuV,    beta_HuV,    alphap_HuV,
     
     time_now = time.time() -time_start
     if(time_now > Time_Counter * 300):
-        print("Runing Time: ",time_now/60," minutes. Cost function called total ", Minuit_Counter, " times.")
+        print("Runing Time:",round(time_now/60),"minutes. Cost function called total", Minuit_Counter, "times.")
         Time_Counter = Time_Counter + 1
     
     Minuit_Counter = Minuit_Counter + 1
@@ -112,31 +112,31 @@ def cost_GUMP(Norm_HuV,    alpha_HuV,    beta_HuV,    alphap_HuV,
     PDF_pred = np.array(list(pool.map(partial(PDF_theo, Para = Para_all), np.array(PDF_data))))
     cost_PDF = np.sum(((PDF_pred - PDF_data["f"])/ PDF_data["delta f"]) ** 2 )
 
-    tPDF_pred = np.array(list(pool.map(partial(tPDF_theo, Para = Para_all), np.array(tPDF_data))))
-    cost_tPDF = np.sum(((tPDF_pred - tPDF_data["f"])/ tPDF_data["delta f"]) ** 2 )
+    #tPDF_pred = np.array(list(pool.map(partial(tPDF_theo, Para = Para_all), np.array(tPDF_data))))
+    #cost_tPDF = np.sum(((tPDF_pred - tPDF_data["f"])/ tPDF_data["delta f"]) ** 2 )
 
-    GFF_pred = np.array(list(pool.map(partial(GFF_theo, Para = Para_all), np.array(GFF_data))))
-    cost_GFF = np.sum(((GFF_pred - GFF_data["f"])/ GFF_data["delta f"]) ** 2 )
+    #GFF_pred = np.array(list(pool.map(partial(GFF_theo, Para = Para_all), np.array(GFF_data))))
+    #cost_GFF = np.sum(((GFF_pred - GFF_data["f"])/ GFF_data["delta f"]) ** 2 )
 
-    return  cost_GFF + cost_PDF + cost_tPDF
+    return  cost_PDF #+ cost_GFF + cost_tPDF
 
 if __name__ == '__main__':
 
     pool = Pool()
     time_start = time.time()
-    NDOF = 310 + 313 + 12   - 4 
-    fit_gump = Minuit(cost_GUMP, Norm_HuV = 1,    alpha_HuV = 1,    beta_HuV = 1,    alphap_HuV = 1, 
-                                 Norm_Hubar = 1,  alpha_Hubar = 1,  beta_Hubar = 1,
-                                 Norm_HdV = 1,    alpha_HdV = 1,    beta_HdV = 1,    alphap_HdV = 1,
-                                 Norm_Hdbar = 1,  alpha_Hdbar = 1,  beta_Hdbar = 1,
-                                 Norm_Hg = 1,     alpha_Hg = 1,     beta_Hg = 1,     alphap_HS = 1,
-                                 R_H_xi2 = 1,     R_E_u = 1,        R_E_d = 1,       R_E_g = 1,       R_E_xi2 = 1,
-                                 Norm_HtuV = 1,   alpha_HtuV = 1,   beta_HtuV = 1,   alphap_HtuV = 1, 
-                                 Norm_Htubar = 1, alpha_Htubar = 1, beta_Htubar = 1,
-                                 Norm_HtdV = 1,   alpha_HtdV = 1,   beta_HtdV = 1,   alphap_HtdV = 1,
-                                 Norm_Htdbar = 1, alpha_Htdbar = 1, beta_Htdbar = 1,
-                                 Norm_Htg = 1,    alpha_Htg = 1,    beta_Htg = 1,    alphap_HtS = 1,
-                                 R_Ht_xi2 = 1,    R_Et_u = 1,       R_Et_d = 1,      R_Et_g = 1,      R_Et_xi2 = 1)
+    NDOF = 310 - 30
+    fit_gump = Minuit(cost_GUMP, Norm_HuV = 4.1,    alpha_HuV = 0.3,     beta_HuV = 3.0,    alphap_HuV = 1.1, 
+                                 Norm_Hubar = 0.2,  alpha_Hubar = 1.1,   beta_Hubar = 7.6,
+                                 Norm_HdV = 1.4,    alpha_HdV = 0.5,     beta_HdV = 3.7,    alphap_HdV = 1.3,
+                                 Norm_Hdbar = 0.2,  alpha_Hdbar = 1.1,   beta_Hdbar = 5.5,
+                                 Norm_Hg = 2.4,     alpha_Hg = 0.1,      beta_Hg = 6.8,     alphap_HS = 0.5,
+                                 R_H_xi2 = 1.0,     R_E_u = 1.0,         R_E_d = 1.0,       R_E_g = 1.0,       R_E_xi2 = 1.0,
+                                 Norm_HtuV = 11,    alpha_HtuV = -0.5,   beta_HtuV = 3.7,   alphap_HtuV = 1.0, 
+                                 Norm_Htubar = -30, alpha_Htubar = -1.8, beta_Htubar = 7.8,
+                                 Norm_HtdV = -0.9,  alpha_HtdV = 0.4,    beta_HtdV = 11,    alphap_HtdV = 1.0,
+                                 Norm_Htdbar = -30, alpha_Htdbar = -1.8, beta_Htdbar = 7.8,
+                                 Norm_Htg = 0.4,    alpha_Htg = -0.4,    beta_Htg = 1.5,    alphap_HtS = 1,
+                                 R_Ht_xi2 = 1.0,    R_Et_u = 1.0,        R_Et_d = 1.0,      R_Et_g = 1.0,      R_Et_xi2 = 1.0)
     fit_gump.errordef = 1
 
     fit_gump.limits["alpha_HuV"] = (-2, 1.2)
@@ -163,43 +163,61 @@ if __name__ == '__main__':
     fit_gump.limits["beta_Htdbar"] = (0, 15)
     fit_gump.limits["beta_Htg"] = (0, 15)
 
+    """
+    fit_gump.fixed["Norm_HtuV"] = True
+    fit_gump.fixed["Norm_Htubar"] = True
+    fit_gump.fixed["Norm_HtdV"] = True
+    fit_gump.fixed["Norm_Htdbar"] = True
+    fit_gump.fixed["Norm_Htg"] = True
+
+    fit_gump.fixed["alpha_HtuV"] = True
+    fit_gump.fixed["alpha_Htubar"] = True
+    fit_gump.fixed["alpha_HtdV"] = True
+    fit_gump.fixed["alpha_Htdbar"] = True
+    fit_gump.fixed["alpha_Htg"] = True
+
+    fit_gump.fixed["beta_HtuV"] = True
+    fit_gump.fixed["beta_Htubar"] = True
+    fit_gump.fixed["beta_HtdV"] = True
+    fit_gump.fixed["beta_Htdbar"] = True
+    fit_gump.fixed["beta_Htg"] = True
+    """
+    
+    fit_gump.fixed["alphap_HuV"] = True
+    fit_gump.fixed["alphap_HdV"] = True
+    fit_gump.fixed["R_E_u"] = True
+    fit_gump.fixed["R_E_d"] = True
+    fit_gump.fixed["alphap_HtuV"] = True
+    fit_gump.fixed["alphap_HtdV"] = True
+    fit_gump.fixed["R_Et_u"] = True
+    fit_gump.fixed["R_Et_d"] = True
+
     fit_gump.fixed["R_H_xi2"] = True
     fit_gump.fixed["alphap_HS"] = True
     fit_gump.fixed["R_E_g"] = True
     fit_gump.fixed["R_E_xi2"] = True
-    fit_gump.fixed["alphap_HtuV"] = True
-    fit_gump.fixed["alphap_HtdV"] = True
     fit_gump.fixed["alphap_HtS"] = True
     fit_gump.fixed["R_Ht_xi2"] = True    
-    fit_gump.fixed["R_Et_u"] = True
-    fit_gump.fixed["R_Et_d"] = True
     fit_gump.fixed["R_Et_g"] = True
     fit_gump.fixed["R_Et_xi2"] = True
-
 
     fit_gump.migrad()
     fit_gump.hesse()
     time_now = time.time() -time_start    
     print(fit_gump.fval/NDOF)
     print(fit_gump.params)
-    print("Total running time: ", time_now/60, " minutes")
+    print("Total running time: ",round(time_now/60), "minutes. Total call of cost function:",Minuit_Counter,".")
 
     """
     Para_all = ParaManager([1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1])
-    print(Para_all[0].shape)
-    
-    
+
     filt = ((GFF_data['j'] == 0) & (GFF_data['spe'] == 0) &  (GFF_data['flv'] == "NS") )
     filt2 = ((GFF_data['j'] == 0) & (GFF_data['spe'] == 0) &  (GFF_data['flv'] == "S") )
     GFFj0NS0 = GFF_data[filt]
     GFFj0S0 = GFF_data[filt2]
     GFF_pred = np.array(list(pool.map(partial(GFF_theo, Para = Para_all), np.array(GFFj0NS0))))
     GFF_pred2 = np.array(list(pool.map(partial(GFF_theo, Para = Para_all), np.array(GFFj0S0))))
-    print(GFFj0NS0)
-    print(GFF_pred)
 
-    print(GFFj0S0)
-    print(GFF_pred2)
     fig, ax = plt.subplots()
     ax.errorbar(-GFFj0NS0['t'], GFFj0NS0['f'], yerr = GFFj0NS0['delta f'], fmt='.', c='k')
     ax.plot(-GFFj0NS0['t'],GFF_pred, label='fit')
