@@ -3,7 +3,6 @@ from Observables import GPDobserv
 from multiprocessing import Pool
 from functools import partial
 from iminuit import Minuit
-import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import time
@@ -24,13 +23,7 @@ def PDF_theo(PDF_input: np.array, Para: np.array):
         p = -1
 
     PDF_theo = GPDobserv(x, xi, t, Q, p)
-    PDF_lst = PDF_theo.tPDF(Para_spe)        
-    if(flv == "u"):
-        return PDF_lst[0]
-    if(flv == "d"):
-        return PDF_lst[1]
-    if(flv == "g"):
-        return PDF_lst[2]
+    return PDF_theo.tPDF(flv, Para_spe)     
 
 def tPDF_theo(tPDF_input: np.array, Para: np.array):
     [x, t, Q, f, delta_f, spe, flv] = tPDF_input
@@ -42,13 +35,7 @@ def tPDF_theo(tPDF_input: np.array, Para: np.array):
         p = -1
 
     tPDF_theo = GPDobserv(x, xi, t, Q, p)
-    tPDF_lst = tPDF_theo.tPDF(Para_spe)        
-    if(flv == "S"):
-        return tPDF_lst[0] + tPDF_lst[1]
-    if(flv == "NS"):
-        return tPDF_lst[0] - tPDF_lst[1]
-    if(flv == "g"):
-        return tPDF_lst[2]
+    return tPDF_theo.tPDF(flv, Para_spe)        
 
 def GFF_theo(GFF_input: np.array, Para):
         
@@ -62,14 +49,7 @@ def GFF_theo(GFF_input: np.array, Para):
         p = -1
 
     GFF_theo = GPDobserv(x, xi, t, Q, p)
-    GFF_lst = GFF_theo.GFFj0(j, Para_spe)
-
-    if(flv == "S"):
-        return GFF_lst[0] + GFF_lst[1]
-    if(flv == "NS"):
-        return GFF_lst[0] - GFF_lst[1]
-    if(flv == "g"):
-        return GFF_lst[2]
+    return GFF_theo.GFFj0(j, Para_spe)
 
 def cost_GUMP(Norm_HuV,    alpha_HuV,    beta_HuV,    alphap_HuV, 
               Norm_Hubar,  alpha_Hubar,  beta_Hubar,   
@@ -87,10 +67,13 @@ def cost_GUMP(Norm_HuV,    alpha_HuV,    beta_HuV,    alphap_HuV,
     global Minuit_Counter, Time_Counter
 
     time_now = time.time() -time_start
+    
     if(time_now > Time_Counter * 300):
         print("Runing Time:",round(time_now/60),"minutes. Cost function called total", Minuit_Counter, "times.")
         Time_Counter = Time_Counter + 1
     
+    #print("Runing Time:",time_now,"seconds. Cost function called total", Minuit_Counter, "times.")
+
     Minuit_Counter = Minuit_Counter + 1
     
     Paralst = [Norm_HuV,    alpha_HuV,    beta_HuV,    alphap_HuV, 
@@ -108,7 +91,6 @@ def cost_GUMP(Norm_HuV,    alpha_HuV,    beta_HuV,    alphap_HuV,
 
     Para_all = ParaManager(np.array(Paralst))
     #[H_para, E_para, Ht_Para, Et_para] = Para_all
-    
     PDF_pred = np.array(list(pool.map(partial(PDF_theo, Para = Para_all), np.array(PDF_data))))
     cost_PDF = np.sum(((PDF_pred - PDF_data["f"])/ PDF_data["delta f"]) ** 2 )
 
@@ -121,7 +103,6 @@ def cost_GUMP(Norm_HuV,    alpha_HuV,    beta_HuV,    alphap_HuV,
     return  cost_PDF #+ cost_GFF + cost_tPDF
 
 if __name__ == '__main__':
-
     pool = Pool()
     time_start = time.time()
     NDOF = 310 - 30
@@ -182,7 +163,7 @@ if __name__ == '__main__':
     fit_gump.fixed["beta_Htdbar"] = True
     fit_gump.fixed["beta_Htg"] = True
     """
-    
+
     fit_gump.fixed["alphap_HuV"] = True
     fit_gump.fixed["alphap_HdV"] = True
     fit_gump.fixed["R_E_u"] = True
