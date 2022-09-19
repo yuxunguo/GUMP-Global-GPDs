@@ -27,7 +27,6 @@ The parameters will form a 5-dimensional matrix such that each para[#1,#2,#3,#4,
 """
 
 import numpy as np
-import PDF_Fitting as fit
 
 def ParaManager(Paralst: np.array):
 
@@ -35,17 +34,27 @@ def ParaManager(Paralst: np.array):
      Here is the parameters manager, as there are over 100 free parameters. Therefore not all of them can be set free.
      Each element F_{q} is a two-dimensional matrix with init_NumofAnsatz = 1 row and Single_Param_Size = 4 columns
     """
-    [alphapV_H, alphapS_H, R_H_xi2, R_E_u, R_E_d, R_E_g, R_E_xi2, alphapV_Ht, alphapS_Ht, R_Ht_xi2, R_Et_u, R_Et_d, R_Et_g, R_Et_xi2] = Paralst
+    [Norm_HuV,    alpha_HuV,    beta_HuV,    alphap_HuV, 
+     Norm_Hubar,  alpha_Hubar,  beta_Hubar, 
+     Norm_HdV,    alpha_HdV,    beta_HdV,    alphap_HdV,
+     Norm_Hdbar,  alpha_Hdbar,  beta_Hdbar,
+     Norm_Hg,     alpha_Hg,     beta_Hg,     alphap_HS,
+     R_H_xi2,     R_E_u,        R_E_d,       R_E_g,       R_E_xi2,
+     Norm_HtuV,   alpha_HtuV,   beta_HtuV,   alphap_HtuV, 
+     Norm_Htubar, alpha_Htubar, beta_Htubar,
+     Norm_HtdV,   alpha_HtdV,   beta_HtdV,   alphap_HtdV,
+     Norm_Htdbar, alpha_Htdbar, beta_Htdbar,
+     Norm_Htg,    alpha_Htg,    beta_Htg,    alphap_HtS,
+     R_Ht_xi2,    R_Et_u,       R_Et_d,      R_Et_g,      R_Et_xi2] = Paralst
     # Initial forward parameters for the H of (uV, ubar, dV, dbar,g) distributions
     """
         Two free parameters alphapV_H, alphapS_H for the valence Regge slope and sea Pomeron slope
     """
-    
-    H_uV =   np.array([np.insert(fit.uV_Unp, 3, alphapV_H) ])
-    H_ubar = np.array([np.insert(fit.ubar_Unp, 3, alphapS_H) ])
-    H_dV =   np.array([np.insert(fit.dV_Unp, 3, alphapV_H) ])
-    H_dbar = np.array([np.insert(fit.dbar_Unp, 3, alphapS_H) ])
-    H_g =    np.array([np.insert(fit.g_Unp, 3, alphapS_H) ])
+    H_uV =   np.array([[Norm_HuV, alpha_HuV, beta_HuV ,alphap_HuV]])
+    H_ubar = np.array([[Norm_Hubar, alpha_Hubar, beta_Hubar ,alphap_HS]])
+    H_dV =   np.array([[Norm_HdV, alpha_HdV, beta_HdV ,alphap_HdV]])
+    H_dbar = np.array([[Norm_Hdbar, alpha_Hdbar, beta_Hdbar ,alphap_HS]])
+    H_g =    np.array([[Norm_Hg, alpha_Hg, beta_Hg ,alphap_HS ]])
 
     # Initial xi^2 parameters for the H of (uV, ubar, dV, dbar,g) distributions
     """
@@ -80,11 +89,11 @@ def ParaManager(Paralst: np.array):
 
     # Initial forward parameters for the Ht of (uV, ubar, dV, dbar,g) distributions
 
-    Ht_uV =   np.array([np.insert(fit.uV_Pol, 3, alphapV_Ht) ])
-    Ht_ubar = np.array([np.insert(fit.qbar_Pol, 3, alphapS_Ht) ])
-    Ht_dV =   np.array([np.insert(fit.dV_Pol, 3, alphapV_Ht) ])
-    Ht_dbar = np.array([np.insert(fit.qbar_Pol, 3, alphapS_Ht) ])
-    Ht_g =    np.array([np.insert(fit.g_Pol, 3, alphapS_Ht) ])
+    Ht_uV =   np.array([[Norm_HtuV, alpha_HtuV, beta_HtuV ,alphap_HtuV]])
+    Ht_ubar = np.array([[Norm_Htubar, alpha_Htubar, beta_Htubar ,alphap_HtS]])
+    Ht_dV =   np.array([[Norm_HtdV, alpha_HtdV, beta_HtdV ,alphap_HtdV]])
+    Ht_dbar = np.array([[Norm_Htdbar, alpha_Htdbar, beta_Htdbar ,alphap_HtS]])
+    Ht_g =    np.array([[Norm_Htg, alpha_Htg, beta_Htg ,alphap_HtS ]])
 
     # Initial xi^2 parameters for the Ht of (uV, ubar, dV, dbar,g) distributions
     """

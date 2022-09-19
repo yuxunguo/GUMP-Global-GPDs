@@ -2,8 +2,6 @@
 Here we define the GPD ansatz based on the moment space expression norm * x^ alpha  * (1-x)^ beta.
 With the GPDs ansatz, observables with LO evolution are calculated
 """
-
-from platform import python_branch
 import scipy as sp
 import numpy as np
 from mpmath import mp, hyp2f1
@@ -296,14 +294,15 @@ class GPDobserv (object) :
             Note for gluon, GPD reduce to x*g(x), not g(x) so the Mellin moment will have a mismatch
         """
         Para_Forward = ParaAll[0]
-
-        GFF_trans = np.array([[1,1+(-1)**j,0,0,0],
-                              [0,0,1,1+(-1)**j,0],
-                              [0,0,0,0,1]])
+        
+        GFF_trans = np.array([[1,1-self.p*(-1)**j,0,0,0],
+                              [0,0,1,1-self.p*(-1)**j,0],
+                              [0,0,0,0,(1+self.p*(-1)**j)/2]])
 
         ConfFlav = np.array( list(map(lambda paraset: Moment_Sum(j, self.t, paraset), Para_Forward)) )
+
         if (j == 0):
             if(self.p == 1):
-                return np.einsum('...j,j', GFF_trans, ConfFlav)
+                return np.array([ConfFlav[0],ConfFlav[2],ConfFlav[4]])
         
         return np.einsum('...j,j', GFF_trans, Moment_Evo(j, NFEFF, self.p, self.Q, ConfFlav))

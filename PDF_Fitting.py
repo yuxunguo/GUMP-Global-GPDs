@@ -7,8 +7,6 @@ import numpy as np
 import pandas as pd
 from iminuit import Minuit
 
-from DVCS_cross_section import M
-
 #Using the ansatz norm * x ** (- alpha) * (1 - x) ** (beta) to fit PDF (equivalent to the moment space ansatz norm* beta( s- alpha, 1 + beta))
 def PDF_Ansatz(x:float, norm: float, alpha: float, beta: float):
     return norm * x ** (- alpha) * (1 - x) ** (beta)
@@ -32,27 +30,38 @@ class PDFFit(object) :
 
 uV_Unp_f = PDFFit("PDFDATA/uV_Unp.csv")
 uV_Unp = np.array(uV_Unp_f.minuit_PDF().values)
+#print(uV_Unp)
+#print(uV_Unp[0]* beta_loggamma(1-uV_Unp[1],1+uV_Unp[2]))
 
 dV_Unp_f = PDFFit("PDFDATA/dV_Unp.csv")
 dV_Unp = np.array(dV_Unp_f.minuit_PDF().values)
+#print(dV_Unp)
+#print(dV_Unp[0]* beta_loggamma(1-dV_Unp[1],1+dV_Unp[2]))
 
 ubar_Unp_f = PDFFit("PDFDATA/ubar_Unp.csv")
 ubar_Unp = np.array(ubar_Unp_f.minuit_PDF().values)
+#print(ubar_Unp)
 
 dbar_Unp_f = PDFFit("PDFDATA/dbar_Unp.csv")
 dbar_Unp = np.array(dbar_Unp_f.minuit_PDF().values)
+#print(dbar_Unp)
 
 g_Unp_f = PDFFit("PDFDATA/g_Unp.csv")
 g_Unp = np.array(g_Unp_f.minuit_PDF().values)
+#print(g_Unp)
 
 uV_Pol_f = PDFFit("PDFDATA/uV_Pol.csv")
 uV_Pol = np.array(uV_Pol_f.minuit_PDF().values)
+#print(uV_Pol)
 
 dV_Pol_f = PDFFit("PDFDATA/dV_Pol.csv")
 dV_Pol = np.array(dV_Pol_f.minuit_PDF().values)
+#print(dV_Pol)
 
 qbar_Pol_f = PDFFit("PDFDATA/qbar_Pol.csv")
 qbar_Pol = np.array(qbar_Pol_f.minuit_PDF().values)
+#print(qbar_Pol)
 
 g_Pol_f = PDFFit("PDFDATA/g_Pol.csv")
 g_Pol = np.array(g_Pol_f.minuit_PDF().values)
+#print(g_Pol)
