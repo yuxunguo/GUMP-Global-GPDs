@@ -6,8 +6,10 @@ from iminuit import Minuit
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
+import time
 
 Minuit_Counter = 1
+Time_Counter = 0
 PDF_data = pd.read_csv("GUMPDATA/PDFdata.csv", names = ["x", "t", "Q", "f", "delta f", "spe", "flv"])
 tPDF_data = pd.read_csv("GUMPDATA/tPDFdata.csv", names = ["x", "t", "Q", "f", "delta f", "spe", "flv"])
 GFF_data = pd.read_csv("GUMPDATA/GFFdata.csv", names = ["j", "t", "Q", "f", "delta f", "spe", "flv"])
@@ -82,10 +84,15 @@ def cost_GUMP(Norm_HuV,    alpha_HuV,    beta_HuV,    alphap_HuV,
               Norm_Htg,    alpha_Htg,    beta_Htg,    alphap_HtS,
               R_Ht_xi2,    R_Et_u,       R_Et_d,      R_Et_g,      R_Et_xi2):
 
-    global Minuit_Counter
-    print("Cost function called ", Minuit_Counter, " times")
-    Minuit_Counter = Minuit_Counter + 1
+    global Minuit_Counter, Time_Counter
 
+    time_now = time.time() -time_start
+    if(time_now > Time_Counter * 300):
+        print("Runing Time: ",time_now/60," minutes. Cost function called total ", Minuit_Counter, " times.")
+        Time_Counter = Time_Counter + 1
+    
+    Minuit_Counter = Minuit_Counter + 1
+    
     Paralst = [Norm_HuV,    alpha_HuV,    beta_HuV,    alphap_HuV, 
                Norm_Hubar,  alpha_Hubar,  beta_Hubar,   
                Norm_HdV,    alpha_HdV,    beta_HdV,    alphap_HdV,
@@ -116,6 +123,7 @@ def cost_GUMP(Norm_HuV,    alpha_HuV,    beta_HuV,    alphap_HuV,
 if __name__ == '__main__':
 
     pool = Pool()
+    time_start = time.time()
     NDOF = 310 + 313 + 12   - 4 
     fit_gump = Minuit(cost_GUMP, Norm_HuV = 1,    alpha_HuV = 1,    beta_HuV = 1,    alphap_HuV = 1, 
                                  Norm_Hubar = 1,  alpha_Hubar = 1,  beta_Hubar = 1,
@@ -144,8 +152,10 @@ if __name__ == '__main__':
     fit_gump.fixed["R_Et_xi2"] = True
     fit_gump.migrad()
     fit_gump.hesse()
+    time_now = time.time() -time_start    
     print(fit_gump.fval/NDOF)
     print(fit_gump.params)
+    print("Total running time: ", time_now/60, " minutes")
 
     """
     Para_all = ParaManager([1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1])
