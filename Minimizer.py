@@ -85,7 +85,7 @@ def cost_GUMP(Norm_HuV,    alpha_HuV,    beta_HuV,    alphap_HuV,
               R_Ht_xi2,    R_Et_u,       R_Et_d,      R_Et_g,      R_Et_xi2):
 
     global Minuit_Counter, Time_Counter
-
+    
     time_now = time.time() -time_start
     if(time_now > Time_Counter * 300):
         print("Runing Time: ",time_now/60," minutes. Cost function called total ", Minuit_Counter, " times.")
