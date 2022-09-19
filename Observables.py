@@ -5,12 +5,11 @@ With the GPDs ansatz, observables with LO evolution are calculated
 import scipy as sp
 import numpy as np
 from mpmath import mp, hyp2f1
-from scipy.integrate import quad_vec
+from scipy.integrate import quad
 from scipy.special import gamma
 from Evolution import Moment_Evo
 
-CFF_trans =np.array([[1, 2, 0, 0, 0],
-                     [0, 0, 1, 2, 0]])
+CFF_trans =np.array([1*(2/3)**2, 2*(2/3)**2, 1*(1/3)**2, 2*(1/3)**2, 0])
 
 """
 ***********************GPD moments***************************************
@@ -19,7 +18,7 @@ CFF_trans =np.array([[1, 2, 0, 0, 0],
 inv_Mellin_intercept = 0.35
 
 #Cutoff for inverse Mellin transformation
-inv_Mellin_cutoff = 50
+inv_Mellin_cutoff = 40
 
 #Cutoff for Mellin Barnes integral
 Mellin_Barnes_intercept = 0.35
@@ -30,6 +29,22 @@ Mellin_Barnes_cutoff = 20
 #Number of effective fermions
 NFEFF = 2
 
+#Relative precision Goal of quad set to be 1e-3
+Prec_Goal = 1e-3
+
+#The flavor interpreter to return the corresponding flavor combination 
+def Flv_Intp(Flv_array: np.array, flv):
+    if(flv == "u"):
+        return Flv_array[0]
+    if(flv == "d"):
+        return Flv_array[1]
+    if(flv == "g"):
+        return Flv_array[2]
+    if(flv == "NS"):
+        return Flv_array[0] - Flv_array[1]
+    if(flv == "S"):
+        return Flv_array[0] + Flv_array[1]
+    
 # Euler Beta function B(a,b) with complex arguments
 def beta_loggamma(a: complex, b: complex) -> complex:
     return np.exp(sp.special.loggamma(a) + sp.special.loggamma(b)-sp.special.loggamma(a + b))
@@ -171,7 +186,7 @@ class GPDobserv (object) :
         self.Q = init_Q
         self.p = p
 
-    def tPDF(self, ParaAll):
+    def tPDF(self, flv, ParaAll):
         """
         t-denpendent PDF in flavor space (uV, ubar, dV, dbar, gluon)
         Args:
@@ -201,9 +216,9 @@ class GPDobserv (object) :
         def Integrand_inv_Mellin(s: complex):
             # Calculate the unevolved moments in the orginal flavor basis
             ConfFlav = np.array( list(map(lambda paraset: Moment_Sum(s - 1, self.t, paraset), Para_Forward)) )            
-            return np.einsum('...j,j', InvMellinWaveConf(s), Moment_Evo(s - 1, NFEFF, self.p, self.Q, ConfFlav))
+            return Flv_Intp(np.einsum('...j,j', InvMellinWaveConf(s), Moment_Evo(s - 1, NFEFF, self.p, self.Q, ConfFlav)), flv)
 
-        return quad_vec(lambda imS : np.real(Integrand_inv_Mellin(reS + 1j * imS)/(2 * np.pi)) , - Max_imS, + Max_imS)[0]
+        return quad(lambda imS : np.real(Integrand_inv_Mellin(reS + 1j * imS)/(2 * np.pi)) , - Max_imS, + Max_imS, epsrel = Prec_Goal)[0]
 
     def CFF(self, ParaAll):
         """
@@ -231,15 +246,15 @@ class GPDobserv (object) :
 
             EvoConf_Wilson = (CWilson(j) * Moment_Evo(j, NFEFF, self.p, self.Q, ConfFlav) + CWilson(j+2) * Moment_Evo(j+2, NFEFF, self.p, self.Q, ConfFlav_xi2))
 
-            return np.einsum('...j,j', CFF_trans, EvoConf_Wilson)
+            return np.einsum('j,j', CFF_trans, EvoConf_Wilson)
 
         if (self.p == 1):
-            return quad_vec(lambda imJ : self.xi ** (-reJ - 1j * imJ - 1) * (1j + np.tan((reJ + 1j * imJ) * np.pi / 2)) *Integrand_Mellin_Barnes_CFF(reJ + 1j * imJ) / 2, - Max_imJ, + Max_imJ)[0]
+            return quad(lambda imJ : self.xi ** (-reJ - 1j * imJ - 1) * (1j + np.tan((reJ + 1j * imJ) * np.pi / 2)) *Integrand_Mellin_Barnes_CFF(reJ + 1j * imJ) / 2, - Max_imJ, + Max_imJ, epsrel = Prec_Goal)[0]
         
         if (self.p == -1):
-            return quad_vec(lambda imJ : self.xi ** (-reJ - 1j * imJ - 1) * (1j - 1/np.tan((reJ + 1j * imJ) * np.pi / 2)) *Integrand_Mellin_Barnes_CFF(reJ + 1j * imJ) / 2, - Max_imJ, + Max_imJ)[0]
+            return quad(lambda imJ : self.xi ** (-reJ - 1j * imJ - 1) * (1j - 1/np.tan((reJ + 1j * imJ) * np.pi / 2)) *Integrand_Mellin_Barnes_CFF(reJ + 1j * imJ) / 2, - Max_imJ, + Max_imJ, epsrel = Prec_Goal)[0]
 
-    def GPD(self, ParaAll):
+    def GPD(self, flv, ParaAll):
         """
         GPD F(x, xi, t) in flavor space (uV, ubar, dV, dbar, gluon)
         Args:
@@ -271,7 +286,7 @@ class GPDobserv (object) :
             ConfFlav = np.array( list(map(lambda paraset: Moment_Sum(j, self.t, paraset), Para_Forward)) )
             ConfFlav_xi2 = np.array( list(map(lambda paraset: Moment_Sum(j+2, self.t, paraset), Para_xi2)) )
              
-            return np.einsum('...j,j', ConfWaveConv(j), Moment_Evo(j, NFEFF, self.p, self.Q, ConfFlav))  +  self.xi ** 2 * np.einsum('...j,j', ConfWaveConv(j+2), Moment_Evo(j+2, NFEFF, self.p, self.Q, ConfFlav_xi2)) 
+            return Flv_Intp(np.einsum('...j,j', ConfWaveConv(j), Moment_Evo(j, NFEFF, self.p, self.Q, ConfFlav))  +  self.xi ** 2 * np.einsum('...j,j', ConfWaveConv(j+2), Moment_Evo(j+2, NFEFF, self.p, self.Q, ConfFlav_xi2)), flv)
         
         # Adding a j = 0 term because the contour do not enclose the j = 0 pole which should be the 0th conformal moment.
         # We cannot change the Mellin_Barnes_intercept > 0 to enclose the j = 0 pole only, due to the pomeron pole around j = 0.
@@ -284,11 +299,11 @@ class GPDobserv (object) :
                 ConfFlav = np.array( list(map(lambda paraset: Moment_Sum(0, self.t, paraset), Para_Forward)) )
                 ConfFlav_xi2 = np.array( list(map(lambda paraset: Moment_Sum(2, self.t, paraset), Para_xi2)) )
 
-                return np.einsum('...j,j', ConfWaveConv(0),ConfFlav) +  self.xi ** 2 * np.einsum('...j,j', ConfWaveConv(2), Moment_Evo(2, NFEFF, self.p, self.Q, ConfFlav_xi2)) 
+                return Flv_Intp(np.einsum('...j,j', ConfWaveConv(0),ConfFlav) +  self.xi ** 2 * np.einsum('...j,j', ConfWaveConv(2), Moment_Evo(2, NFEFF, self.p, self.Q, ConfFlav_xi2)), flv)
 
-        return np.real(GPD0()) + quad_vec(lambda imJ : np.real(Integrand_Mellin_Barnes(reJ + 1j* imJ) / (2 * np.sin((reJ + 1j * imJ+1) * np.pi)) ), - Max_imJ, + Max_imJ)[0]
+        return np.real(GPD0()) + quad(lambda imJ : np.real(Integrand_Mellin_Barnes(reJ + 1j* imJ) / (2 * np.sin((reJ + 1j * imJ+1) * np.pi)) ), - Max_imJ, + Max_imJ, epsrel = Prec_Goal)[0]
 
-    def GFFj0(self, j: int, ParaAll):
+    def GFFj0(self, j: int, flv, ParaAll):
         """
             Generalized Form Factors A_{j0}(t) which is the xi^0 term of the nth (n= j+1) Mellin moment of GPD int dx x^j F(x,xi,t)
             Note for gluon, GPD reduce to x*g(x), not g(x) so the Mellin moment will have a mismatch
@@ -303,6 +318,6 @@ class GPDobserv (object) :
 
         if (j == 0):
             if(self.p == 1):
-                return np.array([ConfFlav[0],ConfFlav[2],ConfFlav[4]])
+                return Flv_Intp( np.array([ConfFlav[0],ConfFlav[2],ConfFlav[4]]) , flv)
         
-        return np.einsum('...j,j', GFF_trans, Moment_Evo(j, NFEFF, self.p, self.Q, ConfFlav))
+        return Flv_Intp(np.einsum('...j,j', GFF_trans, Moment_Evo(j, NFEFF, self.p, self.Q, ConfFlav)), flv)
