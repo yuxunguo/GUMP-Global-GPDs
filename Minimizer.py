@@ -119,8 +119,6 @@ if __name__ == '__main__':
                                  Norm_Htg = 0.4,    alpha_Htg = -0.4,    beta_Htg = 1.5,    alphap_HtS = 1,
                                  R_Ht_xi2 = 1.0,    R_Et_u = 1.0,        R_Et_d = 1.0,      R_Et_g = 1.0,      R_Et_xi2 = 1.0)
     fit_gump.errordef = 1
-    fit_gump.strategy = 0
-    fit_gump.tol = 0.5
 
     fit_gump.limits["alpha_HuV"] = (-2, 1.2)
     fit_gump.limits["alpha_Hubar"] = (-2, 1.2)
@@ -192,7 +190,7 @@ if __name__ == '__main__':
     print("Total running time: ",round(time_now/60), "minutes. Total call of cost function:",Minuit_Counter,".")
     pool.close()
     pool.join()
-    
+
     """
     Para_all = ParaManager([1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1])
 
