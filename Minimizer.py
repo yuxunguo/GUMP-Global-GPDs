@@ -49,7 +49,7 @@ def GFF_theo(GFF_input: np.array, Para):
         p = -1
 
     GFF_theo = GPDobserv(x, xi, t, Q, p)
-    return GFF_theo.GFFj0(j, Para_spe)
+    return GFF_theo.GFFj0(j, flv, Para_spe)
 
 def cost_GUMP(Norm_HuV,    alpha_HuV,    beta_HuV,    alphap_HuV, 
               Norm_Hubar,  alpha_Hubar,  beta_Hubar,   
@@ -119,6 +119,8 @@ if __name__ == '__main__':
                                  Norm_Htg = 0.4,    alpha_Htg = -0.4,    beta_Htg = 1.5,    alphap_HtS = 1,
                                  R_Ht_xi2 = 1.0,    R_Et_u = 1.0,        R_Et_d = 1.0,      R_Et_g = 1.0,      R_Et_xi2 = 1.0)
     fit_gump.errordef = 1
+    fit_gump.strategy = 0
+    fit_gump.tol = 0.5
 
     fit_gump.limits["alpha_HuV"] = (-2, 1.2)
     fit_gump.limits["alpha_Hubar"] = (-2, 1.2)
