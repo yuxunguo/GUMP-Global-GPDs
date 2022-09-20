@@ -94,18 +94,18 @@ def cost_GUMP(Norm_HuV,    alpha_HuV,    beta_HuV,    alphap_HuV,
     PDF_pred = np.array(list(pool.map(partial(PDF_theo, Para = Para_all), np.array(PDF_data))))
     cost_PDF = np.sum(((PDF_pred - PDF_data["f"])/ PDF_data["delta f"]) ** 2 )
 
-    #tPDF_pred = np.array(list(pool.map(partial(tPDF_theo, Para = Para_all), np.array(tPDF_data))))
-    #cost_tPDF = np.sum(((tPDF_pred - tPDF_data["f"])/ tPDF_data["delta f"]) ** 2 )
+    tPDF_pred = np.array(list(pool.map(partial(tPDF_theo, Para = Para_all), np.array(tPDF_data))))
+    cost_tPDF = np.sum(((tPDF_pred - tPDF_data["f"])/ tPDF_data["delta f"]) ** 2 )
 
-    #GFF_pred = np.array(list(pool.map(partial(GFF_theo, Para = Para_all), np.array(GFF_data))))
-    #cost_GFF = np.sum(((GFF_pred - GFF_data["f"])/ GFF_data["delta f"]) ** 2 )
+    GFF_pred = np.array(list(pool.map(partial(GFF_theo, Para = Para_all), np.array(GFF_data))))
+    cost_GFF = np.sum(((GFF_pred - GFF_data["f"])/ GFF_data["delta f"]) ** 2 )
 
-    return  cost_PDF #+ cost_GFF + cost_tPDF
+    return  cost_PDF + cost_GFF + cost_tPDF
 
 if __name__ == '__main__':
     pool = Pool()
     time_start = time.time()
-    NDOF = 310 - 30
+    NDOF = 310 + 313 + 12 - 38
     fit_gump = Minuit(cost_GUMP, Norm_HuV = 4.1,    alpha_HuV = 0.3,     beta_HuV = 3.0,    alphap_HuV = 1.1, 
                                  Norm_Hubar = 0.2,  alpha_Hubar = 1.1,   beta_Hubar = 7.6,
                                  Norm_HdV = 1.4,    alpha_HdV = 0.5,     beta_HdV = 3.7,    alphap_HdV = 1.3,
@@ -164,7 +164,6 @@ if __name__ == '__main__':
     fit_gump.fixed["beta_HtdV"] = True
     fit_gump.fixed["beta_Htdbar"] = True
     fit_gump.fixed["beta_Htg"] = True
-    """
 
     fit_gump.fixed["alphap_HuV"] = True
     fit_gump.fixed["alphap_HdV"] = True
@@ -174,6 +173,7 @@ if __name__ == '__main__':
     fit_gump.fixed["alphap_HtdV"] = True
     fit_gump.fixed["R_Et_u"] = True
     fit_gump.fixed["R_Et_d"] = True
+    """
 
     fit_gump.fixed["R_H_xi2"] = True
     fit_gump.fixed["alphap_HS"] = True
@@ -190,7 +190,9 @@ if __name__ == '__main__':
     print(fit_gump.fval/NDOF)
     print(fit_gump.params)
     print("Total running time: ",round(time_now/60), "minutes. Total call of cost function:",Minuit_Counter,".")
-
+    pool.close()
+    pool.join()
+    
     """
     Para_all = ParaManager([1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1])
 
@@ -211,5 +213,3 @@ if __name__ == '__main__':
     ax.plot(-GFFj0S0['t'],GFF_pred2, label='fit')
     plt.show()
     """
-    pool.close()
-    pool.join()
