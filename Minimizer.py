@@ -1,17 +1,19 @@
 from Parameters import ParaManager
 from Observables import GPDobserv
+from DVCS_xsec import dsigma_TOT
 from multiprocessing import Pool
-from functools import partial
+from functools import partial, cache
 from iminuit import Minuit
 import numpy as np
 import pandas as pd
 import time
 
-Minuit_Counter = 1
-Time_Counter = 0
+Minuit_Counter = 0
+Time_Counter = 1
 PDF_data = pd.read_csv("GUMPDATA/PDFdata.csv", names = ["x", "t", "Q", "f", "delta f", "spe", "flv"])
 tPDF_data = pd.read_csv("GUMPDATA/tPDFdata.csv", names = ["x", "t", "Q", "f", "delta f", "spe", "flv"])
 GFF_data = pd.read_csv("GUMPDATA/GFFdata.csv", names = ["j", "t", "Q", "f", "delta f", "spe", "flv"])
+DVCSxsec_data = pd.read_csv("GUMPDATA/DVCSxsec.csv", names = ["y", "xB", "t", "Q", "phi", "f", "delta f", "pol"])
 
 def PDF_theo(PDF_input: np.array, Para: np.array):
     [x, t, Q, f, delta_f, spe, flv] = PDF_input
@@ -37,8 +39,7 @@ def tPDF_theo(tPDF_input: np.array, Para: np.array):
     tPDF_theo = GPDobserv(x, xi, t, Q, p)
     return tPDF_theo.tPDF(flv, Para_spe)        
 
-def GFF_theo(GFF_input: np.array, Para):
-        
+def GFF_theo(GFF_input: np.array, Para):        
     [j, t, Q, f, delta_f, spe, flv] = GFF_input
     x = 0
     xi = 0   
@@ -50,6 +51,15 @@ def GFF_theo(GFF_input: np.array, Para):
 
     GFF_theo = GPDobserv(x, xi, t, Q, p)
     return GFF_theo.GFFj0(j, flv, Para_spe)
+
+def DVCSxsec_theo(DVCSxsec_input: np.array, Para):
+
+    [y, xB, t, Q, phi, f, delta_f, pol] = DVCSxsec_input
+    HCFF = 0
+    ECFF = 0
+    HtCFF = 0 
+    EtCFF = 0
+    return dsigma_TOT(y,xB,t,Q,phi,pol,HCFF,ECFF,HtCFF,EtCFF)
 
 def cost_GUMP(Norm_HuV,    alpha_HuV,    beta_HuV,    alphap_HuV, 
               Norm_Hubar,  alpha_Hubar,  beta_Hubar,   
@@ -103,9 +113,9 @@ def cost_GUMP(Norm_HuV,    alpha_HuV,    beta_HuV,    alphap_HuV,
     return  cost_PDF + cost_GFF + cost_tPDF
 
 if __name__ == '__main__':
+
     pool = Pool()
-    time_start = time.time()
-    NDOF = 310 + 313 + 12 - 38
+
     fit_gump = Minuit(cost_GUMP, Norm_HuV = 4.1,    alpha_HuV = 0.3,     beta_HuV = 3.0,    alphap_HuV = 1.1, 
                                  Norm_Hubar = 0.2,  alpha_Hubar = 1.1,   beta_Hubar = 7.6,
                                  Norm_HdV = 1.4,    alpha_HdV = 0.5,     beta_HdV = 3.7,    alphap_HdV = 1.3,
@@ -182,15 +192,39 @@ if __name__ == '__main__':
     fit_gump.fixed["R_Et_g"] = True
     fit_gump.fixed["R_Et_xi2"] = True
 
+    time_start = time.time()
     fit_gump.migrad()
-    fit_gump.hesse()
-    time_now = time.time() -time_start    
-    print(fit_gump.fval/NDOF)
-    print(fit_gump.params)
-    print("Total running time: ",round(time_now/60), "minutes. Total call of cost function:",Minuit_Counter,".")
+    time_migrad = time.time() -time_start
+    print("The migard runs for: ", round(time_migrad/60,2), "minutes.")
+    with open('Output.txt', 'w') as f:
+        print("Below are the output parameters from iMinuit WITHOUT hesse():", file = f)
+        print(fit_gump.params, file = f)
+
+    #fit_gump.hesse()
+    time_hesse = time.time() - time_migrad - time_start
+    print("The hesse runs for: ", round(time_hesse/60,2), "minutes.")
+    with open('Output.txt', 'a') as f:
+        print("Below are the output parameters from iMinuit WITH hesse():", file = f)
+        print(fit_gump.params, file = f)
+    
+    #fit_gump.minos()
+    time_minos = time.time() - time_hesse - time_migrad - time_start
+    print("The minos runs for: ", round(time_minos/60,2), "minutes.")
+
     pool.close()
     pool.join()
 
+    ndof = len(PDF_data.index) + len(tPDF_data.index) + len(GFF_data.index) - fit_gump.npar
+
+    time_end = time.time() -time_start    
+    with open('Output.txt', 'a') as f:
+        print("Total running time:",round(time_end/60), "minutes. Total call of cost function:",Minuit_Counter,"(or", fit_gump.nfcn, "from Minuit).\n", file=f)
+        print("The chi squared per d.o.f. is: ", fit_gump.fval/ndof,".\n", file = f)
+        print("Below are the final output parameters from iMinuit:", file = f)
+        print(fit_gump.params, file = f)
+        print("Below are the output covariance from iMinuit:", file = f)
+        print(fit_gump.covariance, file = f)
+        
     """
     Para_all = ParaManager([1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1])
 
