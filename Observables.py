@@ -5,7 +5,7 @@ With the GPDs ansatz, observables with LO evolution are calculated
 import scipy as sp
 import numpy as np
 from mpmath import mp, hyp2f1
-from scipy.integrate import quad
+from scipy.integrate import quad, quad_vec
 from scipy.special import gamma
 from Evolution import Moment_Evo
 
@@ -15,13 +15,13 @@ CFF_trans =np.array([1*(2/3)**2, 2*(2/3)**2, 1*(1/3)**2, 2*(1/3)**2, 0])
 ***********************GPD moments***************************************
 """
 #intercept for inverse Mellin transformation
-inv_Mellin_intercept = 0.35
+inv_Mellin_intercept = 0.25
 
 #Cutoff for inverse Mellin transformation
-inv_Mellin_cutoff = 40
+inv_Mellin_cutoff = 30
 
 #Cutoff for Mellin Barnes integral
-Mellin_Barnes_intercept = 0.35
+Mellin_Barnes_intercept = 0.25
 
 #Cutoff for Mellin Barnes integral
 Mellin_Barnes_cutoff = 20
@@ -188,7 +188,7 @@ class GPDobserv (object) :
 
     def tPDF(self, flv, ParaAll):
         """
-        t-denpendent PDF in flavor space (uV, ubar, dV, dbar, gluon)
+        t-denpendent PDF for given flavor (flv = "u", "d", "S", "NS" or "g")
         Args:
             ParaAll = [Para_Forward, Para_xi2]
             Para_Forward = [Para_Forward_uV, Para_Forward_ubar, Para_Forward_dV, Para_Forward_dbar, Para_Forward_g]
@@ -196,7 +196,7 @@ class GPDobserv (object) :
             Para_xi2: only matter for non-zero xi (NOT needed here but the parameters are passed for consistency with GPDs)
 
         Returns:
-            f(x,t) in (non-singlet, singlet, gluon) space
+            f(x,t) in for the given flavor
         """
         
         Para_Forward = ParaAll[0]
@@ -215,14 +215,15 @@ class GPDobserv (object) :
 
         def Integrand_inv_Mellin(s: complex):
             # Calculate the unevolved moments in the orginal flavor basis
-            ConfFlav = np.array( list(map(lambda paraset: Moment_Sum(s - 1, self.t, paraset), Para_Forward)) )            
+            ConfFlav = np.array( list(map(lambda paraset: Moment_Sum(s - 1, self.t, paraset), Para_Forward)) )
+            # Return the evolved moments with x^(-s) for quark or x^(-s+1) for gluon for the given flavor flv = "u", "d", "S", "NS" or "g"
             return Flv_Intp(np.einsum('...j,j', InvMellinWaveConf(s), Moment_Evo(s - 1, NFEFF, self.p, self.Q, ConfFlav)), flv)
 
         return quad(lambda imS : np.real(Integrand_inv_Mellin(reS + 1j * imS)/(2 * np.pi)) , - Max_imS, + Max_imS, epsrel = Prec_Goal)[0]
 
     def CFF(self, ParaAll):
         """
-        CFF \mathcal{F}(xi, t) in flavor space (Fu, Fd) with out Qu^2/Qd^2
+        Charge averged CFF \mathcal{F}(xi, t) (\mathcal{F} = Q_u^2 F_u + Q_d^2 F_d)
         Args:
             ParaAll = [Para_Forward, Para_xi2]
 
@@ -232,7 +233,7 @@ class GPDobserv (object) :
             Para_xi2_i: xi^2 parameter sets for valence u quark (uV), sea u quark (ubar), valence d quark (dV), sea d quark (dbar) and gluon (g)
 
         Returns:
-            CFF \mathcal{F}(xi, t) in (Fu, Fd) space
+            CFF \mathcal{F}(xi, t) = Q_u^2 F_u + Q_d^2 F_d
         """
         [Para_Forward, Para_xi2] = ParaAll
 
@@ -249,10 +250,10 @@ class GPDobserv (object) :
             return np.einsum('j,j', CFF_trans, EvoConf_Wilson)
 
         if (self.p == 1):
-            return quad(lambda imJ : self.xi ** (-reJ - 1j * imJ - 1) * (1j + np.tan((reJ + 1j * imJ) * np.pi / 2)) *Integrand_Mellin_Barnes_CFF(reJ + 1j * imJ) / 2, - Max_imJ, + Max_imJ, epsrel = Prec_Goal)[0]
+            return quad_vec(lambda imJ : self.xi ** (-reJ - 1j * imJ - 1) * (1j + np.tan((reJ + 1j * imJ) * np.pi / 2)) *Integrand_Mellin_Barnes_CFF(reJ + 1j * imJ) / 2, - Max_imJ, + Max_imJ, epsrel = Prec_Goal)[0]
         
         if (self.p == -1):
-            return quad(lambda imJ : self.xi ** (-reJ - 1j * imJ - 1) * (1j - 1/np.tan((reJ + 1j * imJ) * np.pi / 2)) *Integrand_Mellin_Barnes_CFF(reJ + 1j * imJ) / 2, - Max_imJ, + Max_imJ, epsrel = Prec_Goal)[0]
+            return quad_vec(lambda imJ : self.xi ** (-reJ - 1j * imJ - 1) * (1j - 1/np.tan((reJ + 1j * imJ) * np.pi / 2)) *Integrand_Mellin_Barnes_CFF(reJ + 1j * imJ) / 2, - Max_imJ, + Max_imJ, epsrel = Prec_Goal)[0]
 
     def GPD(self, flv, ParaAll):
         """
