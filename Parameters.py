@@ -22,7 +22,7 @@ The parameters will form a 5-dimensional matrix such that each para[#1,#2,#3,#4,
 #1 = [0,1,2,3] corresponds to [H, E, Ht, Et]
 #2 = [0,1] corresponds to [xi^0 terms, xi^2 terms]
 #3 = [0,1,2,3,4] corresponds to [u - ubar, ubar, d - dbar, dbar, g]
-#4 = [0,1,...,init_NumofAnsatz] corresponds to different set of parameters
+#4 = [0,1,...,init_NumofAnsatz-1] corresponds to different set of parameters
 #5 = [0,1,2,3] correspond to [norm, alpha, beta, alphap] as a set of parameters
 """
 
