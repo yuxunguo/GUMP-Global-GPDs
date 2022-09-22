@@ -306,14 +306,14 @@ class GPDobserv (object) :
 
     def GFFj0(self, j: int, flv, ParaAll):
         """
-            Generalized Form Factors A_{j0}(t) which is the xi^0 term of the nth (n= j+1) Mellin moment of GPD int dx x^j F(x,xi,t)
+            Generalized Form Factors A_{j0}(t) which is the xi^0 term of the nth (n= j+1) Mellin moment of GPD int dx x^j F(x,xi,t) for quark and int dx x^(j-1) F(x,xi,t) for gluon
             Note for gluon, GPD reduce to x*g(x), not g(x) so the Mellin moment will have a mismatch
         """
         Para_Forward = ParaAll[0]
         
-        GFF_trans = np.array([[1,1-self.p*(-1)**j,0,0,0],
-                              [0,0,1,1-self.p*(-1)**j,0],
-                              [0,0,0,0,(1+self.p*(-1)**j)/2]])
+        GFF_trans = np.array([[1,1 - self.p * (-1) ** j,0,0,0],
+                              [0,0,1,1 - self.p * (-1) ** j,0],
+                              [0,0,0,0,(1 - self.p * (-1) ** j)/2]])
 
         ConfFlav = np.array( list(map(lambda paraset: Moment_Sum(j, self.t, paraset), Para_Forward)) )
 
