@@ -242,24 +242,3 @@ if __name__ == '__main__':
         print(fit_GUMP.params, file = f)
         print('Below are the output covariance from iMinuit:', file = f)
         print(fit_GUMP.covariance, file = f)
-
-    """
-    Para_all = ParaManager([1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1])
-
-    filt = ((GFF_data['j'] == 0) & (GFF_data['spe'] == 0) &  (GFF_data['flv'] == 'NS') )
-    filt2 = ((GFF_data['j'] == 0) & (GFF_data['spe'] == 0) &  (GFF_data['flv'] == 'S') )
-    GFFj0NS0 = GFF_data[filt]
-    GFFj0S0 = GFF_data[filt2]
-    GFF_pred = np.array(list(pool.map(partial(GFF_theo, Para = Para_all), np.array(GFFj0NS0))))
-    GFF_pred2 = np.array(list(pool.map(partial(GFF_theo, Para = Para_all), np.array(GFFj0S0))))
-
-    fig, ax = plt.subplots()
-    ax.errorbar(-GFFj0NS0['t'], GFFj0NS0['f'], yerr = GFFj0NS0['delta f'], fmt='.', c='k')
-    ax.plot(-GFFj0NS0['t'],GFF_pred, label='fit')
-    plt.show()
-    
-    fig, ax = plt.subplots()
-    ax.errorbar(-GFFj0S0['t'], GFFj0S0['f'], yerr = GFFj0S0['delta f'], fmt='.', c='k')
-    ax.plot(-GFFj0S0['t'],GFF_pred2, label='fit')
-    plt.show()
-    """
