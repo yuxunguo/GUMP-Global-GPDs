@@ -1,8 +1,8 @@
-from Parameters import ParaManager, NumofGPDSpecies, Flavor_Factor, init_NumofAnsatz, Single_Param_Size, xi2_Factor, Tot_param_Size
+from Parameters import ParaManager
 from Observables import GPDobserv
 from DVCS_xsec import dsigma_TOT, M
 from multiprocessing import Pool
-from functools import partial, cache
+from functools import partial
 from iminuit import Minuit
 import numpy as np
 import pandas as pd
@@ -14,14 +14,15 @@ Time_Counter = 1
 
 Q_threshold = 2
 
-PDF_data = pd.read_csv('GUMPDATA/PDFdata.csv',       header = None, names = ['x', 't', 'Q', 'f', 'delta f', 'spe', 'flv'], dtype = {'x': float, 't': float, 'Q': float, 'f': float, 'delta f': float,'spe': int, 'flv': str})
-tPDF_data = pd.read_csv('GUMPDATA/tPDFdata.csv',     header = None, names = ['x', 't', 'Q', 'f', 'delta f', 'spe', 'flv'], dtype = {'x': float, 't': float, 'Q': float, 'f': float, 'delta f': float,'spe': int, 'flv': str})
-GFF_data = pd.read_csv('GUMPDATA/GFFdata.csv',       header = None, names = ['j', 't', 'Q', 'f', 'delta f', 'spe', 'flv'], dtype = {'j': int, 't': float, 'Q': float, 'f': float, 'delta f': float,'spe': int, 'flv': str})
+PDF_data = pd.read_csv('GUMPDATA/PDFdata.csv',       header = None, names = ['x', 't', 'Q', 'f', 'delta f', 'spe', 'flv'],        dtype = {'x': float, 't': float, 'Q': float, 'f': float, 'delta f': float,'spe': int, 'flv': str})
+tPDF_data = pd.read_csv('GUMPDATA/tPDFdata.csv',     header = None, names = ['x', 't', 'Q', 'f', 'delta f', 'spe', 'flv'],        dtype = {'x': float, 't': float, 'Q': float, 'f': float, 'delta f': float,'spe': int, 'flv': str})
+GFF_data = pd.read_csv('GUMPDATA/GFFdata.csv',       header = None, names = ['j', 't', 'Q', 'f', 'delta f', 'spe', 'flv'],        dtype = {'j': int, 't': float, 'Q': float, 'f': float, 'delta f': float,'spe': int, 'flv': str})
 DVCSxsec_data = pd.read_csv('GUMPDATA/DVCSxsec.csv', header = None, names = ['y', 'xB', 't', 'Q', 'phi', 'f', 'delta f', 'pol'] , dtype = {'y': float, 'xB': float, 't': float, 'Q': float, 'phi': float, 'f': float, 'delta f': float, 'pol': str})
 
 DVCSxsec_data_invalid = DVCSxsec_data[DVCSxsec_data['t']*(DVCSxsec_data['xB']-1) - M ** 2 * DVCSxsec_data['xB'] ** 2 < 0]
-
 DVCSxsec_data = DVCSxsec_data[(DVCSxsec_data['Q'] > Q_threshold) & (DVCSxsec_data['t']*(DVCSxsec_data['xB']-1) - M ** 2 * DVCSxsec_data['xB'] ** 2 > 0)]
+xBtQlst = DVCSxsec_data.drop_duplicates(subset = ['xB', 't', 'Q'], keep = 'first')[['xB','t','Q']].values.tolist()
+DVCSxsec_group_data = list(map(lambda set: DVCSxsec_data[(DVCSxsec_data['xB'] == set[0]) & (DVCSxsec_data['t'] == set[1]) & ((DVCSxsec_data['Q'] == set[2]))], xBtQlst))
 
 def PDF_theo(PDF_input: np.array, Para: np.array):
     [x, t, Q, f, delta_f, spe, flv] = PDF_input
@@ -60,23 +61,27 @@ def GFF_theo(GFF_input: np.array, Para):
     GFF_theo = GPDobserv(x, xi, t, Q, p)
     return GFF_theo.GFFj0(j, flv, Para_spe)
 
-@cache
-def CFF_theo(xB, t, Q, Para):    
-    ParaArray = np.array(Para).reshape((NumofGPDSpecies,xi2_Factor,Flavor_Factor,init_NumofAnsatz,Single_Param_Size))
+def CFF_theo(xB, t, Q, Para):
     x = 0
     xi = (1/(2 - xB) - (2*t*(-1 + xB))/(Q**2*(-2 + xB)**2))*xB
     H_E = GPDobserv(x, xi, t, Q, 1)
     Ht_Et = GPDobserv(x, xi, t, Q, -1)
-    HCFF = H_E.CFF(ParaArray[0])
-    ECFF = H_E.CFF(ParaArray[1])
-    HtCFF = Ht_Et.CFF(ParaArray[2])
-    EtCFF = Ht_Et.CFF(ParaArray[3])
+    HCFF = H_E.CFF(Para[0])
+    ECFF = H_E.CFF(Para[1])
+    HtCFF = Ht_Et.CFF(Para[2])
+    EtCFF = Ht_Et.CFF(Para[3])
     return [HCFF, ECFF, HtCFF, EtCFF]
 
-def DVCSxsec_theo(DVCSxsec_input: np.array, Para):
-    [y, xB, t, Q, phi, f, delta_f, pol] = DVCSxsec_input
-    [HCFF, ECFF, HtCFF, EtCFF] = CFF_theo(xB, t, Q, tuple(Para.reshape(Tot_param_Size)))
+def DVCSxsec_theo(DVCSxsec_input: np.array, CFF_input: np.array):
+    [y, xB, t, Q, phi, f, delta_f, pol] = DVCSxsec_input    
+    [HCFF, ECFF, HtCFF, EtCFF] = CFF_input
     return dsigma_TOT(y, xB, t, Q, phi, pol, HCFF, ECFF, HtCFF, EtCFF)
+
+def DVCSxsec_cost_xBtQ(DVCSxsec_data_xBtQ: np.array, Para):
+    [xB, t, Q] = [DVCSxsec_data_xBtQ['xB'].iat[0], DVCSxsec_data_xBtQ['t'].iat[0], DVCSxsec_data_xBtQ['Q'].iat[0]]
+    [HCFF, ECFF, HtCFF, EtCFF] = CFF_theo(xB, t, Q, Para)
+    DVCS_pred_xBtQ = np.array(list(map(partial(DVCSxsec_theo, CFF_input = [HCFF, ECFF, HtCFF, EtCFF]), np.array(DVCSxsec_data_xBtQ))))
+    return np.sum(((DVCS_pred_xBtQ - DVCSxsec_data_xBtQ['f'])/ DVCSxsec_data_xBtQ['delta f']) ** 2 )
 
 def cost_GUMP(Norm_HuV,    alpha_HuV,    beta_HuV,    alphap_HuV, 
               Norm_Hubar,  alpha_Hubar,  beta_Hubar,   
@@ -124,9 +129,9 @@ def cost_GUMP(Norm_HuV,    alpha_HuV,    beta_HuV,    alphap_HuV,
 
     GFF_pred = np.array(list(pool.map(partial(GFF_theo, Para = Para_all), np.array(GFF_data))))
     cost_GFF = np.sum(((GFF_pred - GFF_data['f'])/ GFF_data['delta f']) ** 2 )
-
-    DVCSxsec_pred = np.array(list(pool.map(partial(DVCSxsec_theo, Para = Para_all), np.array(DVCSxsec_data))))
-    cost_DVCSxsec = np.sum(((DVCSxsec_pred - DVCSxsec_data['f'])/ DVCSxsec_data['delta f']) ** 2 )
+    
+    cost_DVCS_xBtQ = np.array(list(pool.map(partial(DVCSxsec_cost_xBtQ, Para = Para_all), DVCSxsec_group_data)))
+    cost_DVCSxsec = np.sum(cost_DVCS_xBtQ)
 
     return  cost_PDF + cost_tPDF + cost_GFF + cost_DVCSxsec
 
@@ -215,7 +220,7 @@ if __name__ == '__main__':
     pool = Pool()
     time_start = time.time()
 
-    fit_GUMP.migrad()
+    fit_GUMP.migrad(ncall = 10000)
     time_migrad = time.time() 
     print('The migard runs for: ', round((time_migrad - time_start)/60,2), 'minutes.')
     with open('Output.txt', 'w') as f:
@@ -225,10 +230,7 @@ if __name__ == '__main__':
     fit_GUMP.hesse()
     time_hesse = time.time()
     print('The hesse runs for: ', round((time_hesse - time_migrad)/60,2), 'minutes.')
-    with open('Output.txt', 'a') as f:
-        print('Below are the final output parameters from iMinuit WITH hesse:', file = f)
-        print(fit_GUMP.params, file = f)
-    
+
     pool.close()
     pool.join()
 
