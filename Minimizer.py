@@ -14,13 +14,15 @@ Time_Counter = 1
 
 Q_threshold = 2
 
+xB_Cut = 0.5
+
 PDF_data = pd.read_csv('GUMPDATA/PDFdata.csv',       header = None, names = ['x', 't', 'Q', 'f', 'delta f', 'spe', 'flv'],        dtype = {'x': float, 't': float, 'Q': float, 'f': float, 'delta f': float,'spe': int, 'flv': str})
 tPDF_data = pd.read_csv('GUMPDATA/tPDFdata.csv',     header = None, names = ['x', 't', 'Q', 'f', 'delta f', 'spe', 'flv'],        dtype = {'x': float, 't': float, 'Q': float, 'f': float, 'delta f': float,'spe': int, 'flv': str})
 GFF_data = pd.read_csv('GUMPDATA/GFFdata.csv',       header = None, names = ['j', 't', 'Q', 'f', 'delta f', 'spe', 'flv'],        dtype = {'j': int, 't': float, 'Q': float, 'f': float, 'delta f': float,'spe': int, 'flv': str})
 DVCSxsec_data = pd.read_csv('GUMPDATA/DVCSxsec.csv', header = None, names = ['y', 'xB', 't', 'Q', 'phi', 'f', 'delta f', 'pol'] , dtype = {'y': float, 'xB': float, 't': float, 'Q': float, 'phi': float, 'f': float, 'delta f': float, 'pol': str})
 
 DVCSxsec_data_invalid = DVCSxsec_data[DVCSxsec_data['t']*(DVCSxsec_data['xB']-1) - M ** 2 * DVCSxsec_data['xB'] ** 2 < 0]
-DVCSxsec_data = DVCSxsec_data[(DVCSxsec_data['Q'] > Q_threshold) & (DVCSxsec_data['t']*(DVCSxsec_data['xB']-1) - M ** 2 * DVCSxsec_data['xB'] ** 2 > 0)]
+DVCSxsec_data = DVCSxsec_data[(DVCSxsec_data['Q'] > Q_threshold) & (DVCSxsec_data['xB'] < xB_Cut) & (DVCSxsec_data['t']*(DVCSxsec_data['xB']-1) - M ** 2 * DVCSxsec_data['xB'] ** 2 > 0)]
 xBtQlst = DVCSxsec_data.drop_duplicates(subset = ['xB', 't', 'Q'], keep = 'first')[['xB','t','Q']].values.tolist()
 DVCSxsec_group_data = list(map(lambda set: DVCSxsec_data[(DVCSxsec_data['xB'] == set[0]) & (DVCSxsec_data['t'] == set[1]) & ((DVCSxsec_data['Q'] == set[2]))], xBtQlst))
 
@@ -88,13 +90,15 @@ def cost_GUMP(Norm_HuV,    alpha_HuV,    beta_HuV,    alphap_HuV,
               Norm_HdV,    alpha_HdV,    beta_HdV,    alphap_HdV,
               Norm_Hdbar,  alpha_Hdbar,  beta_Hdbar,  
               Norm_Hg,     alpha_Hg,     beta_Hg,     alphap_HS,
-              R_H_xi2,     R_E_u,        R_E_d,       R_E_g,       R_E_xi2,
+              R_H_u_xi2,   R_H_d_xi2,    R_H_g_xi2,
+              R_E_u,        R_E_d,       R_E_g,       R_E_xi2,
               Norm_HtuV,   alpha_HtuV,   beta_HtuV,   alphap_HtuV, 
               Norm_Htubar, alpha_Htubar, beta_Htubar, 
               Norm_HtdV,   alpha_HtdV,   beta_HtdV,   alphap_HtdV,
               Norm_Htdbar, alpha_Htdbar, beta_Htdbar, 
               Norm_Htg,    alpha_Htg,    beta_Htg,    alphap_HtS,
-              R_Ht_xi2,    R_Et_u,       R_Et_d,      R_Et_g,      R_Et_xi2):
+              R_Ht_u_xi2,  R_Ht_d_xi2,   R_Ht_g_xi2,
+              R_Et_u,       R_Et_d,      R_Et_g,      R_Et_xi2):
 
     global Minuit_Counter, Time_Counter
 
@@ -111,13 +115,15 @@ def cost_GUMP(Norm_HuV,    alpha_HuV,    beta_HuV,    alphap_HuV,
                Norm_HdV,    alpha_HdV,    beta_HdV,    alphap_HdV,
                Norm_Hdbar,  alpha_Hdbar,  beta_Hdbar,  
                Norm_Hg,     alpha_Hg,     beta_Hg,     alphap_HS,
-               R_H_xi2,     R_E_u,        R_E_d,       R_E_g,       R_E_xi2,
+               R_H_u_xi2,   R_H_d_xi2,    R_H_g_xi2,
+               R_E_u,        R_E_d,       R_E_g,       R_E_xi2,
                Norm_HtuV,   alpha_HtuV,   beta_HtuV,   alphap_HtuV, 
                Norm_Htubar, alpha_Htubar, beta_Htubar, 
                Norm_HtdV,   alpha_HtdV,   beta_HtdV,   alphap_HtdV,
                Norm_Htdbar, alpha_Htdbar, beta_Htdbar, 
                Norm_Htg,    alpha_Htg,    beta_Htg,    alphap_HtS,
-               R_Ht_xi2,    R_Et_u,       R_Et_d,      R_Et_g,      R_Et_xi2]
+               R_Ht_u_xi2,  R_Ht_d_xi2,   R_Ht_g_xi2,
+               R_Et_u,       R_Et_d,      R_Et_g,      R_Et_xi2]
 
     Para_all = ParaManager(np.array(Paralst))
 
@@ -141,13 +147,15 @@ def set_GUMP():
                             Norm_HdV = 1.4,    alpha_HdV = 0.5,     beta_HdV = 3.7,    alphap_HdV = 1.3,
                             Norm_Hdbar = 0.2,  alpha_Hdbar = 1.1,   beta_Hdbar = 5.5,
                             Norm_Hg = 2.4,     alpha_Hg = 0.1,      beta_Hg = 6.8,     alphap_HS = 0.5,
-                            R_H_xi2 = 1.0,     R_E_u = 1.0,         R_E_d = 1.0,       R_E_g = 1.0,       R_E_xi2 = 1.0,
+                            R_H_u_xi2 = 1.0,   R_H_d_xi2 = 1.0,     R_H_g_xi2 = 1.0,
+                            R_E_u = 1.0,       R_E_d = 1.0,         R_E_g = 1.0,       R_E_xi2 = 1.0,
                             Norm_HtuV = 11,    alpha_HtuV = -0.5,   beta_HtuV = 3.7,   alphap_HtuV = 1.0, 
                             Norm_Htubar = -30, alpha_Htubar = -1.8, beta_Htubar = 7.8,
                             Norm_HtdV = -0.9,  alpha_HtdV = 0.4,    beta_HtdV = 11,    alphap_HtdV = 1.0,
                             Norm_Htdbar = -30, alpha_Htdbar = -1.8, beta_Htdbar = 7.8,
                             Norm_Htg = 0.4,    alpha_Htg = -0.4,    beta_Htg = 1.5,    alphap_HtS = 1,
-                            R_Ht_xi2 = 1.0,    R_Et_u = 1.0,        R_Et_d = 1.0,      R_Et_g = 1.0,      R_Et_xi2 = 1.0)
+                            R_Ht_u_xi2 = 1.0,  R_Ht_d_xi2 = 1.0,    R_Ht_g_xi2 = 1.0,
+                            R_Et_u = 1.0,      R_Et_d = 1.0,        R_Et_g = 1.0,      R_Et_xi2 = 1.0)
     fit.errordef = 1
 
     fit.limits['alpha_HuV'] = (-2, 1.2)
@@ -174,44 +182,6 @@ def set_GUMP():
     fit.limits['beta_Htdbar'] = (0, 15)
     fit.limits['beta_Htg'] = (0, 15)
 
-    """
-    fit.fixed['Norm_HtuV'] = True
-    fit.fixed['Norm_Htubar'] = True
-    fit.fixed['Norm_HtdV'] = True
-    fit.fixed['Norm_Htdbar'] = True
-    fit.fixed['Norm_Htg'] = True
-
-    fit.fixed['alpha_HtuV'] = True
-    fit.fixed['alpha_Htubar'] = True
-    fit.fixed['alpha_HtdV'] = True
-    fit.fixed['alpha_Htdbar'] = True
-    fit.fixed['alpha_Htg'] = True
-
-    fit.fixed['beta_HtuV'] = True
-    fit.fixed['beta_Htubar'] = True
-    fit.fixed['beta_HtdV'] = True
-    fit.fixed['beta_Htdbar'] = True
-    fit.fixed['beta_Htg'] = True
-
-    fit.fixed['alphap_HuV'] = True
-    fit.fixed['alphap_HdV'] = True
-    fit.fixed['R_E_u'] = True
-    fit.fixed['R_E_d'] = True
-    fit.fixed['alphap_HtuV'] = True
-    fit.fixed['alphap_HtdV'] = True
-    fit.fixed['R_Et_u'] = True
-    fit.fixed['R_Et_d'] = True
-
-    fit.fixed['R_H_xi2'] = True
-    fit.fixed['alphap_HS'] = True
-    fit.fixed['R_E_g'] = True
-    fit.fixed['R_E_xi2'] = True
-    fit.fixed['alphap_HtS'] = True
-    fit.fixed['R_Ht_xi2'] = True    
-    fit.fixed['R_Et_g'] = True
-    fit.fixed['R_Et_xi2'] = True
-    """
-    
     return fit
 
 if __name__ == '__main__':
@@ -220,16 +190,13 @@ if __name__ == '__main__':
     pool = Pool()
     time_start = time.time()
 
-    fit_GUMP.migrad(ncall = 10000)
+    fit_GUMP.migrad(ncall = 15000)
     time_migrad = time.time() 
-    print('The migard runs for: ', round((time_migrad - time_start)/60,2), 'minutes.')
-    with open('Output.txt', 'w') as f:
-        print('Below are the final output parameters from iMinuit WITHOUT hesse:', file = f)
-        print(fit_GUMP.params, file = f)
+    print('The migard runs for: ', round((time_migrad - time_start)/60, 1), 'minutes.')
 
     fit_GUMP.hesse()
     time_hesse = time.time()
-    print('The hesse runs for: ', round((time_hesse - time_migrad)/60,2), 'minutes.')
+    print('The hesse runs for: ', round((time_hesse - time_migrad)/60, 1), 'minutes.')
 
     pool.close()
     pool.join()
@@ -237,9 +204,9 @@ if __name__ == '__main__':
     ndof = len(PDF_data.index) + len(tPDF_data.index) + len(GFF_data.index) + len(DVCSxsec_data.index) - fit_GUMP.npar
 
     time_end = time.time() -time_start    
-    with open('Output.txt', 'a') as f:
-        print('Total running time:',round(time_end/60), 'minutes. Total call of cost function:',Minuit_Counter,'(or', fit_GUMP.nfcn, 'from Minuit).\n', file=f)
-        print('The chi squared per d.o.f. is:', round(fit_GUMP.fval/ndof, 2),'.\n', file = f)
+    with open('Output.txt', 'w') as f:
+        print('Total running time:',round(time_end/60, 1), 'minutes. Total call of cost function:',Minuit_Counter,'(or', fit_GUMP.nfcn, 'from Minuit).\n', file=f)
+        print('The chi squared per d.o.f. is:', round(fit_GUMP.fval/ndof, 3),'.\n', file = f)
         print('Below are the final output parameters from iMinuit:', file = f)
         print(fit_GUMP.params, file = f)
         print('Below are the output covariance from iMinuit:', file = f)

@@ -39,13 +39,15 @@ def ParaManager(Paralst: np.array):
      Norm_HdV,    alpha_HdV,    beta_HdV,    alphap_HdV,
      Norm_Hdbar,  alpha_Hdbar,  beta_Hdbar,
      Norm_Hg,     alpha_Hg,     beta_Hg,     alphap_HS,
-     R_H_xi2,     R_E_u,        R_E_d,       R_E_g,       R_E_xi2,
+     R_H_u_xi2,   R_H_d_xi2,    R_H_g_xi2, 
+     R_E_u,       R_E_d,        R_E_g,       R_E_xi2,
      Norm_HtuV,   alpha_HtuV,   beta_HtuV,   alphap_HtuV, 
      Norm_Htubar, alpha_Htubar, beta_Htubar,
      Norm_HtdV,   alpha_HtdV,   beta_HtdV,   alphap_HtdV,
      Norm_Htdbar, alpha_Htdbar, beta_Htdbar,
      Norm_Htg,    alpha_Htg,    beta_Htg,    alphap_HtS,
-     R_Ht_xi2,    R_Et_u,       R_Et_d,      R_Et_g,      R_Et_xi2] = Paralst
+     R_Ht_u_xi2,  R_Ht_d_xi2,   R_Ht_g_xi2, 
+     R_Et_u,      R_Et_d,       R_Et_g,      R_Et_xi2] = Paralst
     # Initial forward parameters for the H of (uV, ubar, dV, dbar,g) distributions
     H_uV =   np.array([[Norm_HuV, alpha_HuV, beta_HuV ,alphap_HuV]])
     H_ubar = np.array([[Norm_Hubar, alpha_Hubar, beta_Hubar ,alphap_HS]])
@@ -58,11 +60,11 @@ def ParaManager(Paralst: np.array):
         One free parameter R_H_xi2 for the ratio to the forward PDF H for u, d ang g
     """
 
-    H_uV_xi2 =   np.einsum('...i,i->...i', H_uV,   [R_H_xi2,1,1,1])
-    H_ubar_xi2 = np.einsum('...i,i->...i', H_ubar, [R_H_xi2,1,1,1])
-    H_dV_xi2 =   np.einsum('...i,i->...i', H_dV,   [R_H_xi2,1,1,1])
-    H_dbar_xi2 = np.einsum('...i,i->...i', H_dV,   [R_H_xi2,1,1,1])
-    H_g_xi2 =    np.einsum('...i,i->...i', H_g,    [R_H_xi2,1,1,1])
+    H_uV_xi2 =   np.einsum('...i,i->...i', H_uV,   [R_H_u_xi2,1,1,1])
+    H_ubar_xi2 = np.einsum('...i,i->...i', H_ubar, [R_H_u_xi2,1,1,1])
+    H_dV_xi2 =   np.einsum('...i,i->...i', H_dV,   [R_H_d_xi2,1,1,1])
+    H_dbar_xi2 = np.einsum('...i,i->...i', H_dV,   [R_H_d_xi2,1,1,1])
+    H_g_xi2 =    np.einsum('...i,i->...i', H_g,    [R_H_g_xi2,1,1,1])
 
     # Initial forward parameters for the E of (uV, ubar, dV, dbar,g) distributions
     """
@@ -96,11 +98,11 @@ def ParaManager(Paralst: np.array):
     """
         One free parameter R_Ht_xi2 for the ratio to the forward PDF H for u, d ang g
     """
-    Ht_uV_xi2 =   np.einsum('...i,i->...i', Ht_uV,   [R_Ht_xi2,1,1,1])
-    Ht_ubar_xi2 = np.einsum('...i,i->...i', Ht_ubar, [R_Ht_xi2,1,1,1])
-    Ht_dV_xi2 =   np.einsum('...i,i->...i', Ht_dV,   [R_Ht_xi2,1,1,1])
-    Ht_dbar_xi2 = np.einsum('...i,i->...i', Ht_dbar, [R_Ht_xi2,1,1,1])
-    Ht_g_xi2 =    np.einsum('...i,i->...i', Ht_g,    [R_Ht_xi2,1,1,1])
+    Ht_uV_xi2 =   np.einsum('...i,i->...i', Ht_uV,   [R_Ht_u_xi2,1,1,1])
+    Ht_ubar_xi2 = np.einsum('...i,i->...i', Ht_ubar, [R_Ht_u_xi2,1,1,1])
+    Ht_dV_xi2 =   np.einsum('...i,i->...i', Ht_dV,   [R_Ht_d_xi2,1,1,1])
+    Ht_dbar_xi2 = np.einsum('...i,i->...i', Ht_dbar, [R_Ht_d_xi2,1,1,1])
+    Ht_g_xi2 =    np.einsum('...i,i->...i', Ht_g,    [R_Ht_g_xi2,1,1,1])
 
     # Initial forward parameters for the Et of (uV, ubar, dV, dbar,g) distributions
     """

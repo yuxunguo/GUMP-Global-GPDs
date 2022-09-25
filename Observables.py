@@ -18,7 +18,7 @@ CFF_trans =np.array([1*(2/3)**2, 2*(2/3)**2, 1*(1/3)**2, 2*(1/3)**2, 0])
 inv_Mellin_intercept = 0.25
 
 #Cutoff for inverse Mellin transformation
-inv_Mellin_cutoff = 30
+inv_Mellin_cutoff = 20
 
 #Cutoff for Mellin Barnes integral
 Mellin_Barnes_intercept = 0.25
