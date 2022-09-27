@@ -340,6 +340,7 @@ def set_GUMP():
 
     return fit
 """
+
 if __name__ == '__main__':
     pool = Pool()
     time_start = time.time()
@@ -378,13 +379,33 @@ if __name__ == '__main__':
         print(fit_forward_Pol.params, file = f)
 
     """
+
+    Para_Unp = [4.086585978666094,   0.28755583897886394, 2.9983526034399794, 2.171188252512768,
+                0.1515298961746849,  1.13084756948615,    7.36859946337703,   0.15,
+                1.6926354836023354,  0.473139675205807,   6.393776012798513,  1.9312430650163865,
+                0.13072287790798406, 1.1163759630136152,  2.7485733816485647, 
+                2.407535543085874,   1.0959812354498215,  6.809224913559509,  1.323257502504473,
+                1.0,                 1.0,                 1.0,
+                0.4875056322598995,  -1.3948983473519148, 0.4459503863845906, 1.0]
+    Para_Unp_All = ParaManager_Unp(Para_Unp)
+
     [Norm_HuV_init,    alpha_HuV_init,    beta_HuV_init,    alphap_HuV_init, 
      Norm_Hubar_init,  alpha_Hubar_init,  beta_Hubar_init,  alphap_Hqbar_init,
      Norm_HdV_init,    alpha_HdV_init,    beta_HdV_init,    alphap_HdV_init,
      Norm_Hdbar_init,  alpha_Hdbar_init,  beta_Hdbar_init,  
      Norm_Hg_init,     alpha_Hg_init,     beta_Hg_init,     alphap_Hg_init,
      R_H_u_xi2_init,   R_H_d_xi2_init,    R_H_g_xi2_init,
-     R_E_u_init,       R_E_d_init,        R_E_g_init,       R_E_xi2_init] = 0
+     R_E_u_init,       R_E_d_init,        R_E_g_init,       R_E_xi2_init] = Para_Unp
+
+    Para_Pol = [6.580899754034524,    -0.23115879550858676, 3.67752942441295,   2.0524314025855905,
+                -15.977144951195188,  -1.532450940306198,   14.99999975677844,  0.15,
+                -0.24146520775232505, 0.7232722836386922,   7.23564714972506,   1.057470747951815,
+                -62.62460294105561,   -1.8801835212054063,  14.99999975578287,
+                0.4394786071022251,   0.5621183453427716,   1.5568167159360558, 1.1,
+                1.0,                  1.0,                  1.0,
+                1.4376774804301957,   3.0131788785602107,   1.0,                1.0]
+    Para_Pol_All = ParaManager_Pol(Para_Pol)
+
 
     [Norm_HtuV_init,   alpha_HtuV_init,   beta_HtuV_init,   alphap_HtuV_init, 
      Norm_Htubar_init, alpha_Htubar_init, beta_Htubar_init, alphap_Htqbar_init,
@@ -392,9 +413,16 @@ if __name__ == '__main__':
      Norm_Htdbar_init, alpha_Htdbar_init, beta_Htdbar_init, 
      Norm_Htg_init,    alpha_Htg_init,    beta_Htg_init,    alphap_Htg_init,
      R_Ht_u_xi2_init,  R_Ht_d_xi2_init,   R_Ht_g_xi2_init,
-     R_Et_u_init,      R_Et_d_init,       R_Et_g_init,      R_Et_xi2_init] = 0
+     R_Et_u_init,      R_Et_d_init,       R_Et_g_init,      R_Et_xi2_init] = Para_Pol
 
+    PDF_data_Unp_u = PDF_data_Unp[(PDF_data_Unp['flv'] == 'u') & (PDF_data_Unp['spe'] == 0)]
 
+    PDF_data_Unp_u_pred = np.array(list(pool.map(partial(PDF_theo, Para = Para_Unp_All), np.array(PDF_data_Unp_u))))
+
+    print(PDF_data_Unp_u['f'])
+
+    print(PDF_data_Unp_u_pred)
+    
     """
     fit_GUMP.migrad()
     time_migrad = time.time() 
