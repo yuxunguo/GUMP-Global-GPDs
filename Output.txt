@@ -25,7 +25,7 @@ Below are the final output parameters from iMinuit:
 │ 14│ beta_Hdbar   │   2.749   │   0.024   │            │            │    0    │   15    │       │
 │ 15│ Norm_Hg      │  2.4075   │  0.0026   │            │            │         │         │       │
 │ 16│ alpha_Hg     │  1.09598  │  0.00033  │            │            │   -2    │   1.2   │       │
-│ 17│ beta_Hg      │   6.809   │   0.013   │            │            │    0    │   15    │       │
+│ 17│ beta_Hg      │   6.09   │   0.013   │            │            │    0    │   15    │       │
 │ 18│ alphap_Hg    │   1.323   │   0.022   │            │            │         │         │       │
 │ 19│ R_H_u_xi2    │   1.00    │   0.01    │            │            │         │         │  yes  │
 │ 20│ R_H_d_xi2    │   1.00    │   0.01    │            │            │         │         │  yes  │

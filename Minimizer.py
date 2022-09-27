@@ -421,8 +421,27 @@ if __name__ == '__main__':
 
     print(PDF_data_Unp_u['f'])
 
-    print(PDF_data_Unp_u_pred)
+    print(PDF_data_Unp_u['delta f'])
     
+    print(PDF_data_Unp_u_pred)
+
+    GFF_data_Unp_NS = GFF_data_Unp[(GFF_data_Unp['flv'] == 'NS') & (GFF_data_Unp['spe'] == 0) & (GFF_data_Unp['j'] == 0)]
+
+    GFF_data_Unp_NS_pred = np.array(list(pool.map(partial(GFF_theo, Para = Para_Unp_All), np.array(GFF_data_Unp_NS))))
+    
+    print(GFF_data_Unp_NS['f'])
+
+    print(GFF_data_Unp_NS_pred)
+
+
+    tPDF_data_Unp_u = tPDF_data_Unp[(tPDF_data_Unp['flv'] == 'NS') & (tPDF_data_Unp['spe'] == 0)]
+
+    tPDF_data_Unp_u_pred = np.array(list(pool.map(partial(tPDF_theo, Para = Para_Unp_All), np.array(tPDF_data_Unp_u))))
+
+    print(tPDF_data_Unp_u['f'])
+
+    print(tPDF_data_Unp_u_pred)
+
     """
     fit_GUMP.migrad()
     time_migrad = time.time() 
