@@ -35,3 +35,40 @@ Below are the final output parameters from iMinuit:
 │ 24│ R_E_g        │   0.446   │   0.014   │            │            │         │         │       │
 │ 25│ R_E_xi2      │   1.00    │   0.01    │            │            │         │         │  yes  │
 └───┴──────────────┴───────────┴───────────┴────────────┴────────────┴─────────┴─────────┴───────┘
+Total running time: 142.6 minutes. Total call of cost function: 5048 .
+
+The chi squared per d.o.f. is: 18.289 .
+
+Below are the final output parameters from iMinuit:
+<ValueView Norm_HtuV=6.580899754034524 alpha_HtuV=-0.23115879550858676 beta_HtuV=3.67752942441295 alphap_HtuV=2.0524314025855905 Norm_Htubar=-15.977144951195188 alpha_Htubar=-1.532450940306198 beta_Htubar=14.99999975677844 alphap_Htqbar=0.15 Norm_HtdV=-0.24146520775232505 alpha_HtdV=0.7232722836386922 beta_HtdV=7.23564714972506 alphap_HtdV=1.057470747951815 Norm_Htdbar=-62.62460294105561 alpha_Htdbar=-1.8801835212054063 beta_Htdbar=14.99999975578287 Norm_Htg=0.4394786071022251 alpha_Htg=0.5621183453427716 beta_Htg=1.5568167159360558 alphap_Htg=1.1 R_Ht_u_xi2=1.0 R_Ht_d_xi2=1.0 R_Ht_g_xi2=1.0 R_Et_u=1.4376774804301957 R_Et_d=3.0131788785602107 R_Et_g=1.0 R_Et_xi2=1.0>
+<ErrorView Norm_HtuV=0.0 alpha_HtuV=0.0 beta_HtuV=0.0 alphap_HtuV=0.0 Norm_Htubar=0.0 alpha_Htubar=0.0 beta_Htubar=0.0 alphap_Htqbar=0.0015 Norm_HtdV=0.0 alpha_HtdV=0.0 beta_HtdV=0.0 alphap_HtdV=0.0 Norm_Htdbar=0.0 alpha_Htdbar=0.0 beta_Htdbar=0.0 Norm_Htg=0.0 alpha_Htg=0.0 beta_Htg=0.0 alphap_Htg=0.0 R_Ht_u_xi2=0.01 R_Ht_d_xi2=0.01 R_Ht_g_xi2=0.01 R_Et_u=0.0 R_Et_d=0.0 R_Et_g=0.0 R_Et_xi2=0.01>
+┌───┬───────────────┬───────────┬───────────┬────────────┬────────────┬─────────┬─────────┬───────┐
+│   │ Name          │   Value   │ Hesse Err │ Minos Err- │ Minos Err+ │ Limit-  │ Limit+  │ Fixed │
+├───┼───────────────┼───────────┼───────────┼────────────┼────────────┼─────────┼─────────┼───────┤
+│ 0 │ Norm_HtuV     │  6.5809   │  0.0000   │            │            │         │         │       │
+│ 1 │ alpha_HtuV    │-2.3116e-1 │ 0.0000e-1 │            │            │   -2    │   1.2   │       │
+│ 2 │ beta_HtuV     │  3.6775   │  0.0000   │            │            │    0    │   15    │       │
+│ 3 │ alphap_HtuV   │  2.0524   │  0.0000   │            │            │         │         │       │
+│ 4 │ Norm_Htubar   │ -1.5977e1 │ 0.0000e1  │            │            │         │         │       │
+│ 5 │ alpha_Htubar  │  -1.5325  │  0.0000   │            │            │   -2    │   1.2   │       │
+│ 6 │ beta_Htubar   │   1.5e1   │   0.0e1   │            │            │    0    │   15    │       │
+│ 7 │ alphap_Htqbar │  0.1500   │  0.0015   │            │            │         │         │  yes  │
+│ 8 │ Norm_HtdV     │-2.4147e-1 │ 0.0000e-1 │            │            │         │         │       │
+│ 9 │ alpha_HtdV    │ 7.2327e-1 │ 0.0000e-1 │            │            │   -2    │   1.2   │       │
+│ 10│ beta_HtdV     │  7.2356   │  0.0000   │            │            │    0    │   15    │       │
+│ 11│ alphap_HtdV   │  1.0575   │  0.0000   │            │            │         │         │       │
+│ 12│ Norm_Htdbar   │ -6.2625e1 │ 0.0000e1  │            │            │         │         │       │
+│ 13│ alpha_Htdbar  │  -1.8802  │  0.0000   │            │            │   -2    │   1.2   │       │
+│ 14│ beta_Htdbar   │   1.5e1   │   0.0e1   │            │            │    0    │   15    │       │
+│ 15│ Norm_Htg      │ 4.3948e-1 │ 0.0000e-1 │            │            │         │         │       │
+│ 16│ alpha_Htg     │ 5.6212e-1 │ 0.0000e-1 │            │            │   -2    │   1.2   │       │
+│ 17│ beta_Htg      │  1.5568   │  0.0000   │            │            │    0    │   15    │       │
+│ 18│ alphap_Htg    │    1.1    │    0.0    │            │            │         │         │       │
+│ 19│ R_Ht_u_xi2    │   1.00    │   0.01    │            │            │         │         │  yes  │
+│ 20│ R_Ht_d_xi2    │   1.00    │   0.01    │            │            │         │         │  yes  │
+│ 21│ R_Ht_g_xi2    │   1.00    │   0.01    │            │            │         │         │  yes  │
+│ 22│ R_Et_u        │  1.4377   │  0.0000   │            │            │         │         │       │
+│ 23│ R_Et_d        │  3.0132   │  0.0000   │            │            │         │         │       │
+│ 24│ R_Et_g        │     1     │     0     │            │            │         │         │       │
+│ 25│ R_Et_xi2      │   1.00    │   0.01    │            │            │         │         │  yes  │
+└───┴───────────────┴───────────┴───────────┴────────────┴────────────┴─────────┴─────────┴───────┘
