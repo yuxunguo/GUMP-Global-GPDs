@@ -38,13 +38,12 @@ def PDF_theo(PDF_input: np.array, Para: np.array):
     [x, t, Q, f, delta_f, spe, flv] = PDF_input
     xi = 0
     if(spe == 0 or spe == 1):
-        spec = spe
-        p = 1
-    if(spe == 2 or spe == 3):
-        spec = spe - 2
-        p = -1
+        spe, p = spe, 1
 
-    Para_spe = Para[spec]
+    if(spe == 2 or spe == 3):
+        spe, p = spe - 2 , -1
+
+    Para_spe = Para[spe]
     PDF_theo = GPDobserv(x, xi, t, Q, p)
     return PDF_theo.tPDF(flv, Para_spe)     
 
@@ -52,13 +51,12 @@ def tPDF_theo(tPDF_input: np.array, Para: np.array):
     [x, t, Q, f, delta_f, spe, flv] = tPDF_input
     xi = 0
     if(spe == 0 or spe == 1):
-        spec = spe
-        p = 1
-    if(spe == 2 or spe == 3):
-        spec = spe - 2
-        p = -1
+        spe, p = spe, 1
 
-    Para_spe = Para[spec]
+    if(spe == 2 or spe == 3):
+        spe, p = spe - 2 , -1
+
+    Para_spe = Para[spe]
     tPDF_theo = GPDobserv(x, xi, t, Q, p)
     return tPDF_theo.tPDF(flv, Para_spe)        
 
@@ -67,13 +65,12 @@ def GFF_theo(GFF_input: np.array, Para):
     x = 0
     xi = 0   
     if(spe == 0 or spe == 1):
-        spec = spe
-        p = 1
+        spe, p = spe, 1
+
     if(spe == 2 or spe == 3):
-        spec = spe - 2
-        p = -1
-    
-    Para_spe = Para[spec]
+        spe, p = spe - 2 , -1
+
+    Para_spe = Para[spe]
     GFF_theo = GPDobserv(x, xi, t, Q, p)
     return GFF_theo.GFFj0(j, flv, Para_spe)
 
@@ -344,10 +341,12 @@ def set_GUMP():
     return fit
 """
 if __name__ == '__main__':
-
-    fit_forward_Unp = set_forward_Unp_fit()
     pool = Pool()
     time_start = time.time()
+
+    """
+    # Below are the forward fitting code
+    fit_forward_Unp = set_forward_Unp_fit()
     fit_forward_Unp.migrad()
     fit_forward_Unp.hesse()
 
@@ -357,6 +356,8 @@ if __name__ == '__main__':
         print('Total running time:',round(time_end/60, 1), 'minutes. Total call of cost function:', fit_forward_Unp.nfcn, '.\n', file=f)
         print('The chi squared per d.o.f. is:', round(fit_forward_Unp.fval/ndof_Unp, 3),'.\n', file = f)
         print('Below are the final output parameters from iMinuit:', file = f)
+        print(fit_forward_Unp.values, file = f)
+        print(fit_forward_Unp.errors, file = f)
         print(fit_forward_Unp.params, file = f)
     
     Minuit_Counter = 0
@@ -372,7 +373,27 @@ if __name__ == '__main__':
         print('Total running time:',round(time_end/60, 1), 'minutes. Total call of cost function:', fit_forward_Pol.nfcn, '.\n', file=f)
         print('The chi squared per d.o.f. is:', round(fit_forward_Pol.fval/ndof_Pol, 3),'.\n', file = f)
         print('Below are the final output parameters from iMinuit:', file = f)
+        print(fit_forward_Pol.values, file = f)
+        print(fit_forward_Pol.errors, file = f)
         print(fit_forward_Pol.params, file = f)
+
+    """
+    [Norm_HuV_init,    alpha_HuV_init,    beta_HuV_init,    alphap_HuV_init, 
+     Norm_Hubar_init,  alpha_Hubar_init,  beta_Hubar_init,  alphap_Hqbar_init,
+     Norm_HdV_init,    alpha_HdV_init,    beta_HdV_init,    alphap_HdV_init,
+     Norm_Hdbar_init,  alpha_Hdbar_init,  beta_Hdbar_init,  
+     Norm_Hg_init,     alpha_Hg_init,     beta_Hg_init,     alphap_Hg_init,
+     R_H_u_xi2_init,   R_H_d_xi2_init,    R_H_g_xi2_init,
+     R_E_u_init,       R_E_d_init,        R_E_g_init,       R_E_xi2_init] = 0
+
+    [Norm_HtuV_init,   alpha_HtuV_init,   beta_HtuV_init,   alphap_HtuV_init, 
+     Norm_Htubar_init, alpha_Htubar_init, beta_Htubar_init, alphap_Htqbar_init,
+     Norm_HtdV_init,   alpha_HtdV_init,   beta_HtdV_init,   alphap_HtdV_init,
+     Norm_Htdbar_init, alpha_Htdbar_init, beta_Htdbar_init, 
+     Norm_Htg_init,    alpha_Htg_init,    beta_Htg_init,    alphap_Htg_init,
+     R_Ht_u_xi2_init,  R_Ht_d_xi2_init,   R_Ht_g_xi2_init,
+     R_Et_u_init,      R_Et_d_init,       R_Et_g_init,      R_Et_xi2_init] = 0
+
 
     """
     fit_GUMP.migrad()
