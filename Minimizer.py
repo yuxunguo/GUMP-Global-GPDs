@@ -197,6 +197,7 @@ def set_forward_Unp_fit():
     fit_forw_Unp.limits['beta_Hdbar'] = (0, 15)
     fit_forw_Unp.limits['beta_Hg'] = (0, 15)
 
+    fit_forw_Unp.fixed['alphap_Hqbar'] = True
     fit_forw_Unp.fixed['R_H_u_xi2'] = True
     fit_forw_Unp.fixed['R_H_d_xi2'] = True
     fit_forw_Unp.fixed['R_H_g_xi2'] = True
@@ -226,6 +227,7 @@ def set_forward_Pol_fit():
     fit_forw_Pol.limits['beta_Htdbar'] = (0, 15)
     fit_forw_Pol.limits['beta_Htg'] = (0, 15)
 
+    fit_forw_Pol.fixed['alphap_Htqbar'] = True
     fit_forw_Pol.fixed['R_Ht_u_xi2'] = True
     fit_forw_Pol.fixed['R_Ht_d_xi2'] = True
     fit_forw_Pol.fixed['R_Ht_g_xi2'] = True
