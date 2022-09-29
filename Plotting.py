@@ -2,13 +2,12 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 
-def plot_compare(data_exp, data_exp_err, data_pred, yscale='linear', figname=None, figsize=[10., 8.], axsettings={}, **kwargs):
+def plot_compare(data_xs, data_exp, data_exp_err, data_pred, yscale='linear', figname=None, figsize=[10., 8.], axsettings={}, **kwargs):
     """
     Plot the experimental data with error bars and compare to the theoretical prediction.
 
-    The x axis is meaningless here. The focus is y axis.
-
     Args:
+        data_x: the x axis with the same length as the data
         data_exp: 1-D array-like with shape (N)
             This is the experimental data.
         data_exp_err: 1-D array-like with shape (N)
@@ -46,7 +45,8 @@ def plot_compare(data_exp, data_exp_err, data_pred, yscale='linear', figname=Non
     axsettings['yscale']=yscale
     ax.set(**axsettings) 
 
-    xs = np.arange(len(data_exp))
+    #xs = np.arange(len(data_exp))
+    xs = data_xs
     
     ax.errorbar(xs, data_exp, yerr = data_exp_err, label='data', **kwargs)
     ax.plot(xs, data_pred, label='prediction')
