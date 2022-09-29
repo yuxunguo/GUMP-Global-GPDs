@@ -656,18 +656,18 @@ def set_GUMP():
 if __name__ == '__main__':
     pool = Pool()
     time_start = time.time()
-    """
+
     fit_forward_H = forward_H_fit()
-    #Paralst_Unp = np.array(fit_forward_H.values)
+    Paralst_Unp = np.array(fit_forward_H.values)
 
     Minuit_Counter = 0
     Time_Counter = 1
     time_start = time.time()
 
     fit_forward_Ht = forward_Ht_fit()
-    #Paralst_Pol = np.array(fit_forward_Ht.values)
-    """
+    Paralst_Pol = np.array(fit_forward_Ht.values)
 
+    """
     Paralst_Unp = [4.069414842032496,   0.2854310655700574, 2.984801319163314,  2.313918289050004,
                    0.15416110374949857, 1.1275378406600627, 7.050379970938083,  8.460138845142314,
                    1.5528552443284596,  0.4494176682500317, 3.9117862194545543, 2.6933791859780487,
@@ -676,6 +676,7 @@ if __name__ == '__main__':
                    4.1,                 0.3,                3.0,                1.1,
                    1.4,                 0.5,                3.7,                1.3,
                    1.0,                 1.0,                1.0]
+    """
 
     Minuit_Counter = 0
     Time_Counter = 1
@@ -683,8 +684,8 @@ if __name__ == '__main__':
 
     fit_forward_E = forward_E_fit(Paralst_Unp)
 
-    #Paralst_Unp = np.array(fit_forward_E.values)
-
+    Paralst_Unp = np.array(fit_forward_E.values)
+    """
     Paralst_Pol = [8.603302685534663,   -0.3439437793836446, 3.823339217692947,   2.3930611979605114,
                    -48.18161077749349,  -1.7491336880623545, 14.999994517244774,  14.943027051512095,
                    -1.596476811170268,  0.2732431661236512,  14.023399232686286,  0.8132610624539507,
@@ -693,7 +694,7 @@ if __name__ == '__main__':
                    11.0,                -0.5,                3.7,                 1.0,
                    -0.9,                0.4,                 11.0,                1.0,
                    1.0,                 1.0,                 1.0]
-
+    """
     Minuit_Counter = 0
     Time_Counter = 1
     time_start = time.time()
