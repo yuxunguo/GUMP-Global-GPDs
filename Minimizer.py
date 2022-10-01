@@ -148,9 +148,7 @@ def cost_forward_Ht(Norm_HtuV,   alpha_HtuV,   beta_HtuV,   alphap_HtuV,
                     Norm_HtdV,   alpha_HtdV,   beta_HtdV,   alphap_HtdV,
                     Norm_Htdbar, alpha_Htdbar, beta_Htdbar, 
                     Norm_Htg,    alpha_Htg,    beta_Htg,    alphap_Htg,
-                    Norm_EtuV,   alpha_EtuV,   beta_EtuV,   alphap_EtuV, 
-                    Norm_EtdV,   alpha_EtdV,   beta_EtdV,   alphap_EtdV,
-                    R_Et_Sea,    R_Ht_xi2,     R_Et_xi2):
+                    R_Et_uV,     R_Et_dV,      R_Et_Sea,    R_Ht_xi2,     R_Et_xi2):
 
     global Minuit_Counter, Time_Counter
 
@@ -167,9 +165,7 @@ def cost_forward_Ht(Norm_HtuV,   alpha_HtuV,   beta_HtuV,   alphap_HtuV,
                Norm_HtdV,   alpha_HtdV,   beta_HtdV,   alphap_HtdV,
                Norm_Htdbar, alpha_Htdbar, beta_Htdbar, 
                Norm_Htg,    alpha_Htg,    beta_Htg,    alphap_Htg,
-               Norm_EtuV,   alpha_EtuV,   beta_EtuV,   alphap_EtuV, 
-               Norm_EtdV,   alpha_EtdV,   beta_EtdV,   alphap_EtdV,
-               R_Et_Sea,    R_Ht_xi2,     R_Et_xi2]
+               R_Et_uV,     R_Et_dV,      R_Et_Sea,    R_Ht_xi2,     R_Et_xi2]
     
     Para_all = ParaManager_Pol(Paralst)
     PDF_Ht_pred = np.array(list(pool.map(partial(PDF_theo, Para = Para_all), np.array(PDF_data_Ht))))
@@ -228,9 +224,7 @@ def cost_forward_Et(Norm_HtuV,   alpha_HtuV,   beta_HtuV,   alphap_HtuV,
                     Norm_HtdV,   alpha_HtdV,   beta_HtdV,   alphap_HtdV,
                     Norm_Htdbar, alpha_Htdbar, beta_Htdbar, 
                     Norm_Htg,    alpha_Htg,    beta_Htg,    alphap_Htg,
-                    Norm_EtuV,   alpha_EtuV,   beta_EtuV,   alphap_EtuV, 
-                    Norm_EtdV,   alpha_EtdV,   beta_EtdV,   alphap_EtdV,
-                    R_Et_Sea,    R_Ht_xi2,     R_Et_xi2):
+                    R_Et_uV,      R_Et_dV,       R_Et_Sea,    R_Ht_xi2,     R_Et_xi2):
 
     global Minuit_Counter, Time_Counter
 
@@ -247,9 +241,7 @@ def cost_forward_Et(Norm_HtuV,   alpha_HtuV,   beta_HtuV,   alphap_HtuV,
                Norm_HtdV,   alpha_HtdV,   beta_HtdV,   alphap_HtdV,
                Norm_Htdbar, alpha_Htdbar, beta_Htdbar, 
                Norm_Htg,    alpha_Htg,    beta_Htg,    alphap_Htg,
-               Norm_EtuV,   alpha_EtuV,   beta_EtuV,   alphap_EtuV, 
-               Norm_EtdV,   alpha_EtdV,   beta_EtdV,   alphap_EtdV,
-               R_Et_Sea,    R_Ht_xi2,     R_Et_xi2]
+               R_Et_uV,      R_Et_dV,       R_Et_Sea,    R_Ht_xi2,     R_Et_xi2]
     
     Para_all = ParaManager_Pol(Paralst)
     PDF_Et_pred = np.array(list(pool.map(partial(PDF_theo, Para = Para_all), np.array(PDF_data_Et))))
@@ -329,9 +321,7 @@ def forward_Ht_fit():
                                           Norm_HtdV = -0.9,  alpha_HtdV = 0.4,    beta_HtdV = 11,    alphap_HtdV = 1.0,
                                           Norm_Htdbar = -30, alpha_Htdbar = -1.8, beta_Htdbar = 7.8,
                                           Norm_Htg = 0.4,    alpha_Htg = -0.4,    beta_Htg = 1.5,    alphap_Htg = 1.1,
-                                          Norm_EtuV = 11,    alpha_EtuV = -0.5,   beta_EtuV = 3.7,   alphap_EtuV = 1.0,
-                                          Norm_EtdV = -0.9,  alpha_EtdV = 0.4,    beta_EtdV = 11,    alphap_EtdV = 1.0,
-                                          R_Et_Sea = 1,      R_Ht_xi2 = 1,        R_Et_xi2 = 1)
+                                          R_Et_uV = 1,       R_Et_dV = 1,         R_Et_Sea = 1,      R_Ht_xi2 = 1,        R_Et_xi2 = 1)
     fit_forw_Ht.errordef = 1
 
     fit_forw_Ht.limits['alpha_HtuV'] = (-2, 1.2)
@@ -339,29 +329,16 @@ def forward_Ht_fit():
     fit_forw_Ht.limits['alpha_HtdV'] = (-2, 1.2)
     fit_forw_Ht.limits['alpha_Htdbar'] = (-2, 1.2)
     fit_forw_Ht.limits['alpha_Htg'] = (-2, 1.2)
-    fit_forw_Ht.limits['alpha_EtuV'] = (-2, 1.2)
-    fit_forw_Ht.limits['alpha_EtdV'] = (-2, 1.2)
 
     fit_forw_Ht.limits['beta_HtuV'] = (0, 15)
     fit_forw_Ht.limits['beta_Htubar'] = (0, 15)
     fit_forw_Ht.limits['beta_HtdV'] = (0, 15)
     fit_forw_Ht.limits['beta_Htdbar'] = (0, 15)
     fit_forw_Ht.limits['beta_Htg'] = (0, 15)
-    fit_forw_Ht.limits['beta_EtuV'] = (0, 15)
-    fit_forw_Ht.limits['beta_EtdV'] = (0, 15)
-
     #fit_forw_Pol.fixed['alphap_Htqbar'] = True
 
-    fit_forw_Ht.fixed['Norm_EtuV'] = True
-    fit_forw_Ht.fixed['alpha_EtuV'] = True
-    fit_forw_Ht.fixed['beta_EtuV'] = True
-    fit_forw_Ht.fixed['alphap_EtuV'] = True
-
-    fit_forw_Ht.fixed['Norm_EtdV'] = True
-    fit_forw_Ht.fixed['alpha_EtdV'] = True
-    fit_forw_Ht.fixed['beta_EtdV'] = True
-    fit_forw_Ht.fixed['alphap_EtdV'] = True
-
+    fit_forw_Ht.fixed['R_Et_uV'] = True
+    fit_forw_Ht.fixed['R_Et_dV'] = True
     fit_forw_Ht.fixed['R_Et_Sea'] = True
     fit_forw_Ht.fixed['R_Ht_xi2'] = True
     fit_forw_Ht.fixed['R_Et_xi2'] = True
@@ -470,18 +447,14 @@ def forward_Et_fit(Paralst_Pol):
      Norm_HtdV_Init,   alpha_HtdV_Init,   beta_HtdV_Init,   alphap_HtdV_Init,
      Norm_Htdbar_Init, alpha_Htdbar_Init, beta_Htdbar_Init, 
      Norm_Htg_Init,    alpha_Htg_Init,    beta_Htg_Init,    alphap_Htg_Init,
-     Norm_EtuV_Init,   alpha_EtuV_Init,   beta_EtuV_Init,   alphap_EtuV_Init, 
-     Norm_EtdV_Init,   alpha_EtdV_Init,   beta_EtdV_Init,   alphap_EtdV_Init,
-     R_Et_Sea_Init,    R_Ht_xi2_Init,     R_Et_xi2_Init] = Paralst_Pol
+     R_Et_uV_Init,     R_Et_dV_Init,      R_Et_Sea_Init,    R_Ht_xi2_Init,     R_Et_xi2_Init] = Paralst_Pol
 
     fit_forw_Et = Minuit(cost_forward_Et, Norm_HtuV = Norm_HtuV_Init,     alpha_HtuV = alpha_HtuV_Init,      beta_HtuV = beta_HtuV_Init,     alphap_HtuV = alphap_HtuV_Init, 
                                           Norm_Htubar = Norm_Htubar_Init, alpha_Htubar = alpha_Htubar_Init,  beta_Htubar = beta_Htubar_Init, alphap_Htqbar = alphap_Htqbar_Init,
                                           Norm_HtdV = Norm_HtdV_Init,     alpha_HtdV = alpha_HtdV_Init,      beta_HtdV = beta_HtdV_Init,     alphap_HtdV = alphap_HtdV_Init,
                                           Norm_Htdbar = Norm_Htdbar_Init, alpha_Htdbar = alpha_Htdbar_Init,  beta_Htdbar = beta_Htdbar_Init, 
                                           Norm_Htg = Norm_Htg_Init,       alpha_Htg = alpha_Htg_Init,        beta_Htg = beta_Htg_Init,       alphap_Htg = alphap_Htg_Init,
-                                          Norm_EtuV = Norm_EtuV_Init,     alpha_EtuV = alpha_EtuV_Init,      beta_EtuV = beta_EtuV_Init,     alphap_EtuV = alphap_EtuV_Init, 
-                                          Norm_EtdV = Norm_EtdV_Init,     alpha_EtdV = alpha_EtdV_Init,      beta_EtdV = beta_EtdV_Init,     alphap_EtdV = alphap_EtdV_Init,
-                                          R_Et_Sea = R_Et_Sea_Init,       R_Ht_xi2 = R_Ht_xi2_Init,          R_Et_xi2 = R_Et_xi2_Init)
+                                          R_Et_uV = R_Et_uV_Init,         R_Et_dV = R_Et_dV_Init,            R_Et_Sea = R_Et_Sea_Init,       R_Ht_xi2 = R_Ht_xi2_Init,          R_Et_xi2 = R_Et_xi2_Init)
     fit_forw_Et.errordef = 1
 
     fit_forw_Et.limits['alpha_HtuV'] = (-2, 1.2)
@@ -489,16 +462,12 @@ def forward_Et_fit(Paralst_Pol):
     fit_forw_Et.limits['alpha_HtdV'] = (-2, 1.2)
     fit_forw_Et.limits['alpha_Htdbar'] = (-2, 1.2)
     fit_forw_Et.limits['alpha_Htg'] = (-2, 1.2)
-    fit_forw_Et.limits['alpha_EtuV'] = (-2, 1.2)
-    fit_forw_Et.limits['alpha_EtdV'] = (-2, 1.2)
 
     fit_forw_Et.limits['beta_HtuV'] = (0, 15)
     fit_forw_Et.limits['beta_Htubar'] = (0, 15)
     fit_forw_Et.limits['beta_HtdV'] = (0, 15)
     fit_forw_Et.limits['beta_Htdbar'] = (0, 15)
     fit_forw_Et.limits['beta_Htg'] = (0, 15)
-    fit_forw_Et.limits['beta_EtuV'] = (0, 15)
-    fit_forw_Et.limits['beta_EtdV'] = (0, 15)
 
     fit_forw_Et.fixed['Norm_HtuV'] = True
     fit_forw_Et.fixed['alpha_HtuV'] = True
@@ -656,7 +625,7 @@ def set_GUMP():
 if __name__ == '__main__':
     pool = Pool()
     time_start = time.time()
-
+    """
     fit_forward_H = forward_H_fit()
     Paralst_Unp = np.array(fit_forward_H.values)
 
@@ -666,49 +635,52 @@ if __name__ == '__main__':
 
     fit_forward_Ht = forward_Ht_fit()
     Paralst_Pol = np.array(fit_forward_Ht.values)
-
-    """
-    Paralst_Unp = [4.069414842032496,   0.2854310655700574, 2.984801319163314,  2.313918289050004,
-                   0.15416110374949857, 1.1275378406600627, 7.050379970938083,  8.460138845142314,
-                   1.5528552443284596,  0.4494176682500317, 3.9117862194545543, 2.6933791859780487,
-                   0.16512984220694593, 1.0830871264105184, 4.9719259240405895,
-                   2.4045560425974233,  1.0962757503174405, 6.799743430343084,  1.3477968478412048,
-                   4.1,                 0.3,                3.0,                1.1,
-                   1.4,                 0.5,                3.7,                1.3,
-                   1.0,                 1.0,                1.0]
     """
 
+    Paralst_Unp = [4.069414842032496, 0.2854310655700574, 2.984801319163314, 2.313918289050004, 0.15416110374949857, 1.1275378406600627, 7.050379970938083, 8.460138845142314, 1.5528552443284596, 0.4494176682500317, 3.9117862194545543, 2.6933791859780487, 0.16512984220694593, 1.0830871264105184, 4.9719259240405895, 2.4045560425974233, 1.0962757503174405, 6.799743430343084, 1.3477968478412048, 2.3879281792188274, 0.4064905964665395, 2.3337222132453666, 3.186397049413531, -0.5105398210955508, 0.8375272100961433, 5.709932175531137, 0.7999328796250668, 0.460859194942991, 1.0, 1.0]
+    """
     Minuit_Counter = 0
     Time_Counter = 1
     time_start = time.time()
 
     fit_forward_E = forward_E_fit(Paralst_Unp)
-
+    
     Paralst_Unp = np.array(fit_forward_E.values)
     """
-    Paralst_Pol = [8.603302685534663,   -0.3439437793836446, 3.823339217692947,   2.3930611979605114,
-                   -48.18161077749349,  -1.7491336880623545, 14.999994517244774,  14.943027051512095,
-                   -1.596476811170268,  0.2732431661236512,  14.023399232686286,  0.8132610624539507,
-                   -44.836841779691504, -1.9999964628876339, 8.267812298540168,
-                   0.439190177655261,   0.5623448077955673,  1.5558573126417579,  1.1,
-                   11.0,                -0.5,                3.7,                 1.0,
-                   -0.9,                0.4,                 11.0,                1.0,
-                   1.0,                 1.0,                 1.0]
-    """
+    
+    Paralst_Pol = [8.603302685534663, -0.3439437793836446, 3.823339217692947, 2.3930611979605114, -48.18161077749349, -1.7491336880623545, 14.999994517244774, 14.943027051512095, -1.596476811170268, 0.2732431661236512, 14.023399232686286, 0.8132610624539507, -44.836841779691504, -1.9999964628876339, 8.267812298540168, 0.439190177655261, 0.5623448077955673, 1.5558573126417579, 1.1, 1.0, 1.0, -1.380788573246649, 1.0, 1.0]
+
     Minuit_Counter = 0
     Time_Counter = 1
     time_start = time.time()
     
     fit_forward_Et = forward_Et_fit(Paralst_Pol)
 
-    #Paralst_Pol = np.array(fit_forward_Et.values)
+    Paralst_Pol = np.array(fit_forward_Et.values)
+
+    Para_Unp_All = ParaManager_Unp(Paralst_Unp)
+    Para_Pol_All = ParaManager_Pol(Paralst_Pol)
 
     """
-    Para_Unp_All = ParaManager_Unp(Paralst_Unp)
     FLV = 'g'
     PDF_data_H_FLV = PDF_data_H[(PDF_data_H['flv'] == FLV)]
     PDF_data_H_FLV_pred = np.array(list(pool.map(partial(PDF_theo, Para = Para_Unp_All), np.array(PDF_data_H_FLV))))
     plot_compare(PDF_data_H_FLV['x'],PDF_data_H_FLV['f'], PDF_data_H_FLV['delta f'], PDF_data_H_FLV_pred)
+    """
+
+    """
+    FLV = 'NS'
+    T = -0.69
+    tPDF_data_E_FLV = tPDF_data_E[(tPDF_data_E['flv'] == FLV)& (tPDF_data_E['t'] == T)]
+    tPDF_data_E_FLV_pred = np.array(list(pool.map(partial(tPDF_theo, Para = Para_Unp_All), np.array(tPDF_data_E_FLV))))
+    plot_compare(tPDF_data_E_FLV['x'],tPDF_data_E_FLV['f'], tPDF_data_E_FLV['delta f'], tPDF_data_E_FLV_pred)
+    """
+    """
+    FLV = 'NS'
+    J = 0
+    GFF_data_E_FLV = GFF_data_E[(GFF_data_E['flv'] == FLV) & (GFF_data_E['j'] == J)]
+    GFF_data_E_FLV_pred = np.array(list(pool.map(partial(GFF_theo, Para = Para_Unp_All), np.array(GFF_data_E_FLV))))
+    plot_compare(GFF_data_E_FLV['t'], GFF_data_E_FLV['f'], GFF_data_E_FLV['delta f'], GFF_data_E_FLV_pred)
     """
 
     """
@@ -721,15 +693,13 @@ if __name__ == '__main__':
 
     """
     FLV = 'NS'
-    SPE = 0
     T = -0.39
-    tPDF_data_H_FLV = tPDF_data_H[(tPDF_data_H['flv'] == FLV) & (tPDF_data_H['spe'] == SPE) & (tPDF_data_H['t'] == T)]
+    tPDF_data_H_FLV = tPDF_data_H[(tPDF_data_H['flv'] == FLV)& (tPDF_data_H['t'] == T)]
     tPDF_data_H_FLV_pred = np.array(list(pool.map(partial(tPDF_theo, Para = Para_Unp_All), np.array(tPDF_data_H_FLV))))
     plot_compare(tPDF_data_H_FLV['x'], tPDF_data_H_FLV['f'], tPDF_data_H_FLV['delta f'], tPDF_data_H_FLV_pred)
     """
 
     """
-    Para_Pol_All = ParaManager_Pol(Paralst_Pol)
     FLV = 'u'
     PDF_data_Ht_FLV = PDF_data_Ht[(PDF_data_Ht['flv'] == FLV)]
     PDF_data_Ht_FLV_pred = np.array(list(pool.map(partial(PDF_theo, Para = Para_Pol_All), np.array(PDF_data_Ht_FLV))))
@@ -751,6 +721,21 @@ if __name__ == '__main__':
     GFF_data_Ht_FLV_pred = np.array(list(pool.map(partial(GFF_theo, Para = Para_Pol_All), np.array(GFF_data_Ht_FLV))))
     plot_compare(GFF_data_Ht_FLV['t'], GFF_data_Ht_FLV['f'], GFF_data_Ht_FLV['delta f'], GFF_data_Ht_FLV_pred)
     """
+    
+    """
+    FLV = 'd'
+    J = 0
+    GFF_data_Et_FLV = GFF_data_Et[(GFF_data_Et['flv'] == FLV) & (GFF_data_Et['j'] == J)]
+    GFF_data_Et_FLV_pred = np.array(list(pool.map(partial(GFF_theo, Para = Para_Pol_All), np.array(GFF_data_Et_FLV))))
+    print(GFF_data_Et_FLV_pred)
+    plot_compare(GFF_data_Et_FLV['t'], GFF_data_Et_FLV['f'], GFF_data_Et_FLV['delta f'], GFF_data_Et_FLV_pred)
+    """
+
+    testGPD = GPDobserv(0.1,0,0,2,-1)
+    print(testGPD.GFFj0(0,'u',Para_Pol_All[1]))
+    
+    testGPD = GPDobserv(0.1,0,0,2,-1)
+    print(testGPD.GFFj0(0,'d',Para_Pol_All[1]))
 
     """
     fit_GUMP.migrad()

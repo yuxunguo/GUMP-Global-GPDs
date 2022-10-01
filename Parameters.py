@@ -96,9 +96,7 @@ def ParaManager_Pol(Paralst: np.array):
      Norm_HtdV,   alpha_HtdV,   beta_HtdV,   alphap_HtdV,
      Norm_Htdbar, alpha_Htdbar, beta_Htdbar, 
      Norm_Htg,    alpha_Htg,    beta_Htg,    alphap_Htg,
-     Norm_EtuV,   alpha_EtuV,   beta_EtuV,   alphap_EtuV,
-     Norm_EtdV,   alpha_EtdV,   beta_EtdV,   alphap_EtdV,
-     R_Et_Sea,    R_Ht_xi2,     R_Et_xi2] = Paralst
+     R_Et_uV,      R_Et_dV,       R_Et_Sea,    R_Ht_xi2,     R_Et_xi2] = Paralst
 
     # Initial forward parameters for the Ht of (uV, ubar, dV, dbar,g) distributions
 
@@ -122,9 +120,9 @@ def ParaManager_Pol(Paralst: np.array):
     """
         Three free parameter R_Et_u, R_Et_d, R_E_g for the Et/Ht ratio 
     """
-    Et_uV =   np.array([[Norm_EtuV,   alpha_EtuV,   beta_EtuV,   alphap_EtuV]])
+    Et_uV =   np.einsum('...i,i->...i', Ht_uV,   [R_Et_uV,1,1,1])
     Et_ubar = np.einsum('...i,i->...i', Ht_ubar, [R_Et_Sea,1,1,1])
-    Et_dV =   np.array([[Norm_EtdV,   alpha_EtdV,   beta_EtdV,   alphap_EtdV]])
+    Et_dV =   np.einsum('...i,i->...i', Ht_dV,   [R_Et_dV,1,1,1])
     Et_dbar = np.einsum('...i,i->...i', Ht_dbar, [R_Et_Sea,1,1,1])
     Et_g =    np.einsum('...i,i->...i', Ht_g,    [R_Et_Sea,1,1,1])
 
