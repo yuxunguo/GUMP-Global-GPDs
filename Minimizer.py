@@ -115,7 +115,7 @@ def cost_forward_H(Norm_HuV,    alpha_HuV,    beta_HuV,    alphap_HuV,
 
     global Minuit_Counter, Time_Counter
 
-    time_now = time.time() -time_start
+    time_now = time.time() - time_start
     
     if(time_now > Time_Counter * 600):
         print('Runing Time:',round(time_now/60),'minutes. Cost function called total', Minuit_Counter, 'times.')
@@ -157,7 +157,7 @@ def cost_forward_E(Norm_HuV,    alpha_HuV,    beta_HuV,    alphap_HuV,
 
     global Minuit_Counter, Time_Counter
 
-    time_now = time.time() -time_start
+    time_now = time.time() - time_start
     
     if(time_now > Time_Counter * 600):
         print('Runing Time:',round(time_now/60),'minutes. Cost function called total', Minuit_Counter, 'times.')
@@ -246,7 +246,7 @@ def forward_H_fit(Paralst_Unp):
     fit_forw_H.fixed['R_Ed_xi2'] = True
     fit_forw_H.fixed['R_Eg_xi2'] = True
 
-    global Minuit_Counter, Time_Counter
+    global Minuit_Counter, Time_Counter, time_start
     Minuit_Counter = 0
     Time_Counter = 1
     time_start = time.time()
@@ -259,8 +259,8 @@ def forward_H_fit(Paralst_Unp):
     time_end = time.time() -time_start
 
     with open('GUMP_Output/H_forward_fit.txt', 'w') as f:
-        print('Total running time:',round(time_end/60, 1), 'minutes. Total call of cost function:', fit_forw_H.nfcn, '.\n', file=f)
-        print('The chi squared per d.o.f. is:', round(fit_forw_H.fval/ndof_H, 3),'.\n', file = f)
+        print('Total running time: %3.1f minutes. Total call of cost function: %3d.\n' % ( time_end/60, fit_forw_H.nfcn), file=f)
+        print('The chi squared/d.o.f. is: %3.1f / %3d ( = %3.1f ).\n' % (fit_forw_H.fval, ndof_H, fit_forw_H.fval/ndof_H), file = f)
         print('Below are the final output parameters from iMinuit:', file = f)
         print(*fit_forw_H.values, sep=", ", file = f)
         print(*fit_forw_H.errors, sep=", ", file = f)
@@ -338,7 +338,7 @@ def forward_E_fit(Paralst_Unp):
     fit_forw_E.fixed['R_Ed_xi2'] = True
     fit_forw_E.fixed['R_Eg_xi2'] = True
 
-    global Minuit_Counter, Time_Counter
+    global Minuit_Counter, Time_Counter, time_start
     Minuit_Counter = 0
     Time_Counter = 1
     time_start = time.time()
@@ -351,8 +351,8 @@ def forward_E_fit(Paralst_Unp):
     time_end = time.time() -time_start
 
     with open('GUMP_Output/E_forward_fit.txt', 'w') as f:
-        print('Total running time:',round(time_end/60, 1), 'minutes. Total call of cost function:', fit_forw_E.nfcn, '.\n', file=f)
-        print('The chi squared per d.o.f. is:', round(fit_forw_E.fval/ndof_E, 3),'.\n', file = f)
+        print('Total running time: %3.1f minutes. Total call of cost function: %3d.\n' % ( time_end/60, fit_forw_E.nfcn), file=f)
+        print('The chi squared/d.o.f. is: %3.1f / %3d ( = %3.1f ).\n' % (fit_forw_E.fval, ndof_E, fit_forw_E.fval/ndof_E), file = f)
         print('Below are the final output parameters from iMinuit:', file = f)
         print(*fit_forw_E.values, sep=", ", file = f)
         print(*fit_forw_E.errors, sep=", ", file = f)
@@ -371,7 +371,7 @@ def cost_forward_Ht(Norm_HtuV,   alpha_HtuV,   beta_HtuV,   alphap_HtuV,
 
     global Minuit_Counter, Time_Counter
 
-    time_now = time.time() -time_start
+    time_now = time.time() - time_start
     
     if(time_now > Time_Counter * 600):
         print('Runing Time:',round(time_now/60),'minutes. Cost function called total', Minuit_Counter, 'times.')
@@ -411,7 +411,7 @@ def cost_forward_Et(Norm_HtuV,   alpha_HtuV,   beta_HtuV,   alphap_HtuV,
 
     global Minuit_Counter, Time_Counter
 
-    time_now = time.time() -time_start
+    time_now = time.time() - time_start
     
     if(time_now > Time_Counter * 600):
         print('Runing Time:',round(time_now/60),'minutes. Cost function called total', Minuit_Counter, 'times.')
@@ -492,7 +492,7 @@ def forward_Ht_fit(Paralst_Pol):
     fit_forw_Ht.fixed['R_Etd_xi2'] = True
     fit_forw_Ht.fixed['R_Etg_xi2'] = True
 
-    global Minuit_Counter, Time_Counter
+    global Minuit_Counter, Time_Counter, time_start
     Minuit_Counter = 0
     Time_Counter = 1
     time_start = time.time()
@@ -504,8 +504,8 @@ def forward_Ht_fit(Paralst_Pol):
 
     time_end = time.time() -time_start    
     with open('GUMP_Output/Ht_forward_fit.txt', 'w') as f:
-        print('Total running time:',round(time_end/60, 1), 'minutes. Total call of cost function:', fit_forw_Ht.nfcn, '.\n', file=f)
-        print('The chi squared per d.o.f. is:', round(fit_forw_Ht.fval/ndof_Ht, 3),'.\n', file = f)
+        print('Total running time: %3.1f minutes. Total call of cost function: %3d.\n' % ( time_end/60, fit_forw_Ht.nfcn), file=f)
+        print('The chi squared/d.o.f. is: %3.1f / %3d ( = %3.1f ).\n' % (fit_forw_Ht.fval, ndof_Ht, fit_forw_Ht.fval/ndof_Ht), file = f)
         print('Below are the final output parameters from iMinuit:', file = f)
         print(*fit_forw_Ht.values, sep=", ", file = f)
         print(*fit_forw_Ht.errors, sep=", ", file = f)
@@ -579,7 +579,7 @@ def forward_Et_fit(Paralst_Pol):
     fit_forw_Et.fixed['R_Etd_xi2'] = True
     fit_forw_Et.fixed['R_Etg_xi2'] = True
 
-    global Minuit_Counter, Time_Counter
+    global Minuit_Counter, Time_Counter, time_start
     Minuit_Counter = 0
     Time_Counter = 1
     time_start = time.time()
@@ -591,8 +591,8 @@ def forward_Et_fit(Paralst_Pol):
 
     time_end = time.time() -time_start    
     with open('GUMP_Output/Et_forward_fit.txt', 'w') as f:
-        print('Total running time:',round(time_end/60, 1), 'minutes. Total call of cost function:', fit_forw_Et.nfcn, '.\n', file=f)
-        print('The chi squared per d.o.f. is:', round(fit_forw_Et.fval/ndof_Et, 3),'.\n', file = f)
+        print('Total running time: %3.1f minutes. Total call of cost function: %3d.\n' % ( time_end/60, fit_forw_Et.nfcn), file=f)
+        print('The chi squared/d.o.f. is: %3.1f / %3d ( = %3.1f ).\n' % (fit_forw_Et.fval, ndof_Et, fit_forw_Et.fval/ndof_Et), file = f)
         print('Below are the final output parameters from iMinuit:', file = f)
         print(*fit_forw_Et.values, sep=", ", file = f)
         print(*fit_forw_Et.errors, sep=", ", file = f)
@@ -620,7 +620,7 @@ def cost_off_forward(Norm_HuV,    alpha_HuV,    beta_HuV,    alphap_HuV,
 
     global Minuit_Counter, Time_Counter
 
-    time_now = time.time() -time_start
+    time_now = time.time() - time_start
     
     if(time_now > Time_Counter * 600):
         print('Runing Time:',round(time_now/60),'minutes. Cost function called total', Minuit_Counter, 'times.')
@@ -760,7 +760,12 @@ def off_forward_fit(Paralst_Unp, Paralst_Pol):
 
     fit_off_forward.fixed['Norm_EtdV'] = True
 
-    global Minuit_Counter, Time_Counter
+    fit_off_forward.fixed['R_Hg_xi2'] = True
+    fit_off_forward.fixed['R_Eg_xi2'] = True
+    fit_off_forward.fixed['R_Htg_xi2'] = True
+    fit_off_forward.fixed['R_Etg_xi2'] = True
+
+    global Minuit_Counter, Time_Counter, time_start
     Minuit_Counter = 0
     Time_Counter = 1
     time_start = time.time()
@@ -773,8 +778,8 @@ def off_forward_fit(Paralst_Unp, Paralst_Pol):
     time_end = time.time() -time_start
 
     with open('GUMP_Output/off_forward_fit.txt', 'w') as f:
-        print('Total running time:',round(time_end/60, 1), 'minutes. Total call of cost function:', fit_off_forward.nfcn, '.\n', file=f)
-        print('The chi squared per d.o.f. is:', round(fit_off_forward.fval/ndof_off_forward, 3),'.\n', file = f)
+        print('Total running time: %3.1f minutes. Total call of cost function: %3d.\n' % ( time_end/60, fit_off_forward.nfcn), file=f)
+        print('The chi squared/d.o.f. is: %3.1f / %3d ( = %3.1f ).\n' % (fit_off_forward.fval, ndof_off_forward, fit_off_forward.fval/ndof_off_forward), file = f)
         print('Below are the final output parameters from iMinuit:', file = f)
         print(*fit_off_forward.values, sep=", ", file = f)
         print(*fit_off_forward.errors, sep=", ", file = f)
@@ -782,124 +787,14 @@ def off_forward_fit(Paralst_Unp, Paralst_Pol):
 
     return fit_off_forward
 
-"""
-def cost_GUMP(Norm_HuV,    alpha_HuV,    beta_HuV,    alphap_HuV, 
-              Norm_Hubar,  alpha_Hubar,  beta_Hubar,  alphap_Hqbar,
-              Norm_HdV,    alpha_HdV,    beta_HdV,    alphap_HdV,
-              Norm_Hdbar,  alpha_Hdbar,  beta_Hdbar,  
-              Norm_Hg,     alpha_Hg,     beta_Hg,     alphap_Hg,
-              R_H_u_xi2,   R_H_d_xi2,    R_H_g_xi2,
-              R_E_u,        R_E_d,       R_E_g,       R_E_xi2,
-              Norm_HtuV,   alpha_HtuV,   beta_HtuV,   alphap_HtuV, 
-              Norm_Htubar, alpha_Htubar, beta_Htubar, alphap_Htqbar,
-              Norm_HtdV,   alpha_HtdV,   beta_HtdV,   alphap_HtdV,
-              Norm_Htdbar, alpha_Htdbar, beta_Htdbar, 
-              Norm_Htg,    alpha_Htg,    beta_Htg,    alphap_Htg,
-              R_Ht_u_xi2,  R_Ht_d_xi2,   R_Ht_g_xi2,
-              R_Et_u,       R_Et_d,      R_Et_g,      R_Et_xi2):
-
-    global Minuit_Counter, Time_Counter
-
-    time_now = time.time() -time_start
-    
-    if(time_now > Time_Counter * 600):
-        print('Runing Time:',round(time_now/60),'minutes. Cost function called total', Minuit_Counter, 'times.')
-        Time_Counter = Time_Counter + 1
-    
-    Minuit_Counter = Minuit_Counter + 1
-    
-    Paralst = [Norm_HuV,    alpha_HuV,    beta_HuV,    alphap_HuV, 
-               Norm_Hubar,  alpha_Hubar,  beta_Hubar,  alphap_Hqbar,
-               Norm_HdV,    alpha_HdV,    beta_HdV,    alphap_HdV,
-               Norm_Hdbar,  alpha_Hdbar,  beta_Hdbar,  
-               Norm_Hg,     alpha_Hg,     beta_Hg,     alphap_Hg,
-               R_H_u_xi2,   R_H_d_xi2,    R_H_g_xi2,
-               R_E_u,        R_E_d,       R_E_g,       R_E_xi2,
-               Norm_HtuV,   alpha_HtuV,   beta_HtuV,   alphap_HtuV, 
-               Norm_Htubar, alpha_Htubar, beta_Htubar, alphap_Htqbar,
-               Norm_HtdV,   alpha_HtdV,   beta_HtdV,   alphap_HtdV,
-               Norm_Htdbar, alpha_Htdbar, beta_Htdbar, 
-               Norm_Htg,    alpha_Htg,    beta_Htg,    alphap_Htg,
-               R_Ht_u_xi2,  R_Ht_d_xi2,   R_Ht_g_xi2,
-               R_Et_u,       R_Et_d,      R_Et_g,      R_Et_xi2]
-
-    Para_all = ParaManager(np.array(Paralst))
-
-    PDF_pred = np.array(list(pool.map(partial(PDF_theo, Para = Para_all), np.array(PDF_data))))
-    cost_PDF = np.sum(((PDF_pred - PDF_data['f'])/ PDF_data['delta f']) ** 2 )
-
-    tPDF_pred = np.array(list(pool.map(partial(tPDF_theo, Para = Para_all), np.array(tPDF_data))))
-    cost_tPDF = np.sum(((tPDF_pred - tPDF_data['f'])/ tPDF_data['delta f']) ** 2 )
-
-    GFF_pred = np.array(list(pool.map(partial(GFF_theo, Para = Para_all), np.array(GFF_data))))
-    cost_GFF = np.sum(((GFF_pred - GFF_data['f'])/ GFF_data['delta f']) ** 2 )
-    
-    #cost_DVCS_xBtQ = np.array(list(pool.map(partial(DVCSxsec_cost_xBtQ, Para = Para_all), DVCSxsec_group_data)))
-    #cost_DVCSxsec = np.sum(cost_DVCS_xBtQ)
-
-    return  cost_PDF + cost_tPDF + cost_GFF #+ cost_DVCSxsec
-
-def set_GUMP():
-    fit = Minuit(cost_GUMP, Norm_HuV = 4.1,    alpha_HuV = 0.3,     beta_HuV = 3.0,    alphap_HuV = 1.1, 
-                            Norm_Hubar = 0.2,  alpha_Hubar = 1.1,   beta_Hubar = 7.6,  alphap_Hqbar = 0.15,
-                            Norm_HdV = 1.4,    alpha_HdV = 0.5,     beta_HdV = 3.7,    alphap_HdV = 1.3,
-                            Norm_Hdbar = 0.2,  alpha_Hdbar = 1.1,   beta_Hdbar = 5.5, 
-                            Norm_Hg = 2.4,     alpha_Hg = 0.1,      beta_Hg = 6.8,     alphap_Hg = 1.1,
-                            R_H_u_xi2 = 1.0,   R_H_d_xi2 = 1.0,     R_H_g_xi2 = 1.0,
-                            R_E_u = 1.0,       R_E_d = 1.0,         R_E_g = 1.0,       R_E_xi2 = 1.0,
-                            Norm_HtuV = 11,    alpha_HtuV = -0.5,   beta_HtuV = 3.7,   alphap_HtuV = 1.0, 
-                            Norm_Htubar = -30, alpha_Htubar = -1.8, beta_Htubar = 7.8, alphap_Htqbar = 0.15,
-                            Norm_HtdV = -0.9,  alpha_HtdV = 0.4,    beta_HtdV = 11,    alphap_HtdV = 1.0,
-                            Norm_Htdbar = -30, alpha_Htdbar = -1.8, beta_Htdbar = 7.8,
-                            Norm_Htg = 0.4,    alpha_Htg = -0.4,    beta_Htg = 1.5,    alphap_Htg = 1.1,
-                            R_Ht_u_xi2 = 1.0,  R_Ht_d_xi2 = 1.0,    R_Ht_g_xi2 = 1.0,
-                            R_Et_u = 1.0,      R_Et_d = 1.0,        R_Et_g = 1.0,      R_Et_xi2 = 1.0)
-    fit.errordef = 1
-
-    fit.limits['alpha_HuV'] = (-2, 1.2)
-    fit.limits['alpha_Hubar'] = (-2, 1.2)
-    fit.limits['alpha_HdV'] = (-2, 1.2)
-    fit.limits['alpha_Hdbar'] = (-2, 1.2)
-    fit.limits['alpha_Hg'] = (-2, 1.2)
-
-    fit.limits['beta_HuV'] = (0, 15)
-    fit.limits['beta_Hubar'] = (0, 15)
-    fit.limits['beta_HdV'] = (0, 15)
-    fit.limits['beta_Hdbar'] = (0, 15)
-    fit.limits['beta_Hg'] = (0, 15)
-
-    fit.limits['alpha_HtuV'] = (-2, 1.2)
-    fit.limits['alpha_Htubar'] = (-2, 1.2)
-    fit.limits['alpha_HtdV'] = (-2, 1.2)
-    fit.limits['alpha_Htdbar'] = (-2, 1.2)
-    fit.limits['alpha_Htg'] = (-2, 1.2)
-
-    fit.limits['beta_HtuV'] = (0, 15)
-    fit.limits['beta_Htubar'] = (0, 15)
-    fit.limits['beta_HtdV'] = (0, 15)
-    fit.limits['beta_Htdbar'] = (0, 15)
-    fit.limits['beta_Htg'] = (0, 15)
-
-    fit.fixed['R_H_u_xi2'] = True
-    fit.fixed['R_H_d_xi2'] = True
-    fit.fixed['R_H_g_xi2'] = True
-    fit.fixed['R_E_xi2'] = True
-    fit.fixed['R_Ht_u_xi2'] = True
-    fit.fixed['R_Ht_d_xi2'] = True
-    fit.fixed['R_Ht_g_xi2'] = True
-    fit.fixed['R_Et_xi2'] = True
-
-    return fit
-"""
-
 if __name__ == '__main__':
     pool = Pool()
     time_start = time.time()
 
-    Paralst_Unp = [4.082358287371731, 0.282653247902509, 2.986296728891269, 2.245219965789688, 0.15817443100073975, 1.1226656940092044, 7.015680465291775, 0.15, 1.6485088059973931, 0.43707650021185973, 4.0292033842695965, 2.693820126890465, 0.1503481801083353, 1.1033691609885965, 4.924117368333008, 2.4045486998720857, 1.0962763560072974, 6.7997617963427945, 1.3477796928594774, 7.034012977961293, 0.030777128006481025, 3.239985268527132, 4.895681929465, -0.01873426627989557, 0.9913219685710168, 0.9612207320044269, 0.04065419752134227, 0.4851943916890669, 1.0, 1.0, 1.0, 1.0,1.0, 1.0]
-    Paralst_Pol = [8.87258856433098, -0.36802641256707447, 3.858315698259692, 2.3863585316454654, -64.10535156222909, -1.9728605729783493, 14.999998148129283, 0.15, -0.9649800367021223, 0.3771289120702077, 10.69167470127731, 5.31124587136953, -1.9639391095404515, -0.8715630091450424, 3.9646795840790165, 0.43929546121794, 0.5622418886554943, 1.5560088669306507, 1.1, 11.715536559045812, 0.7999999982353825, 7.64915565967481, 3.0001506763721797, -3.6726234893923766, 0.3336362059631376, 1.0, 1.0, 1.0, 1.0,1.0, 1.0]
+    Paralst_Unp = [4.082358227263017, 0.2826532409850464, 2.986296774454871, 2.24522004474676, 0.1581744331009367, 1.1226656924308713, 7.01568105954925, 0.15, 1.648508799738407, 0.43707650546653554, 4.029203340794728, 2.693820051283222, 0.15034818199932226, 1.1033691595111588, 4.924117307211938, 2.4045487530340344, 1.096276356427122, 6.799761847708548, 1.3477799228806449, 7.034131548023299, 0.03078510086766073, 3.239936633000125, 4.895474324977648, -0.018734206742570585, 0.9913219231731922, 0.9609913992535482, 0.04065428078355453, 0.4827966818490336, -0.6887126614047647, 1.754388907902855, 1.0, 3.0920570393131457, -20.5532307277746, 1.0]
+    Paralst_Pol = [8.87214166968074, -0.36801108477454814, 3.858231331505561, 2.386385056789591, -64.10777399322623, -1.9728819217568303, 14.999999897099432, 0.15, -0.9649319242476728, 0.3771338268758275, 10.69184501837682, 5.312411076938466, -1.9639111654039398, -0.8715803477407777, 3.9646342306695423, 0.4392983636860164, 0.5622561316389589, 1.5561712188847046, 1.1, 11.715536559045812, 0.7999999982353825, 7.64915565967481, 3.0001506763721797, -3.6726234893923766, -0.38623872147052424, -0.12712744219033034, 0.4447102091694132, 1.0, 5.822659498640951, 78.95104604737972, 1.0]
     
-
+    """
     fit_forward_H = forward_H_fit(Paralst_Unp)
     Paralst_Unp = np.array(fit_forward_H.values)
 
@@ -911,9 +806,10 @@ if __name__ == '__main__':
 
     fit_forward_Et = forward_Et_fit(Paralst_Pol)
     Paralst_Pol = np.array(fit_forward_Et.values)
+    """
 
     fit_off_forward = off_forward_fit(Paralst_Unp, Paralst_Pol)
-
+    
     Para_Unp_All = ParaManager_Unp(Paralst_Unp)
     Para_Pol_All = ParaManager_Pol(Paralst_Pol)
 
@@ -985,35 +881,4 @@ if __name__ == '__main__':
     GFF_data_Et_FLV = GFF_data_Et[(GFF_data_Et['flv'] == FLV) & (GFF_data_Et['j'] == J)]
     GFF_data_Et_FLV_pred = np.array(list(pool.map(partial(GFF_theo, Para = Para_Pol_All), np.array(GFF_data_Et_FLV))))
     plot_compare(GFF_data_Et_FLV['t'], GFF_data_Et_FLV['f'], GFF_data_Et_FLV['delta f'], GFF_data_Et_FLV_pred)
-    """
-    """
-
-    testGPD = GPDobserv(0.1,0,0,2,-1)
-    print(testGPD.GFFj0(0,'u',Para_Pol_All[1]))
-    
-    testGPD = GPDobserv(0.1,0,0,2,-1)
-    print(testGPD.GFFj0(0,'d',Para_Pol_All[1]))
-    """
-    """
-    fit_GUMP.migrad()
-    time_migrad = time.time() 
-    print('The migard runs for: ', round((time_migrad - time_start)/60, 1), 'minutes.')
-
-    fit_GUMP.hesse()
-    time_hesse = time.time()
-    print('The hesse runs for: ', round((time_hesse - time_migrad)/60, 1), 'minutes.')
-
-    pool.close()
-    pool.join()
-
-    ndof = len(PDF_data.index) + len(tPDF_data.index) + len(GFF_data.index)  - fit_GUMP.npar #+ len(DVCSxsec_data.index)
-
-    time_end = time.time() -time_start    
-    with open('Output.txt', 'w') as f:
-        print('Total running time:',round(time_end/60, 1), 'minutes. Total call of cost function:',Minuit_Counter,'(or', fit_GUMP.nfcn, 'from Minuit).\n', file=f)
-        print('The chi squared per d.o.f. is:', round(fit_GUMP.fval/ndof, 3),'.\n', file = f)
-        print('Below are the final output parameters from iMinuit:', file = f)
-        print(fit_GUMP.params, file = f)
-        print('Below are the output covariance from iMinuit:', file = f)
-        print(fit_GUMP.covariance, file = f)
     """
