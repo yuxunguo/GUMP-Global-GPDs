@@ -791,94 +791,22 @@ if __name__ == '__main__':
     pool = Pool()
     time_start = time.time()
 
-    Paralst_Unp = [4.082358227263017, 0.2826532409850464, 2.986296774454871, 2.24522004474676, 0.1581744331009367, 1.1226656924308713, 7.01568105954925, 0.15, 1.648508799738407, 0.43707650546653554, 4.029203340794728, 2.693820051283222, 0.15034818199932226, 1.1033691595111588, 4.924117307211938, 2.4045487530340344, 1.096276356427122, 6.799761847708548, 1.3477799228806449, 7.034131548023299, 0.03078510086766073, 3.239936633000125, 4.895474324977648, -0.018734206742570585, 0.9913219231731922, 0.9609913992535482, 0.04065428078355453, 0.4827966818490336, -0.6887126614047647, 1.754388907902855, 1.0, 3.0920570393131457, -20.5532307277746, 1.0]
-    Paralst_Pol = [8.87214166968074, -0.36801108477454814, 3.858231331505561, 2.386385056789591, -64.10777399322623, -1.9728819217568303, 14.999999897099432, 0.15, -0.9649319242476728, 0.3771338268758275, 10.69184501837682, 5.312411076938466, -1.9639111654039398, -0.8715803477407777, 3.9646342306695423, 0.4392983636860164, 0.5622561316389589, 1.5561712188847046, 1.1, 11.715536559045812, 0.7999999982353825, 7.64915565967481, 3.0001506763721797, -3.6726234893923766, -0.38623872147052424, -0.12712744219033034, 0.4447102091694132, 1.0, 5.822659498640951, 78.95104604737972, 1.0]
-    
-    """
-    fit_forward_H = forward_H_fit(Paralst_Unp)
-    Paralst_Unp = np.array(fit_forward_H.values)
+    Paralst_Unp     = [4.082358227263017, 0.2826532409850464, 2.986296774454871, 2.24522004474676, 0.1581744331009367, 1.1226656924308713, 7.01568105954925, 0.15, 1.648508799738407, 0.43707650546653554, 4.029203340794728, 2.693820051283222, 0.15034818199932226, 1.1033691595111588, 4.924117307211938, 2.4045487530340344, 1.096276356427122, 6.799761847708548, 1.3477799228806449, 7.034131548023299, 0.03078510086766073, 3.239936633000125, 4.895474324977648, -0.018734206742570585, 0.9913219231731922, 0.9609913992535482, 0.04065428078355453, 0.4827966818490336, -0.6887126614047647, 1.754388907902855, 1.0, 3.0920570393131457, -20.5532307277746, 1.0]
+    Paralst_Pol     = [8.87214166968074, -0.36801108477454814, 3.858231331505561, 2.386385056789591, -64.10777399322623, -1.9728819217568303, 14.999999897099432, 0.15, -0.9649319242476728, 0.3771338268758275, 10.69184501837682, 5.312411076938466, -1.9639111654039398, -0.8715803477407777, 3.9646342306695423, 0.4392983636860164, 0.5622561316389589, 1.5561712188847046, 1.1, 11.715536559045812, 0.7999999982353825, 7.64915565967481, 3.0001506763721797, -3.6726234893923766, -0.38623872147052424, -0.12712744219033034, 0.4447102091694132, 1.0, 5.822659498640951, 78.95104604737972, 1.0]
 
-    fit_forward_Ht = forward_Ht_fit(Paralst_Pol)
-    Paralst_Pol = np.array(fit_forward_Ht.values)
+    fit_forward_H   = forward_H_fit(Paralst_Unp)
+    Paralst_Unp     = np.array(fit_forward_H.values)
 
-    fit_forward_E = forward_E_fit(Paralst_Unp)
-    Paralst_Unp = np.array(fit_forward_E.values)
+    fit_forward_Ht  = forward_Ht_fit(Paralst_Pol)
+    Paralst_Pol     = np.array(fit_forward_Ht.values)
 
-    fit_forward_Et = forward_Et_fit(Paralst_Pol)
-    Paralst_Pol = np.array(fit_forward_Et.values)
-    """
+    fit_forward_E   = forward_E_fit(Paralst_Unp)
+    Paralst_Unp     = np.array(fit_forward_E.values)
+
+    fit_forward_Et  = forward_Et_fit(Paralst_Pol)
+    Paralst_Pol     = np.array(fit_forward_Et.values)
 
     fit_off_forward = off_forward_fit(Paralst_Unp, Paralst_Pol)
-    
-    Para_Unp_All = ParaManager_Unp(Paralst_Unp)
-    Para_Pol_All = ParaManager_Pol(Paralst_Pol)
 
-    """
-    FLV = 'g'
-    PDF_data_H_FLV = PDF_data_H[(PDF_data_H['flv'] == FLV)]
-    PDF_data_H_FLV_pred = np.array(list(pool.map(partial(PDF_theo, Para = Para_Unp_All), np.array(PDF_data_H_FLV))))
-    plot_compare(PDF_data_H_FLV['x'],PDF_data_H_FLV['f'], PDF_data_H_FLV['delta f'], PDF_data_H_FLV_pred)
-    """
-
-    """
-    FLV = 'NS'
-    J = 1
-    GFF_data_H_FLV = GFF_data_H[(GFF_data_H['flv'] == FLV) & (GFF_data_H['j'] == J)]
-    GFF_data_H_FLV_pred = np.array(list(pool.map(partial(GFF_theo, Para = Para_Unp_All), np.array(GFF_data_H_FLV))))
-    plot_compare(GFF_data_H_FLV['t'], GFF_data_H_FLV['f'], GFF_data_H_FLV['delta f'], GFF_data_H_FLV_pred)
-    """
-
-    """
-    FLV = 'NS'
-    T = -0.69
-    tPDF_data_H_FLV = tPDF_data_H[(tPDF_data_H['flv'] == FLV)& (tPDF_data_H['t'] == T)]
-    tPDF_data_H_FLV_pred = np.array(list(pool.map(partial(tPDF_theo, Para = Para_Unp_All), np.array(tPDF_data_H_FLV))))
-    plot_compare(tPDF_data_H_FLV['x'], tPDF_data_H_FLV['f'], tPDF_data_H_FLV['delta f'], tPDF_data_H_FLV_pred)
-    """
-
-    """
-    FLV = 'NS'
-    T = -0.39
-    tPDF_data_E_FLV = tPDF_data_E[(tPDF_data_E['flv'] == FLV)& (tPDF_data_E['t'] == T)]
-    tPDF_data_E_FLV_pred = np.array(list(pool.map(partial(tPDF_theo, Para = Para_Unp_All), np.array(tPDF_data_E_FLV))))
-    plot_compare(tPDF_data_E_FLV['x'],tPDF_data_E_FLV['f'], tPDF_data_E_FLV['delta f'], tPDF_data_E_FLV_pred)
-    """
-
-    """
-    FLV = 'NS'
-    J = 1
-    GFF_data_E_FLV = GFF_data_E[(GFF_data_E['flv'] == FLV) & (GFF_data_E['j'] == J)]
-    GFF_data_E_FLV_pred = np.array(list(pool.map(partial(GFF_theo, Para = Para_Unp_All), np.array(GFF_data_E_FLV))))
-    plot_compare(GFF_data_E_FLV['t'], GFF_data_E_FLV['f'], GFF_data_E_FLV['delta f'], GFF_data_E_FLV_pred)
-    """
-
-    """
-    FLV = 'u'
-    PDF_data_Ht_FLV = PDF_data_Ht[(PDF_data_Ht['flv'] == FLV)]
-    PDF_data_Ht_FLV_pred = np.array(list(pool.map(partial(PDF_theo, Para = Para_Pol_All), np.array(PDF_data_Ht_FLV))))
-    plot_compare(PDF_data_Ht_FLV['x'],PDF_data_Ht_FLV['f'], PDF_data_Ht_FLV['delta f'], PDF_data_Ht_FLV_pred)
-    """
-
-    """
-    FLV = 'NS'
-    T = -0.69
-    tPDF_data_Ht_FLV = tPDF_data_Ht[(tPDF_data_Ht['flv'] == FLV) & (tPDF_data_Ht['t'] == T)]
-    tPDF_data_Ht_FLV_pred = np.array(list(pool.map(partial(tPDF_theo, Para = Para_Pol_All), np.array(tPDF_data_Ht_FLV))))
-    plot_compare(tPDF_data_Ht_FLV['x'], tPDF_data_Ht_FLV['f'], tPDF_data_Ht_FLV['delta f'], tPDF_data_Ht_FLV_pred)
-    """
-
-    """
-    FLV = 'd'
-    J = 0
-    GFF_data_Ht_FLV = GFF_data_Ht[(GFF_data_Ht['flv'] == FLV) & (GFF_data_Ht['j'] == J)]
-    GFF_data_Ht_FLV_pred = np.array(list(pool.map(partial(GFF_theo, Para = Para_Pol_All), np.array(GFF_data_Ht_FLV))))
-    plot_compare(GFF_data_Ht_FLV['t'], GFF_data_Ht_FLV['f'], GFF_data_Ht_FLV['delta f'], GFF_data_Ht_FLV_pred)
-    """
-    
-    """
-    FLV = 'NS'
-    J = 1
-    GFF_data_Et_FLV = GFF_data_Et[(GFF_data_Et['flv'] == FLV) & (GFF_data_Et['j'] == J)]
-    GFF_data_Et_FLV_pred = np.array(list(pool.map(partial(GFF_theo, Para = Para_Pol_All), np.array(GFF_data_Et_FLV))))
-    plot_compare(GFF_data_Et_FLV['t'], GFF_data_Et_FLV['f'], GFF_data_Et_FLV['delta f'], GFF_data_Et_FLV_pred)
-    """
+    Para_Unp_All    = ParaManager_Unp(Paralst_Unp)
+    Para_Pol_All    = ParaManager_Pol(Paralst_Pol)

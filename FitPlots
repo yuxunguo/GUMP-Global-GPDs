@@ -1,0 +1,88 @@
+from Parameters import ParaManager_Unp, ParaManager_Pol
+from Observables import GPDobserv
+from DVCS_xsec import dsigma_TOT, M
+from multiprocessing import Pool
+from functools import partial
+import numpy as np
+import pandas as pd
+from  Plotting import plot_compare
+
+Minuit_Counter = 0
+
+Time_Counter = 1
+
+Q_threshold = 2
+
+xB_Cut = 0.5
+
+PDF_data = pd.read_csv('GUMPDATA/PDFdata.csv',       header = None, names = ['x', 't', 'Q', 'f', 'delta f', 'spe', 'flv'],        dtype = {'x': float, 't': float, 'Q': float, 'f': float, 'delta f': float,'spe': int, 'flv': str})
+PDF_data_H  = PDF_data[PDF_data['spe'] == 0]
+PDF_data_E  = PDF_data[PDF_data['spe'] == 1]
+PDF_data_Ht = PDF_data[PDF_data['spe'] == 2]
+PDF_data_Et = PDF_data[PDF_data['spe'] == 3]
+
+tPDF_data = pd.read_csv('GUMPDATA/tPDFdata.csv',     header = None, names = ['x', 't', 'Q', 'f', 'delta f', 'spe', 'flv'],        dtype = {'x': float, 't': float, 'Q': float, 'f': float, 'delta f': float,'spe': int, 'flv': str})
+tPDF_data_H  = tPDF_data[tPDF_data['spe'] == 0]
+tPDF_data_E  = tPDF_data[tPDF_data['spe'] == 1]
+tPDF_data_Ht = tPDF_data[tPDF_data['spe'] == 2]
+tPDF_data_Et = tPDF_data[tPDF_data['spe'] == 3]
+
+GFF_data = pd.read_csv('GUMPDATA/GFFdata.csv',       header = None, names = ['j', 't', 'Q', 'f', 'delta f', 'spe', 'flv'],        dtype = {'j': int, 't': float, 'Q': float, 'f': float, 'delta f': float,'spe': int, 'flv': str})
+GFF_data_H  = GFF_data[GFF_data['spe'] == 0]
+GFF_data_E  = GFF_data[GFF_data['spe'] == 1]
+GFF_data_Ht = GFF_data[GFF_data['spe'] == 2]
+GFF_data_Et = GFF_data[GFF_data['spe'] == 3]
+
+DVCSxsec_data = pd.read_csv('GUMPDATA/DVCSxsec.csv', header = None, names = ['y', 'xB', 't', 'Q', 'phi', 'f', 'delta f', 'pol'] , dtype = {'y': float, 'xB': float, 't': float, 'Q': float, 'phi': float, 'f': float, 'delta f': float, 'pol': str})
+DVCSxsec_data_invalid = DVCSxsec_data[DVCSxsec_data['t']*(DVCSxsec_data['xB']-1) - M ** 2 * DVCSxsec_data['xB'] ** 2 < 0]
+DVCSxsec_data = DVCSxsec_data[(DVCSxsec_data['Q'] > Q_threshold) & (DVCSxsec_data['xB'] < xB_Cut) & (DVCSxsec_data['t']*(DVCSxsec_data['xB']-1) - M ** 2 * DVCSxsec_data['xB'] ** 2 > 0)]
+xBtQlst = DVCSxsec_data.drop_duplicates(subset = ['xB', 't', 'Q'], keep = 'first')[['xB','t','Q']].values.tolist()
+DVCSxsec_group_data = list(map(lambda set: DVCSxsec_data[(DVCSxsec_data['xB'] == set[0]) & (DVCSxsec_data['t'] == set[1]) & ((DVCSxsec_data['Q'] == set[2]))], xBtQlst))
+
+def DVCSxsec_theo(DVCSxsec_input: np.array, CFF_input: np.array):
+    [y, xB, t, Q, phi, f, delta_f, pol] = DVCSxsec_input    
+    [HCFF, ECFF, HtCFF, EtCFF] = CFF_input
+    return dsigma_TOT(y, xB, t, Q, phi, pol, HCFF, ECFF, HtCFF, EtCFF)
+
+def CFF_theo(xB, t, Q, Para_Unp, Para_Pol):
+    x = 0
+    xi = (1/(2 - xB) - (2*t*(-1 + xB))/(Q**2*(-2 + xB)**2))*xB
+    H_E = GPDobserv(x, xi, t, Q, 1)
+    Ht_Et = GPDobserv(x, xi, t, Q, -1)
+    HCFF = H_E.CFF(Para_Unp[0])
+    ECFF = H_E.CFF(Para_Unp[1])
+    HtCFF = Ht_Et.CFF(Para_Pol[0])
+    EtCFF = Ht_Et.CFF(Para_Pol[1])
+    return [HCFF, ECFF, HtCFF, EtCFF]
+
+def DVCSxsec_cost_xBtQ_plt(DVCSxsec_data_xBtQ: np.array, Para_Unp, Para_Pol):
+    [xB, t, Q] = [DVCSxsec_data_xBtQ['xB'].iat[0], DVCSxsec_data_xBtQ['t'].iat[0], DVCSxsec_data_xBtQ['Q'].iat[0]]
+    [HCFF, ECFF, HtCFF, EtCFF] = CFF_theo(xB, t, Q, Para_Unp, Para_Pol)
+    DVCS_pred_xBtQ = np.array(list(map(partial(DVCSxsec_theo, CFF_input = [HCFF, ECFF, HtCFF, EtCFF]), np.array(DVCSxsec_data_xBtQ))))
+    return DVCS_pred_xBtQ, HCFF, ECFF, HtCFF, EtCFF
+
+Paralst_Unp     = [4.082358227263017, 0.2826532409850464, 2.986296774454871, 2.24522004474676, 0.1581744331009367, 1.1226656924308713, 7.01568105954925, 0.15, 1.648508799738407, 0.43707650546653554, 4.029203340794728, 2.693820051283222, 0.15034818199932226, 1.1033691595111588, 4.924117307211938, 2.4045487530340344, 1.096276356427122, 6.799761847708548, 1.3477799228806449, 7.034131548023299, 0.03078510086766073, 3.239936633000125, 4.895474324977648, -0.018734206742570585, 0.9913219231731922, 0.9609913992535482, 0.04065428078355453, 0.4827966818490336, -0.6887126614047647, 1.754388907902855, 1.0, 3.0920570393131457, -20.5532307277746, 1.0]
+Paralst_Pol     = [8.87214166968074, -0.36801108477454814, 3.858231331505561, 2.386385056789591, -64.10777399322623, -1.9728819217568303, 14.999999897099432, 0.15, -0.9649319242476728, 0.3771338268758275, 10.69184501837682, 5.312411076938466, -1.9639111654039398, -0.8715803477407777, 3.9646342306695423, 0.4392983636860164, 0.5622561316389589, 1.5561712188847046, 1.1, 11.715536559045812, 0.7999999982353825, 7.64915565967481, 3.0001506763721797, -3.6726234893923766, -0.38623872147052424, -0.12712744219033034, 0.4447102091694132, 1.0, 5.822659498640951, 78.95104604737972, 1.0]
+
+Para_Unp_All    = ParaManager_Unp(Paralst_Unp)
+Para_Pol_All    = ParaManager_Pol(Paralst_Pol)
+
+xsecgp0 = DVCSxsec_group_data[0]
+print(xsecgp0)
+xsecgp0UU = xsecgp0[xsecgp0['pol'] == 'UU']
+xsecgp0LU = xsecgp0[xsecgp0['pol'] == 'LU']
+xsecgp0UU_pred, xsecgp0HCFF, xsecgp0ECFF, xsecgp0HtCFF, xsecgp0EtCFF =DVCSxsec_cost_xBtQ_plt(xsecgp0UU, Para_Unp_All,Para_Pol_All )
+xsecgp0LU_pred, xsecgp0HCFF, xsecgp0ECFF, xsecgp0HtCFF, xsecgp0EtCFF =DVCSxsec_cost_xBtQ_plt(xsecgp0LU, Para_Unp_All,Para_Pol_All )
+print(xsecgp0HCFF, xsecgp0ECFF, xsecgp0HtCFF, xsecgp0EtCFF)
+plot_compare(xsecgp0UU['phi'], xsecgp0UU['f'], xsecgp0UU['delta f'], xsecgp0UU_pred)
+plot_compare(xsecgp0LU['phi'], xsecgp0LU['f'], xsecgp0LU['delta f'], xsecgp0LU_pred)
+    
+xsecgp1 = DVCSxsec_group_data[3]
+print(xsecgp1)
+xsecgp1UU = xsecgp1[xsecgp1['pol'] == 'UU']
+xsecgp1LU = xsecgp1[xsecgp1['pol'] == 'LU']
+xsecgp1UU_pred, xsecgp1HCFF, xsecgp1ECFF, xsecgp1HtCFF, xsecgp1EtCFF=DVCSxsec_cost_xBtQ_plt(xsecgp1UU, Para_Unp_All,Para_Pol_All )
+xsecgp1LU_pred, xsecgp1HCFF, xsecgp1ECFF, xsecgp1HtCFF, xsecgp1EtCFF=DVCSxsec_cost_xBtQ_plt(xsecgp1LU, Para_Unp_All,Para_Pol_All )
+print(xsecgp1HCFF, xsecgp1ECFF, xsecgp1HtCFF, xsecgp1EtCFF)
+plot_compare(xsecgp1UU['phi'], xsecgp1UU['f'], xsecgp1UU['delta f'], xsecgp1UU_pred)
+plot_compare(xsecgp1LU['phi'], xsecgp1LU['f'], xsecgp1LU['delta f'], xsecgp1LU_pred)
