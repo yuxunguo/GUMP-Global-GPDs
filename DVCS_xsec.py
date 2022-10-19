@@ -4,7 +4,7 @@ In this module we have the DVCS cross-section formulas with twist-two Compton fo
 The five fold cross-section dsigma over dxB dt dQ dphi dphi_S will be calculated.
 
 """
-
+from scipy.integrate import quad
 #The proton mass M = 0.938 GeV
 M = 0.938
 
@@ -25,6 +25,10 @@ from numpy import conjugate as Conjugate
 # The total cross-section is given by the sum of Bethe-Heitler (BH), pure DVCS and interference (INT) contributions
 def dsigma_TOT(y: float, xB: float, t: float, Q: float, phi: float, pol, HCFF: complex, ECFF: complex, HtCFF: complex, EtCFF: complex):
     return dsigma_BH(y, xB, t, Q, phi, pol) + dsigma_DVCS(y, xB, t, Q, phi, pol, HCFF, ECFF, HtCFF, EtCFF) + dsigma_INT(y, xB, t, Q, phi, pol, HCFF, ECFF, HtCFF, EtCFF)
+
+# The total cross-section integrated over phi
+def dsigma_TOT_Int_Phi(y: float, xB: float, t: float, Q: float, pol, HCFF: complex, ECFF: complex, HtCFF: complex, EtCFF: complex):
+    return quad(lambda phi: dsigma_TOT(y, xB, t, Q, phi, pol,HCFF, ECFF, HtCFF, EtCFF), 0, 2 * Pi)[0]
 
 # The Bethe-Heitler cross-section contribute to four polarization configurations
 def dsigma_BH(y: float, xB: float, t: float, Q: float, phi: float, pol):

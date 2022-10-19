@@ -120,7 +120,6 @@ def InvMellinWaveFuncG(s: complex, x: float) -> complex:
     
     return 0
 
-
 def ConfWaveFuncQ(j: complex, x: float, xi: float) -> complex:
     """ 
     Quark conformal wave function p_j(x,xi) check e.g. https://arxiv.org/pdf/hep-ph/0509204.pdf
@@ -190,10 +189,10 @@ class GPDobserv (object) :
         """
         t-denpendent PDF for given flavor (flv = "u", "d", "S", "NS" or "g")
         Args:
-            ParaAll = [Para_Forward, Para_xi2]
+            ParaAll = [Para_Forward, Para_xi2, Para_xi4]
             Para_Forward = [Para_Forward_uV, Para_Forward_ubar, Para_Forward_dV, Para_Forward_dbar, Para_Forward_g]
             Para_Forward_i: parameter sets for valence u quark (uV), sea u quark (ubar), valence d quark (dV), sea d quark (dbar) and gluon (g)
-            Para_xi2: only matter for non-zero xi (NOT needed here but the parameters are passed for consistency with GPDs)
+            Para_xi2, Para_xi4: only matter for non-zero xi (NOT needed here but the parameters are passed for consistency with GPDs)
 
         Returns:
             f(x,t) in for the given flavor
@@ -225,17 +224,19 @@ class GPDobserv (object) :
         """
         Charge averged CFF \mathcal{F}(xi, t) (\mathcal{F} = Q_u^2 F_u + Q_d^2 F_d)
         Args:
-            ParaAll = [Para_Forward, Para_xi2]
+            ParaAll = [Para_Forward, Para_xi2, Para_xi4]
 
             Para_Forward = [Para_Forward_uV, Para_Forward_ubar, Para_Forward_dV, Para_Forward_dbar, Para_Forward_g]
             Para_Forward_i: forward parameter sets for valence u quark (uV), sea u quark (ubar), valence d quark (dV), sea d quark (dbar) and gluon (g)
             Para_xi2 = [Para_xi2_uV, Para_xi2_ubar, Para_xi2_dV, Para_xi2_dbar, Para_xi2_g]
             Para_xi2_i: xi^2 parameter sets for valence u quark (uV), sea u quark (ubar), valence d quark (dV), sea d quark (dbar) and gluon (g)
+            Para_xi4 = [Para_xi4_uV, Para_xi4_ubar, Para_xi4_dV, Para_xi4_dbar, Para_xi4_g]
+            Para_xi4_i: xi^4 parameter sets for valence u quark (uV), sea u quark (ubar), valence d quark (dV), sea d quark (dbar) and gluon (g)
 
         Returns:
             CFF \mathcal{F}(xi, t) = Q_u^2 F_u + Q_d^2 F_d
         """
-        [Para_Forward, Para_xi2] = ParaAll
+        [Para_Forward, Para_xi2, Para_xi4] = ParaAll
 
         # The contour for Mellin-Barnes integral in terms of j not n.
         reJ = Mellin_Barnes_intercept 
@@ -244,8 +245,9 @@ class GPDobserv (object) :
         def Integrand_Mellin_Barnes_CFF(j: complex):
             ConfFlav = np.array( list(map(lambda paraset: Moment_Sum(j, self.t, paraset), Para_Forward)) )
             ConfFlav_xi2 = np.array( list(map(lambda paraset: Moment_Sum(j, self.t, paraset), Para_xi2)) )
+            ConfFlav_xi4 = np.array( list(map(lambda paraset: Moment_Sum(j, self.t, paraset), Para_xi4)) )
 
-            EvoConf_Wilson = (CWilson(j) * Moment_Evo(j, NFEFF, self.p, self.Q, ConfFlav) + CWilson(j+2) * Moment_Evo(j+2, NFEFF, self.p, self.Q, ConfFlav_xi2))
+            EvoConf_Wilson = (CWilson(j) * Moment_Evo(j, NFEFF, self.p, self.Q, ConfFlav) + CWilson(j+2) * Moment_Evo(j+2, NFEFF, self.p, self.Q, ConfFlav_xi2) + CWilson(j+4) * Moment_Evo(j+4, NFEFF, self.p, self.Q, ConfFlav_xi4))
 
             return np.einsum('j,j', CFF_trans, EvoConf_Wilson)
 
@@ -259,17 +261,18 @@ class GPDobserv (object) :
         """
         GPD F(x, xi, t) in flavor space (uV, ubar, dV, dbar, gluon)
         Args:
-            ParaAll = [Para_Forward, Para_xi2]
-
+            ParaAll = [Para_Forward, Para_xi2, Para_xi4]
             Para_Forward = [Para_Forward_uV, Para_Forward_ubar, Para_Forward_dV, Para_Forward_dbar, Para_Forward_g]
             Para_Forward_i: forward parameter sets for valence u quark (uV), sea u quark (ubar), valence d quark (dV), sea d quark (dbar) and gluon (g)
             Para_xi2 = [Para_xi2_uV, Para_xi2_ubar, Para_xi2_dV, Para_xi2_dbar, Para_xi2_g]
             Para_xi2_i: xi^2 parameter sets for valence u quark (uV), sea u quark (ubar), valence d quark (dV), sea d quark (dbar) and gluon (g)
+            Para_xi4 = [Para_xi4_uV, Para_xi4_ubar, Para_xi4_dV, Para_xi4_dbar, Para_xi4_g]
+            Para_xi4_i: xi^4 parameter sets for valence u quark (uV), sea u quark (ubar), valence d quark (dV), sea d quark (dbar) and gluon (g)
 
         Returns:
-            f(x,xi,t) in (uV, ubar, dV, dbar, gluon) space
+            f(x,xi,t) for given flavor flv
         """
-        [Para_Forward, Para_xi2] = ParaAll
+        [Para_Forward, Para_xi2, Para_xi4] = ParaAll
 
         # The contour for Mellin-Barnes integral in terms of j not n.        
         reJ = Mellin_Barnes_intercept 
@@ -286,8 +289,9 @@ class GPDobserv (object) :
 
             ConfFlav = np.array( list(map(lambda paraset: Moment_Sum(j, self.t, paraset), Para_Forward)) )
             ConfFlav_xi2 = np.array( list(map(lambda paraset: Moment_Sum(j, self.t, paraset), Para_xi2)) )
-             
-            return Flv_Intp(np.einsum('...j,j', ConfWaveConv(j), Moment_Evo(j, NFEFF, self.p, self.Q, ConfFlav))  +  self.xi ** 2 * np.einsum('...j,j', ConfWaveConv(j+2), Moment_Evo(j+2, NFEFF, self.p, self.Q, ConfFlav_xi2)), flv)
+            ConfFlav_xi4 = np.array( list(map(lambda paraset: Moment_Sum(j, self.t, paraset), Para_xi4)) )
+
+            return Flv_Intp(np.einsum('...j,j', ConfWaveConv(j), Moment_Evo(j, NFEFF, self.p, self.Q, ConfFlav))  +  self.xi ** 2 * np.einsum('...j,j', ConfWaveConv(j+2), Moment_Evo(j+2, NFEFF, self.p, self.Q, ConfFlav_xi2)) + self.xi ** 4 * np.einsum('...j,j', ConfWaveConv(j+4), Moment_Evo(j+4, NFEFF, self.p, self.Q, ConfFlav_xi4)), flv)
         
         # Adding a j = 0 term because the contour do not enclose the j = 0 pole which should be the 0th conformal moment.
         # We cannot change the Mellin_Barnes_intercept > 0 to enclose the j = 0 pole only, due to the pomeron pole around j = 0.
@@ -299,8 +303,9 @@ class GPDobserv (object) :
                 
                 ConfFlav = np.array( list(map(lambda paraset: Moment_Sum(0, self.t, paraset), Para_Forward)) )
                 ConfFlav_xi2 = np.array( list(map(lambda paraset: Moment_Sum(0, self.t, paraset), Para_xi2)) )
+                ConfFlav_xi4 = np.array( list(map(lambda paraset: Moment_Sum(0, self.t, paraset), Para_xi4)) )
 
-                return Flv_Intp(np.einsum('...j,j', ConfWaveConv(0),ConfFlav) +  self.xi ** 2 * np.einsum('...j,j', ConfWaveConv(2), Moment_Evo(2, NFEFF, self.p, self.Q, ConfFlav_xi2)), flv)
+                return Flv_Intp(np.einsum('...j,j', ConfWaveConv(0),ConfFlav) +  self.xi ** 2 * np.einsum('...j,j', ConfWaveConv(2), Moment_Evo(2, NFEFF, self.p, self.Q, ConfFlav_xi2)) + self.xi ** 4 * np.einsum('...j,j', ConfWaveConv(4), Moment_Evo(4, NFEFF, self.p, self.Q, ConfFlav_xi4)), flv)
 
         return np.real(GPD0()) + quad(lambda imJ : np.real(Integrand_Mellin_Barnes(reJ + 1j* imJ) / (2 * np.sin((reJ + 1j * imJ+1) * np.pi)) ), - Max_imJ, + Max_imJ, epsrel = Prec_Goal)[0]
 
