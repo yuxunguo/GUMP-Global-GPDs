@@ -1,13 +1,12 @@
 from Parameters import ParaManager_Unp, ParaManager_Pol
 from Observables import GPDobserv
-from DVCS_xsec import dsigma_TOT,dsigma_TOT_Int_Phi, M
+from DVCS_xsec import dsigma_TOT, dsigma_DVCS_HERA, M
 from multiprocessing import Pool
 from functools import partial
 from iminuit import Minuit
 import numpy as np
 import pandas as pd
 import time
-from  Plotting import plot_compare
 
 Minuit_Counter = 0
 
@@ -41,7 +40,7 @@ DVCSxsec_data = DVCSxsec_data[(DVCSxsec_data['Q'] > Q_threshold) & (DVCSxsec_dat
 xBtQlst = DVCSxsec_data.drop_duplicates(subset = ['xB', 't', 'Q'], keep = 'first')[['xB','t','Q']].values.tolist()
 DVCSxsec_group_data = list(map(lambda set: DVCSxsec_data[(DVCSxsec_data['xB'] == set[0]) & (DVCSxsec_data['t'] == set[1]) & ((DVCSxsec_data['Q'] == set[2]))], xBtQlst))
 
-DVCS_Int_Phi_data = pd.read_csv('GUMPDATA/DVCSxsec_IntPhi.csv', header = None, names = ['y', 'xB', 't', 'Q', 'f', 'delta f', 'pol'] , dtype = {'y': float, 'xB': float, 't': float, 'Q': float, 'f': float, 'delta f': float, 'pol': str})
+DVCS_HERA_data = pd.read_csv('GUMPDATA/DVCSxsec_HERA.csv', header = None, names = ['y', 'xB', 't', 'Q', 'f', 'delta f', 'pol'] , dtype = {'y': float, 'xB': float, 't': float, 'Q': float, 'f': float, 'delta f': float, 'pol': str})
 
 def PDF_theo(PDF_input: np.array, Para: np.array):
     [x, t, Q, f, delta_f, spe, flv] = PDF_input
@@ -105,12 +104,10 @@ def DVCSxsec_cost_xBtQ(DVCSxsec_data_xBtQ: np.array, Para_Unp, Para_Pol):
     DVCS_pred_xBtQ = np.array(list(map(partial(DVCSxsec_theo, CFF_input = [HCFF, ECFF, HtCFF, EtCFF]), np.array(DVCSxsec_data_xBtQ))))
     return np.sum(((DVCS_pred_xBtQ - DVCSxsec_data_xBtQ['f'])/ DVCSxsec_data_xBtQ['delta f']) ** 2 )
 
-def DVCSxsec_cost_Int_Phi(DVCSxsec_data_Int_Phi: np.array, Para_Unp, Para_Pol):
-    [y, xB, t, Q, f, delta_f, pol]  = DVCSxsec_data_Int_Phi
-
+def DVCSxsec_cost_HERA(DVCSxsec_data_HERA: np.array, Para_Unp, Para_Pol):
+    [y, xB, t, Q, f, delta_f, pol]  = DVCSxsec_data_HERA
     [HCFF, ECFF, HtCFF, EtCFF] = CFF_theo(xB, t, Q, Para_Unp, Para_Pol)
-
-    return dsigma_TOT_Int_Phi(y, xB, t, Q, pol, HCFF, ECFF, HtCFF, EtCFF)
+    return dsigma_DVCS_HERA(y, xB, t, Q, pol, HCFF, ECFF, HtCFF, EtCFF)
 
 def cost_forward_H(Norm_HuV,    alpha_HuV,    beta_HuV,    alphap_HuV, 
                    Norm_Hubar,  alpha_Hubar,  beta_Hubar,  alphap_Hqbar,
@@ -729,10 +726,10 @@ def cost_off_forward(Norm_HuV,    alpha_HuV,    beta_HuV,    alphap_HuV,
     cost_DVCS_xBtQ = np.array(list(pool.map(partial(DVCSxsec_cost_xBtQ, Para_Unp = Para_Unp_all, Para_Pol = Para_Pol_all), DVCSxsec_group_data)))
     cost_DVCSxsec = np.sum(cost_DVCS_xBtQ)
 
-    DVCS_Int_Phi_pred = np.array(list(pool.map(partial(DVCSxsec_cost_Int_Phi, Para_Unp = Para_Unp_all, Para_Pol = Para_Pol_all), np.array(DVCS_Int_Phi_data))))
-    cost_DVCS_Int_Phi = np.sum(((DVCS_Int_Phi_pred - DVCS_Int_Phi_data['f'])/ DVCS_Int_Phi_data['delta f']) ** 2 )
+    DVCS_HERA_pred = np.array(list(pool.map(partial(DVCSxsec_cost_HERA, Para_Unp = Para_Unp_all, Para_Pol = Para_Pol_all), np.array(DVCS_HERA_data))))
+    cost_DVCS_HERA = np.sum(((DVCS_HERA_pred - DVCS_HERA_data['f'])/ DVCS_HERA_data['delta f']) ** 2 )
 
-    return  cost_DVCSxsec + cost_DVCS_Int_Phi
+    return  cost_DVCSxsec + cost_DVCS_HERA
 
 def off_forward_fit(Paralst_Unp, Paralst_Pol):
 
@@ -857,6 +854,16 @@ def off_forward_fit(Paralst_Unp, Paralst_Pol):
     fit_off_forward.fixed['R_Htg_xi4'] = True
     fit_off_forward.fixed['R_Etg_xi4'] = True
 
+    fit_off_forward.fixed['R_Hu_xi4'] = True
+    fit_off_forward.fixed['R_Hd_xi4'] = True 
+    fit_off_forward.fixed['R_Eu_xi4'] = True
+    fit_off_forward.fixed['R_Ed_xi4'] = True
+
+    fit_off_forward.fixed['R_Htu_xi4'] = True
+    fit_off_forward.fixed['R_Htd_xi4'] = True 
+    fit_off_forward.fixed['R_Etu_xi4'] = True
+    fit_off_forward.fixed['R_Etd_xi4'] = True
+
     global Minuit_Counter, Time_Counter, time_start
     Minuit_Counter = 0
     Time_Counter = 1
@@ -865,7 +872,7 @@ def off_forward_fit(Paralst_Unp, Paralst_Pol):
     fit_off_forward.migrad()
     fit_off_forward.hesse()
 
-    ndof_off_forward = len(DVCSxsec_data.index) + len(DVCS_Int_Phi_data.index)  - fit_off_forward.nfit 
+    ndof_off_forward = len(DVCSxsec_data.index) + len(DVCS_HERA_data.index)  - fit_off_forward.nfit 
 
     time_end = time.time() -time_start
 
@@ -883,8 +890,8 @@ if __name__ == '__main__':
     pool = Pool()
     time_start = time.time()
 
-    Paralst_Unp     = [4.916737283339119, 0.2160974228785908, 3.225842430886436, 2.3297704177442204, 0.16264613639915726, 1.1368777940255592, 6.801675157242863, 0.15, 3.401131269095196, 0.18167877613353722, 4.431135742224296, 3.5552156017799676, 0.25661060619652576, 1.04567781923165, 6.797731062114649, 2.8570473466919086, 1.0528415889107445, 7.38601497232236, 1.366803669541298, 8.899224850940271, -0.06027913251281358, 3.4141024269659477, 5.355145356556698, -0.023544525609215043, 0.9891188937554514, 0.9633204582657556, 0.05097991222901859, 0.32051181357680714, -3.086335021428786, -0.05875602545191977, 1.0, 5.613102933244834, -103.13553037000695, 1.0, 0.8017450125046932, 0.2899196384489254, 1.0, -1.0027437062000857, 23.140681037860155, 1.0]
-    Paralst_Pol     = [4.519704056562077, -0.24572938431514468, 3.033750037483243, 2.6225066563288046, 0.07486546721227119, 0.5200338257276549, 4.322052364475874, 0.15, -0.7129668007282417, 0.21129814574055095, 3.2387797856158285, 4.446990039917334, -0.05548414616872854, 0.6154641449842302, 2.0760565209718056, 0.24171501221366298, 0.6324937565273858, 2.7052231790791184, 1.1, 8.801498457626478, 0.7999999567299216, 7.29932487997744, 1.9996290487804516, -3.4999140709213306, -3.282476962836322, 2.114921925064702, -47.42714275193791, 1.0, 7.8188159302159965, 3.1526146373001955, 1.0, -0.7664258109169737, 13.489236806711359, 1.0, -0.7880864380537768, 16.91942035876352, 1.0]
+    Paralst_Unp     = [4.916737283339119, 0.2160974228785908, 3.225842430886436, 2.3297704177442204, 0.16264613639915726, 1.1368777940255592, 6.801675157242863, 0.15, 3.401131269095196, 0.18167877613353722, 4.431135742224296, 3.5552156017799676, 0.25661060619652576, 1.04567781923165, 6.797731062114649, 2.8570473466919086, 1.0528415889107445, 7.38601497232236, 1.366803669541298, 8.899224850940271, -0.06027913251281358, 3.4141024269659477, 5.355145356556698, -0.023544525609215043, 0.9891188937554514, 0.9633204582657556, 0.05097991222901859, 0.32051181357680714, -3.086335021428786, -0.05875602545191977, 1.0, 5.613102933244834, -103.13553037000695, 1.0, 0,0,0,0,0,0]
+    Paralst_Pol     = [4.519704056562077, -0.24572938431514468, 3.033750037483243, 2.6225066563288046, 0.07486546721227119, 0.5200338257276549, 4.322052364475874, 0.15, -0.7129668007282417, 0.21129814574055095, 3.2387797856158285, 4.446990039917334, -0.05548414616872854, 0.6154641449842302, 2.0760565209718056, 0.24171501221366298, 0.6324937565273858, 2.7052231790791184, 1.1, 8.801498457626478, 0.7999999567299216, 7.29932487997744, 1.9996290487804516, -3.4999140709213306, -3.282476962836322, 2.114921925064702, -47.42714275193791, 1.0, 7.8188159302159965, 3.1526146373001955, 1.0,0,0,0,0,0,0]
 
     fit_forward_H   = forward_H_fit(Paralst_Unp)
     Paralst_Unp     = np.array(fit_forward_H.values)

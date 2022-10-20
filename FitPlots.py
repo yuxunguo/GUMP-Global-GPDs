@@ -7,7 +7,7 @@ import numpy as np
 import pandas as pd
 import csv
 from  Plotting import plot_compare
-from Minimizer import Q_threshold, xB_Cut
+from Minimizer import Q_threshold, xB_Cut, DVCSxsec_theo, CFF_theo
 
 PDF_data = pd.read_csv('GUMPDATA/PDFdata.csv',       header = None, names = ['x', 't', 'Q', 'f', 'delta f', 'spe', 'flv'],        dtype = {'x': float, 't': float, 'Q': float, 'f': float, 'delta f': float,'spe': int, 'flv': str})
 PDF_data_H  = PDF_data[PDF_data['spe'] == 0]
@@ -32,22 +32,6 @@ DVCSxsec_data_invalid = DVCSxsec_data[DVCSxsec_data['t']*(DVCSxsec_data['xB']-1)
 DVCSxsec_data = DVCSxsec_data[(DVCSxsec_data['Q'] > Q_threshold) & (DVCSxsec_data['xB'] < xB_Cut) & (DVCSxsec_data['t']*(DVCSxsec_data['xB']-1) - M ** 2 * DVCSxsec_data['xB'] ** 2 > 0)]
 xBtQlst = DVCSxsec_data.drop_duplicates(subset = ['xB', 't', 'Q'], keep = 'first')[['xB','t','Q']].values.tolist()
 DVCSxsec_group_data = list(map(lambda set: DVCSxsec_data[(DVCSxsec_data['xB'] == set[0]) & (DVCSxsec_data['t'] == set[1]) & ((DVCSxsec_data['Q'] == set[2]))], xBtQlst))
-
-def DVCSxsec_theo(DVCSxsec_input: np.array, CFF_input: np.array):
-    [y, xB, t, Q, phi, f, delta_f, pol] = DVCSxsec_input    
-    [HCFF, ECFF, HtCFF, EtCFF] = CFF_input
-    return dsigma_TOT(y, xB, t, Q, phi, pol, HCFF, ECFF, HtCFF, EtCFF)
-
-def CFF_theo(xB, t, Q, Para_Unp, Para_Pol):
-    x = 0
-    xi = (1/(2 - xB) - (2*t*(-1 + xB))/(Q**2*(-2 + xB)**2))*xB
-    H_E = GPDobserv(x, xi, t, Q, 1)
-    Ht_Et = GPDobserv(x, xi, t, Q, -1)
-    HCFF = H_E.CFF(Para_Unp[0])
-    ECFF = H_E.CFF(Para_Unp[1])
-    HtCFF = Ht_Et.CFF(Para_Pol[0])
-    EtCFF = Ht_Et.CFF(Para_Pol[1])
-    return [HCFF, ECFF, HtCFF, EtCFF]
 
 def DVCSxsec_cost_xBtQ_plt(DVCSxsec_data_xBtQ: np.array, Para_Unp, Para_Pol):
     [xB, t, Q] = [DVCSxsec_data_xBtQ['xB'].iat[0], DVCSxsec_data_xBtQ['t'].iat[0], DVCSxsec_data_xBtQ['Q'].iat[0]]
