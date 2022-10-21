@@ -28,7 +28,7 @@ def dsigma_TOT(y: float, xB: float, t: float, Q: float, phi: float, pol, HCFF: c
 
 # The total cross-section integrated over phi
 def dsigma_DVCS_HERA(y: float, xB: float, t: float, Q: float, pol, HCFF: complex, ECFF: complex, HtCFF: complex, EtCFF: complex):
-    Conv = alphaEM * (1- y + 1/2 * y ** 2)/(Pi * y * Q ** 2)
+    Conv = alphaEM * (1- y + 1/2 * y ** 2)/(Pi * y * Q ** 2) * y / xB
     return 1/Conv * quad(lambda phi: dsigma_DVCS(y, xB, t, Q, phi, pol,HCFF, ECFF, HtCFF, EtCFF), 0, 2 * Pi)[0]
 
 # The Bethe-Heitler cross-section contribute to four polarization configurations
