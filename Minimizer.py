@@ -119,7 +119,7 @@ def cost_forward_H(Norm_HuV,    alpha_HuV,    beta_HuV,    alphap_HuV,
                    R_E_Sea,     R_Hu_xi2,     R_Hd_xi2,    R_Hg_xi2,
                    R_Eu_xi2,    R_Ed_xi2,     R_Eg_xi2,
                    R_Hu_xi4,    R_Hd_xi4,     R_Hg_xi4,
-                   R_Eu_xi4,    R_Ed_xi4,     R_Eg_xi4):
+                   R_Eu_xi4,    R_Ed_xi4,     R_Eg_xi4,    bexp_HSea):
 
     global Minuit_Counter, Time_Counter
 
@@ -141,7 +141,7 @@ def cost_forward_H(Norm_HuV,    alpha_HuV,    beta_HuV,    alphap_HuV,
                R_E_Sea,     R_Hu_xi2,     R_Hd_xi2,    R_Hg_xi2,
                R_Eu_xi2,    R_Ed_xi2,     R_Eg_xi2,
                R_Hu_xi4,    R_Hd_xi4,     R_Hg_xi4,
-               R_Eu_xi4,    R_Ed_xi4,     R_Eg_xi4]
+               R_Eu_xi4,    R_Ed_xi4,     R_Eg_xi4,    bexp_HSea]
     
     Para_all = ParaManager_Unp(Paralst)
     PDF_H_pred = np.array(list(pool.map(partial(PDF_theo, Para = Para_all), np.array(PDF_data_H))))
@@ -165,7 +165,7 @@ def cost_forward_E(Norm_HuV,    alpha_HuV,    beta_HuV,    alphap_HuV,
                    R_E_Sea,     R_Hu_xi2,     R_Hd_xi2,    R_Hg_xi2,
                    R_Eu_xi2,    R_Ed_xi2,     R_Eg_xi2,
                    R_Hu_xi4,    R_Hd_xi4,     R_Hg_xi4,
-                   R_Eu_xi4,    R_Ed_xi4,     R_Eg_xi4):
+                   R_Eu_xi4,    R_Ed_xi4,     R_Eg_xi4,    bexp_HSea):
 
     global Minuit_Counter, Time_Counter
 
@@ -187,7 +187,7 @@ def cost_forward_E(Norm_HuV,    alpha_HuV,    beta_HuV,    alphap_HuV,
                R_E_Sea,     R_Hu_xi2,     R_Hd_xi2,    R_Hg_xi2,
                R_Eu_xi2,    R_Ed_xi2,     R_Eg_xi2,
                R_Hu_xi4,    R_Hd_xi4,     R_Hg_xi4,
-               R_Eu_xi4,    R_Ed_xi4,     R_Eg_xi4]
+               R_Eu_xi4,    R_Ed_xi4,     R_Eg_xi4,    bexp_HSea]
     
     Para_all = ParaManager_Unp(Paralst)
     PDF_E_pred = np.array(list(pool.map(partial(PDF_theo, Para = Para_all), np.array(PDF_data_E))))
@@ -213,7 +213,7 @@ def forward_H_fit(Paralst_Unp):
      R_E_Sea_Init,     R_Hu_xi2_Init,     R_Hd_xi2_Init,    R_Hg_xi2_Init,
      R_Eu_xi2_Init,    R_Ed_xi2_Init,     R_Eg_xi2_Init,
      R_Hu_xi4_Init,    R_Hd_xi4_Init,     R_Hg_xi4_Init,
-     R_Eu_xi4_Init,    R_Ed_xi4_Init,     R_Eg_xi4_Init] = Paralst_Unp
+     R_Eu_xi4_Init,    R_Ed_xi4_Init,     R_Eg_xi4_Init,    bexp_HSea_Init] = Paralst_Unp
 
     fit_forw_H = Minuit(cost_forward_H, Norm_HuV = Norm_HuV_Init,     alpha_HuV = alpha_HuV_Init,      beta_HuV = beta_HuV_Init,     alphap_HuV = alphap_HuV_Init, 
                                         Norm_Hubar = Norm_Hubar_Init, alpha_Hubar = alpha_Hubar_Init,  beta_Hubar = beta_Hubar_Init, alphap_Hqbar = alphap_Hqbar_Init,
@@ -225,7 +225,7 @@ def forward_H_fit(Paralst_Unp):
                                         R_E_Sea = R_E_Sea_Init,       R_Hu_xi2 = R_Hu_xi2_Init,        R_Hd_xi2 = R_Hd_xi2_Init,     R_Hg_xi2 = R_Hg_xi2_Init,
                                         R_Eu_xi2 = R_Eu_xi2_Init,     R_Ed_xi2 = R_Ed_xi2_Init,        R_Eg_xi2 = R_Eg_xi2_Init,
                                         R_Hu_xi4 = R_Hu_xi4_Init,     R_Hd_xi4 = R_Hd_xi4_Init,        R_Hg_xi4 = R_Hg_xi4_Init,
-                                        R_Eu_xi4 = R_Eu_xi4_Init,     R_Ed_xi4 = R_Ed_xi4_Init,        R_Eg_xi4 = R_Eg_xi4_Init)
+                                        R_Eu_xi4 = R_Eu_xi4_Init,     R_Ed_xi4 = R_Ed_xi4_Init,        R_Eg_xi4 = R_Eg_xi4_Init,     bexp_HSea = bexp_HSea_Init)
     fit_forw_H.errordef = 1
 
     fit_forw_H.limits['alpha_HuV'] = (-2, 1.2)
@@ -271,6 +271,8 @@ def forward_H_fit(Paralst_Unp):
     fit_forw_H.fixed['R_Ed_xi4'] = True
     fit_forw_H.fixed['R_Eg_xi4'] = True
 
+    fit_forw_H.fixed['bexp_HSea_Init'] = True
+
     global Minuit_Counter, Time_Counter, time_start
     Minuit_Counter = 0
     Time_Counter = 1
@@ -305,7 +307,7 @@ def forward_E_fit(Paralst_Unp):
      R_E_Sea_Init,     R_Hu_xi2_Init,     R_Hd_xi2_Init,    R_Hg_xi2_Init,
      R_Eu_xi2_Init,    R_Ed_xi2_Init,     R_Eg_xi2_Init,
      R_Hu_xi4_Init,    R_Hd_xi4_Init,     R_Hg_xi4_Init,
-     R_Eu_xi4_Init,    R_Ed_xi4_Init,     R_Eg_xi4_Init] = Paralst_Unp
+     R_Eu_xi4_Init,    R_Ed_xi4_Init,     R_Eg_xi4_Init,    bexp_HSea_Init] = Paralst_Unp
 
     fit_forw_E = Minuit(cost_forward_E, Norm_HuV = Norm_HuV_Init,     alpha_HuV = alpha_HuV_Init,      beta_HuV = beta_HuV_Init,     alphap_HuV = alphap_HuV_Init, 
                                         Norm_Hubar = Norm_Hubar_Init, alpha_Hubar = alpha_Hubar_Init,  beta_Hubar = beta_Hubar_Init, alphap_Hqbar = alphap_Hqbar_Init,
@@ -317,7 +319,7 @@ def forward_E_fit(Paralst_Unp):
                                         R_E_Sea = R_E_Sea_Init,       R_Hu_xi2 = R_Hu_xi2_Init,        R_Hd_xi2 = R_Hd_xi2_Init,     R_Hg_xi2 = R_Hg_xi2_Init,
                                         R_Eu_xi2 = R_Eu_xi2_Init,     R_Ed_xi2 = R_Ed_xi2_Init,        R_Eg_xi2 = R_Eg_xi2_Init,
                                         R_Hu_xi4 = R_Hu_xi4_Init,     R_Hd_xi4 = R_Hd_xi4_Init,        R_Hg_xi4 = R_Hg_xi4_Init,
-                                        R_Eu_xi4 = R_Eu_xi4_Init,     R_Ed_xi4 = R_Ed_xi4_Init,        R_Eg_xi4 = R_Eg_xi4_Init)
+                                        R_Eu_xi4 = R_Eu_xi4_Init,     R_Ed_xi4 = R_Ed_xi4_Init,        R_Eg_xi4 = R_Eg_xi4_Init,     bexp_HSea = bexp_HSea_Init)
     fit_forw_E.errordef = 1
 
     fit_forw_E.limits['alpha_HuV'] = (-2, 1.2)
@@ -374,6 +376,8 @@ def forward_E_fit(Paralst_Unp):
     fit_forw_E.fixed['R_Ed_xi4'] = True
     fit_forw_E.fixed['R_Eg_xi4'] = True
 
+    fit_forw_E.fixed['bexp_HSea_Init'] = True
+
     global Minuit_Counter, Time_Counter, time_start
     Minuit_Counter = 0
     Time_Counter = 1
@@ -405,7 +409,7 @@ def cost_forward_Ht(Norm_HtuV,   alpha_HtuV,   beta_HtuV,   alphap_HtuV,
                     Norm_EtdV,   R_Et_Sea,     R_Htu_xi2,   R_Htd_xi2,    R_Htg_xi2,
                     R_Etu_xi2,   R_Etd_xi2,    R_Etg_xi2,
                     R_Htu_xi4,   R_Htd_xi4,    R_Htg_xi4,
-                    R_Etu_xi4,   R_Etd_xi4,    R_Etg_xi4):
+                    R_Etu_xi4,   R_Etd_xi4,    R_Etg_xi4,   bexp_HtSea):
 
     global Minuit_Counter, Time_Counter
 
@@ -426,7 +430,7 @@ def cost_forward_Ht(Norm_HtuV,   alpha_HtuV,   beta_HtuV,   alphap_HtuV,
                Norm_EtdV,   R_Et_Sea,     R_Htu_xi2,   R_Htd_xi2,    R_Htg_xi2,
                R_Etu_xi2,   R_Etd_xi2,    R_Etg_xi2,
                R_Htu_xi4,   R_Htd_xi4,    R_Htg_xi4,
-               R_Etu_xi4,   R_Etd_xi4,    R_Etg_xi4]
+               R_Etu_xi4,   R_Etd_xi4,    R_Etg_xi4,   bexp_HtSea]
     
     Para_all = ParaManager_Pol(Paralst)
     PDF_Ht_pred = np.array(list(pool.map(partial(PDF_theo, Para = Para_all), np.array(PDF_data_Ht))))
@@ -449,7 +453,7 @@ def cost_forward_Et(Norm_HtuV,   alpha_HtuV,   beta_HtuV,   alphap_HtuV,
                     Norm_EtdV,   R_Et_Sea,     R_Htu_xi2,   R_Htd_xi2,    R_Htg_xi2,
                     R_Etu_xi2,   R_Etd_xi2,    R_Etg_xi2,
                     R_Htu_xi4,   R_Htd_xi4,    R_Htg_xi4,
-                    R_Etu_xi4,   R_Etd_xi4,    R_Etg_xi4):
+                    R_Etu_xi4,   R_Etd_xi4,    R_Etg_xi4,   bexp_HtSea):
 
     global Minuit_Counter, Time_Counter
 
@@ -470,7 +474,7 @@ def cost_forward_Et(Norm_HtuV,   alpha_HtuV,   beta_HtuV,   alphap_HtuV,
                Norm_EtdV,   R_Et_Sea,     R_Htu_xi2,   R_Htd_xi2,    R_Htg_xi2,
                R_Etu_xi2,   R_Etd_xi2,    R_Etg_xi2,
                R_Htu_xi4,   R_Htd_xi4,    R_Htg_xi4,
-               R_Etu_xi4,   R_Etd_xi4,    R_Etg_xi4]
+               R_Etu_xi4,   R_Etd_xi4,    R_Etg_xi4,   bexp_HtSea]
     
     Para_all = ParaManager_Pol(Paralst)
     PDF_Et_pred = np.array(list(pool.map(partial(PDF_theo, Para = Para_all), np.array(PDF_data_Et))))
@@ -495,7 +499,7 @@ def forward_Ht_fit(Paralst_Pol):
      Norm_EtdV_Init,   R_Et_Sea_Init,     R_Htu_xi2_Init,   R_Htd_xi2_Init,    R_Htg_xi2_Init,
      R_Etu_xi2_Init,   R_Etd_xi2_Init,    R_Etg_xi2_Init,
      R_Htu_xi4_Init,   R_Htd_xi4_Init,    R_Htg_xi4_Init,
-     R_Etu_xi4_Init,   R_Etd_xi4_Init,    R_Etg_xi4_Init] = Paralst_Pol
+     R_Etu_xi4_Init,   R_Etd_xi4_Init,    R_Etg_xi4_Init,   bexp_HtSea_Init] = Paralst_Pol
 
     fit_forw_Ht = Minuit(cost_forward_Ht, Norm_HtuV = Norm_HtuV_Init,     alpha_HtuV = alpha_HtuV_Init,      beta_HtuV = beta_HtuV_Init,     alphap_HtuV = alphap_HtuV_Init, 
                                           Norm_Htubar = Norm_Htubar_Init, alpha_Htubar = alpha_Htubar_Init,  beta_Htubar = beta_Htubar_Init, alphap_Htqbar = alphap_Htqbar_Init,
@@ -506,7 +510,7 @@ def forward_Ht_fit(Paralst_Pol):
                                           Norm_EtdV = Norm_EtdV_Init,     R_Et_Sea = R_Et_Sea_Init,          R_Htu_xi2 = R_Htu_xi2_Init,     R_Htd_xi2 = R_Htd_xi2_Init,        R_Htg_xi2 = R_Htg_xi2_Init,
                                           R_Etu_xi2 = R_Etu_xi2_Init,     R_Etd_xi2 = R_Etd_xi2_Init,        R_Etg_xi2 = R_Etg_xi2_Init,
                                           R_Htu_xi4 = R_Htu_xi4_Init,     R_Htd_xi4 = R_Htd_xi4_Init,        R_Htg_xi4 = R_Htg_xi4_Init,
-                                          R_Etu_xi4 = R_Etu_xi4_Init,     R_Etd_xi4 = R_Etd_xi4_Init,        R_Etg_xi4 = R_Etg_xi4_Init)
+                                          R_Etu_xi4 = R_Etu_xi4_Init,     R_Etd_xi4 = R_Etd_xi4_Init,        R_Etg_xi4 = R_Etg_xi4_Init,     bexp_HtSea = bexp_HtSea_Init)
     fit_forw_Ht.errordef = 1
 
     fit_forw_Ht.limits['alpha_HtuV'] = (-2, 1.2)
@@ -547,6 +551,8 @@ def forward_Ht_fit(Paralst_Pol):
     fit_forw_Ht.fixed['R_Etd_xi4'] = True
     fit_forw_Ht.fixed['R_Etg_xi4'] = True
 
+    fit_forw_Ht.fixed['bexp_HtSea'] = True
+
     global Minuit_Counter, Time_Counter, time_start
     Minuit_Counter = 0
     Time_Counter = 1
@@ -579,7 +585,7 @@ def forward_Et_fit(Paralst_Pol):
      Norm_EtdV_Init,   R_Et_Sea_Init,     R_Htu_xi2_Init,   R_Htd_xi2_Init,    R_Htg_xi2_Init,
      R_Etu_xi2_Init,   R_Etd_xi2_Init,    R_Etg_xi2_Init,
      R_Htu_xi4_Init,   R_Htd_xi4_Init,    R_Htg_xi4_Init,
-     R_Etu_xi4_Init,   R_Etd_xi4_Init,    R_Etg_xi4_Init] = Paralst_Pol
+     R_Etu_xi4_Init,   R_Etd_xi4_Init,    R_Etg_xi4_Init,   bexp_HtSea_Init] = Paralst_Pol
 
     fit_forw_Et = Minuit(cost_forward_Et, Norm_HtuV = Norm_HtuV_Init,     alpha_HtuV = alpha_HtuV_Init,      beta_HtuV = beta_HtuV_Init,     alphap_HtuV = alphap_HtuV_Init, 
                                           Norm_Htubar = Norm_Htubar_Init, alpha_Htubar = alpha_Htubar_Init,  beta_Htubar = beta_Htubar_Init, alphap_Htqbar = alphap_Htqbar_Init,
@@ -590,7 +596,7 @@ def forward_Et_fit(Paralst_Pol):
                                           Norm_EtdV = Norm_EtdV_Init,     R_Et_Sea = R_Et_Sea_Init,          R_Htu_xi2 = R_Htu_xi2_Init,     R_Htd_xi2 = R_Htd_xi2_Init,     R_Htg_xi2 = R_Htg_xi2_Init,
                                           R_Etu_xi2 = R_Etu_xi2_Init,     R_Etd_xi2 = R_Etd_xi2_Init,        R_Etg_xi2 = R_Etg_xi2_Init,
                                           R_Htu_xi4 = R_Htu_xi4_Init,     R_Htd_xi4 = R_Htd_xi4_Init,        R_Htg_xi4 = R_Htg_xi4_Init,
-                                          R_Etu_xi4 = R_Etu_xi4_Init,     R_Etd_xi4 = R_Etd_xi4_Init,        R_Etg_xi4 = R_Etg_xi4_Init)
+                                          R_Etu_xi4 = R_Etu_xi4_Init,     R_Etd_xi4 = R_Etd_xi4_Init,        R_Etg_xi4 = R_Etg_xi4_Init,     bexp_HtSea = bexp_HtSea_Init)
     fit_forw_Et.errordef = 1
 
     fit_forw_Et.limits['alpha_HtuV'] = (-2, 1.2)
@@ -645,6 +651,8 @@ def forward_Et_fit(Paralst_Pol):
     fit_forw_Et.fixed['R_Etd_xi4'] = True
     fit_forw_Et.fixed['R_Etg_xi4'] = True
 
+    fit_forw_Et.fixed['bexp_HtSea'] = True
+
     global Minuit_Counter, Time_Counter, time_start
     Minuit_Counter = 0
     Time_Counter = 1
@@ -676,7 +684,7 @@ def cost_off_forward(Norm_HuV,    alpha_HuV,    beta_HuV,    alphap_HuV,
                      R_E_Sea,     R_Hu_xi2,     R_Hd_xi2,    R_Hg_xi2,
                      R_Eu_xi2,    R_Ed_xi2,     R_Eg_xi2,
                      R_Hu_xi4,    R_Hd_xi4,     R_Hg_xi4,
-                     R_Eu_xi4,    R_Ed_xi4,     R_Eg_xi4,
+                     R_Eu_xi4,    R_Ed_xi4,     R_Eg_xi4,    bexp_HSea,
                      Norm_HtuV,   alpha_HtuV,   beta_HtuV,   alphap_HtuV, 
                      Norm_Htubar, alpha_Htubar, beta_Htubar, alphap_Htqbar,
                      Norm_HtdV,   alpha_HtdV,   beta_HtdV,   alphap_HtdV,
@@ -686,7 +694,7 @@ def cost_off_forward(Norm_HuV,    alpha_HuV,    beta_HuV,    alphap_HuV,
                      Norm_EtdV,   R_Et_Sea,     R_Htu_xi2,   R_Htd_xi2,    R_Htg_xi2,
                      R_Etu_xi2,   R_Etd_xi2,    R_Etg_xi2,
                      R_Htu_xi4,   R_Htd_xi4,    R_Htg_xi4,
-                     R_Etu_xi4,   R_Etd_xi4,    R_Etg_xi4):
+                     R_Etu_xi4,   R_Etd_xi4,    R_Etg_xi4,   bexp_HtSea):
 
     global Minuit_Counter, Time_Counter
 
@@ -707,7 +715,7 @@ def cost_off_forward(Norm_HuV,    alpha_HuV,    beta_HuV,    alphap_HuV,
                     R_E_Sea,     R_Hu_xi2,     R_Hd_xi2,    R_Hg_xi2,
                     R_Eu_xi2,    R_Ed_xi2,     R_Eg_xi2,
                     R_Hu_xi4,    R_Hd_xi4,     R_Hg_xi4,
-                    R_Eu_xi4,    R_Ed_xi4,     R_Eg_xi4]
+                    R_Eu_xi4,    R_Ed_xi4,     R_Eg_xi4,    bexp_HSea]
 
     Para_Pol_lst = [Norm_HtuV,   alpha_HtuV,   beta_HtuV,   alphap_HtuV, 
                     Norm_Htubar, alpha_Htubar, beta_Htubar, alphap_Htqbar,
@@ -718,7 +726,7 @@ def cost_off_forward(Norm_HuV,    alpha_HuV,    beta_HuV,    alphap_HuV,
                     Norm_EtdV,   R_Et_Sea,     R_Htu_xi2,   R_Htd_xi2,    R_Htg_xi2,
                     R_Etu_xi2,   R_Etd_xi2,    R_Etg_xi2,
                     R_Htu_xi4,   R_Htd_xi4,    R_Htg_xi4,
-                    R_Etu_xi4,   R_Etd_xi4,    R_Etg_xi4]
+                    R_Etu_xi4,   R_Etd_xi4,    R_Etg_xi4,   bexp_HtSea]
         
     Para_Unp_all = ParaManager_Unp(Para_Unp_lst)
     Para_Pol_all = ParaManager_Pol(Para_Pol_lst)
@@ -743,7 +751,7 @@ def off_forward_fit(Paralst_Unp, Paralst_Pol):
      R_E_Sea_Init,     R_Hu_xi2_Init,     R_Hd_xi2_Init,    R_Hg_xi2_Init,
      R_Eu_xi2_Init,    R_Ed_xi2_Init,     R_Eg_xi2_Init,
      R_Hu_xi4_Init,    R_Hd_xi4_Init,     R_Hg_xi4_Init,
-     R_Eu_xi4_Init,    R_Ed_xi4_Init,     R_Eg_xi4_Init] = Paralst_Unp
+     R_Eu_xi4_Init,    R_Ed_xi4_Init,     R_Eg_xi4_Init,    bexp_HSea_Init] = Paralst_Unp
 
     [Norm_HtuV_Init,   alpha_HtuV_Init,   beta_HtuV_Init,   alphap_HtuV_Init, 
      Norm_Htubar_Init, alpha_Htubar_Init, beta_Htubar_Init, alphap_Htqbar_Init,
@@ -754,7 +762,7 @@ def off_forward_fit(Paralst_Unp, Paralst_Pol):
      Norm_EtdV_Init,   R_Et_Sea_Init,     R_Htu_xi2_Init,   R_Htd_xi2_Init,    R_Htg_xi2_Init,
      R_Etu_xi2_Init,   R_Etd_xi2_Init,    R_Etg_xi2_Init,
      R_Htu_xi4_Init,   R_Htd_xi4_Init,    R_Htg_xi4_Init,
-     R_Etu_xi4_Init,   R_Etd_xi4_Init,    R_Etg_xi4_Init] = Paralst_Pol
+     R_Etu_xi4_Init,   R_Etd_xi4_Init,    R_Etg_xi4_Init,   bexp_HtSea_Init] = Paralst_Pol
 
     fit_off_forward = Minuit(cost_off_forward, Norm_HuV = Norm_HuV_Init,     alpha_HuV = alpha_HuV_Init,      beta_HuV = beta_HuV_Init,     alphap_HuV = alphap_HuV_Init, 
                                                Norm_Hubar = Norm_Hubar_Init, alpha_Hubar = alpha_Hubar_Init,  beta_Hubar = beta_Hubar_Init, alphap_Hqbar = alphap_Hqbar_Init,
@@ -766,7 +774,7 @@ def off_forward_fit(Paralst_Unp, Paralst_Pol):
                                                R_E_Sea = R_E_Sea_Init,       R_Hu_xi2 = R_Hu_xi2_Init,        R_Hd_xi2 = R_Hd_xi2_Init,     R_Hg_xi2 = R_Hg_xi2_Init,
                                                R_Eu_xi2 = R_Eu_xi2_Init,     R_Ed_xi2 = R_Ed_xi2_Init,        R_Eg_xi2 = R_Eg_xi2_Init,
                                                R_Hu_xi4 = R_Hu_xi4_Init,     R_Hd_xi4 = R_Hd_xi4_Init,        R_Hg_xi4 = R_Hg_xi4_Init,
-                                               R_Eu_xi4 = R_Eu_xi4_Init,     R_Ed_xi4 = R_Ed_xi4_Init,        R_Eg_xi4 = R_Eg_xi4_Init,
+                                               R_Eu_xi4 = R_Eu_xi4_Init,     R_Ed_xi4 = R_Ed_xi4_Init,        R_Eg_xi4 = R_Eg_xi4_Init,     bexp_HSea = bexp_HSea_Init,
                                                Norm_HtuV = Norm_HtuV_Init,     alpha_HtuV = alpha_HtuV_Init,      beta_HtuV = beta_HtuV_Init,     alphap_HtuV = alphap_HtuV_Init, 
                                                Norm_Htubar = Norm_Htubar_Init, alpha_Htubar = alpha_Htubar_Init,  beta_Htubar = beta_Htubar_Init, alphap_Htqbar = alphap_Htqbar_Init,
                                                Norm_HtdV = Norm_HtdV_Init,     alpha_HtdV = alpha_HtdV_Init,      beta_HtdV = beta_HtdV_Init,     alphap_HtdV = alphap_HtdV_Init,
@@ -776,7 +784,7 @@ def off_forward_fit(Paralst_Unp, Paralst_Pol):
                                                Norm_EtdV = Norm_EtdV_Init,     R_Et_Sea = R_Et_Sea_Init,          R_Htu_xi2 = R_Htu_xi2_Init,     R_Htd_xi2 = R_Htd_xi2_Init,     R_Htg_xi2 = R_Htg_xi2_Init,
                                                R_Etu_xi2 = R_Etu_xi2_Init,     R_Etd_xi2 = R_Etd_xi2_Init,        R_Etg_xi2 = R_Etg_xi2_Init,
                                                R_Htu_xi4 = R_Htu_xi4_Init,     R_Htd_xi4 = R_Htd_xi4_Init,        R_Htg_xi4 = R_Htg_xi4_Init,
-                                               R_Etu_xi4 = R_Etu_xi4_Init,     R_Etd_xi4 = R_Etd_xi4_Init,        R_Etg_xi4 = R_Etg_xi4_Init)
+                                               R_Etu_xi4 = R_Etu_xi4_Init,     R_Etd_xi4 = R_Etd_xi4_Init,        R_Etg_xi4 = R_Etg_xi4_Init,     bexp_HtSea = bexp_HtSea_Init)
     fit_off_forward.errordef = 1
 
     fit_off_forward.fixed['Norm_HuV'] = True
@@ -787,6 +795,7 @@ def off_forward_fit(Paralst_Unp, Paralst_Pol):
     fit_off_forward.fixed['Norm_Hubar'] = True
     fit_off_forward.fixed['alpha_Hubar'] = True
     fit_off_forward.fixed['beta_Hubar'] = True
+
     fit_off_forward.fixed['alphap_Hqbar'] = True
 
     fit_off_forward.fixed['Norm_HdV'] = True
@@ -821,6 +830,7 @@ def off_forward_fit(Paralst_Unp, Paralst_Pol):
     fit_off_forward.fixed['Norm_Htubar'] = True
     fit_off_forward.fixed['alpha_Htubar'] = True
     fit_off_forward.fixed['beta_Htubar'] = True
+
     fit_off_forward.fixed['alphap_Htqbar'] = True
 
     fit_off_forward.fixed['Norm_HtdV'] = True
@@ -854,6 +864,7 @@ def off_forward_fit(Paralst_Unp, Paralst_Pol):
     fit_off_forward.fixed['R_Htg_xi4'] = True
     fit_off_forward.fixed['R_Etg_xi4'] = True
 
+    """
     fit_off_forward.fixed['R_Hu_xi4'] = True
     fit_off_forward.fixed['R_Hd_xi4'] = True 
     fit_off_forward.fixed['R_Eu_xi4'] = True
@@ -863,6 +874,7 @@ def off_forward_fit(Paralst_Unp, Paralst_Pol):
     fit_off_forward.fixed['R_Htd_xi4'] = True 
     fit_off_forward.fixed['R_Etu_xi4'] = True
     fit_off_forward.fixed['R_Etd_xi4'] = True
+    """
 
     global Minuit_Counter, Time_Counter, time_start
     Minuit_Counter = 0
@@ -890,9 +902,9 @@ if __name__ == '__main__':
     pool = Pool()
     time_start = time.time()
 
-    Paralst_Unp     = [4.916737288099265, 0.2160974235037556, 3.2258424299202755, 2.3297704052669705, 0.1626461362289145, 1.1368777981444618, 6.801675174056078, 0.15, 3.4011312710904424, 0.18167877602047033, 4.431135738906448, 3.5552156393490506, 0.2566106051374345, 1.0456780115928632, 6.797731044211278, 2.857047337247385, 1.0528415885845877, 7.386015035320446, 1.3668037066534142, 8.89892151499381, -0.06026608225708063, 3.414072497873425, 5.355066163072291, -0.023541114852060577, 0.9891204496981967, 0.9632557231947952, 0.05097257659617962, 0.2598145128212054, -0.4886935318021287, 1.2220510740758985, 1.0, 2.628575442444291, -29.4514432911689, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
-    Paralst_Pol     = [4.519624755533353, -0.24572862253056815, 3.033722770434178, 2.6225128805098703, 0.07490016975962657, 0.5199239290487521, 4.323496948268691, 0.15, -0.7128670325051504, 0.21132587362841937, 3.2387492201569494, 4.447810664973923, -0.055480456634778005, 0.615449804616039, 2.0757673709446696, 0.24177484233130947, 0.6324341817221732, 2.7058935184763966, 1.1, 8.772598157795674, 0.7999999801488662, 7.290777470786635, 1.9914823940193018, -3.491397001954771, 1.6505025549235222, -0.05334411782947617, 3.428943340674911, 1.0, 6.001134395336198, 60.78099052239202, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
-    
+    Paralst_Unp     = [4.916737288099265, 0.2160974235037556, 3.2258424299202755, 2.3297704052669705, 0.1626461362289145, 1.1368777981444618, 6.801675174056078, 0.15, 3.4011312710904424, 0.18167877602047033, 4.431135738906448, 3.5552156393490506, 0.2566106051374345, 1.0456780115928632, 6.797731044211278, 2.857047337247385, 1.0528415885845877, 7.386015035320446, 1.3668037066534142, 8.89892151499381, -0.06026608225708063, 3.414072497873425, 5.355066163072291, -0.023541114852060577, 0.9891204496981967, 0.9632557231947952, 0.05097257659617962, 0.006415775282922205, -2.365434779238983, 0.3199008853020352, 1.0, 9.003044705421427, -84.86742073956177, 1.0, 0.609691017424693, 0.08237033996473307, 0.0, -2.603673477179661, 29.812645500588264, 0.0, 0.0]
+    Paralst_Pol     = [4.519624755533353, -0.24572862253056815, 3.033722770434178, 2.6225128805098703, 0.07490016975962657, 0.5199239290487521, 4.323496948268691, 0.15, -0.7128670325051504, 0.21132587362841937, 3.2387492201569494, 4.447810664973923, -0.055480456634778005, 0.615449804616039, 2.0757673709446696, 0.24177484233130947, 0.6324341817221732, 2.7058935184763966, 1.1, 8.772598157795674, 0.7999999801488662, 7.290777470786635, 1.9914823940193018, -3.491397001954771, -0.4676673268175943, 1.2258081300470829, 6.366555784071109, 1.0, 1.697980818866844, 34.44515102261264, 1.0, -0.42961433607987104, -1.8949842275991569, 0.0, 3.4598966572448955, 31.12987072198461, 0.0, 0.0]
+  
     """
     fit_forward_H   = forward_H_fit(Paralst_Unp)
     Paralst_Unp     = np.array(fit_forward_H.values)

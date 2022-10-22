@@ -61,22 +61,24 @@ def ConfMoment(j: complex, t: float, ParaSet: np.ndarray):
             alphap = ParaSet[3]: regge trajectory alpha(t) = alpha + alphap * t
         j: conformal spin j (conformal spin is actually j+2 but anyway)
         t: momentum transfer squared t
+        bexp: extra exponential term exp(bexp*t)
 
     Returns:
         Conformal moment in j space F(j,t)
     """
 
-    [norm, alpha, beta, alphap] = ParaSet
-    return norm * beta_loggamma (j + 1 - alpha, 1 + beta) * (j + 1  - alpha)/ (j + 1 - alpha - alphap * t)
+    [norm, alpha, beta, alphap, bexp] = ParaSet
+    return norm * beta_loggamma (j + 1 - alpha, 1 + beta) * (j + 1  - alpha)/ (j + 1 - alpha - alphap * t) * np.exp( bexp * t)
 
 def Moment_Sum(j: complex, t: float, ParaSets: np.ndarray) -> complex:
     """
     Sum of the conformal moments when the ParaSets contain more than just one set of parameters 
 
     Args:
-        ParaSets : contains [ParaSet1, ParaSet0, ParaSet2,...] with each ParaSet = [norm, alpha, beta ,alphap] for valence and sea distributions repsectively.        
+        ParaSets : contains [ParaSet1, ParaSet0, ParaSet2,...] with each ParaSet = [norm, alpha, beta ,alphap, bexp] for valence and sea distributions repsectively.        
         j: conformal spin j (or j+2 but anyway)
         t: momentum transfer squared t
+        bexp: extra exponential term exp(bexp*t)
 
     Returns:
         sum of conformal moments over all the ParaSet
