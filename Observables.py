@@ -493,6 +493,12 @@ class GPDobserv (object) :
                               [0,0,0,0,(1 - self.p * (-1) ** j)/2]])
 
         ConfFlav = np.array( list(map(lambda paraset: Moment_Sum(j, self.t, paraset), Para_Forward)) )
+
+        if (j == 0):
+            if(self.p == 1):
+                return Flv_Intp( np.array([ConfFlav[0],ConfFlav[2],ConfFlav[4]]) , flv)
+        
+        return Flv_Intp(np.einsum('...j,j', GFF_trans, Moment_Evo(j, NFEFF, self.p, self.Q, ConfFlav)), flv)
         '''
 
         Para_Forward = ParaAll[..., 0, :, :, :]  # (N, 5, 1, 5)
@@ -514,8 +520,4 @@ class GPDobserv (object) :
         result[~mask] = Flv_Intp(np.einsum('...ij,j->...i', GFF_trans, Moment_Evo(j, NFEFF, self.p, self.Q, ConfFlav)), flv) # (N_~mask)
         return result #(N)
 
-        if (j == 0):
-            if(self.p == 1):
-                return Flv_Intp( np.array([ConfFlav[0],ConfFlav[2],ConfFlav[4]]) , flv)
         
-        return Flv_Intp(np.einsum('...j,j', GFF_trans, Moment_Evo(j, NFEFF, self.p, self.Q, ConfFlav)), flv)
