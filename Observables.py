@@ -32,8 +32,49 @@ NFEFF = 2
 #Relative precision Goal of quad set to be 1e-3
 Prec_Goal = 1e-3
 
+
+
+
+def flv_to_indx(flv:str):
+    '''
+    flv is the flavor. It is a string
+
+    This function will cast each flavor to an auxiliary length 3 array
+
+    Output shape: ( 3)
+
+    
+
+    '''
+    if(flv=="u"):
+        return np.array([1, 0, 0])
+    if(flv=="d"):
+        return np.array([0, 1, 0])
+    if(flv=="g"):
+        return np.array([0, 0, 1])
+    if(flv=="NS"):
+        return np.array([1, -1, 0])
+    if(flv=="S"):
+        return np.array([1, 1, 0])
+
+def flvs_to_indx(flvs):
+    '''flvs is an array of strings (N)
+    Output: (N, 3)
+    '''
+    output = [flv_to_indx(flv) for flv in flvs]
+    return np.array(output)
+
 #The flavor interpreter to return the corresponding flavor combination 
 def Flv_Intp(Flv_array: np.array, flv):
+
+    """
+    Flv_array: (N, 3) complex
+    flv: (N) str
+
+    return result: (N) complex
+    """
+    
+    '''
     if(flv == "u"):
         return Flv_array[0]
     if(flv == "d"):
@@ -44,13 +85,16 @@ def Flv_Intp(Flv_array: np.array, flv):
         return Flv_array[0] - Flv_array[1]
     if(flv == "S"):
         return Flv_array[0] + Flv_array[1]
+    '''
+    _helper = flvs_to_indx(flv)
+    return np.einsum('...j,...j', Flv_array, _helper) # (N)
     
 # Euler Beta function B(a,b) with complex arguments
 def beta_loggamma(a: complex, b: complex) -> complex:
     return np.exp(sp.special.loggamma(a) + sp.special.loggamma(b)-sp.special.loggamma(a + b))
 
 # Conformal moment in j space F(j)
-def ConfMoment(j: complex, t: float, ParaSet: np.ndarray):
+def ConfMoment_vec(j: complex, t: float, ParaSets: np.ndarray):
     """
     Conformal moment in j space F(j)
 
@@ -61,30 +105,75 @@ def ConfMoment(j: complex, t: float, ParaSet: np.ndarray):
             alphap = ParaSet[3]: regge trajectory alpha(t) = alpha + alphap * t
         j: conformal spin j (conformal spin is actually j+2 but anyway)
         t: momentum transfer squared t
-        bexp: extra exponential term exp(bexp*t)
+
+    Originally, ParaSet have shape (5).
+    Output is a scalar
+    
+    After vectorization, there are a few different usages:
+        1. t has shape (N), ParaSet has shape (N, 5). Output have shape (N)
+        2. t has shape (N), ParaSet has shape (N, m1, 5). Output have shape (N, m1)
+        3. t has shape (N), ParaSet has shape (N, m1, m2, 5). Output have shape (N, m1, m2)
+        4. and so on
+        
+    Recommended usage:
+        t has shape (N), ParaSet has shape (N, 5, init_NumofAnsatz, 5)
+        output will be (N, 5, init_NumofAnsatz)
+
+    j should only be a scalar. It cannot be an ndarray before I make more changes
 
     Returns:
         Conformal moment in j space F(j,t)
     """
 
-    [norm, alpha, beta, alphap, bexp] = ParaSet
+    # [norm, alpha, beta, alphap, bexp] = ParaSet
+    norm = ParaSets[..., 0]  # in recommended usage, has shape (N, 5, init_NumofAnsatz)
+    alpha = ParaSets[..., 1] # in general, can have shape (N), (N, m1), (N, m1, m2), ......
+    beta  = ParaSets[..., 2]
+    alphap = ParaSets[..., 3]
+    bexp = ParaSets[..., 4]
+    
+    if np.ndim(norm) < np.ndim(t):
+        raise ValueError("Input format is wrong.")
+    
+    t_new_shape = list(np.shape(t)) + [1]*(np.ndim(norm) - np.ndim(t))
+    t = np.reshape(t, t_new_shape) # to make sure t can be broadcasted with norm, alpha, etc.
+    # t will have shape (N) or (N, m1) or (N, m1, m2)... depends
+
+
     return norm * beta_loggamma (j + 1 - alpha, 1 + beta) * (j + 1  - alpha)/ (j + 1 - alpha - alphap * t) * np.exp( bexp * t)
+    # (N) or (N, m1) or (N, m1, m2) .... depends on usage
+    # For the recommended usage, the output is (N, 5, init_NumofAnsatz)
 
 def Moment_Sum(j: complex, t: float, ParaSets: np.ndarray) -> complex:
     """
     Sum of the conformal moments when the ParaSets contain more than just one set of parameters 
 
     Args:
-        ParaSets : contains [ParaSet1, ParaSet0, ParaSet2,...] with each ParaSet = [norm, alpha, beta ,alphap, bexp] for valence and sea distributions repsectively.        
+        ParaSets : contains [ParaSet1, ParaSet0, ParaSet2,...] with each ParaSet = [norm, alpha, beta ,alphap] for valence and sea distributions repsectively.        
         j: conformal spin j (or j+2 but anyway)
         t: momentum transfer squared t
-        bexp: extra exponential term exp(bexp*t)
+
+        Originally, ParaSets have shape (init_NumofAnsatz, 4). In practice, it is (1, 4)
+        output is a scalar
+
+        Here, after vectorization, 
+            t has shape (N)
+            ParaSets has (N, 5, init_NumofAnsatz, 5)
+            output will have shape (N, 5)  # here, the 5 means 5 different species [u - ubar, ubar, d - dbar, dbar, g]
+        
+        More generally, 
+            t have shape (N)
+            ParaSets has shape (N, i, 5 ) or (N, m1, i, 5) or (N, m1, m2, i, 5) and so on
+            output will have shape (N) or (N, m1) or (N, m2)...... etc.
 
     Returns:
         sum of conformal moments over all the ParaSet
     """
 
-    return np.sum(np.array( list(map(lambda paraset: ConfMoment(j, t, paraset), ParaSets)) ))
+    #return np.sum(np.array( list(map(lambda paraset: ConfMoment(j, t, paraset), ParaSets)) ))
+
+    # ConfMoment_vec(j, t, ParaSets) should have shape (N, 5, init_NumofAnsatz)
+    return np.sum(ConfMoment(j, t, ParaSets) ,  axis=-1) # (N, 5)
 
 
 # precision for the hypergeometric function
@@ -100,11 +189,18 @@ def InvMellinWaveFuncQ(s: complex, x: float) -> complex:
 
     Returns:
         Wave function for inverse Mellin transformation: x^(-s) for x>0 and 0 for x<0
-    """  
+
+    vectorized version of InvMellinWaveFuncQ
+    """ 
+
+    ''' 
     if(x > 0):
         return x ** (-s)
     
     return 0
+    '''
+    return np.where(x>0, x**(-s), 0)
+
 
 def InvMellinWaveFuncG(s: complex, x: float) -> complex:
     """ 
@@ -117,10 +213,14 @@ def InvMellinWaveFuncG(s: complex, x: float) -> complex:
     Returns:
         Gluon wave function for inverse Mellin transformation: x^(-s+1) for x>0 and 0 for x<0
     """  
+
+    '''
     if(x > 0):
         return x ** (-s+1)
     
     return 0
+    '''
+    return np.where(x>0, x**(-s+1), 0)
 
 def ConfWaveFuncQ(j: complex, x: float, xi: float) -> complex:
     """ 
