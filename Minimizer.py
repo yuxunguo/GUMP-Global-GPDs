@@ -42,45 +42,60 @@ DVCSxsec_group_data = list(map(lambda set: DVCSxsec_data[(DVCSxsec_data['xB'] ==
 
 DVCS_HERA_data = pd.read_csv('GUMPDATA/DVCSxsec_HERA.csv', header = None, names = ['y', 'xB', 't', 'Q', 'f', 'delta f', 'pol'] , dtype = {'y': float, 'xB': float, 't': float, 'Q': float, 'f': float, 'delta f': float, 'pol': str})
 
-def PDF_theo(PDF_input: np.array, Para: np.array):
-    [x, t, Q, f, delta_f, spe, flv] = PDF_input
+
+def PDF_theo(PDF_input: pd.DataFrame, Para: np.array):
+    # [x, t, Q, f, delta_f, spe, flv] = PDF_input
+    xs = PDF_input['x']
+    ts = PDF_input['t']
+    Qs = PDF_input['Q']
+    flvs = PDF_input['flv']
+    spes = PDF_input['spe']
+ 
     xi = 0
+
+    ps = np.where(spes<=1, 1, -1)
+    spes = np.where(spes<=1, spes, spes-2)
+
+    '''
     if(spe == 0 or spe == 1):
         spe, p = spe, 1
 
     if(spe == 2 or spe == 3):
         spe, p = spe - 2 , -1
+    '''
+    # Para: (4, 2, 5, 1, 4)
 
-    Para_spe = Para[spe]
-    PDF_theo = GPDobserv(x, xi, t, Q, p)
-    return PDF_theo.tPDF(flv, Para_spe)     
+    Para_spe = Para[spes] # fancy indexing. Output (N, 3, 5, 1, 5)
+    PDF_theo = GPDobserv_vec(xs, xi, ts, Qs, ps)
+    return PDF_theo.tPDF(flvs, Para_spe)  # array length N
 
-def tPDF_theo(tPDF_input: np.array, Para: np.array):
-    [x, t, Q, f, delta_f, spe, flv] = tPDF_input
-    xi = 0
-    if(spe == 0 or spe == 1):
-        spe, p = spe, 1
-
-    if(spe == 2 or spe == 3):
-        spe, p = spe - 2 , -1
-
-    Para_spe = Para[spe]
-    tPDF_theo = GPDobserv(x, xi, t, Q, p)
-    return tPDF_theo.tPDF(flv, Para_spe)        
+tPDF_theo = PDF_theo
+      
 
 def GFF_theo(GFF_input: np.array, Para):
-    [j, t, Q, f, delta_f, spe, flv] = GFF_input
+    # [j, t, Q, f, delta_f, spe, flv] = GFF_input
+    js = GFF_input['j']
+    ts = GFF_input['t']
+    Qs = GFF_input['Q']
+    fs = GFF_input['f']
+    delta_fs = GFF_input['delta f']
+    flvs = GFF_input['flv']
+    spes = GFF_input['spe']
     x = 0
     xi = 0   
+    '''
     if(spe == 0 or spe == 1):
         spe, p = spe, 1
 
     if(spe == 2 or spe == 3):
         spe, p = spe - 2 , -1
+    '''
+    ps = np.where(spes<=1, 1, -1)
+    spes = np.where(spes<=1, spes, spes-2)
 
-    Para_spe = Para[spe]
-    GFF_theo = GPDobserv(x, xi, t, Q, p)
-    return GFF_theo.GFFj0(j, flv, Para_spe)
+    Para_spe = Para[spes] # fancy indexing. Output (N, 3, 5, 1, 5)
+    GFF_theo = GPDobserv(x, xi, ts, Qs, ps)
+    return GFF_theo.GFFj0(js, flvs, Para_spe) # (N)
 
 def CFF_theo(xB, t, Q, Para_Unp, Para_Pol):
     x = 0
@@ -91,7 +106,7 @@ def CFF_theo(xB, t, Q, Para_Unp, Para_Pol):
     ECFF = H_E.CFF(Para_Unp[1])
     HtCFF = Ht_Et.CFF(Para_Pol[0])
     EtCFF = Ht_Et.CFF(Para_Pol[1])
-    return [HCFF, ECFF, HtCFF, EtCFF]
+    return np.stack([HCFF, ECFF, HtCFF, EtCFF], axis=-1)
 
 def DVCSxsec_theo(DVCSxsec_input: np.array, CFF_input: np.array):
     [y, xB, t, Q, phi, f, delta_f, pol] = DVCSxsec_input    
