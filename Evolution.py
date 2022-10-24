@@ -17,6 +17,8 @@ import numpy as np
 import rundec
 from scipy.special import psi
 from typing import Tuple
+import numba
+from numba import vectorize, njit
 
 """
 ***********************QCD constants***************************************
@@ -224,7 +226,7 @@ def lambdaf(n: complex, nf: int, p: int, prty: int = 1) -> np.ndarray:
     return np.stack([lam1, lam2], axis=-1) # shape (N, 2)
 
 
-def projectors_vec(n: complex, nf: int, p: int, prty: int = 1) -> Tuple[np.ndarray, np.ndarray]:
+def projectors(n: complex, nf: int, p: int, prty: int = 1) -> Tuple[np.ndarray, np.ndarray]:
     """
     Projectors on evolution quark-gluon singlet eigenaxes.
 
