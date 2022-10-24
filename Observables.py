@@ -120,6 +120,7 @@ def ConfMoment(j: complex, t: float, ParaSets: np.ndarray):
         output will be (N, 5, init_NumofAnsatz)
 
     j should only be a scalar. It cannot be an ndarray before I make more changes
+    Right now, j can be a vector, but if you want to do integration, then better pass j as scalar.
 
     Returns:
         Conformal moment in j space F(j,t)
@@ -136,8 +137,10 @@ def ConfMoment(j: complex, t: float, ParaSets: np.ndarray):
         raise ValueError("Input format is wrong.")
     
     t_new_shape = list(np.shape(t)) + [1]*(np.ndim(norm) - np.ndim(t))
+    j_new_shape = list(np.shape(j)) + [1]*(np.ndim(norm) - np.ndim(t))  # not a typo, it is np.ndim(norm) - np.ndim(t)
     t = np.reshape(t, t_new_shape) # to make sure t can be broadcasted with norm, alpha, etc.
     # t will have shape (N) or (N, m1) or (N, m1, m2)... depends
+    j = np.reshape(j, j_new_shape)
 
 
     return norm * beta_loggamma (j + 1 - alpha, 1 + beta) * (j + 1  - alpha)/ (j + 1 - alpha - alphap * t) * np.exp( bexp * t)
@@ -409,10 +412,16 @@ class GPDobserv (object) :
         def Integrand_CFF(imJ: complex):
             mask = (self.p==1) # assume p can only be either 1 or -1
 
-            result = self.xi ** (-reJ - 1j * imJ - 1) * Integrand_Mellin_Barnes_CFF(reJ + 1j * imJ) / 2
-
-            result[mask] *= (1j + np.tan((reJ + 1j * imJ) * np.pi / 2))
-            result[~mask] *= (1j - 1/np.tan((reJ + 1j * imJ) * np.pi / 2))
+            result = np.ones_like(self.p) * self.xi ** (-reJ - 1j * imJ - 1) * Integrand_Mellin_Barnes_CFF(reJ + 1j * imJ) / 2
+        
+            if np.ndim(result)>0:
+                result[mask] *= (1j + np.tan((reJ + 1j * imJ) * np.pi / 2))
+                result[~mask] *= (1j - 1/np.tan((reJ + 1j * imJ) * np.pi / 2))
+            else: # scalar
+                if self.p==1:
+                    result *= (1j + np.tan((reJ + 1j * imJ) * np.pi / 2))
+                else:
+                    result *= (1j - 1/np.tan((reJ + 1j * imJ) * np.pi / 2))
             return result
 
         return quad_vec(Integrand_CFF, - Max_imJ, + Max_imJ, epsrel = Prec_Goal)[0]
@@ -503,10 +512,10 @@ class GPDobserv (object) :
 
         Para_Forward = ParaAll[..., 0, :, :, :]  # (N, 5, 1, 5)
         _helper1 = np.array([[1, 1, 0, 0, 0],
-                             [0, 0, 1, 1, 0]
+                             [0, 0, 1, 1, 0],
                              [0, 0, 0, 0, 1/2]])
         _helper2 = np.array([[0, -1, 0, 0, 0],
-                             [0, 0, 0, -1, 0]
+                             [0, 0, 0, -1, 0],
                              [0, 0, 0, 0, -1/2]])
         GFF_trans = np.einsum('... , ij->...ij', self.p * (-1)**j, _helper2) + _helper1  # (N, 3, 5)
         ConfFlav = Moment_Sum(j, self.t, Para_Forward) # (N, 5)
@@ -514,10 +523,11 @@ class GPDobserv (object) :
         # the result of np.einsum will be (N, 3)
         # Flv_Intp  result (N)
         mask = ((j==0) & (self.p==1))
+        print(mask)
         result = np.empty_like(self.Q)
 
-        result[mask] = Flv_Intp(ConfFlav[ [0,2,4], : ] , flv ) # (N_mask)
-        result[~mask] = Flv_Intp(np.einsum('...ij,j->...i', GFF_trans, Moment_Evo(j, NFEFF, self.p, self.Q, ConfFlav)), flv) # (N_~mask)
+        result[mask] = Flv_Intp(ConfFlav[mask][:, [0,2,4] ] , flv[mask] ) # (N_mask)
+        result[~mask] = Flv_Intp(np.einsum('...ij, ...j->...i', GFF_trans[~mask], Moment_Evo(j[~mask], NFEFF, self.p[~mask], self.Q[~mask], ConfFlav[~mask])), flv[~mask]) # (N_~mask)
         return result #(N)
 
         

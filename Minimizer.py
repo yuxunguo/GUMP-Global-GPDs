@@ -45,11 +45,11 @@ DVCS_HERA_data = pd.read_csv('GUMPDATA/DVCSxsec_HERA.csv', header = None, names 
 
 def PDF_theo(PDF_input: pd.DataFrame, Para: np.array):
     # [x, t, Q, f, delta_f, spe, flv] = PDF_input
-    xs = PDF_input['x']
-    ts = PDF_input['t']
-    Qs = PDF_input['Q']
-    flvs = PDF_input['flv']
-    spes = PDF_input['spe']
+    xs = PDF_input['x'].to_numpy()
+    ts = PDF_input['t'].to_numpy()
+    Qs = PDF_input['Q'].to_numpy()
+    flvs = PDF_input['flv'].to_numpy()
+    spes = PDF_input['spe'].to_numpy()
  
     xi = 0
 
@@ -66,7 +66,7 @@ def PDF_theo(PDF_input: pd.DataFrame, Para: np.array):
     # Para: (4, 2, 5, 1, 4)
 
     Para_spe = Para[spes] # fancy indexing. Output (N, 3, 5, 1, 5)
-    PDF_theo = GPDobserv_vec(xs, xi, ts, Qs, ps)
+    PDF_theo = GPDobserv(xs, xi, ts, Qs, ps)
     return PDF_theo.tPDF(flvs, Para_spe)  # array length N
 
 tPDF_theo = PDF_theo
@@ -74,13 +74,13 @@ tPDF_theo = PDF_theo
 
 def GFF_theo(GFF_input: np.array, Para):
     # [j, t, Q, f, delta_f, spe, flv] = GFF_input
-    js = GFF_input['j']
-    ts = GFF_input['t']
-    Qs = GFF_input['Q']
-    fs = GFF_input['f']
-    delta_fs = GFF_input['delta f']
-    flvs = GFF_input['flv']
-    spes = GFF_input['spe']
+    js = GFF_input['j'].to_numpy()
+    ts = GFF_input['t'].to_numpy()
+    Qs = GFF_input['Q'].to_numpy()
+    fs = GFF_input['f'].to_numpy()
+    delta_fs = GFF_input['delta f'].to_numpy()
+    flvs = GFF_input['flv'].to_numpy()
+    spes = GFF_input['spe'].to_numpy()
     x = 0
     xi = 0   
     '''
