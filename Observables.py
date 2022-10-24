@@ -35,34 +35,56 @@ Prec_Goal = 1e-3
 
 
 
+# def flv_to_indx(flv:str):
+#     '''
+#     flv is the flavor. It is a string
+
+#     This function will cast each flavor to an auxiliary length 3 array
+
+    # Output shape: ( 3)
+
+    
+
+    # '''
+    # if(flv=="u"):
+    #     return np.array([1, 0, 0])
+    # if(flv=="d"):
+    #     return np.array([0, 1, 0])
+    # if(flv=="g"):
+    #     return np.array([0, 0, 1])
+    # if(flv=="NS"):
+    #     return np.array([1, -1, 0])
+    # if(flv=="S"):
+    #     return np.array([1, 1, 0])
+
 def flv_to_indx(flv:str):
     '''
     flv is the flavor. It is a string
 
     This function will cast each flavor to an auxiliary length 3 array
 
-    Output shape: ( 3)
+    Output shape: scalar int
 
     
 
     '''
     if(flv=="u"):
-        return np.array([1, 0, 0])
+        return 0
     if(flv=="d"):
-        return np.array([0, 1, 0])
+        return 1
     if(flv=="g"):
-        return np.array([0, 0, 1])
+        return 2
     if(flv=="NS"):
-        return np.array([1, -1, 0])
+        return 3
     if(flv=="S"):
-        return np.array([1, 1, 0])
+        return 4
 
 def flvs_to_indx(flvs):
     '''flvs is an array of strings (N)
-    Output: (N, 3)
+    Output: (N)
     '''
     output = [flv_to_indx(flv) for flv in flvs]
-    return np.array(output)
+    return np.array(output, dtype=np.int32)
 
 #The flavor interpreter to return the corresponding flavor combination 
 def Flv_Intp(Flv_array: np.array, flv):
@@ -86,8 +108,12 @@ def Flv_Intp(Flv_array: np.array, flv):
     if(flv == "S"):
         return Flv_array[0] + Flv_array[1]
     '''
-    _helper = flvs_to_indx(flv)
-    return np.einsum('...j,...j', Flv_array, _helper) # (N)
+    _flv_index = flvs_to_indx(flv)
+    return np.choose(_flv_index, [Flv_array[...,0], Flv_array[..., 1], Flv_array[..., 2],\
+                        Flv_array[..., 0]-Flv_array[..., 1], Flv_array[..., 0]+Flv_array[..., 1]])
+    # return np.einsum('...j,...j', Flv_array, _helper) # (N)
+
+
     
 # Euler Beta function B(a,b) with complex arguments
 def beta_loggamma(a: complex, b: complex) -> complex:
@@ -520,10 +546,11 @@ class GPDobserv (object) :
         GFF_trans = np.einsum('... , ij->...ij', self.p * (-1)**j, _helper2) + _helper1  # (N, 3, 5)
         ConfFlav = Moment_Sum(j, self.t, Para_Forward) # (N, 5)
 
+        
+
         # the result of np.einsum will be (N, 3)
         # Flv_Intp  result (N)
         mask = ((j==0) & (self.p==1))
-        print(mask)
         result = np.empty_like(self.Q)
 
         result[mask] = Flv_Intp(ConfFlav[mask][:, [0,2,4] ] , flv[mask] ) # (N_mask)
