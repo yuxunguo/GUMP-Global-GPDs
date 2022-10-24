@@ -53,13 +53,11 @@ DVCS_HERA_pred = np.array(list(map(partial(DVCSxsec_HERA_theo, Para_Unp = Para_U
 
 print(DVCS_HERA_pred)
 
-"""
 print(CFF_theo(0.36, -0.345, 2, Para_Unp_All, Para_Pol_All))
 
 print(CFF_theo(0.48, -0.702, 2, Para_Unp_All, Para_Pol_All))
 
 print(CFF_theo(0.60, -1.05, 2, Para_Unp_All, Para_Pol_All))
-"""
 
 """
 xsecgp0 = DVCSxsec_group_data[0]
