@@ -51,7 +51,7 @@ def ParaManager_Unp(Paralst: np.array):
     H_ubar = np.array([[Norm_Hubar, alpha_Hubar, beta_Hubar, alphap_Hqbar, bexp_HSea]])
     H_dV =   np.array([[Norm_HdV,   alpha_HdV,   beta_HdV,   alphap_HdV,   0]])
     H_dbar = np.array([[Norm_Hdbar, alpha_Hdbar, beta_Hdbar, alphap_Hqbar, bexp_HSea]])
-    H_g =    np.array([[Norm_Hg,    alpha_Hg,    beta_Hg,    alphap_Hg,    bexp_HSea ]])
+    H_g =    np.array([[Norm_Hg,    alpha_Hg,    beta_Hg,    alphap_Hg,    0 ]])
 
     # Initial xi^2 parameters for the H of (uV, ubar, dV, dbar,g) distributions
     """
@@ -125,7 +125,7 @@ def ParaManager_Pol(Paralst: np.array):
     Ht_ubar = np.array([[Norm_Htubar, alpha_Htubar, beta_Htubar, alphap_Htqbar, bexp_HtSea]])
     Ht_dV =   np.array([[Norm_HtdV,   alpha_HtdV,   beta_HtdV,   alphap_HtdV,   0]])
     Ht_dbar = np.array([[Norm_Htdbar, alpha_Htdbar, beta_Htdbar, alphap_Htqbar, bexp_HtSea]])
-    Ht_g =    np.array([[Norm_Htg,    alpha_Htg,    beta_Htg,    alphap_Htg,    bexp_HtSea]])
+    Ht_g =    np.array([[Norm_Htg,    alpha_Htg,    beta_Htg,    alphap_Htg,    0]])
 
     # Initial xi^2 parameters for the Ht of (uV, ubar, dV, dbar,g) distributions
     """
