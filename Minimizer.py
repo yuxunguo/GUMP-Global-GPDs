@@ -102,16 +102,17 @@ def CFF_theo(xB, t, Q, Para_Unp, Para_Pol):
     xi = (1/(2 - xB) - (2*t*(-1 + xB))/(Q**2*(-2 + xB)**2))*xB
     H_E = GPDobserv(x, xi, t, Q, 1)
     Ht_Et = GPDobserv(x, xi, t, Q, -1)
-    HCFF = H_E.CFF(Para_Unp[0])
-    ECFF = H_E.CFF(Para_Unp[1])
-    HtCFF = Ht_Et.CFF(Para_Pol[0])
-    EtCFF = Ht_Et.CFF(Para_Pol[1])
-    return [HCFF, ECFF, HtCFF, EtCFF] # this can be a list of arrays of shape (N)
+    HCFF = H_E.CFF(Para_Unp[..., 0, :, :, :, :])
+    ECFF = H_E.CFF(Para_Unp[..., 1, :, :, :, :])
+    HtCFF = Ht_Et.CFF(Para_Pol[..., 0, :, :, :, :])
+    EtCFF = Ht_Et.CFF(Para_Pol[..., 1, :, :, :, :])
+
+    return [ HCFF, ECFF, HtCFF, EtCFF ] # this can be a list of arrays of shape (N)
     # return np.stack([HCFF, ECFF, HtCFF, EtCFF], axis=-1)
 
 def DVCSxsec_theo(DVCSxsec_input: pd.DataFrame, CFF_input: np.array):
     # CFF_input is a list of np.arrays
-    [y, xB, t, Q, phi, f, delta_f, pol] = DVCSxsec_input    
+    # [y, xB, t, Q, phi, f, delta_f, pol] = DVCSxsec_input    
 
     y = DVCSxsec_input['y'].to_numpy()
     xB = DVCSxsec_input['xB'].to_numpy()
@@ -141,7 +142,7 @@ def DVCSxsec_HERA_theo(DVCSxsec_data_HERA: pd.DataFrame, Para_Unp, Para_Pol):
     delta_f = DVCSxsec_data_HERA['delta f'].to_numpy()
     pol = DVCSxsec_data_HERA['pol'].to_numpy()
 
-    [HCFF, ECFF, HtCFF, EtCFF] = CFF_theo(xB, t, Q, Para_Unp, Para_Pol)
+    [HCFF, ECFF, HtCFF, EtCFF] = CFF_theo(xB, t, Q, np.expand_dims(Para_Unp, axis=0), np.expand_dims(Para_Pol, axis=0))
     return dsigma_DVCS_HERA(y, xB, t, Q, pol, HCFF, ECFF, HtCFF, EtCFF)
 
 def cost_forward_H(Norm_HuV,    alpha_HuV,    beta_HuV,    alphap_HuV, 

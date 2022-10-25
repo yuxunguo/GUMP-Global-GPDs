@@ -315,7 +315,6 @@ class GPDobserv (object) :
         self.t = init_t
         self.Q = init_Q
         self.p = p
-        # These should be numpy arrays with shape (N)
 
     def tPDF(self, flv, ParaAll):
         """
@@ -424,7 +423,7 @@ class GPDobserv (object) :
             ConfFlav_xi2 = np.array( list(map(lambda paraset: Moment_Sum(j, self.t, paraset), Para_xi2)) )
             ConfFlav_xi4 = np.array( list(map(lambda paraset: Moment_Sum(j, self.t, paraset), Para_xi4)) )
             '''
-            ConfFlav     = Moment_Sum(j, self.t, Para_Forward)
+            ConfFlav     = Moment_Sum(j, self.t, Para_Forward) #(N, 5)
             ConfFlav_xi2 = Moment_Sum(j, self.t, Para_xi2)
             ConfFlav_xi4 = Moment_Sum(j, self.t, Para_xi4)
 
@@ -436,10 +435,15 @@ class GPDobserv (object) :
             return np.einsum('j, ...j', CFF_trans, EvoConf_Wilson) # shape (N)
 
         def Integrand_CFF(imJ: complex):
-            mask = (self.p==1) # assume p can only be either 1 or -1
+            # mask = (self.p==1) # assume p can only be either 1 or -1
 
             result = np.ones_like(self.p) * self.xi ** (-reJ - 1j * imJ - 1) * Integrand_Mellin_Barnes_CFF(reJ + 1j * imJ) / 2
-        
+
+            if self.p==1:
+                result *= (1j + np.tan((reJ + 1j * imJ) * np.pi / 2))
+            else:
+                result *= (1j - 1/np.tan((reJ + 1j * imJ) * np.pi / 2))
+            '''
             if np.ndim(result)>0:
                 result[mask] *= (1j + np.tan((reJ + 1j * imJ) * np.pi / 2))
                 result[~mask] *= (1j - 1/np.tan((reJ + 1j * imJ) * np.pi / 2))
@@ -448,6 +452,7 @@ class GPDobserv (object) :
                     result *= (1j + np.tan((reJ + 1j * imJ) * np.pi / 2))
                 else:
                     result *= (1j - 1/np.tan((reJ + 1j * imJ) * np.pi / 2))
+            '''
             return result
 
         return quad_vec(Integrand_CFF, - Max_imJ, + Max_imJ, epsrel = Prec_Goal)[0]
