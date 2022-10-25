@@ -31,52 +31,110 @@ def dsigma_TOT(y: float, xB: float, t: float, Q: float, phi: float, pol, HCFF: c
 # The total cross-section integrated over phi
 def dsigma_DVCS_HERA(y: float, xB: float, t: float, Q: float, pol, HCFF: complex, ECFF: complex, HtCFF: complex, EtCFF: complex):
     Conv = alphaEM * (1- y + 1/2 * y ** 2)/(Pi * y * Q ** 2) * y / xB
-    return 1/Conv * quad(lambda phi: dsigma_DVCS(y, xB, t, Q, phi, pol,HCFF, ECFF, HtCFF, EtCFF), 0, 2 * Pi)[0]
+    return 1/Conv * quad_vec(lambda phi: dsigma_DVCS(y, xB, t, Q, phi, pol,HCFF, ECFF, HtCFF, EtCFF), 0, 2 * Pi)[0]
+
+@np.vectorize
+def _pol_to_index(pol: str):
+    '''
+    A helper function to convert pol string to integer. Because numba can deal with integer array but not string array
+    '''
+    if(pol == "UU"):
+        return 0
+
+    if(pol == "LU"):
+        return 1
+
+    if(pol == "UL"):
+        return 2
+
+    if(pol == "LL"):
+        return 3
+    
+    if(pol == "UTin"):
+        return 4
+
+    if(pol == "LTin"):
+        return 5
+
+    if(pol == "UTout"):
+        return 6
+
+    if(pol == "LTout"):
+        return 7
+
+    return -999
 
 # The Bethe-Heitler cross-section contribute to four polarization configurations
 def dsigma_BH(y: float, xB: float, t: float, Q: float, phi: float, pol):
+    # all the inputs are arrays of length (N)
 
+
+    pol_index = _pol_to_index(pol)
+    
+    return __dsigma_BH(y, xB, t, Q, phi, pol_index)
+
+
+# The Bethe-Heitler cross-section contribute to four polarization configurations
+@vectorize(["float64(float64, float64, float64, float64, float64, int32)"])
+def __dsigma_BH(y: float, xB: float, t: float, Q: float, phi: float, pol_index: int):
     prefac_BH = conv * Gamma_prefac(y, xB, Q) * t ** (-2)
 
     # For unpolarized/longitudinally polarized target, integrate over dphi_S gives an extra factor of 2 * pi.
 
-    if(pol == "UU"):
+    if(pol_index == 0):
         return 2 * Pi * prefac_BH * (A_BH(y, xB, t, Q, phi) * ( F1_FF(t) ** 2 - t / (4 * M ** 2) * F2_FF(t) ** 2 ) + B_BH(y, xB, t, Q, phi) * ( F1_FF(t)+ F2_FF(t) ) ** 2 )
     
-    if(pol == "LL"):
+    if(pol_index == 3):
         return 2 * Pi * prefac_BH * (At_BH_L(y, xB, t, Q, phi) * ( F1_FF(t) * F2_FF(t) + F2_FF(t) ** 2 ) + Bt_BH_L(y, xB, t, Q, phi) * ( F1_FF(t)+ F2_FF(t) ) ** 2 )
     
-    if(pol == "LTin"):
+    if(pol_index == 5):
         return prefac_BH * (At_BH_Tin(y, xB, t, Q, phi) * ( F1_FF(t) * F2_FF(t) + F2_FF(t) ** 2 ) + Bt_BH_Tin(y, xB, t, Q, phi) * ( F1_FF(t)+ F2_FF(t) ) ** 2 )
     
-    if(pol == "LTout"):
+    if(pol_index == 7):
         return prefac_BH * (At_BH_Tout(y, xB, t, Q, phi) * ( F1_FF(t) * F2_FF(t) + F2_FF(t) ** 2 ) + Bt_BH_Tout(y, xB, t, Q, phi) * ( F1_FF(t)+ F2_FF(t) ) ** 2 )
     
     return 0
 
+
 def dsigma_DVCS(y: float, xB: float, t: float, Q: float, phi: float, pol, HCFF: complex, ECFF: complex, HtCFF: complex, EtCFF: complex):
 
+    pol_index = _pol_to_index(pol)
+
+    return __dsigma_DVCS(y, xB, t, Q, phi, pol_index, HCFF, ECFF, HtCFF, EtCFF)
+
+
+@vectorize(["float64(float64, float64, float64, float64, int32, complex128, complex128, complex128, complex128)"])
+def __dsigma_DVCS(y: float, xB: float, t: float, Q: float, phi: float, pol_index, HCFF: complex, ECFF: complex, HtCFF: complex, EtCFF: complex):
     prefac_DVCS = conv * Gamma_prefac(y, xB, Q) * Q ** (-4) 
 
     Xi = xi(xB, t, Q)
 
     # For unpolarized/longitudinally polarized target, integrate over dphi_S gives an extra factor of 2 * pi.
 
-    if(pol == "UU"):
+    if(pol_index == 0):
         return 2 * Pi * prefac_DVCS * 4 * h_pureDVCS(y, xB, t, Q, phi) * Real( (1 - Xi ** 2) * (Conjugate(HCFF) * HCFF + Conjugate(HtCFF) * HtCFF ) - t / (4 * M ** 2) * ( Conjugate(ECFF)* ECFF + Xi ** 2 * Conjugate(EtCFF)* EtCFF) - Xi ** 2 * (Conjugate(ECFF)* ECFF + Conjugate(ECFF) * HCFF + Conjugate(HCFF)* ECFF +   Conjugate(EtCFF) * HtCFF + Conjugate(HtCFF)* EtCFF) )
     
-    if(pol == "UTout"):
+    if(pol_index == 6):
         return prefac_DVCS * 4 * N(xB, t, Q) * h_pureDVCS(y,xB,t,Q,phi) * Imag( Conjugate(HCFF) * ECFF - Xi * Conjugate(HtCFF) * EtCFF) 
 
-    if(pol == "LL"):
+    if(pol_index == 3):
         return 2 * Pi * prefac_DVCS * 8 * hminus_pureDVCS(y, xB, t, Q, phi) * Real( (1 - Xi ** 2) * Conjugate(HtCFF) * HCFF  - Xi ** 2 * ( Conjugate(HtCFF)* ECFF + Conjugate(EtCFF)* HCFF) - (Xi ** 2/ (1 + Xi) + t /(4 * M ** 2))* Xi* Conjugate(EtCFF) * ECFF)
     
-    if(pol == "LTin"):
+    if(pol_index == 5):
         return prefac_DVCS * 4 * N(xB, t, Q) * hminus_pureDVCS(y,xB,t,Q,phi) * Real( Conjugate(HtCFF) * ECFF - Xi * Conjugate(EtCFF) * HCFF - Xi ** 2/ (1 + Xi) * Conjugate(EtCFF) * ECFF ) 
 
     return 0
 
 def dsigma_INT(y: float, xB: float, t: float, Q: float, phi: float, pol, HCFF: complex, ECFF: complex, HtCFF: complex, EtCFF: complex):
+    pol_index = _pol_to_index(pol)
+
+    return __dsigma_INT(y, xB, t, Q, phi, pol_index, HCFF, ECFF, HtCFF, EtCFF)
+
+    
+
+
+@vectorize(["float64(float64, float64, float64, float64, float64, int32, complex128, complex128, complex128, complex128)"])
+def __dsigma_INT(y: float, xB: float, t: float, Q: float, phi: float, pol_index, HCFF: complex, ECFF: complex, HtCFF: complex, EtCFF: complex):
 
     prefac_INT = conv * Gamma_prefac(y, xB, Q) * Q ** (-2) * (-t) ** (-1)
 
@@ -84,28 +142,28 @@ def dsigma_INT(y: float, xB: float, t: float, Q: float, phi: float, pol, HCFF: c
     
     # For unpolarized/longitudinally polarized target, integrate over dphi_S gives an extra factor of 2 * pi.
 
-    if(pol == "UU"):
+    if(pol_index == 0):
         return 2 * Pi * prefac_INT * Real(A_INT_unp(y, xB, t, Q, phi) * (HCFF * F1_FF(t) - t/ (4* M ** 2) * ECFF * F2_FF(t)) + B_INT_unp(y, xB, t, Q, phi) * (F1_FF(t) + F2_FF(t)) * (HCFF + ECFF) + C_INT_unp(y, xB, t, Q, phi) * (F1_FF(t) + F2_FF(t)) * HtCFF )
 
-    if(pol == "LU"):
+    if(pol_index == 1):
         return 2 * Pi * prefac_INT * Imag(A_INT_pol(y, xB, t, Q, phi) * (HCFF * F1_FF(t) - t/ (4* M ** 2) * ECFF * F2_FF(t)) + B_INT_pol(y, xB, t, Q, phi) * (F1_FF(t) + F2_FF(t)) * (HCFF + ECFF) + C_INT_pol(y, xB, t, Q, phi) * (F1_FF(t) + F2_FF(t)) * HtCFF )
 
-    if(pol == "UL"):
+    if(pol_index == 2):
         return 2 * Pi * prefac_INT * Imag(At_INT_unp(y, xB, t, Q, phi) * ( F1_FF(t) * (HtCFF - Xi ** 2/ (1 + Xi) * EtCFF) - F2_FF(t) * t/ (4 * M ** 2) * Xi* EtCFF ) + Bt_INT_unp(y, xB, t, Q, phi) * (F1_FF(t) + F2_FF(t)) * (HtCFF  + Xi/ (1 + Xi ) * EtCFF) - Ct_INT_unp(y, xB, t, Q, phi) * (F1_FF(t) + F2_FF(t)) * (HCFF  + Xi/ (1 + Xi ) * ECFF)  )
 
-    if(pol == "LL"):
+    if(pol_index == 3):
         return 2 * Pi * prefac_INT * (-1) * Real(At_INT_pol(y, xB, t, Q, phi) * ( F1_FF(t) * (HtCFF - Xi ** 2/ (1 + Xi) * EtCFF) - F2_FF(t) * t/ (4 * M ** 2) * Xi* EtCFF ) + Bt_INT_pol(y, xB, t, Q, phi) * (F1_FF(t) + F2_FF(t)) * (HtCFF  + Xi/ (1 + Xi ) * EtCFF) - Ct_INT_pol(y, xB, t, Q, phi) * (F1_FF(t) + F2_FF(t)) * (HCFF  + Xi/ (1 + Xi ) * ECFF)  )
     
-    if(pol == "UTin"):
+    if(pol_index == 4):
         return prefac_INT * 2 / N(xB, t, Q) * Imag( At_INT_unp(y, xB, t, Q, phi) * ( Xi * F1_FF(t) * ( Xi * HtCFF + (Xi ** 2 /(1 + Xi) + t/ (4 * M ** 2)) * EtCFF) + F2_FF(t) * t /(4 * M ** 2) *( (Xi ** 2 -1) * HtCFF + Xi ** 2 * EtCFF ) ) + Bt_INT_unp(y, xB, t, Q, phi) * (F1_FF(t) + F2_FF(t)) * (HtCFF + (t /(4 * M ** 2)- Xi/(1 + Xi) )* Xi *EtCFF) + Ct_INT_unp(y, xB, t, Q, phi) * (F1_FF(t) + F2_FF(t)) * (Xi * HCFF + (t /(4 * M ** 2) + Xi ** 2 /(1 + Xi) )* ECFF) )
 
-    if(pol == "LTin"):
+    if(pol_index == 5):
         return prefac_INT * (-2) / N(xB, t, Q) * Real( At_INT_pol(y, xB, t, Q, phi) * ( Xi * F1_FF(t) * ( Xi * HtCFF + (Xi ** 2 /(1 + Xi) + t/ (4 * M ** 2)) * EtCFF) + F2_FF(t) * t /(4 * M ** 2) *( (Xi ** 2 -1) * HtCFF + Xi ** 2 * EtCFF ) ) + Bt_INT_pol(y, xB, t, Q, phi) * (F1_FF(t) + F2_FF(t)) * (HtCFF + (t /(4 * M ** 2)- Xi/(1 + Xi) )* Xi *EtCFF) + Ct_INT_pol(y, xB, t, Q, phi) * (F1_FF(t) + F2_FF(t)) * (Xi * HCFF + (t /(4 * M ** 2) + Xi ** 2 /(1 + Xi) )* ECFF) )
 
-    if(pol == "UTout"):
+    if(pol_index == 6):
         return prefac_INT * (-2) / N(xB, t, Q) * Imag( A_INT_unp(y, xB, t, Q, phi) * (F1_FF(t) * (Xi ** 2 * HCFF +(Xi ** 2 + t/(4 * M **2)) * ECFF) + F2_FF(t) *t /(4 * M ** 2) * ((Xi ** 2 -1)* HCFF + Xi ** 2 * ECFF) ) +  B_INT_unp(y, xB, t, Q, phi) * (F1_FF(t) + F2_FF(t)) * (HCFF + t/ (4 * M **2) *ECFF) - Xi * C_INT_unp(y, xB, t, Q, phi) * (F1_FF(t) + F2_FF(t)) * (HtCFF + t/ (4 * M **2) *EtCFF) )
 
-    if(pol == "LTout"):
+    if(pol_index == 7):
         return prefac_INT * (2) / N(xB, t, Q) * Real( A_INT_pol(y, xB, t, Q, phi) * (F1_FF(t) * (Xi ** 2 * HCFF +(Xi ** 2 + t/(4 * M **2)) * ECFF) + F2_FF(t) *t /(4 * M ** 2) * ((Xi ** 2 -1)* HCFF + Xi ** 2 * ECFF) ) +  B_INT_pol(y, xB, t, Q, phi) * (F1_FF(t) + F2_FF(t)) * (HCFF + t/ (4 * M **2) *ECFF) - Xi * C_INT_pol(y, xB, t, Q, phi) * (F1_FF(t) + F2_FF(t)) * (HtCFF + t/ (4 * M **2) *EtCFF) )
 
     return -1
