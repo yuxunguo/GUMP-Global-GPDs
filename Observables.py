@@ -32,8 +32,71 @@ NFEFF = 2
 #Relative precision Goal of quad set to be 1e-3
 Prec_Goal = 1e-3
 
+
+
+
+# def flv_to_indx(flv:str):
+#     '''
+#     flv is the flavor. It is a string
+
+#     This function will cast each flavor to an auxiliary length 3 array
+
+    # Output shape: ( 3)
+
+    
+
+    # '''
+    # if(flv=="u"):
+    #     return np.array([1, 0, 0])
+    # if(flv=="d"):
+    #     return np.array([0, 1, 0])
+    # if(flv=="g"):
+    #     return np.array([0, 0, 1])
+    # if(flv=="NS"):
+    #     return np.array([1, -1, 0])
+    # if(flv=="S"):
+    #     return np.array([1, 1, 0])
+
+def flv_to_indx(flv:str):
+    '''
+    flv is the flavor. It is a string
+
+    This function will cast each flavor to an auxiliary length 3 array
+
+    Output shape: scalar int
+
+    
+
+    '''
+    if(flv=="u"):
+        return 0
+    if(flv=="d"):
+        return 1
+    if(flv=="g"):
+        return 2
+    if(flv=="NS"):
+        return 3
+    if(flv=="S"):
+        return 4
+
+def flvs_to_indx(flvs):
+    '''flvs is an array of strings (N)
+    Output: (N)
+    '''
+    output = [flv_to_indx(flv) for flv in flvs]
+    return np.array(output, dtype=np.int32)
+
 #The flavor interpreter to return the corresponding flavor combination 
 def Flv_Intp(Flv_array: np.array, flv):
+
+    """
+    Flv_array: (N, 3) complex
+    flv: (N) str
+
+    return result: (N) complex
+    """
+    
+    '''
     if(flv == "u"):
         return Flv_array[0]
     if(flv == "d"):
@@ -44,13 +107,20 @@ def Flv_Intp(Flv_array: np.array, flv):
         return Flv_array[0] - Flv_array[1]
     if(flv == "S"):
         return Flv_array[0] + Flv_array[1]
+    '''
+    _flv_index = flvs_to_indx(flv)
+    return np.choose(_flv_index, [Flv_array[...,0], Flv_array[..., 1], Flv_array[..., 2],\
+                        Flv_array[..., 0]-Flv_array[..., 1], Flv_array[..., 0]+Flv_array[..., 1]])
+    # return np.einsum('...j,...j', Flv_array, _helper) # (N)
+
+
     
 # Euler Beta function B(a,b) with complex arguments
 def beta_loggamma(a: complex, b: complex) -> complex:
     return np.exp(sp.special.loggamma(a) + sp.special.loggamma(b)-sp.special.loggamma(a + b))
 
 # Conformal moment in j space F(j)
-def ConfMoment(j: complex, t: float, ParaSet: np.ndarray):
+def ConfMoment(j: complex, t: float, ParaSets: np.ndarray):
     """
     Conformal moment in j space F(j)
 
@@ -61,30 +131,78 @@ def ConfMoment(j: complex, t: float, ParaSet: np.ndarray):
             alphap = ParaSet[3]: regge trajectory alpha(t) = alpha + alphap * t
         j: conformal spin j (conformal spin is actually j+2 but anyway)
         t: momentum transfer squared t
-        bexp: extra exponential term exp(bexp*t)
+
+    Originally, ParaSet have shape (5).
+    Output is a scalar
+    
+    After vectorization, there are a few different usages:
+        1. t has shape (N), ParaSet has shape (N, 5). Output have shape (N)
+        2. t has shape (N), ParaSet has shape (N, m1, 5). Output have shape (N, m1)
+        3. t has shape (N), ParaSet has shape (N, m1, m2, 5). Output have shape (N, m1, m2)
+        4. and so on
+        
+    Recommended usage:
+        t has shape (N), ParaSet has shape (N, 5, init_NumofAnsatz, 5)
+        output will be (N, 5, init_NumofAnsatz)
+
+    j should only be a scalar. It cannot be an ndarray before I make more changes
+    Right now, j can be a vector, but if you want to do integration, then better pass j as scalar.
 
     Returns:
         Conformal moment in j space F(j,t)
     """
 
-    [norm, alpha, beta, alphap, bexp] = ParaSet
+    # [norm, alpha, beta, alphap, bexp] = ParaSet
+    norm = ParaSets[..., 0]  # in recommended usage, has shape (N, 5, init_NumofAnsatz)
+    alpha = ParaSets[..., 1] # in general, can have shape (N), (N, m1), (N, m1, m2), ......
+    beta  = ParaSets[..., 2]
+    alphap = ParaSets[..., 3]
+    bexp = ParaSets[..., 4]
+    
+    if np.ndim(norm) < np.ndim(t):
+        raise ValueError("Input format is wrong.")
+    
+    t_new_shape = list(np.shape(t)) + [1]*(np.ndim(norm) - np.ndim(t))
+    j_new_shape = list(np.shape(j)) + [1]*(np.ndim(norm) - np.ndim(t))  # not a typo, it is np.ndim(norm) - np.ndim(t)
+    t = np.reshape(t, t_new_shape) # to make sure t can be broadcasted with norm, alpha, etc.
+    # t will have shape (N) or (N, m1) or (N, m1, m2)... depends
+    j = np.reshape(j, j_new_shape)
+
+
     return norm * beta_loggamma (j + 1 - alpha, 1 + beta) * (j + 1  - alpha)/ (j + 1 - alpha - alphap * t) * np.exp( bexp * t)
+    # (N) or (N, m1) or (N, m1, m2) .... depends on usage
+    # For the recommended usage, the output is (N, 5, init_NumofAnsatz)
 
 def Moment_Sum(j: complex, t: float, ParaSets: np.ndarray) -> complex:
     """
     Sum of the conformal moments when the ParaSets contain more than just one set of parameters 
 
     Args:
-        ParaSets : contains [ParaSet1, ParaSet0, ParaSet2,...] with each ParaSet = [norm, alpha, beta ,alphap, bexp] for valence and sea distributions repsectively.        
+        ParaSets : contains [ParaSet1, ParaSet0, ParaSet2,...] with each ParaSet = [norm, alpha, beta ,alphap] for valence and sea distributions repsectively.        
         j: conformal spin j (or j+2 but anyway)
         t: momentum transfer squared t
-        bexp: extra exponential term exp(bexp*t)
+
+        Originally, ParaSets have shape (init_NumofAnsatz, 4). In practice, it is (1, 4)
+        output is a scalar
+
+        Here, after vectorization, 
+            t has shape (N)
+            ParaSets has (N, 5, init_NumofAnsatz, 5)
+            output will have shape (N, 5)  # here, the 5 means 5 different species [u - ubar, ubar, d - dbar, dbar, g]
+        
+        More generally, 
+            t have shape (N)
+            ParaSets has shape (N, i, 5 ) or (N, m1, i, 5) or (N, m1, m2, i, 5) and so on
+            output will have shape (N) or (N, m1) or (N, m2)...... etc.
 
     Returns:
         sum of conformal moments over all the ParaSet
     """
 
-    return np.sum(np.array( list(map(lambda paraset: ConfMoment(j, t, paraset), ParaSets)) ))
+    #return np.sum(np.array( list(map(lambda paraset: ConfMoment(j, t, paraset), ParaSets)) ))
+
+    # ConfMoment_vec(j, t, ParaSets) should have shape (N, 5, init_NumofAnsatz)
+    return np.sum(ConfMoment(j, t, ParaSets) ,  axis=-1) # (N, 5)
 
 
 # precision for the hypergeometric function
@@ -100,11 +218,18 @@ def InvMellinWaveFuncQ(s: complex, x: float) -> complex:
 
     Returns:
         Wave function for inverse Mellin transformation: x^(-s) for x>0 and 0 for x<0
-    """  
+
+    vectorized version of InvMellinWaveFuncQ
+    """ 
+
+    ''' 
     if(x > 0):
         return x ** (-s)
     
     return 0
+    '''
+    return np.where(x>0, x**(-s), 0)
+
 
 def InvMellinWaveFuncG(s: complex, x: float) -> complex:
     """ 
@@ -117,10 +242,14 @@ def InvMellinWaveFuncG(s: complex, x: float) -> complex:
     Returns:
         Gluon wave function for inverse Mellin transformation: x^(-s+1) for x>0 and 0 for x<0
     """  
+
+    '''
     if(x > 0):
         return x ** (-s+1)
     
     return 0
+    '''
+    return np.where(x>0, x**(-s+1), 0)
 
 def ConfWaveFuncQ(j: complex, x: float, xi: float) -> complex:
     """ 
@@ -191,36 +320,75 @@ class GPDobserv (object) :
         """
         t-denpendent PDF for given flavor (flv = "u", "d", "S", "NS" or "g")
         Args:
-            ParaAll = [Para_Forward, Para_xi2, Para_xi4]
+            ParaAll = [Para_Forward, Para_xi2]
             Para_Forward = [Para_Forward_uV, Para_Forward_ubar, Para_Forward_dV, Para_Forward_dbar, Para_Forward_g]
             Para_Forward_i: parameter sets for valence u quark (uV), sea u quark (ubar), valence d quark (dV), sea d quark (dbar) and gluon (g)
-            Para_xi2, Para_xi4: only matter for non-zero xi (NOT needed here but the parameters are passed for consistency with GPDs)
+            Para_xi2: only matter for non-zero xi (NOT needed here but the parameters are passed for consistency with GPDs)
 
         Returns:
             f(x,t) in for the given flavor
         """
         
-        Para_Forward = ParaAll[0]
+        # originally, all parameters should be (4, 3, 5, 1, 5)
+        # ParaAll would be a ( 3, 5, 1, 5) matrix
+        # this means Para_Forward would be a matrix of (5, 1, 5)
+
+        # For now, I will pass ParaAll as (N, 3, 5, 1, 5) array
+        # This is not optimal for performance, but it somewhat retains backwards compatibility
+        # For better speed, more changes are needed. 
+
+        Para_Forward = ParaAll[..., 0, :, :, :] # (N, 3, 5, 1, 5) 
 
         # The contour for inverse Meliin transform. Note that S here is the analytically continued n which is j + 1 not j !
         reS = inv_Mellin_intercept + 1
         Max_imS = inv_Mellin_cutoff 
 
         def InvMellinWaveConf(s: complex):
+            # s is scalar (but it actually can be an ndarray as long as broadcasting rule allows it)
 
+            '''
             InvMellinWaveC = np.array([[InvMellinWaveFuncQ(s, self.x), InvMellinWaveFuncQ(s, self.x) - self.p * InvMellinWaveFuncQ(s, -self.x),0,0,0],
                                        [0,0,InvMellinWaveFuncQ(s, self.x), InvMellinWaveFuncQ(s, self.x) - self.p * InvMellinWaveFuncQ(s, -self.x),0],
-                                       [0,0,0,0,(InvMellinWaveFuncG(s, self.x)+ self.p * InvMellinWaveFuncG(s, -self.x))]])
+                                       [0,0,0,0,(InvMellinWaveFuncG(s, self.x)+ self.p * InvMellinWaveFuncG(s, -self.x))]]) # (3, 5) matrix
+                                       # in my case, I want it to be (N, 3, 5) ndarray
+            '''
 
-            return InvMellinWaveC
+            # InvMellinWaveFuncQ(s, self.x) # shape (N)
+            # self.p * InvMellinWaveFuncQ(s, -self.x) # shape (N)
+
+            helper1 = np.array([[1, 1, 0, 0, 0],
+                                [0, 0, 1, 1, 0],
+                                [0, 0, 0, 0, 0]])
+            helper2 = np.array([[0, -1, 0, 0, 0],
+                                [0, 0, 0, -1, 0],
+                                [0, 0, 0, 0, 0]])
+            helper3 = np.array([[0, 0, 0, 0, 0],
+                                [0, 0, 0, 0, 0],
+                                [0, 0, 0, 0, 1]])
+
+            InvMellinWaveC =np.einsum('..., ij->...ij', InvMellinWaveFuncQ(s, self.x), helper1) \
+                            + np.einsum('... ,ij->...ij', self.p * InvMellinWaveFuncQ(s, -self.x), helper2) \
+                            + np.einsum('... ,ij->...ij', (InvMellinWaveFuncG(s, self.x)+ self.p * InvMellinWaveFuncG(s, -self.x)), helper3)
+
+
+            return InvMellinWaveC #(N, 3, 5)
 
         def Integrand_inv_Mellin(s: complex):
             # Calculate the unevolved moments in the orginal flavor basis
-            ConfFlav = np.array( list(map(lambda paraset: Moment_Sum(s - 1, self.t, paraset), Para_Forward)) )
-            # Return the evolved moments with x^(-s) for quark or x^(-s+1) for gluon for the given flavor flv = "u", "d", "S", "NS" or "g"
-            return Flv_Intp(np.einsum('...j,j', InvMellinWaveConf(s), Moment_Evo(s - 1, NFEFF, self.p, self.Q, ConfFlav)), flv)
+            # originally, Para_Forward will have shape (5, 1, 5) now (N, 5, 1, 5)  # in previous version is is (5, 1, 4) and (N, 5, 1, 4)
 
-        return quad(lambda imS : np.real(Integrand_inv_Mellin(reS + 1j * imS)/(2 * np.pi)) , - Max_imS, + Max_imS, epsrel = Prec_Goal)[0]
+            # ConfFlav = np.array( list(map(lambda paraset: Moment_Sum(s - 1, self.t, paraset), Para_Forward)) )  
+            ConfFlav = Moment_Sum(s-1, self.t, Para_Forward) # shape (N, 5)
+            # Return the evolved moments with x^(-s) for quark or x^(-s+1) for gluon for the given flavor flv = "u", "d", "S", "NS" or "g"
+
+            #  InvMellinWaveConf(s): (N, 3, 5)
+            
+            # the result of np.einsum will be (N, 3)
+            # Flv_Intp  result (N)
+            return Flv_Intp(np.einsum('...ij,...j->...i', InvMellinWaveConf(s), Moment_Evo(s - 1, NFEFF, self.p, self.Q, ConfFlav)), flv)
+
+        return quad_vec(lambda imS : np.real(Integrand_inv_Mellin(reS + 1j * imS)/(2 * np.pi)) , - Max_imS, + Max_imS, epsrel = Prec_Goal)[0]
+
 
     def CFF(self, ParaAll):
         """
@@ -238,26 +406,64 @@ class GPDobserv (object) :
         Returns:
             CFF \mathcal{F}(xi, t) = Q_u^2 F_u + Q_d^2 F_d
         """
-        [Para_Forward, Para_xi2, Para_xi4] = ParaAll
+        #[Para_Forward, Para_xi2, Para_xi4] = ParaAll  # each (N, 5, 1, 5)
+        Para_Forward = ParaAll[..., 0, :, :, :]  # each (N, 5, 1, 5)
+        Para_xi2     = ParaAll[..., 1, :, :, :]
+        Para_xi4     = ParaAll[..., 2, :, :, :]
 
         # The contour for Mellin-Barnes integral in terms of j not n.
         reJ = Mellin_Barnes_intercept 
         Max_imJ = Mellin_Barnes_cutoff 
 
         def Integrand_Mellin_Barnes_CFF(j: complex):
+            # j is a scalar
+
+            '''
             ConfFlav = np.array( list(map(lambda paraset: Moment_Sum(j, self.t, paraset), Para_Forward)) )
             ConfFlav_xi2 = np.array( list(map(lambda paraset: Moment_Sum(j, self.t, paraset), Para_xi2)) )
             ConfFlav_xi4 = np.array( list(map(lambda paraset: Moment_Sum(j, self.t, paraset), Para_xi4)) )
+            '''
+            ConfFlav     = Moment_Sum(j, self.t, Para_Forward) #(N, 5)
+            ConfFlav_xi2 = Moment_Sum(j, self.t, Para_xi2)
+            ConfFlav_xi4 = Moment_Sum(j, self.t, Para_xi4)
 
-            EvoConf_Wilson = (CWilson(j) * Moment_Evo(j, NFEFF, self.p, self.Q, ConfFlav) + CWilson(j+2) * Moment_Evo(j+2, NFEFF, self.p, self.Q, ConfFlav_xi2) + CWilson(j+4) * Moment_Evo(j+4, NFEFF, self.p, self.Q, ConfFlav_xi4))
+            # shape (N, 5)
+            EvoConf_Wilson = (CWilson(j) * Moment_Evo(j, NFEFF, self.p, self.Q, ConfFlav) \
+                                + CWilson(j+2) * Moment_Evo(j+2, NFEFF, self.p, self.Q, ConfFlav_xi2) \
+                                + CWilson(j+4) * Moment_Evo(j+4, NFEFF, self.p, self.Q, ConfFlav_xi4))
 
-            return np.einsum('j,j', CFF_trans, EvoConf_Wilson)
+            return np.einsum('j, ...j', CFF_trans, EvoConf_Wilson) # shape (N)
 
+        def Integrand_CFF(imJ: complex):
+            # mask = (self.p==1) # assume p can only be either 1 or -1
+
+            result = np.ones_like(self.p) * self.xi ** (-reJ - 1j * imJ - 1) * Integrand_Mellin_Barnes_CFF(reJ + 1j * imJ) / 2
+
+            if self.p==1:
+                result *= (1j + np.tan((reJ + 1j * imJ) * np.pi / 2))
+            else:
+                result *= (1j - 1/np.tan((reJ + 1j * imJ) * np.pi / 2))
+            '''
+            if np.ndim(result)>0:
+                result[mask] *= (1j + np.tan((reJ + 1j * imJ) * np.pi / 2))
+                result[~mask] *= (1j - 1/np.tan((reJ + 1j * imJ) * np.pi / 2))
+            else: # scalar
+                if self.p==1:
+                    result *= (1j + np.tan((reJ + 1j * imJ) * np.pi / 2))
+                else:
+                    result *= (1j - 1/np.tan((reJ + 1j * imJ) * np.pi / 2))
+            '''
+            return result
+
+        return quad_vec(Integrand_CFF, - Max_imJ, + Max_imJ, epsrel = Prec_Goal)[0]
+
+        '''
         if (self.p == 1):
             return quad_vec(lambda imJ : self.xi ** (-reJ - 1j * imJ - 1) * (1j + np.tan((reJ + 1j * imJ) * np.pi / 2)) *Integrand_Mellin_Barnes_CFF(reJ + 1j * imJ) / 2, - Max_imJ, + Max_imJ, epsrel = Prec_Goal)[0]
         
         if (self.p == -1):
             return quad_vec(lambda imJ : self.xi ** (-reJ - 1j * imJ - 1) * (1j - 1/np.tan((reJ + 1j * imJ) * np.pi / 2)) *Integrand_Mellin_Barnes_CFF(reJ + 1j * imJ) / 2, - Max_imJ, + Max_imJ, epsrel = Prec_Goal)[0]
+        '''
 
     def GPD(self, flv, ParaAll):
         """
@@ -316,6 +522,10 @@ class GPDobserv (object) :
             Generalized Form Factors A_{j0}(t) which is the xi^0 term of the nth (n= j+1) Mellin moment of GPD int dx x^j F(x,xi,t) for quark and int dx x^(j-1) F(x,xi,t) for gluon
             Note for gluon, GPD reduce to x*g(x), not g(x) so the Mellin moment will have a mismatch
         """
+        # j, flv both have shape (N)
+        # ParaAll: (N, 3, 5, 1, 5)
+
+        '''
         Para_Forward = ParaAll[0]
         
         GFF_trans = np.array([[1,1 - self.p * (-1) ** j,0,0,0],
@@ -329,3 +539,27 @@ class GPDobserv (object) :
                 return Flv_Intp( np.array([ConfFlav[0],ConfFlav[2],ConfFlav[4]]) , flv)
         
         return Flv_Intp(np.einsum('...j,j', GFF_trans, Moment_Evo(j, NFEFF, self.p, self.Q, ConfFlav)), flv)
+        '''
+
+        Para_Forward = ParaAll[..., 0, :, :, :]  # (N, 5, 1, 5)
+        _helper1 = np.array([[1, 1, 0, 0, 0],
+                             [0, 0, 1, 1, 0],
+                             [0, 0, 0, 0, 1/2]])
+        _helper2 = np.array([[0, -1, 0, 0, 0],
+                             [0, 0, 0, -1, 0],
+                             [0, 0, 0, 0, -1/2]])
+        GFF_trans = np.einsum('... , ij->...ij', self.p * (-1)**j, _helper2) + _helper1  # (N, 3, 5)
+        ConfFlav = Moment_Sum(j, self.t, Para_Forward) # (N, 5)
+
+        
+
+        # the result of np.einsum will be (N, 3)
+        # Flv_Intp  result (N)
+        mask = ((j==0) & (self.p==1))
+        result = np.empty_like(self.Q)
+
+        result[mask] = Flv_Intp(ConfFlav[mask][:, [0,2,4] ] , flv[mask] ) # (N_mask)
+        result[~mask] = Flv_Intp(np.einsum('...ij, ...j->...i', GFF_trans[~mask], Moment_Evo(j[~mask], NFEFF, self.p[~mask], self.Q[~mask], ConfFlav[~mask])), flv[~mask]) # (N_~mask)
+        return result #(N)
+
+        

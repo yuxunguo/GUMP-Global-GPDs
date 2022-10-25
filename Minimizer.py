@@ -42,71 +42,107 @@ DVCSxsec_group_data = list(map(lambda set: DVCSxsec_data[(DVCSxsec_data['xB'] ==
 
 DVCS_HERA_data = pd.read_csv('GUMPDATA/DVCSxsec_HERA.csv', header = None, names = ['y', 'xB', 't', 'Q', 'f', 'delta f', 'pol'] , dtype = {'y': float, 'xB': float, 't': float, 'Q': float, 'f': float, 'delta f': float, 'pol': str})
 
-def PDF_theo(PDF_input: np.array, Para: np.array):
-    [x, t, Q, f, delta_f, spe, flv] = PDF_input
+
+def PDF_theo(PDF_input: pd.DataFrame, Para: np.array):
+    # [x, t, Q, f, delta_f, spe, flv] = PDF_input
+    xs = PDF_input['x'].to_numpy()
+    ts = PDF_input['t'].to_numpy()
+    Qs = PDF_input['Q'].to_numpy()
+    flvs = PDF_input['flv'].to_numpy()
+    spes = PDF_input['spe'].to_numpy()
+ 
     xi = 0
+
+    ps = np.where(spes<=1, 1, -1)
+    spes = np.where(spes<=1, spes, spes-2)
+
+    '''
     if(spe == 0 or spe == 1):
         spe, p = spe, 1
 
     if(spe == 2 or spe == 3):
         spe, p = spe - 2 , -1
+    '''
+    # Para: (4, 2, 5, 1, 4)
 
-    Para_spe = Para[spe]
-    PDF_theo = GPDobserv(x, xi, t, Q, p)
-    return PDF_theo.tPDF(flv, Para_spe)     
+    Para_spe = Para[spes] # fancy indexing. Output (N, 3, 5, 1, 5)
+    PDF_theo = GPDobserv(xs, xi, ts, Qs, ps)
+    return PDF_theo.tPDF(flvs, Para_spe)  # array length N
 
-def tPDF_theo(tPDF_input: np.array, Para: np.array):
-    [x, t, Q, f, delta_f, spe, flv] = tPDF_input
-    xi = 0
-    if(spe == 0 or spe == 1):
-        spe, p = spe, 1
-
-    if(spe == 2 or spe == 3):
-        spe, p = spe - 2 , -1
-
-    Para_spe = Para[spe]
-    tPDF_theo = GPDobserv(x, xi, t, Q, p)
-    return tPDF_theo.tPDF(flv, Para_spe)        
+tPDF_theo = PDF_theo
+      
 
 def GFF_theo(GFF_input: np.array, Para):
-    [j, t, Q, f, delta_f, spe, flv] = GFF_input
+    # [j, t, Q, f, delta_f, spe, flv] = GFF_input
+    js = GFF_input['j'].to_numpy()
+    ts = GFF_input['t'].to_numpy()
+    Qs = GFF_input['Q'].to_numpy()
+    fs = GFF_input['f'].to_numpy()
+    delta_fs = GFF_input['delta f'].to_numpy()
+    flvs = GFF_input['flv'].to_numpy()
+    spes = GFF_input['spe'].to_numpy()
     x = 0
     xi = 0   
+    '''
     if(spe == 0 or spe == 1):
         spe, p = spe, 1
 
     if(spe == 2 or spe == 3):
         spe, p = spe - 2 , -1
+    '''
+    ps = np.where(spes<=1, 1, -1)
+    spes = np.where(spes<=1, spes, spes-2)
 
-    Para_spe = Para[spe]
-    GFF_theo = GPDobserv(x, xi, t, Q, p)
-    return GFF_theo.GFFj0(j, flv, Para_spe)
+    Para_spe = Para[spes] # fancy indexing. Output (N, 3, 5, 1, 5)
+    GFF_theo = GPDobserv(x, xi, ts, Qs, ps)
+    return GFF_theo.GFFj0(js, flvs, Para_spe) # (N)
 
 def CFF_theo(xB, t, Q, Para_Unp, Para_Pol):
     x = 0
     xi = (1/(2 - xB) - (2*t*(-1 + xB))/(Q**2*(-2 + xB)**2))*xB
     H_E = GPDobserv(x, xi, t, Q, 1)
     Ht_Et = GPDobserv(x, xi, t, Q, -1)
-    HCFF = H_E.CFF(Para_Unp[0])
-    ECFF = H_E.CFF(Para_Unp[1])
-    HtCFF = Ht_Et.CFF(Para_Pol[0])
-    EtCFF = Ht_Et.CFF(Para_Pol[1])
-    return [HCFF, ECFF, HtCFF, EtCFF]
+    HCFF = H_E.CFF(Para_Unp[..., 0, :, :, :, :])
+    ECFF = H_E.CFF(Para_Unp[..., 1, :, :, :, :])
+    HtCFF = Ht_Et.CFF(Para_Pol[..., 0, :, :, :, :])
+    EtCFF = Ht_Et.CFF(Para_Pol[..., 1, :, :, :, :])
 
-def DVCSxsec_theo(DVCSxsec_input: np.array, CFF_input: np.array):
-    [y, xB, t, Q, phi, f, delta_f, pol] = DVCSxsec_input    
-    [HCFF, ECFF, HtCFF, EtCFF] = CFF_input
+    return [ HCFF, ECFF, HtCFF, EtCFF ] # this can be a list of arrays of shape (N)
+    # return np.stack([HCFF, ECFF, HtCFF, EtCFF], axis=-1)
+
+def DVCSxsec_theo(DVCSxsec_input: pd.DataFrame, CFF_input: np.array):
+    # CFF_input is a list of np.arrays
+    # [y, xB, t, Q, phi, f, delta_f, pol] = DVCSxsec_input    
+
+    y = DVCSxsec_input['y'].to_numpy()
+    xB = DVCSxsec_input['xB'].to_numpy()
+    t = DVCSxsec_input['t'].to_numpy()
+    Q = DVCSxsec_input['Q'].to_numpy()
+    phi = DVCSxsec_input['phi'].to_numpy()
+    f = DVCSxsec_input['f'].to_numpy()
+    pol = DVCSxsec_input['pol'].to_numpy()
+
+    [HCFF, ECFF, HtCFF, EtCFF] = CFF_input # each of them have shape (N); scalar is also OK if we use 
     return dsigma_TOT(y, xB, t, Q, phi, pol, HCFF, ECFF, HtCFF, EtCFF)
 
-def DVCSxsec_cost_xBtQ(DVCSxsec_data_xBtQ: np.array, Para_Unp, Para_Pol):
-    [xB, t, Q] = [DVCSxsec_data_xBtQ['xB'].iat[0], DVCSxsec_data_xBtQ['t'].iat[0], DVCSxsec_data_xBtQ['Q'].iat[0]]
-    [HCFF, ECFF, HtCFF, EtCFF] = CFF_theo(xB, t, Q, Para_Unp, Para_Pol)
-    DVCS_pred_xBtQ = np.array(list(map(partial(DVCSxsec_theo, CFF_input = [HCFF, ECFF, HtCFF, EtCFF]), np.array(DVCSxsec_data_xBtQ))))
+def DVCSxsec_cost_xBtQ(DVCSxsec_data_xBtQ: pd.DataFrame, Para_Unp, Para_Pol):
+    [xB, t, Q] = [DVCSxsec_data_xBtQ['xB'].iat[0], DVCSxsec_data_xBtQ['t'].iat[0], DVCSxsec_data_xBtQ['Q'].iat[0]] 
+    [HCFF, ECFF, HtCFF, EtCFF] = CFF_theo(xB, t, Q, Para_Unp, Para_Pol) # scalar for each of them
+    # DVCS_pred_xBtQ = np.array(list(map(partial(DVCSxsec_theo, CFF_input = [HCFF, ECFF, HtCFF, EtCFF]), np.array(DVCSxsec_data_xBtQ))))
+    DVCS_pred_xBtQ = DVCSxsec_theo(DVCSxsec_data_xBtQ, CFF_input = [HCFF, ECFF, HtCFF, EtCFF])
     return np.sum(((DVCS_pred_xBtQ - DVCSxsec_data_xBtQ['f'])/ DVCSxsec_data_xBtQ['delta f']) ** 2 )
 
-def DVCSxsec_HERA_theo(DVCSxsec_data_HERA: np.array, Para_Unp, Para_Pol):
-    [y, xB, t, Q, f, delta_f, pol]  = DVCSxsec_data_HERA
-    [HCFF, ECFF, HtCFF, EtCFF] = CFF_theo(xB, t, Q, Para_Unp, Para_Pol)
+def DVCSxsec_HERA_theo(DVCSxsec_data_HERA: pd.DataFrame, Para_Unp, Para_Pol):
+    # [y, xB, t, Q, f, delta_f, pol]  = DVCSxsec_data_HERA
+    y = DVCSxsec_data_HERA['y'].to_numpy()
+    xB = DVCSxsec_data_HERA['xB'].to_numpy()
+    t = DVCSxsec_data_HERA['t'].to_numpy()
+    Q = DVCSxsec_data_HERA['Q'].to_numpy()
+    f = DVCSxsec_data_HERA['f'].to_numpy()
+    delta_f = DVCSxsec_data_HERA['delta f'].to_numpy()
+    pol = DVCSxsec_data_HERA['pol'].to_numpy()
+
+    [HCFF, ECFF, HtCFF, EtCFF] = CFF_theo(xB, t, Q, np.expand_dims(Para_Unp, axis=0), np.expand_dims(Para_Pol, axis=0))
     return dsigma_DVCS_HERA(y, xB, t, Q, pol, HCFF, ECFF, HtCFF, EtCFF)
 
 def cost_forward_H(Norm_HuV,    alpha_HuV,    beta_HuV,    alphap_HuV, 
@@ -144,13 +180,16 @@ def cost_forward_H(Norm_HuV,    alpha_HuV,    beta_HuV,    alphap_HuV,
                R_Eu_xi4,    R_Ed_xi4,     R_Eg_xi4,    bexp_HSea]
     
     Para_all = ParaManager_Unp(Paralst)
-    PDF_H_pred = np.array(list(pool.map(partial(PDF_theo, Para = Para_all), np.array(PDF_data_H))))
+    # PDF_H_pred = np.array(list(pool.map(partial(PDF_theo, Para = Para_all), np.array(PDF_data_H))))
+    PDF_H_pred = PDF_theo(PDF_data_H, Para=Para_all)
     cost_PDF_H = np.sum(((PDF_H_pred - PDF_data_H['f'])/ PDF_data_H['delta f']) ** 2 )
 
-    tPDF_H_pred = np.array(list(pool.map(partial(tPDF_theo, Para = Para_all), np.array(tPDF_data_H))))
+    # tPDF_H_pred = np.array(list(pool.map(partial(tPDF_theo, Para = Para_all), np.array(tPDF_data_H))))
+    tPDF_H_pred = tPDF_theo(tPDF_data_H, Para=Para_all)
     cost_tPDF_H = np.sum(((tPDF_H_pred - tPDF_data_H['f'])/ tPDF_data_H['delta f']) ** 2 )
 
-    GFF_H_pred = np.array(list(pool.map(partial(GFF_theo, Para = Para_all), np.array(GFF_data_H))))
+    # GFF_H_pred = np.array(list(pool.map(partial(GFF_theo, Para = Para_all), np.array(GFF_data_H))))
+    GFF_H_pred = GFF_theo(GFF_data_H, Para=Para_all)
     cost_GFF_H = np.sum(((GFF_H_pred - GFF_data_H['f'])/ GFF_data_H['delta f']) ** 2 )
 
     return cost_PDF_H + cost_tPDF_H + cost_GFF_H
@@ -190,13 +229,16 @@ def cost_forward_E(Norm_HuV,    alpha_HuV,    beta_HuV,    alphap_HuV,
                R_Eu_xi4,    R_Ed_xi4,     R_Eg_xi4,    bexp_HSea]
     
     Para_all = ParaManager_Unp(Paralst)
-    PDF_E_pred = np.array(list(pool.map(partial(PDF_theo, Para = Para_all), np.array(PDF_data_E))))
+    # PDF_E_pred = np.array(list(pool.map(partial(PDF_theo, Para = Para_all), np.array(PDF_data_E))))
+    PDF_E_pred = PDF_theo(PDF_data_E, Para=Para_all)
     cost_PDF_E = np.sum(((PDF_E_pred - PDF_data_E['f'])/ PDF_data_E['delta f']) ** 2 )
 
-    tPDF_E_pred = np.array(list(pool.map(partial(tPDF_theo, Para = Para_all), np.array(tPDF_data_E))))
+    # tPDF_E_pred = np.array(list(pool.map(partial(tPDF_theo, Para = Para_all), np.array(tPDF_data_E))))
+    tPDF_E_pred = tPDF_theo(tPDF_data_E, Para=Para_all)
     cost_tPDF_E = np.sum(((tPDF_E_pred - tPDF_data_E['f'])/ tPDF_data_E['delta f']) ** 2 )
 
-    GFF_E_pred = np.array(list(pool.map(partial(GFF_theo, Para = Para_all), np.array(GFF_data_E))))
+    # GFF_E_pred = np.array(list(pool.map(partial(GFF_theo, Para = Para_all), np.array(GFF_data_E))))
+    GFF_E_pred = GFF_theo(GFF_data_E, Para=Para_all)
     cost_GFF_E = np.sum(((GFF_E_pred - GFF_data_E['f'])/ GFF_data_E['delta f']) ** 2 )
 
     return cost_PDF_E + cost_tPDF_E + cost_GFF_E
@@ -433,13 +475,16 @@ def cost_forward_Ht(Norm_HtuV,   alpha_HtuV,   beta_HtuV,   alphap_HtuV,
                R_Etu_xi4,   R_Etd_xi4,    R_Etg_xi4,   bexp_HtSea]
     
     Para_all = ParaManager_Pol(Paralst)
-    PDF_Ht_pred = np.array(list(pool.map(partial(PDF_theo, Para = Para_all), np.array(PDF_data_Ht))))
+    # PDF_Ht_pred = np.array(list(pool.map(partial(PDF_theo, Para = Para_all), np.array(PDF_data_Ht))))
+    PDF_Ht_pred = PDF_theo(PDF_data_Ht, Para=Para_all)
     cost_PDF_Ht = np.sum(((PDF_Ht_pred - PDF_data_Ht['f'])/ PDF_data_Ht['delta f']) ** 2 )
 
-    tPDF_Ht_pred = np.array(list(pool.map(partial(tPDF_theo, Para = Para_all), np.array(tPDF_data_Ht))))
+    # tPDF_Ht_pred = np.array(list(pool.map(partial(tPDF_theo, Para = Para_all), np.array(tPDF_data_Ht))))
+    tPDF_Ht_pred = tPDF_theo(tPDF_data_Ht, Para=Para_all)
     cost_tPDF_Ht = np.sum(((tPDF_Ht_pred - tPDF_data_Ht['f'])/ tPDF_data_Ht['delta f']) ** 2 )
 
-    GFF_Ht_pred = np.array(list(pool.map(partial(GFF_theo, Para = Para_all), np.array(GFF_data_Ht))))
+    # GFF_Ht_pred = np.array(list(pool.map(partial(GFF_theo, Para = Para_all), np.array(GFF_data_Ht))))
+    GFF_Ht_pred = GFF_theo(GFF_data_Ht, Para=Para_all)
     cost_GFF_Ht = np.sum(((GFF_Ht_pred - GFF_data_Ht['f'])/ GFF_data_Ht['delta f']) ** 2 )
 
     return cost_PDF_Ht + cost_tPDF_Ht + cost_GFF_Ht
@@ -477,13 +522,16 @@ def cost_forward_Et(Norm_HtuV,   alpha_HtuV,   beta_HtuV,   alphap_HtuV,
                R_Etu_xi4,   R_Etd_xi4,    R_Etg_xi4,   bexp_HtSea]
     
     Para_all = ParaManager_Pol(Paralst)
-    PDF_Et_pred = np.array(list(pool.map(partial(PDF_theo, Para = Para_all), np.array(PDF_data_Et))))
+    # PDF_Et_pred = np.array(list(pool.map(partial(PDF_theo, Para = Para_all), np.array(PDF_data_Et))))
+    PDF_Et_pred = PDF_theo(PDF_data_Et, Para=Para_all)
     cost_PDF_Et = np.sum(((PDF_Et_pred - PDF_data_Et['f'])/ PDF_data_Et['delta f']) ** 2 )
 
-    tPDF_Et_pred = np.array(list(pool.map(partial(tPDF_theo, Para = Para_all), np.array(tPDF_data_Et))))
+    # tPDF_Et_pred = np.array(list(pool.map(partial(tPDF_theo, Para = Para_all), np.array(tPDF_data_Et))))
+    tPDF_Et_pred = tPDF_theo(tPDF_data_Et, Para=Para_all)
     cost_tPDF_Et = np.sum(((tPDF_Et_pred - tPDF_data_Et['f'])/ tPDF_data_Et['delta f']) ** 2 )
 
-    GFF_Et_pred = np.array(list(pool.map(partial(GFF_theo, Para = Para_all), np.array(GFF_data_Et))))
+    # GFF_Et_pred = np.array(list(pool.map(partial(GFF_theo, Para = Para_all), np.array(GFF_data_Et))))
+    GFF_Et_pred = GFF_theo(GFF_data_Et, Para=Para_all)
     cost_GFF_Et = np.sum(((GFF_Et_pred - GFF_data_Et['f'])/ GFF_data_Et['delta f']) ** 2 )
 
     return cost_PDF_Et + cost_tPDF_Et + cost_GFF_Et
@@ -734,7 +782,8 @@ def cost_off_forward(Norm_HuV,    alpha_HuV,    beta_HuV,    alphap_HuV,
     cost_DVCS_xBtQ = np.array(list(pool.map(partial(DVCSxsec_cost_xBtQ, Para_Unp = Para_Unp_all, Para_Pol = Para_Pol_all), DVCSxsec_group_data)))
     cost_DVCSxsec = np.sum(cost_DVCS_xBtQ)
 
-    DVCS_HERA_pred = np.array(list(pool.map(partial(DVCSxsec_HERA_theo, Para_Unp = Para_Unp_all, Para_Pol = Para_Pol_all), np.array(DVCS_HERA_data))))
+    # DVCS_HERA_pred = np.array(list(pool.map(partial(DVCSxsec_HERA_theo, Para_Unp = Para_Unp_all, Para_Pol = Para_Pol_all), np.array(DVCS_HERA_data))))
+    DVCS_HERA_pred = DVCSxsec_HERA_theo(DVCS_HERA_data, Para_Unp=Para_Unp_all, Para_Pol=Para_Pol_all)
     cost_DVCS_HERA = np.sum(((DVCS_HERA_pred - DVCS_HERA_data['f'])/ DVCS_HERA_data['delta f']) ** 2 )
 
     return  cost_DVCSxsec + cost_DVCS_HERA
