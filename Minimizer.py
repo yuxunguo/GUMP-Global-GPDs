@@ -106,21 +106,41 @@ def CFF_theo(xB, t, Q, Para_Unp, Para_Pol):
     ECFF = H_E.CFF(Para_Unp[1])
     HtCFF = Ht_Et.CFF(Para_Pol[0])
     EtCFF = Ht_Et.CFF(Para_Pol[1])
-    return np.stack([HCFF, ECFF, HtCFF, EtCFF], axis=-1)
+    return [HCFF, ECFF, HtCFF, EtCFF] # this can be a list of arrays of shape (N)
+    # return np.stack([HCFF, ECFF, HtCFF, EtCFF], axis=-1)
 
-def DVCSxsec_theo(DVCSxsec_input: np.array, CFF_input: np.array):
+def DVCSxsec_theo(DVCSxsec_input: pd.DataFrame, CFF_input: np.array):
+    # CFF_input is a list of np.arrays
     [y, xB, t, Q, phi, f, delta_f, pol] = DVCSxsec_input    
-    [HCFF, ECFF, HtCFF, EtCFF] = CFF_input
+
+    y = DVCSxsec_input['y'].to_numpy()
+    xB = DVCSxsec_input['xB'].to_numpy()
+    t = DVCSxsec_input['t'].to_numpy()
+    Q = DVCSxsec_input['Q'].to_numpy()
+    phi = DVCSxsec_input['phi'].to_numpy()
+    f = DVCSxsec_input['f'].to_numpy()
+    pol = DVCSxsec_input['pol'].to_numpy()
+
+    [HCFF, ECFF, HtCFF, EtCFF] = CFF_input # each of them have shape (N); scalar is also OK if we use 
     return dsigma_TOT(y, xB, t, Q, phi, pol, HCFF, ECFF, HtCFF, EtCFF)
 
-def DVCSxsec_cost_xBtQ(DVCSxsec_data_xBtQ: np.array, Para_Unp, Para_Pol):
-    [xB, t, Q] = [DVCSxsec_data_xBtQ['xB'].iat[0], DVCSxsec_data_xBtQ['t'].iat[0], DVCSxsec_data_xBtQ['Q'].iat[0]]
-    [HCFF, ECFF, HtCFF, EtCFF] = CFF_theo(xB, t, Q, Para_Unp, Para_Pol)
-    DVCS_pred_xBtQ = np.array(list(map(partial(DVCSxsec_theo, CFF_input = [HCFF, ECFF, HtCFF, EtCFF]), np.array(DVCSxsec_data_xBtQ))))
+def DVCSxsec_cost_xBtQ(DVCSxsec_data_xBtQ: pd.DataFrame, Para_Unp, Para_Pol):
+    [xB, t, Q] = [DVCSxsec_data_xBtQ['xB'].iat[0], DVCSxsec_data_xBtQ['t'].iat[0], DVCSxsec_data_xBtQ['Q'].iat[0]] 
+    [HCFF, ECFF, HtCFF, EtCFF] = CFF_theo(xB, t, Q, Para_Unp, Para_Pol) # scalar for each of them
+    # DVCS_pred_xBtQ = np.array(list(map(partial(DVCSxsec_theo, CFF_input = [HCFF, ECFF, HtCFF, EtCFF]), np.array(DVCSxsec_data_xBtQ))))
+    DVCS_pred_xBtQ = DVCSxsec_theo(DVCSxsec_data_xBtQ, CFF_input = [HCFF, ECFF, HtCFF, EtCFF])
     return np.sum(((DVCS_pred_xBtQ - DVCSxsec_data_xBtQ['f'])/ DVCSxsec_data_xBtQ['delta f']) ** 2 )
 
-def DVCSxsec_HERA_theo(DVCSxsec_data_HERA: np.array, Para_Unp, Para_Pol):
-    [y, xB, t, Q, f, delta_f, pol]  = DVCSxsec_data_HERA
+def DVCSxsec_HERA_theo(DVCSxsec_data_HERA: pd.DataFrame, Para_Unp, Para_Pol):
+    # [y, xB, t, Q, f, delta_f, pol]  = DVCSxsec_data_HERA
+    y = DVCSxsec_data_HERA['y'].to_numpy()
+    xB = DVCSxsec_data_HERA['xB'].to_numpy()
+    t = DVCSxsec_data_HERA['t'].to_numpy()
+    Q = DVCSxsec_data_HERA['Q'].to_numpy()
+    f = DVCSxsec_data_HERA['f'].to_numpy()
+    delta_f = DVCSxsec_data_HERA['delta f'].to_numpy()
+    pol = DVCSxsec_data_HERA['pol'].to_numpy()
+
     [HCFF, ECFF, HtCFF, EtCFF] = CFF_theo(xB, t, Q, Para_Unp, Para_Pol)
     return dsigma_DVCS_HERA(y, xB, t, Q, pol, HCFF, ECFF, HtCFF, EtCFF)
 
