@@ -44,14 +44,14 @@ def ParaManager_Unp(Paralst: np.array):
      R_E_Sea,     R_Hu_xi2,     R_Hd_xi2,    R_Hg_xi2,
      R_Eu_xi2,    R_Ed_xi2,     R_Eg_xi2,
      R_Hu_xi4,    R_Hd_xi4,     R_Hg_xi4,
-     R_Eu_xi4,    R_Ed_xi4,     R_Eg_xi4, bexp_HSea] = Paralst
+     R_Eu_xi4,    R_Ed_xi4,     R_Eg_xi4,    bexp_HSea] = Paralst
 
     # Initial forward parameters for the H of (uV, ubar, dV, dbar,g) distributions
     H_uV =   np.array([[Norm_HuV,   alpha_HuV,   beta_HuV,   alphap_HuV,   0]])
     H_ubar = np.array([[Norm_Hubar, alpha_Hubar, beta_Hubar, alphap_Hqbar, bexp_HSea]])
     H_dV =   np.array([[Norm_HdV,   alpha_HdV,   beta_HdV,   alphap_HdV,   0]])
     H_dbar = np.array([[Norm_Hdbar, alpha_Hdbar, beta_Hdbar, alphap_Hqbar, bexp_HSea]])
-    H_g =    np.array([[Norm_Hg,    alpha_Hg,    beta_Hg,    alphap_Hg,    0 ]])
+    H_g =    np.array([[Norm_Hg,    alpha_Hg,    beta_Hg,    alphap_Hg,    bexp_HSea ]])
 
     # Initial xi^2 parameters for the H of (uV, ubar, dV, dbar,g) distributions
     """
@@ -117,7 +117,7 @@ def ParaManager_Pol(Paralst: np.array):
      Norm_EtdV,   R_Et_Sea,     R_Htu_xi2,   R_Htd_xi2,    R_Htg_xi2,
      R_Etu_xi2,   R_Etd_xi2,    R_Etg_xi2,
      R_Htu_xi4,   R_Htd_xi4,    R_Htg_xi4,
-     R_Etu_xi4,   R_Etd_xi4,    R_Etg_xi4, bexp_HtSea] = Paralst
+     R_Etu_xi4,   R_Etd_xi4,    R_Etg_xi4,   bexp_HtSea] = Paralst
 
     # Initial forward parameters for the Ht of (uV, ubar, dV, dbar,g) distributions
 
@@ -125,7 +125,7 @@ def ParaManager_Pol(Paralst: np.array):
     Ht_ubar = np.array([[Norm_Htubar, alpha_Htubar, beta_Htubar, alphap_Htqbar, bexp_HtSea]])
     Ht_dV =   np.array([[Norm_HtdV,   alpha_HtdV,   beta_HtdV,   alphap_HtdV,   0]])
     Ht_dbar = np.array([[Norm_Htdbar, alpha_Htdbar, beta_Htdbar, alphap_Htqbar, bexp_HtSea]])
-    Ht_g =    np.array([[Norm_Htg,    alpha_Htg,    beta_Htg,    alphap_Htg,    0]])
+    Ht_g =    np.array([[Norm_Htg,    alpha_Htg,    beta_Htg,    alphap_Htg,    bexp_HtSea]])
 
     # Initial xi^2 parameters for the Ht of (uV, ubar, dV, dbar,g) distributions
     """
