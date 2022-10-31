@@ -83,8 +83,8 @@ def GFF_theo(GFF_input: np.array, Para):
     js = GFF_input['j'].to_numpy()
     ts = GFF_input['t'].to_numpy()
     Qs = GFF_input['Q'].to_numpy()
-    fs = GFF_input['f'].to_numpy()
-    delta_fs = GFF_input['delta f'].to_numpy()
+    #fs = GFF_input['f'].to_numpy()
+    #delta_fs = GFF_input['delta f'].to_numpy()
     flvs = GFF_input['flv'].to_numpy()
     spes = GFF_input['spe'].to_numpy()
     x = 0
@@ -125,7 +125,7 @@ def DVCSxsec_theo(DVCSxsec_input: pd.DataFrame, CFF_input: np.array):
     t = DVCSxsec_input['t'].to_numpy()
     Q = DVCSxsec_input['Q'].to_numpy()
     phi = DVCSxsec_input['phi'].to_numpy()
-    f = DVCSxsec_input['f'].to_numpy()
+    #f = DVCSxsec_input['f'].to_numpy()
     pol = DVCSxsec_input['pol'].to_numpy()
 
     [HCFF, ECFF, HtCFF, EtCFF] = CFF_input # each of them have shape (N); scalar is also OK if we use 
@@ -144,8 +144,8 @@ def DVCSxsec_HERA_theo(DVCSxsec_data_HERA: pd.DataFrame, Para_Unp, Para_Pol):
     xB = DVCSxsec_data_HERA['xB'].to_numpy()
     t = DVCSxsec_data_HERA['t'].to_numpy()
     Q = DVCSxsec_data_HERA['Q'].to_numpy()
-    f = DVCSxsec_data_HERA['f'].to_numpy()
-    delta_f = DVCSxsec_data_HERA['delta f'].to_numpy()
+    #f = DVCSxsec_data_HERA['f'].to_numpy()
+    #delta_f = DVCSxsec_data_HERA['delta f'].to_numpy()
     pol = DVCSxsec_data_HERA['pol'].to_numpy()
 
     [HCFF, ECFF, HtCFF, EtCFF] = CFF_theo(xB, t, Q, np.expand_dims(Para_Unp, axis=0), np.expand_dims(Para_Pol, axis=0))
