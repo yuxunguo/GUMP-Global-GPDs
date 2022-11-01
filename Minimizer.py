@@ -748,6 +748,72 @@ def cost_off_forward(Norm_HuV,    alpha_HuV,    beta_HuV,    alphap_HuV,
 
     return  cost_DVCSxsec + cost_DVCS_HERA
 
+def cost_off_forward_test(Norm_HuV,    alpha_HuV,    beta_HuV,    alphap_HuV, 
+                     Norm_Hubar,  alpha_Hubar,  beta_Hubar,  alphap_Hqbar,
+                     Norm_HdV,    alpha_HdV,    beta_HdV,    alphap_HdV,
+                     Norm_Hdbar,  alpha_Hdbar,  beta_Hdbar, 
+                     Norm_Hg,     alpha_Hg,     beta_Hg,     alphap_Hg,
+                     Norm_EuV,    alpha_EuV,    beta_EuV,    alphap_EuV,
+                     Norm_EdV,    alpha_EdV,    beta_EdV,    alphap_EdV,
+                     R_E_Sea,     R_Hu_xi2,     R_Hd_xi2,    R_Hg_xi2,
+                     R_Eu_xi2,    R_Ed_xi2,     R_Eg_xi2,
+                     R_Hu_xi4,    R_Hd_xi4,     R_Hg_xi4,
+                     R_Eu_xi4,    R_Ed_xi4,     R_Eg_xi4,    bexp_HSea,
+                     Norm_HtuV,   alpha_HtuV,   beta_HtuV,   alphap_HtuV, 
+                     Norm_Htubar, alpha_Htubar, beta_Htubar, alphap_Htqbar,
+                     Norm_HtdV,   alpha_HtdV,   beta_HtdV,   alphap_HtdV,
+                     Norm_Htdbar, alpha_Htdbar, beta_Htdbar, 
+                     Norm_Htg,    alpha_Htg,    beta_Htg,    alphap_Htg,
+                     Norm_EtuV,   alpha_EtuV,   beta_EtuV,   alphap_EtuV,
+                     Norm_EtdV,   R_Et_Sea,     R_Htu_xi2,   R_Htd_xi2,    R_Htg_xi2,
+                     R_Etu_xi2,   R_Etd_xi2,    R_Etg_xi2,
+                     R_Htu_xi4,   R_Htd_xi4,    R_Htg_xi4,
+                     R_Etu_xi4,   R_Etd_xi4,    R_Etg_xi4,   bexp_HtSea):
+
+    global Minuit_Counter, Time_Counter
+
+    time_now = time.time() - time_start
+    
+    if(time_now > Time_Counter * 600):
+        print('Runing Time:',round(time_now/60),'minutes. Cost function called total', Minuit_Counter, 'times.')
+        Time_Counter = Time_Counter + 1
+    
+    Minuit_Counter = Minuit_Counter + 1
+    Para_Unp_lst = [Norm_HuV,    alpha_HuV,    beta_HuV,    alphap_HuV, 
+                    Norm_Hubar,  alpha_Hubar,  beta_Hubar,  alphap_Hqbar,
+                    Norm_HdV,    alpha_HdV,    beta_HdV,    alphap_HdV,
+                    Norm_Hdbar,  alpha_Hdbar,  beta_Hdbar, 
+                    Norm_Hg,     alpha_Hg,     beta_Hg,     alphap_Hg,
+                    Norm_EuV,    alpha_EuV,    beta_EuV,    alphap_EuV,
+                    Norm_EdV,    alpha_EdV,    beta_EdV,    alphap_EdV,
+                    R_E_Sea,     R_Hu_xi2,     R_Hd_xi2,    R_Hg_xi2,
+                    R_Eu_xi2,    R_Ed_xi2,     R_Eg_xi2,
+                    R_Hu_xi4,    R_Hd_xi4,     R_Hg_xi4,
+                    R_Eu_xi4,    R_Ed_xi4,     R_Eg_xi4,    bexp_HSea]
+
+    Para_Pol_lst = [Norm_HtuV,   alpha_HtuV,   beta_HtuV,   alphap_HtuV, 
+                    Norm_Htubar, alpha_Htubar, beta_Htubar, alphap_Htqbar,
+                    Norm_HtdV,   alpha_HtdV,   beta_HtdV,   alphap_HtdV,
+                    Norm_Htdbar, alpha_Htdbar, beta_Htdbar, 
+                    Norm_Htg,    alpha_Htg,    beta_Htg,    alphap_Htg,
+                    Norm_EtuV,   alpha_EtuV,   beta_EtuV,   alphap_EtuV,
+                    Norm_EtdV,   R_Et_Sea,     R_Htu_xi2,   R_Htd_xi2,    R_Htg_xi2,
+                    R_Etu_xi2,   R_Etd_xi2,    R_Etg_xi2,
+                    R_Htu_xi4,   R_Htd_xi4,    R_Htg_xi4,
+                    R_Etu_xi4,   R_Etd_xi4,    R_Etg_xi4,   bexp_HtSea]
+        
+    Para_Unp_all = ParaManager_Unp(Para_Unp_lst)
+    Para_Pol_all = ParaManager_Pol(Para_Pol_lst)
+
+    cost_DVCS_xBtQ = np.array(list(pool.map(partial(DVCSxsec_cost_xBtQ, Para_Unp = Para_Unp_all, Para_Pol = Para_Pol_all), DVCSxsec_group_data)))
+    cost_DVCSxsec = np.sum(cost_DVCS_xBtQ)
+
+    # DVCS_HERA_pred = np.array(list(pool.map(partial(DVCSxsec_HERA_theo, Para_Unp = Para_Unp_all, Para_Pol = Para_Pol_all), np.array(DVCS_HERA_data))))
+    DVCS_HERA_pred = DVCSxsec_HERA_theo(DVCS_HERA_data, Para_Unp=Para_Unp_all, Para_Pol=Para_Pol_all)
+    cost_DVCS_HERA = np.sum(((DVCS_HERA_pred - DVCS_HERA_data['f'])/ DVCS_HERA_data['delta f']) ** 2 )
+
+    return  cost_DVCSxsec, cost_DVCS_HERA
+
 def off_forward_fit(Paralst_Unp, Paralst_Pol):
 
     [Norm_HuV_Init,    alpha_HuV_Init,    beta_HuV_Init,    alphap_HuV_Init, 
@@ -822,7 +888,6 @@ def off_forward_fit(Paralst_Unp, Paralst_Pol):
     fit_off_forward.fixed['Norm_Hg'] = True
     fit_off_forward.fixed['alpha_Hg'] = True
     fit_off_forward.fixed['beta_Hg'] = True
-    fit_off_forward.fixed['alphap_Hg'] = True
 
     fit_off_forward.fixed['Norm_EuV'] = True
     fit_off_forward.fixed['alpha_EuV'] = True
@@ -857,7 +922,6 @@ def off_forward_fit(Paralst_Unp, Paralst_Pol):
     fit_off_forward.fixed['Norm_Htg'] = True
     fit_off_forward.fixed['alpha_Htg'] = True
     fit_off_forward.fixed['beta_Htg'] = True
-    fit_off_forward.fixed['alphap_Htg'] = True
 
     fit_off_forward.fixed['Norm_EtuV'] = True
     fit_off_forward.fixed['alpha_EtuV'] = True
@@ -865,6 +929,9 @@ def off_forward_fit(Paralst_Unp, Paralst_Pol):
     fit_off_forward.fixed['alphap_EtuV'] = True
 
     fit_off_forward.fixed['Norm_EtdV'] = True
+
+    fit_off_forward.fixed['alphap_Hg'] = True
+    fit_off_forward.fixed['alphap_Htg'] = True
 
     fit_off_forward.fixed['R_Hg_xi2'] = True
     fit_off_forward.fixed['R_Eg_xi2'] = True
@@ -914,9 +981,9 @@ if __name__ == '__main__':
     pool = Pool()
     time_start = time.time()
 
-    Paralst_Unp     = [4.922770899728711, 0.21631245457726278, 3.2286340744892907, 2.348399185175322, 0.16365640346071564, 1.1354420505970975, 6.900555781000984, 0.15, 3.3576171024691988, 0.18433322801878216, 4.417047711571693, 3.4784962312911554, 0.24919405603782252, 1.0519014521338468, 6.550675975040194, 2.8569361638914623, 1.052850395852861, 7.3858686738696075, 1.3667990030964654, 11.428596979560261, -0.14503367665445221, 3.758714482921486, 5.682818126206609, -0.04238153011014113, 0.9803227812334159, 0.4586142799424245, 0.09122382463597081, 0.5174928633254026, -3.6601890894524987, 4.4047879899243005, 1.0, 6.068048827873447, 30.197110804859197, 1.0, 1.1390141973542285, -1.542434376217511, 0.0, -1.6034835605512132, -10.27405958258355, 0.0, 5.230500613651823]
-    Paralst_Pol     = [4.519500903078374, -0.24572273380859522, 3.0336506651929422, 2.6222628900332507, 0.07497508649129046, 0.5197103475539158, 4.325734887333323, 0.15, -0.7127190055054058, 0.21139941814694918, 3.2384085342954885, 4.446272032794327, -0.055483176661642805, 0.6154810679003333, 2.074752893822682, 0.24189131037183043, 0.6323075664721904, 2.7069132220353342, 1.1, 8.795795400853171, 0.7999999981931851, 7.29806279081493, 1.9980251635965138, -3.4981561238130356, -0.6401207838946621, 3.6721190840512543, 41.05312601873508, 1.0, 1.139988840989931, 10.38510432334534, 1.0, -1.1225695849394057, -11.859558195586501, 0.0, 3.052120336919783, 32.4062446087123, 0.0, 0]
-    
+    Paralst_Unp     = [4.923217839900655, 0.2163060129576606, 3.228925750381223, 2.3493354261241612, 0.16346679672382392, 1.1357132245889958, 6.897969180700207, 0.15, 3.3570782094516596, 0.18430549565759557, 4.416316231277839, 3.4721988925548706, 0.24911311573644498, 1.0519743916576973, 6.5462925888590595, 2.863953531291127, 1.0523304954325372, 7.412350083916277, 0.15, 6.276774021060197, 0.11670360566985849, 3.547396702804653, 4.587715450527496, -0.7142906394782781, 0.7632839180070121, 2.0763504665527757, 1.1274957356797919, 1.497966434121736, -3.2408671697246416, 5.699905821036576, 1.0, 7.835285455617766, -13.73529004595495, 1.0, 0.8701104635432858, -1.4867232698056145, 0.0, -2.1710158707342946, 3.3441086795926793, 0.0, 4.673094489772017]
+    Paralst_Pol     = [4.5143494322720334, -0.2454214913083923, 3.0318031020006058, 2.6220176153953245, 0.07657586611377216, 0.5146695211814358, 4.37635963882342, 0.15, -0.7101347985853508, 0.21247704285712699, 3.2328291823725634, 4.441200599742609, -0.05562201795594495, 0.6147236921885604, 2.0777565438620855, 0.24341647746990971, 0.6306311366014787, 2.719806232443027, 0.15, 8.78184184809053, 0.7999999719162574, 7.296335404521038, 1.9934319167219052, -3.4960543432322893, -1.2776456807843937, 4.514881584041937, 35.4654224562875, 1.0, 1.0339060576780428, 9.430399080989018, 1.0, -1.3189468104713455, -9.521150279563958, 0.0, 2.978128102747831, 32.67808817882311, 0.0, 0.026774585332154932]
+    """
     fit_forward_H   = forward_H_fit(Paralst_Unp)
     Paralst_Unp     = np.array(fit_forward_H.values)
 
@@ -928,9 +995,10 @@ if __name__ == '__main__':
 
     fit_forward_Et  = forward_Et_fit(Paralst_Pol)
     Paralst_Pol     = np.array(fit_forward_Et.values)
-    """
+
     fit_off_forward = off_forward_fit(Paralst_Unp, Paralst_Pol)
 
     Para_Unp_All    = ParaManager_Unp(Paralst_Unp)
     Para_Pol_All    = ParaManager_Pol(Paralst_Pol)
     """
+    print(cost_off_forward_test(4.923217839900655, 0.2163060129576606, 3.228925750381223, 2.3493354261241612, 0.16346679672382392, 1.1357132245889958, 6.897969180700207, 0.15, 3.3570782094516596, 0.18430549565759557, 4.416316231277839, 3.4721988925548706, 0.24911311573644498, 1.0519743916576973, 6.5462925888590595, 2.863953531291127, 1.0523304954325372, 7.412350083916277, 0.15, 6.276774021060197, 0.11670360566985849, 3.547396702804653, 4.587715450527496, -0.7142906394782781, 0.7632839180070121, 2.0763504665527757, 1.1274957356797919, 1.497966434121736, -3.2408671697246416, 5.699905821036576, 1.0, 7.835285455617766, -13.73529004595495, 1.0, 0.8701104635432858, -1.4867232698056145, 0.0, -2.1710158707342946, 3.3441086795926793, 0.0, 4.673094489772017, 4.5143494322720334, -0.2454214913083923, 3.0318031020006058, 2.6220176153953245, 0.07657586611377216, 0.5146695211814358, 4.37635963882342, 0.15, -0.7101347985853508, 0.21247704285712699, 3.2328291823725634, 4.441200599742609, -0.05562201795594495, 0.6147236921885604, 2.0777565438620855, 0.24341647746990971, 0.6306311366014787, 2.719806232443027, 0.15, 8.78184184809053, 0.7999999719162574, 7.296335404521038, 1.9934319167219052, -3.4960543432322893, -1.2776456807843937, 4.514881584041937, 35.4654224562875, 1.0, 1.0339060576780428, 9.430399080989018, 1.0, -1.3189468104713455, -9.521150279563958, 0.0, 2.978128102747831, 32.67808817882311, 0.0, 0.026774585332154932))
