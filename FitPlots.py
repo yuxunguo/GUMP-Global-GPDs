@@ -50,7 +50,7 @@ if __name__ == '__main__':
     Para_Unp_All    = ParaManager_Unp(Paralst_Unp)
     Para_Pol_All    = ParaManager_Pol(Paralst_Pol)
 
-    DVCS_HERA_pred = np.array(list(pool.map(partial(DVCSxsec_HERA_theo, Para_Unp = Para_Unp_All, Para_Pol = Para_Pol_All), np.array(DVCS_HERA_data))))
+    DVCS_HERA_pred = DVCSxsec_HERA_theo(DVCS_HERA_data, Para_Unp=Para_Unp_All, Para_Pol=Para_Pol_All)
 
     print(DVCS_HERA_pred)
     """

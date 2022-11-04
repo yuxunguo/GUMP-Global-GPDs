@@ -157,8 +157,7 @@ def cost_forward_H(Norm_HuV,    alpha_HuV,    beta_HuV,    alphap_HuV,
                    Norm_Hdbar,  alpha_Hdbar,  beta_Hdbar, 
                    Norm_Hg,     alpha_Hg,     beta_Hg,     alphap_Hg,
                    Norm_EuV,    alpha_EuV,    beta_EuV,    alphap_EuV,
-                   Norm_EdV,    alpha_EdV,    beta_EdV,    alphap_EdV,
-                   R_E_Sea,     R_Hu_xi2,     R_Hd_xi2,    R_Hg_xi2,
+                   Norm_EdV,    R_E_Sea,      R_Hu_xi2,    R_Hd_xi2,    R_Hg_xi2,
                    R_Eu_xi2,    R_Ed_xi2,     R_Eg_xi2,
                    R_Hu_xi4,    R_Hd_xi4,     R_Hg_xi4,
                    R_Eu_xi4,    R_Ed_xi4,     R_Eg_xi4,    bexp_HSea):
@@ -169,8 +168,7 @@ def cost_forward_H(Norm_HuV,    alpha_HuV,    beta_HuV,    alphap_HuV,
                Norm_Hdbar,  alpha_Hdbar,  beta_Hdbar, 
                Norm_Hg,     alpha_Hg,     beta_Hg,     alphap_Hg,
                Norm_EuV,    alpha_EuV,    beta_EuV,    alphap_EuV,
-               Norm_EdV,    alpha_EdV,    beta_EdV,    alphap_EdV,
-               R_E_Sea,     R_Hu_xi2,     R_Hd_xi2,    R_Hg_xi2,
+               Norm_EdV,    R_E_Sea,      R_Hu_xi2,    R_Hd_xi2,    R_Hg_xi2,
                R_Eu_xi2,    R_Ed_xi2,     R_Eg_xi2,
                R_Hu_xi4,    R_Hd_xi4,     R_Hg_xi4,
                R_Eu_xi4,    R_Ed_xi4,     R_Eg_xi4,    bexp_HSea]
@@ -196,8 +194,7 @@ def cost_forward_E(Norm_HuV,    alpha_HuV,    beta_HuV,    alphap_HuV,
                    Norm_Hdbar,  alpha_Hdbar,  beta_Hdbar, 
                    Norm_Hg,     alpha_Hg,     beta_Hg,     alphap_Hg,
                    Norm_EuV,    alpha_EuV,    beta_EuV,    alphap_EuV,
-                   Norm_EdV,    alpha_EdV,    beta_EdV,    alphap_EdV,
-                   R_E_Sea,     R_Hu_xi2,     R_Hd_xi2,    R_Hg_xi2,
+                   Norm_EdV,    R_E_Sea,      R_Hu_xi2,    R_Hd_xi2,    R_Hg_xi2,
                    R_Eu_xi2,    R_Ed_xi2,     R_Eg_xi2,
                    R_Hu_xi4,    R_Hd_xi4,     R_Hg_xi4,
                    R_Eu_xi4,    R_Ed_xi4,     R_Eg_xi4,    bexp_HSea):
@@ -208,8 +205,7 @@ def cost_forward_E(Norm_HuV,    alpha_HuV,    beta_HuV,    alphap_HuV,
                Norm_Hdbar,  alpha_Hdbar,  beta_Hdbar, 
                Norm_Hg,     alpha_Hg,     beta_Hg,     alphap_Hg,
                Norm_EuV,    alpha_EuV,    beta_EuV,    alphap_EuV,
-               Norm_EdV,    alpha_EdV,    beta_EdV,    alphap_EdV,
-               R_E_Sea,     R_Hu_xi2,     R_Hd_xi2,    R_Hg_xi2,
+               Norm_EdV,    R_E_Sea,      R_Hu_xi2,    R_Hd_xi2,    R_Hg_xi2,
                R_Eu_xi2,    R_Ed_xi2,     R_Eg_xi2,
                R_Hu_xi4,    R_Hd_xi4,     R_Hg_xi4,
                R_Eu_xi4,    R_Ed_xi4,     R_Eg_xi4,    bexp_HSea]
@@ -237,8 +233,7 @@ def forward_H_fit(Paralst_Unp):
      Norm_Hdbar_Init,  alpha_Hdbar_Init,  beta_Hdbar_Init, 
      Norm_Hg_Init,     alpha_Hg_Init,     beta_Hg_Init,     alphap_Hg_Init,
      Norm_EuV_Init,    alpha_EuV_Init,    beta_EuV_Init,    alphap_EuV_Init,
-     Norm_EdV_Init,    alpha_EdV_Init,    beta_EdV_Init,    alphap_EdV_Init,
-     R_E_Sea_Init,     R_Hu_xi2_Init,     R_Hd_xi2_Init,    R_Hg_xi2_Init,
+     Norm_EdV_Init,    R_E_Sea_Init,      R_Hu_xi2_Init,    R_Hd_xi2_Init,    R_Hg_xi2_Init,
      R_Eu_xi2_Init,    R_Ed_xi2_Init,     R_Eg_xi2_Init,
      R_Hu_xi4_Init,    R_Hd_xi4_Init,     R_Hg_xi4_Init,
      R_Eu_xi4_Init,    R_Ed_xi4_Init,     R_Eg_xi4_Init,    bexp_HSea_Init] = Paralst_Unp
@@ -249,8 +244,7 @@ def forward_H_fit(Paralst_Unp):
                                         Norm_Hdbar = Norm_Hdbar_Init, alpha_Hdbar = alpha_Hdbar_Init,  beta_Hdbar = beta_Hdbar_Init, 
                                         Norm_Hg = Norm_Hg_Init,       alpha_Hg = alpha_Hg_Init,        beta_Hg = beta_Hg_Init,       alphap_Hg = alphap_Hg_Init,
                                         Norm_EuV = Norm_EuV_Init,     alpha_EuV = alpha_EuV_Init,      beta_EuV = beta_EuV_Init,     alphap_EuV = alphap_EuV_Init, 
-                                        Norm_EdV = Norm_EdV_Init,     alpha_EdV = alpha_EdV_Init,      beta_EdV = beta_EdV_Init,     alphap_EdV = alphap_EdV_Init,
-                                        R_E_Sea = R_E_Sea_Init,       R_Hu_xi2 = R_Hu_xi2_Init,        R_Hd_xi2 = R_Hd_xi2_Init,     R_Hg_xi2 = R_Hg_xi2_Init,
+                                        Norm_EdV = Norm_EdV_Init,     R_E_Sea = R_E_Sea_Init,          R_Hu_xi2 = R_Hu_xi2_Init,     R_Hd_xi2 = R_Hd_xi2_Init,     R_Hg_xi2 = R_Hg_xi2_Init,
                                         R_Eu_xi2 = R_Eu_xi2_Init,     R_Ed_xi2 = R_Ed_xi2_Init,        R_Eg_xi2 = R_Eg_xi2_Init,
                                         R_Hu_xi4 = R_Hu_xi4_Init,     R_Hd_xi4 = R_Hd_xi4_Init,        R_Hg_xi4 = R_Hg_xi4_Init,
                                         R_Eu_xi4 = R_Eu_xi4_Init,     R_Ed_xi4 = R_Ed_xi4_Init,        R_Eg_xi4 = R_Eg_xi4_Init,     bexp_HSea = bexp_HSea_Init)
@@ -262,7 +256,6 @@ def forward_H_fit(Paralst_Unp):
     fit_forw_H.limits['alpha_Hdbar'] = (-2, 1.2)
     fit_forw_H.limits['alpha_Hg'] = (-2, 1.2)
     fit_forw_H.limits['alpha_EuV'] = (-2, 1.2)
-    fit_forw_H.limits['alpha_EdV'] = (-2, 1.2)
 
     fit_forw_H.limits['beta_HuV'] = (0, 15)
     fit_forw_H.limits['beta_Hubar'] = (0, 15)
@@ -270,7 +263,6 @@ def forward_H_fit(Paralst_Unp):
     fit_forw_H.limits['beta_Hdbar'] = (0, 15)
     fit_forw_H.limits['beta_Hg'] = (0, 15)    
     fit_forw_H.limits['beta_EuV'] = (0, 15)
-    fit_forw_H.limits['beta_EdV'] = (0, 15)
 
     fit_forw_H.fixed['alphap_Hqbar'] = True
     fit_forw_H.fixed['alphap_Hg'] = True
@@ -281,9 +273,6 @@ def forward_H_fit(Paralst_Unp):
     fit_forw_H.fixed['alphap_EuV'] = True
 
     fit_forw_H.fixed['Norm_EdV'] = True
-    fit_forw_H.fixed['alpha_EdV'] = True
-    fit_forw_H.fixed['beta_EdV'] = True
-    fit_forw_H.fixed['alphap_EdV'] = True
 
     fit_forw_H.fixed['R_E_Sea'] = True
     fit_forw_H.fixed['R_Hu_xi2'] = True
@@ -330,8 +319,7 @@ def forward_E_fit(Paralst_Unp):
      Norm_Hdbar_Init,  alpha_Hdbar_Init,  beta_Hdbar_Init, 
      Norm_Hg_Init,     alpha_Hg_Init,     beta_Hg_Init,     alphap_Hg_Init,
      Norm_EuV_Init,    alpha_EuV_Init,    beta_EuV_Init,    alphap_EuV_Init,
-     Norm_EdV_Init,    alpha_EdV_Init,    beta_EdV_Init,    alphap_EdV_Init,
-     R_E_Sea_Init,     R_Hu_xi2_Init,     R_Hd_xi2_Init,    R_Hg_xi2_Init,
+     Norm_EdV_Init,    R_E_Sea_Init,      R_Hu_xi2_Init,    R_Hd_xi2_Init,    R_Hg_xi2_Init,
      R_Eu_xi2_Init,    R_Ed_xi2_Init,     R_Eg_xi2_Init,
      R_Hu_xi4_Init,    R_Hd_xi4_Init,     R_Hg_xi4_Init,
      R_Eu_xi4_Init,    R_Ed_xi4_Init,     R_Eg_xi4_Init,    bexp_HSea_Init] = Paralst_Unp
@@ -342,8 +330,7 @@ def forward_E_fit(Paralst_Unp):
                                         Norm_Hdbar = Norm_Hdbar_Init, alpha_Hdbar = alpha_Hdbar_Init,  beta_Hdbar = beta_Hdbar_Init, 
                                         Norm_Hg = Norm_Hg_Init,       alpha_Hg = alpha_Hg_Init,        beta_Hg = beta_Hg_Init,       alphap_Hg = alphap_Hg_Init,
                                         Norm_EuV = Norm_EuV_Init,     alpha_EuV = alpha_EuV_Init,      beta_EuV = beta_EuV_Init,     alphap_EuV = alphap_EuV_Init, 
-                                        Norm_EdV = Norm_EdV_Init,     alpha_EdV = alpha_EdV_Init,      beta_EdV = beta_EdV_Init,     alphap_EdV = alphap_EdV_Init,
-                                        R_E_Sea = R_E_Sea_Init,       R_Hu_xi2 = R_Hu_xi2_Init,        R_Hd_xi2 = R_Hd_xi2_Init,     R_Hg_xi2 = R_Hg_xi2_Init,
+                                        Norm_EdV = Norm_EdV_Init,     R_E_Sea = R_E_Sea_Init,          R_Hu_xi2 = R_Hu_xi2_Init,     R_Hd_xi2 = R_Hd_xi2_Init,     R_Hg_xi2 = R_Hg_xi2_Init,
                                         R_Eu_xi2 = R_Eu_xi2_Init,     R_Ed_xi2 = R_Ed_xi2_Init,        R_Eg_xi2 = R_Eg_xi2_Init,
                                         R_Hu_xi4 = R_Hu_xi4_Init,     R_Hd_xi4 = R_Hd_xi4_Init,        R_Hg_xi4 = R_Hg_xi4_Init,
                                         R_Eu_xi4 = R_Eu_xi4_Init,     R_Ed_xi4 = R_Ed_xi4_Init,        R_Eg_xi4 = R_Eg_xi4_Init,     bexp_HSea = bexp_HSea_Init)
@@ -355,7 +342,6 @@ def forward_E_fit(Paralst_Unp):
     fit_forw_E.limits['alpha_Hdbar'] = (-2, 1.2)
     fit_forw_E.limits['alpha_Hg'] = (-2, 1.2)
     fit_forw_E.limits['alpha_EuV'] = (-2, 1.2)
-    fit_forw_E.limits['alpha_EdV'] = (-2, 1.2)
 
     fit_forw_E.limits['beta_HuV'] = (0, 15)
     fit_forw_E.limits['beta_Hubar'] = (0, 15)
@@ -363,7 +349,6 @@ def forward_E_fit(Paralst_Unp):
     fit_forw_E.limits['beta_Hdbar'] = (0, 15)
     fit_forw_E.limits['beta_Hg'] = (0, 15)    
     fit_forw_E.limits['beta_EuV'] = (0, 15)
-    fit_forw_E.limits['beta_EdV'] = (0, 15)
 
     fit_forw_E.fixed['Norm_HuV'] = True
     fit_forw_E.fixed['alpha_HuV'] = True
@@ -688,8 +673,7 @@ def cost_off_forward(Norm_HuV,    alpha_HuV,    beta_HuV,    alphap_HuV,
                      Norm_Hdbar,  alpha_Hdbar,  beta_Hdbar, 
                      Norm_Hg,     alpha_Hg,     beta_Hg,     alphap_Hg,
                      Norm_EuV,    alpha_EuV,    beta_EuV,    alphap_EuV,
-                     Norm_EdV,    alpha_EdV,    beta_EdV,    alphap_EdV,
-                     R_E_Sea,     R_Hu_xi2,     R_Hd_xi2,    R_Hg_xi2,
+                     Norm_EdV,    R_E_Sea,      R_Hu_xi2,    R_Hd_xi2,    R_Hg_xi2,
                      R_Eu_xi2,    R_Ed_xi2,     R_Eg_xi2,
                      R_Hu_xi4,    R_Hd_xi4,     R_Hg_xi4,
                      R_Eu_xi4,    R_Ed_xi4,     R_Eg_xi4,    bexp_HSea,
@@ -719,8 +703,7 @@ def cost_off_forward(Norm_HuV,    alpha_HuV,    beta_HuV,    alphap_HuV,
                     Norm_Hdbar,  alpha_Hdbar,  beta_Hdbar, 
                     Norm_Hg,     alpha_Hg,     beta_Hg,     alphap_Hg,
                     Norm_EuV,    alpha_EuV,    beta_EuV,    alphap_EuV,
-                    Norm_EdV,    alpha_EdV,    beta_EdV,    alphap_EdV,
-                    R_E_Sea,     R_Hu_xi2,     R_Hd_xi2,    R_Hg_xi2,
+                    Norm_EdV,    R_E_Sea,      R_Hu_xi2,    R_Hd_xi2,    R_Hg_xi2,
                     R_Eu_xi2,    R_Ed_xi2,     R_Eg_xi2,
                     R_Hu_xi4,    R_Hd_xi4,     R_Hg_xi4,
                     R_Eu_xi4,    R_Ed_xi4,     R_Eg_xi4,    bexp_HSea]
@@ -754,8 +737,7 @@ def cost_off_forward_test(Norm_HuV,    alpha_HuV,    beta_HuV,    alphap_HuV,
                      Norm_Hdbar,  alpha_Hdbar,  beta_Hdbar, 
                      Norm_Hg,     alpha_Hg,     beta_Hg,     alphap_Hg,
                      Norm_EuV,    alpha_EuV,    beta_EuV,    alphap_EuV,
-                     Norm_EdV,    alpha_EdV,    beta_EdV,    alphap_EdV,
-                     R_E_Sea,     R_Hu_xi2,     R_Hd_xi2,    R_Hg_xi2,
+                     Norm_EdV,    R_E_Sea,      R_Hu_xi2,    R_Hd_xi2,    R_Hg_xi2,
                      R_Eu_xi2,    R_Ed_xi2,     R_Eg_xi2,
                      R_Hu_xi4,    R_Hd_xi4,     R_Hg_xi4,
                      R_Eu_xi4,    R_Ed_xi4,     R_Eg_xi4,    bexp_HSea,
@@ -785,8 +767,7 @@ def cost_off_forward_test(Norm_HuV,    alpha_HuV,    beta_HuV,    alphap_HuV,
                     Norm_Hdbar,  alpha_Hdbar,  beta_Hdbar, 
                     Norm_Hg,     alpha_Hg,     beta_Hg,     alphap_Hg,
                     Norm_EuV,    alpha_EuV,    beta_EuV,    alphap_EuV,
-                    Norm_EdV,    alpha_EdV,    beta_EdV,    alphap_EdV,
-                    R_E_Sea,     R_Hu_xi2,     R_Hd_xi2,    R_Hg_xi2,
+                    Norm_EdV,    R_E_Sea,     R_Hu_xi2,     R_Hd_xi2,    R_Hg_xi2,
                     R_Eu_xi2,    R_Ed_xi2,     R_Eg_xi2,
                     R_Hu_xi4,    R_Hd_xi4,     R_Hg_xi4,
                     R_Eu_xi4,    R_Ed_xi4,     R_Eg_xi4,    bexp_HSea]
@@ -822,8 +803,7 @@ def off_forward_fit(Paralst_Unp, Paralst_Pol):
      Norm_Hdbar_Init,  alpha_Hdbar_Init,  beta_Hdbar_Init, 
      Norm_Hg_Init,     alpha_Hg_Init,     beta_Hg_Init,     alphap_Hg_Init,
      Norm_EuV_Init,    alpha_EuV_Init,    beta_EuV_Init,    alphap_EuV_Init,
-     Norm_EdV_Init,    alpha_EdV_Init,    beta_EdV_Init,    alphap_EdV_Init,
-     R_E_Sea_Init,     R_Hu_xi2_Init,     R_Hd_xi2_Init,    R_Hg_xi2_Init,
+     Norm_EdV_Init,    R_E_Sea_Init,      R_Hu_xi2_Init,    R_Hd_xi2_Init,    R_Hg_xi2_Init,
      R_Eu_xi2_Init,    R_Ed_xi2_Init,     R_Eg_xi2_Init,
      R_Hu_xi4_Init,    R_Hd_xi4_Init,     R_Hg_xi4_Init,
      R_Eu_xi4_Init,    R_Ed_xi4_Init,     R_Eg_xi4_Init,    bexp_HSea_Init] = Paralst_Unp
@@ -845,8 +825,7 @@ def off_forward_fit(Paralst_Unp, Paralst_Pol):
                                                Norm_Hdbar = Norm_Hdbar_Init, alpha_Hdbar = alpha_Hdbar_Init,  beta_Hdbar = beta_Hdbar_Init, 
                                                Norm_Hg = Norm_Hg_Init,       alpha_Hg = alpha_Hg_Init,        beta_Hg = beta_Hg_Init,       alphap_Hg = alphap_Hg_Init,
                                                Norm_EuV = Norm_EuV_Init,     alpha_EuV = alpha_EuV_Init,      beta_EuV = beta_EuV_Init,     alphap_EuV = alphap_EuV_Init, 
-                                               Norm_EdV = Norm_EdV_Init,     alpha_EdV = alpha_EdV_Init,      beta_EdV = beta_EdV_Init,     alphap_EdV = alphap_EdV_Init,
-                                               R_E_Sea = R_E_Sea_Init,       R_Hu_xi2 = R_Hu_xi2_Init,        R_Hd_xi2 = R_Hd_xi2_Init,     R_Hg_xi2 = R_Hg_xi2_Init,
+                                               Norm_EdV = Norm_EdV_Init,     R_E_Sea = R_E_Sea_Init,          R_Hu_xi2 = R_Hu_xi2_Init,     R_Hd_xi2 = R_Hd_xi2_Init,     R_Hg_xi2 = R_Hg_xi2_Init,
                                                R_Eu_xi2 = R_Eu_xi2_Init,     R_Ed_xi2 = R_Ed_xi2_Init,        R_Eg_xi2 = R_Eg_xi2_Init,
                                                R_Hu_xi4 = R_Hu_xi4_Init,     R_Hd_xi4 = R_Hd_xi4_Init,        R_Hg_xi4 = R_Hg_xi4_Init,
                                                R_Eu_xi4 = R_Eu_xi4_Init,     R_Ed_xi4 = R_Ed_xi4_Init,        R_Eg_xi4 = R_Eg_xi4_Init,     bexp_HSea = bexp_HSea_Init,
@@ -895,9 +874,6 @@ def off_forward_fit(Paralst_Unp, Paralst_Pol):
     fit_off_forward.fixed['alphap_EuV'] = True
 
     fit_off_forward.fixed['Norm_EdV'] = True
-    fit_off_forward.fixed['alpha_EdV'] = True
-    fit_off_forward.fixed['beta_EdV'] = True
-    fit_off_forward.fixed['alphap_EdV'] = True
 
     fit_off_forward.fixed['Norm_HtuV'] = True
     fit_off_forward.fixed['alpha_HtuV'] = True
@@ -981,9 +957,9 @@ if __name__ == '__main__':
     pool = Pool()
     time_start = time.time()
 
-    Paralst_Unp     = [4.923217839900655, 0.2163060129576606, 3.228925750381223, 2.3493354261241612, 0.16346679672382392, 1.1357132245889958, 6.897969180700207, 0.15, 3.3570782094516596, 0.18430549565759557, 4.416316231277839, 3.4721988925548706, 0.24911311573644498, 1.0519743916576973, 6.5462925888590595, 2.863953531291127, 1.0523304954325372, 7.412350083916277, 0.15, 6.276774021060197, 0.11670360566985849, 3.547396702804653, 4.587715450527496, -0.7142906394782781, 0.7632839180070121, 2.0763504665527757, 1.1274957356797919, 1.497966434121736, -3.2408671697246416, 5.699905821036576, 1.0, 7.835285455617766, -13.73529004595495, 1.0, 0.8701104635432858, -1.4867232698056145, 0.0, -2.1710158707342946, 3.3441086795926793, 0.0, 4.673094489772017]
+    Paralst_Unp     = [4.923217839900655, 0.2163060129576606, 3.228925750381223, 2.3493354261241612, 0.16346679672382392, 1.1357132245889958, 6.897969180700207, 0.15, 3.3570782094516596, 0.18430549565759557, 4.416316231277839, 3.4721988925548706, 0.24911311573644498, 1.0519743916576973, 6.5462925888590595, 2.863953531291127, 1.0523304954325372, 7.412350083916277, 0.15, 6.276774021060197, 0.11670360566985849, 3.547396702804653, 4.587715450527496, -0.7142906394782781, 1.497966434121736, -3.2408671697246416, 5.699905821036576, 1.0, 7.835285455617766, -13.73529004595495, 1.0, 0.8701104635432858, -1.4867232698056145, 0.0, -2.1710158707342946, 3.3441086795926793, 0.0, 4.673094489772017]
     Paralst_Pol     = [4.5143494322720334, -0.2454214913083923, 3.0318031020006058, 2.6220176153953245, 0.07657586611377216, 0.5146695211814358, 4.37635963882342, 0.15, -0.7101347985853508, 0.21247704285712699, 3.2328291823725634, 4.441200599742609, -0.05562201795594495, 0.6147236921885604, 2.0777565438620855, 0.24341647746990971, 0.6306311366014787, 2.719806232443027, 0.15, 8.78184184809053, 0.7999999719162574, 7.296335404521038, 1.9934319167219052, -3.4960543432322893, -1.2776456807843937, 4.514881584041937, 35.4654224562875, 1.0, 1.0339060576780428, 9.430399080989018, 1.0, -1.3189468104713455, -9.521150279563958, 0.0, 2.978128102747831, 32.67808817882311, 0.0, 0.026774585332154932]
-    """
+
     fit_forward_H   = forward_H_fit(Paralst_Unp)
     Paralst_Unp     = np.array(fit_forward_H.values)
 
@@ -1000,5 +976,5 @@ if __name__ == '__main__':
 
     Para_Unp_All    = ParaManager_Unp(Paralst_Unp)
     Para_Pol_All    = ParaManager_Pol(Paralst_Pol)
-    """
-    print(cost_off_forward_test(4.923217839900655, 0.2163060129576606, 3.228925750381223, 2.3493354261241612, 0.16346679672382392, 1.1357132245889958, 6.897969180700207, 0.15, 3.3570782094516596, 0.18430549565759557, 4.416316231277839, 3.4721988925548706, 0.24911311573644498, 1.0519743916576973, 6.5462925888590595, 2.863953531291127, 1.0523304954325372, 7.412350083916277, 0.15, 6.276774021060197, 0.11670360566985849, 3.547396702804653, 4.587715450527496, -0.7142906394782781, 0.7632839180070121, 2.0763504665527757, 1.1274957356797919, 1.497966434121736, -3.2408671697246416, 5.699905821036576, 1.0, 7.835285455617766, -13.73529004595495, 1.0, 0.8701104635432858, -1.4867232698056145, 0.0, -2.1710158707342946, 3.3441086795926793, 0.0, 4.673094489772017, 4.5143494322720334, -0.2454214913083923, 3.0318031020006058, 2.6220176153953245, 0.07657586611377216, 0.5146695211814358, 4.37635963882342, 0.15, -0.7101347985853508, 0.21247704285712699, 3.2328291823725634, 4.441200599742609, -0.05562201795594495, 0.6147236921885604, 2.0777565438620855, 0.24341647746990971, 0.6306311366014787, 2.719806232443027, 0.15, 8.78184184809053, 0.7999999719162574, 7.296335404521038, 1.9934319167219052, -3.4960543432322893, -1.2776456807843937, 4.514881584041937, 35.4654224562875, 1.0, 1.0339060576780428, 9.430399080989018, 1.0, -1.3189468104713455, -9.521150279563958, 0.0, 2.978128102747831, 32.67808817882311, 0.0, 0.026774585332154932))
+
+    #print(cost_off_forward_test(4.923217839900655, 0.2163060129576606, 3.228925750381223, 2.3493354261241612, 0.16346679672382392, 1.1357132245889958, 6.897969180700207, 0.15, 3.3570782094516596, 0.18430549565759557, 4.416316231277839, 3.4721988925548706, 0.24911311573644498, 1.0519743916576973, 6.5462925888590595, 2.863953531291127, 1.0523304954325372, 7.412350083916277, 0.15, 6.276774021060197, 0.11670360566985849, 3.547396702804653, 4.587715450527496, -0.7142906394782781, 0.7632839180070121, 2.0763504665527757, 1.1274957356797919, 1.497966434121736, -3.2408671697246416, 5.699905821036576, 1.0, 7.835285455617766, -13.73529004595495, 1.0, 0.8701104635432858, -1.4867232698056145, 0.0, -2.1710158707342946, 3.3441086795926793, 0.0, 4.673094489772017, 4.5143494322720334, -0.2454214913083923, 3.0318031020006058, 2.6220176153953245, 0.07657586611377216, 0.5146695211814358, 4.37635963882342, 0.15, -0.7101347985853508, 0.21247704285712699, 3.2328291823725634, 4.441200599742609, -0.05562201795594495, 0.6147236921885604, 2.0777565438620855, 0.24341647746990971, 0.6306311366014787, 2.719806232443027, 0.15, 8.78184184809053, 0.7999999719162574, 7.296335404521038, 1.9934319167219052, -3.4960543432322893, -1.2776456807843937, 4.514881584041937, 35.4654224562875, 1.0, 1.0339060576780428, 9.430399080989018, 1.0, -1.3189468104713455, -9.521150279563958, 0.0, 2.978128102747831, 32.67808817882311, 0.0, 0.026774585332154932))
