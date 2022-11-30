@@ -7,6 +7,7 @@ from iminuit import Minuit
 import numpy as np
 import pandas as pd
 import time
+import csv
 
 Minuit_Counter = 0
 
@@ -308,7 +309,11 @@ def forward_H_fit(Paralst_Unp):
         print(*fit_forw_H.values, sep=", ", file = f)
         print(*fit_forw_H.errors, sep=", ", file = f)
         print(fit_forw_H.params, file = f)
-        print(fit_forw_H.covariance, file = f)
+
+    with open("GUMP_Output/H_forward_cov.csv","w",newline='') as my_csv:
+        csvWriter = csv.writer(my_csv,delimiter=',')
+        csvWriter.writerows([*fit_forw_H.covariance])
+
     print("H fit finished...")
     return fit_forw_H
 
@@ -408,7 +413,11 @@ def forward_E_fit(Paralst_Unp):
         print(*fit_forw_E.values, sep=", ", file = f)
         print(*fit_forw_E.errors, sep=", ", file = f)
         print(fit_forw_E.params, file = f)
-        print(fit_forw_E.covariance, file = f)
+
+    with open("GUMP_Output/E_forward_cov.csv","w",newline='') as my_csv:
+        csvWriter = csv.writer(my_csv,delimiter=',')
+        csvWriter.writerows([*fit_forw_E.covariance])
+
     print("E fit finished...")
     return fit_forw_E
 
@@ -568,7 +577,11 @@ def forward_Ht_fit(Paralst_Pol):
         print(*fit_forw_Ht.values, sep=", ", file = f)
         print(*fit_forw_Ht.errors, sep=", ", file = f)
         print(fit_forw_Ht.params, file = f)
-        print(fit_forw_Ht.covariance, file = f)
+
+    with open("GUMP_Output/Ht_forward_cov.csv","w",newline='') as my_csv:
+        csvWriter = csv.writer(my_csv,delimiter=',')
+        csvWriter.writerows([*fit_forw_Ht.covariance])
+
     print("Ht fit finished...")
     return fit_forw_Ht
 
@@ -667,7 +680,11 @@ def forward_Et_fit(Paralst_Pol):
         print(*fit_forw_Et.values, sep=", ", file = f)
         print(*fit_forw_Et.errors, sep=", ", file = f)
         print(fit_forw_Et.params, file = f)
-        print(fit_forw_Et.covariance, file = f)
+
+    with open("GUMP_Output/Et_forward_cov.csv","w",newline='') as my_csv:
+        csvWriter = csv.writer(my_csv,delimiter=',')
+        csvWriter.writerows([*fit_forw_Et.covariance])
+
     print("Et fit finished...")
     return fit_forw_Et
 
@@ -954,7 +971,11 @@ def off_forward_fit(Paralst_Unp, Paralst_Pol):
         print(*fit_off_forward.values, sep=", ", file = f)
         print(*fit_off_forward.errors, sep=", ", file = f)
         print(fit_off_forward.params, file = f)
-        print(fit_off_forward.covariance, file = f)
+
+    with open("GUMP_Output/Off_forward_cov.csv","w",newline='') as my_csv:
+        csvWriter = csv.writer(my_csv,delimiter=',')
+        csvWriter.writerows([*fit_off_forward.covariance])
+
     print("off forward fit finished...")
     return fit_off_forward
 
@@ -978,8 +999,5 @@ if __name__ == '__main__':
     Paralst_Pol     = np.array(fit_forward_Et.values)
 
     fit_off_forward = off_forward_fit(Paralst_Unp, Paralst_Pol)
-
-    Para_Unp_All    = ParaManager_Unp(Paralst_Unp)
-    Para_Pol_All    = ParaManager_Pol(Paralst_Pol)
 
     #print(cost_off_forward_test(4.923245780014504, 0.21630849765192428, 3.22890722499297, 2.3489354011979526, 0.16346585165260322, 1.135711231720756, 6.897907293004202, 0.15, 3.3570431064205124, 0.18430950949075475, 4.4164330846199, 3.474060988244228, 0.24911513048067477, 1.051977198682268, 6.546615550866641, 2.8639557573930126, 1.052330303667227, 7.412339020128528, 0.15, 0.16051495538648822, 0.9163110652883968, 1.0193962830435552, 0.41274932784170376, -0.1977991308710107, -1.2564920365188517, 1.067457804938632, -19.770730039892825, 1.0, 10.069595476994552, -3.2467026195137683, 1.0, -0.32089849276114984, 5.693312161571689, 0.0, -2.926022924238427, 0.6575758917146275, 0.0, 3.7811389938079354, 4.523625044880523, -0.24625833924504925, 3.0349443428078073, 2.6130504668028984, 0.07655463228254533, 0.5156744483888329, 4.371557716864458, 0.15, -0.7111561056489031, 0.2110536573461057, 3.2394039683470357, 4.37109681578387, -0.05648412944234933, 0.6133679635068163, 2.0897772013914437, 0.24322592280875213, 0.6308477000598409, 2.7182293377476165, 0.15, 8.93993973044334, 0.7999950847932062, 7.329257777405136, 2.043840761349927, -3.531387135862607, -1.267179457495525, 5.110641851061494, 42.0289770774691, 1.0, 2.092997157826637, -2.1779671813414163, 1.0, -1.5931689979366248, -12.338040498859877, 0.0, 2.6588214837192625, 36.25529526389492, 0.0, 2.805380264758739e-06))
