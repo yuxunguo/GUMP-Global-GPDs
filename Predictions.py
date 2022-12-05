@@ -6,13 +6,13 @@ import pandas as pd
 from Minimizer import PDF_theo, tPDF_theo, GFF_theo, CFF_theo
 from Minimizer import DVCSxsec_theo, DVCSxsec_cost_xBtQ, DVCSxsec_HERA_theo
 
-df_Para = pd.read_csv('GUMP_Paras/params.csv', index_col=0)
-para_list_unp = df_Para['values'][:38].to_numpy()
-para_list_pol = df_Para['values'][:38].to_numpy()
+df_Para = pd.read_csv('GUMP_Params/params.csv', index_col=0)
+para_list_unp = df_Para['value'][:38].to_numpy()
+para_list_pol = df_Para['value'][:38].to_numpy()
 
 Para_Unp = ParaManager_Unp(para_list_unp)
 Para_Pol = ParaManager_Pol(para_list_pol)
-Para_All = np.stack([Para_Unp, Para_Pol], axis=0)
+Para_All = np.concatenate([Para_Unp, Para_Pol], axis=0)
 
 
 def PDF(x, t, Q, flv, spe):
@@ -24,9 +24,9 @@ def PDF(x, t, Q, flv, spe):
         t: float or numpy array. 
         Q: float or numpy array. 
         flv: string or an array of string.
-            flvs is the flavor. It can be 'u', 'd', 'g', 'NS', or 'S'
+            flv is the flavor. It can be 'u', 'd', 'g', 'NS', or 'S'
         spe: integer or numpy array of integer
-            spes is the "species."
+            spe is the "species."
             0 means H
             1 means E
             2 means Ht
@@ -48,7 +48,7 @@ def PDF(x, t, Q, flv, spe):
  
     xi = 0
 
-    p = np.where(spes<=1, 1, -1)
+    p = np.where(spe<=1, 1, -1)
 
     '''
     if(spe == 0 or spe == 1):
@@ -59,9 +59,9 @@ def PDF(x, t, Q, flv, spe):
     '''
     # Para: (4, 2, 5, 1, 4)
 
-    Para_spe = Para_All[spes] # fancy indexing. Output (N, 3, 5, 1, 5)
+    Para_spe = Para_All[spe] # fancy indexing. Output (N, 3, 5, 1, 5)
     _PDF_theo = GPDobserv(x, xi, t, Q, p)
-    _pdf = _PDF_theo.tPDF(flvs, Para_spe)  # array length N
+    _pdf = _PDF_theo.tPDF(flv, Para_spe)  # array length N
 
     if _is_scalar:
         _pdf = _pdf.item()
@@ -71,7 +71,7 @@ def PDF(x, t, Q, flv, spe):
 tPDF = PDF
 
 
-def GFF_theo(j, t, Q, flv, spe):
+def GFF(j, t, Q, flv, spe):
     '''
     Return Generalized Form Factors
 
@@ -80,9 +80,9 @@ def GFF_theo(j, t, Q, flv, spe):
         t: float or numpy array
         Q:float or numpy array
         flv: string or an array of string.
-            flvs is the flavor. It can be 'u', 'd', 'g', 'NS', or 'S'
+            flv is the flavor. It can be 'u', 'd', 'g', 'NS', or 'S'
         spe: integer or numpy array of integer
-            spes is the "species."
+            spe is the "species."
             0 means H
             1 means E
             2 means Ht
@@ -108,10 +108,10 @@ def GFF_theo(j, t, Q, flv, spe):
     if(spe == 2 or spe == 3):
         p = -1
     '''
-    p = np.where(spes<=1, 1, -1)
+    p = np.where(spe<=1, 1, -1)
    
 
-    Para_spe = Para_All[spes] # fancy indexing. Output (N, 3, 5, 1, 5)
+    Para_spe = Para_All[spe] # fancy indexing. Output (N, 3, 5, 1, 5)
     _GFF_theo = GPDobserv(x, xi, t, Q, p)
     _gff = _GFF_theo.GFFj0(j, flv, Para_spe) # (N)
 
