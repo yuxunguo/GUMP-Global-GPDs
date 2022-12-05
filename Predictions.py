@@ -20,12 +20,12 @@ def PDF(x, t, Q, flv, spe):
     Return parton distribution function (PDF) at a given point.
 
     Args:
-        x: float or numpy array. 
-        t: float or numpy array. 
-        Q: float or numpy array. 
-        flv: string or an array of string.
+        x: numpy float array. 
+        t: numpy float array.  
+        Q: numpy float array. 
+        flv: an array of string.
             flv is the flavor. It can be 'u', 'd', 'g', 'NS', or 'S'
-        spe: integer or numpy array of integer
+        spe: numpy integer array
             spe is the "species."
             0 means H
             1 means E
@@ -33,13 +33,9 @@ def PDF(x, t, Q, flv, spe):
             3 means Et
         
     Returns:
-        _pdf: Float or numpy array, depending on the input.
+        _pdf: numpy float array.
             Parton distribution function.
     '''
-    # [x, t, Q, f, delta_f, spe, flv] = PDF_input
-    _is_scalar = ( np.isscalar(x) and np.isscalar(t) and np.isscalar(Q)\
-        and np.isscalar(flv) and np.isscalar(spe) )
-
     x = np.array(x)
     t = np.array(t)
     Q = np.array(Q)
@@ -63,9 +59,6 @@ def PDF(x, t, Q, flv, spe):
     _PDF_theo = GPDobserv(x, xi, t, Q, p)
     _pdf = _PDF_theo.tPDF(flv, Para_spe)  # array length N
 
-    if _is_scalar:
-        _pdf = _pdf.item()
-
     return _pdf
 
 tPDF = PDF
@@ -76,12 +69,12 @@ def GFF(j, t, Q, flv, spe):
     Return Generalized Form Factors
 
     Args:
-        j: int or numpy int array
-        t: float or numpy array
-        Q:float or numpy array
-        flv: string or an array of string.
+        j: numpy int array
+        t: numpy float array
+        Q: numpy float array
+        flv: an array of string.
             flv is the flavor. It can be 'u', 'd', 'g', 'NS', or 'S'
-        spe: integer or numpy array of integer
+        spe: numpy array of integer
             spe is the "species."
             0 means H
             1 means E
@@ -89,10 +82,8 @@ def GFF(j, t, Q, flv, spe):
             3 means Et
     
     Returns:
-        _gff: generalized form factors. Float or numpy array
+        _gff: generalized form factors. numpy float array
     '''
-    _is_scalar = ( np.isscalar(j) and np.isscalar(t) and np.isscalar(Q)\
-        and np.isscalar(flv) and np.isscalar(spe) )
 
     j = np.array(j)
     t = np.array(t)
@@ -114,9 +105,6 @@ def GFF(j, t, Q, flv, spe):
     Para_spe = Para_All[spe] # fancy indexing. Output (N, 3, 5, 1, 5)
     _GFF_theo = GPDobserv(x, xi, t, Q, p)
     _gff = _GFF_theo.GFFj0(j, flv, Para_spe) # (N)
-
-    if _is_scalar:
-        _gff = _gff.item()
     
     return _gff
 
@@ -126,18 +114,16 @@ def CFF(xB, t, Q):
     CFF
 
     Args
-        xB: float or numpy array
-        t: float or numpy array
-        Q: float or numpy array
+        xB: numpy float array
+        t: numpy float array
+        Q: numpy float array
 
     Returns
-        [ HCFF, ECFF, HtCFF, EtCFF ], each of which can be a scalar or numpy array
+        [ HCFF, ECFF, HtCFF, EtCFF ], each of which is a numpy array
     '''
     xB  = np.array(xB)
     t   = np.array(t)
     Q   = np.array(Q)
-    if np.ndim(xB*t*Q)==0:
-        return CFF_theo(xB, t, Q, Para_Unp, Para_Pol)
     return CFF_theo(xB, t, Q, np.expand_dims(Para_Unp, axis=0), np.expand_dims(Para_Pol, axis=0))
 
 
@@ -146,12 +132,12 @@ def DVCSxsec(y, xB, t, Q, phi, pol):
     DVCS cross section
 
     Args
-        y: float or numpy array
-        xB: float or numpy array
-        t: float or numpy array
-        Q: float or numpy array
-        phi: float or numpy array
-        pol: string or a numpy array of str
+        y: numpy float array
+        xB: numpy float array
+        t: numpy float array
+        Q: numpy float array
+        phi: numpy float array
+        pol: a numpy array of str
             pol can be 'UU', 'LU', 'UL', 'LL',
                 'UTin', 'LTin', 'UTout', or 'LTout'
 
@@ -174,12 +160,12 @@ def DVCSxsec_HERA(y, xB, t, Q, pol):
     The total DVCS cross-section integrated over phi
 
     Args
-        y: float or numpy array
-        xB: float or numpy array
-        t: float or numpy array
-        Q: float or numpy array
-        phi: float or numpy array
-        pol: string or a numpy array of str
+        y: numpy float array
+        xB: numpy float array
+        t: numpy float array
+        Q: numpy float array
+        phi: numpy float array
+        pol: a numpy array of str
             pol can be 'UU', 'LU', 'UL', 'LL',
                 'UTin', 'LTin', 'UTout', or 'LTout'
 
