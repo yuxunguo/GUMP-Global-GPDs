@@ -8,7 +8,7 @@ from Minimizer import DVCSxsec_theo, DVCSxsec_cost_xBtQ, DVCSxsec_HERA_theo
 
 df_Para = pd.read_csv('GUMP_Params/params.csv', index_col=0)
 para_list_unp = df_Para['value'][:38].to_numpy()
-para_list_pol = df_Para['value'][:38].to_numpy()
+para_list_pol = df_Para['value'][38:].to_numpy()
 
 Para_Unp = ParaManager_Unp(para_list_unp)
 Para_Pol = ParaManager_Pol(para_list_pol)
