@@ -202,7 +202,8 @@ def DVCSxsec(y, xB, t, Q, phi, pol):
 
 if __name__ == '__main__':
     pool = Pool()
-    x = np.exp(np.linspace(np.log(0.02), np.log(0.6), 40, dtype = float))
+
+    x = np.exp(np.linspace(np.log(0.005), np.log(0.6), 100, dtype = float))
 
     uhPDF = PDF(x,[0.0],[2.0],['u'],[0])
     ubarhPDF = -PDF(-x,[0.0],[2.0],['u'],[0])
@@ -240,38 +241,32 @@ if __name__ == '__main__':
         csvWriter = csv.writer(my_csv,delimiter=',')
         csvWriter.writerows(np.transpose([x,uetPDF,ubaretPDF,detPDF,dbaretPDF]))
 
-    uhGPD = GPD(x,[0.1],[0.0],[2.0],['u'],[0])
-    ubarhGPD = -GPD(-x,[0.1],[0.0],[2.0],['u'],[0])
-    dhGPD = GPD(x,[0.1],[0.0],[2.0],['d'],[0])
-    dbarhGPD = -GPD(-x,[0.1],[0.0],[2.0],['d'],[0])
+    xgpd = np.concatenate((np.linspace(-0.6, -0.25, 8, dtype = float),np.linspace(-0.2, -0.105, 20, dtype = float),np.linspace(-0.1, 0.1, 94, dtype = float),np.linspace(0.105, 0.20, 20, dtype = float),np.linspace(0.25, 0.6, 8, dtype = float)))
+
+    uhGPD = GPD(xgpd,[0.1],[0.0],[2.0],['u'],[0])
+    dhGPD = GPD(xgpd,[0.1],[0.0],[2.0],['d'],[0])
 
     with open("GUMP_Results/H_GPD.csv","w",newline='') as my_csv:
         csvWriter = csv.writer(my_csv,delimiter=',')
-        csvWriter.writerows(np.transpose([x,uhGPD,ubarhGPD,dhGPD,dbarhGPD]))
+        csvWriter.writerows(np.transpose([xgpd,uhGPD,dhGPD]))
 
-    ueGPD = GPD(x,[0.1],[0.0],[2.0],['u'],[1])
-    ubareGPD = -GPD(-x,[0.1],[0.0],[2.0],['u'],[1])
-    deGPD = GPD(x,[0.1],[0.0],[2.0],['d'],[1])
-    dbareGPD = -GPD(-x,[0.1],[0.0],[2.0],['d'],[1])
+    ueGPD = GPD(xgpd,[0.1],[0.0],[2.0],['u'],[1])
+    deGPD = GPD(xgpd,[0.1],[0.0],[2.0],['d'],[1])
 
     with open("GUMP_Results/E_GPD.csv","w",newline='') as my_csv:
         csvWriter = csv.writer(my_csv,delimiter=',')
-        csvWriter.writerows(np.transpose([x,ueGPD,ubareGPD,deGPD,dbareGPD]))
+        csvWriter.writerows(np.transpose([xgpd,ueGPD,deGPD]))
 
-    uhtGPD = GPD(x,[0.1],[0.0],[2.0],['u'],[2])
-    ubarhtGPD = GPD(-x,[0.1],[0.0],[2.0],['u'],[2])
-    dhtGPD = GPD(x,[0.1],[0.0],[2.0],['d'],[2])
-    dbarhtGPD = GPD(-x,[0.1],[0.0],[2.0],['d'],[2])
+    uhtGPD = GPD(xgpd,[0.1],[0.0],[2.0],['u'],[2])
+    dhtGPD = GPD(xgpd,[0.1],[0.0],[2.0],['d'],[2])
 
     with open("GUMP_Results/Ht_GPD.csv","w",newline='') as my_csv:
         csvWriter = csv.writer(my_csv,delimiter=',')
-        csvWriter.writerows(np.transpose([x,uhtGPD,ubarhtGPD,dhtGPD,dbarhtGPD]))
+        csvWriter.writerows(np.transpose([xgpd,uhtGPD,dhtGPD]))
 
-    uetGPD = GPD(x,[0.1],[0.0],[2.0],['u'],[3])
-    ubaretGPD = GPD(-x,[0.1],[0.0],[2.0],['u'],[3])
-    detGPD = GPD(x,[0.1],[0.0],[2.0],['d'],[3])
-    dbaretGPD = GPD(-x,[0.1],[0.0],[2.0],['d'],[3])
+    uetGPD = GPD(xgpd,[0.1],[0.0],[2.0],['u'],[3])
+    detGPD = GPD(xgpd,[0.1],[0.0],[2.0],['d'],[3])
 
     with open("GUMP_Results/Et_GPD.csv","w",newline='') as my_csv:
         csvWriter = csv.writer(my_csv,delimiter=',')
-        csvWriter.writerows(np.transpose([x,uetGPD,ubaretGPD,detGPD,dbaretGPD]))
+        csvWriter.writerows(np.transpose([xgpd,uetGPD,detGPD]))
