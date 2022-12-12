@@ -3,8 +3,10 @@ from Observables import GPDobserv
 from DVCS_xsec import dsigma_TOT, dsigma_DVCS_HERA, M
 import numpy as np
 import pandas as pd
+import csv 
 from Minimizer import PDF_theo, tPDF_theo, GFF_theo, CFF_theo
 from Minimizer import DVCSxsec_theo, DVCSxsec_cost_xBtQ, DVCSxsec_HERA_theo
+from multiprocessing import Pool
 
 df_Para = pd.read_csv('GUMP_Params/params.csv', index_col=0)
 para_list_unp = df_Para['value'][:38].to_numpy()
@@ -63,6 +65,50 @@ def PDF(x, t, Q, flv, spe):
 
 tPDF = PDF
 
+def GPD(x, xi, t, Q, flv, spe):
+    '''
+    Return parton distribution function (PDF) at a given point.
+
+    Args:
+        x: numpy float array. 
+        t: numpy float array.  
+        Q: numpy float array. 
+        flv: an array of string.
+            flv is the flavor. It can be 'u', 'd', 'g', 'NS', or 'S'
+        spe: numpy integer array
+            spe is the "species."
+            0 means H
+            1 means E
+            2 means Ht
+            3 means Et
+        
+    Returns:
+        _pdf: numpy float array.
+            Parton distribution function.
+    '''
+    x = np.array(x)
+    xi = np.array(xi)
+    t = np.array(t)
+    Q = np.array(Q)
+    flv = np.array(flv)
+    spe = np.array(spe)
+
+    p = np.where(spe<=1, 1, -1)
+
+    '''
+    if(spe == 0 or spe == 1):
+       p =  1
+
+    if(spe == 2 or spe == 3):
+        p = -1
+    '''
+    # Para: (4, 2, 5, 1, 4)
+
+    Para_spe = Para_All[spe] # fancy indexing. Output (N, 3, 5, 1, 5)
+    _GPD_theo = GPDobserv(x, xi, t, Q, p)
+    _GPD = _GPD_theo.GPD(flv, Para_spe)  # array length N
+
+    return _GPD
 
 def GFF(j, t, Q, flv, spe):
     '''
@@ -154,29 +200,78 @@ def DVCSxsec(y, xB, t, Q, phi, pol):
     [HCFF, ECFF, HtCFF, EtCFF] = CFF(xB, t, Q)
     return dsigma_TOT(y, xB, t, Q, phi, pol, HCFF, ECFF, HtCFF, EtCFF)
 
+if __name__ == '__main__':
+    pool = Pool()
+    x = np.exp(np.linspace(np.log(0.02), np.log(0.6), 40, dtype = float))
 
-def DVCSxsec_HERA(y, xB, t, Q, pol):
-    '''
-    The total DVCS cross-section integrated over phi
+    uhPDF = PDF(x,[0.0],[2.0],['u'],[0])
+    ubarhPDF = -PDF(-x,[0.0],[2.0],['u'],[0])
+    dhPDF = PDF(x,[0.0],[2.0],['d'],[0])
+    dbarhPDF = -PDF(-x,[0.0],[2.0],['d'],[0])
 
-    Args
-        y: numpy float array
-        xB: numpy float array
-        t: numpy float array
-        Q: numpy float array
-        phi: numpy float array
-        pol: a numpy array of str
-            pol can be 'UU', 'LU', 'UL', 'LL',
-                'UTin', 'LTin', 'UTout', or 'LTout'
+    with open("GUMP_Results/H_PDF.csv","w",newline='') as my_csv:
+        csvWriter = csv.writer(my_csv,delimiter=',')
+        csvWriter.writerows(np.transpose([x,uhPDF,ubarhPDF,dhPDF,dbarhPDF]))
 
-    Returns
-        The total DVCS cross-section integrated over phi. Float or numpy array
-    '''
-    y   = np.array(y)
-    xB  = np.array(xB)
-    t   = np.array(t)
-    Q   = np.array(Q)
-    pol = np.array(pol)
+    uePDF = PDF(x,[0.0],[2.0],['u'],[1])
+    ubarePDF = -PDF(-x,[0.0],[2.0],['u'],[1])
+    dePDF = PDF(x,[0.0],[2.0],['d'],[1])
+    dbarePDF = -PDF(-x,[0.0],[2.0],['d'],[1])
 
-    [HCFF, ECFF, HtCFF, EtCFF] = CFF(xB, t, Q)
-    return dsigma_DVCS_HERA(y, xB, t, Q, pol, HCFF, ECFF, HtCFF, EtCFF)
+    with open("GUMP_Results/E_PDF.csv","w",newline='') as my_csv:
+        csvWriter = csv.writer(my_csv,delimiter=',')
+        csvWriter.writerows(np.transpose([x,uePDF,ubarePDF,dePDF,dbarePDF]))
+
+    uhtPDF = PDF(x,[0.0],[2.0],['u'],[2])
+    ubarhtPDF = PDF(-x,[0.0],[2.0],['u'],[2])
+    dhtPDF = PDF(x,[0.0],[2.0],['d'],[2])
+    dbarhtPDF = PDF(-x,[0.0],[2.0],['d'],[2])
+
+    with open("GUMP_Results/Ht_PDF.csv","w",newline='') as my_csv:
+        csvWriter = csv.writer(my_csv,delimiter=',')
+        csvWriter.writerows(np.transpose([x,uhtPDF,ubarhtPDF,dhtPDF,dbarhtPDF]))
+
+    uetPDF = PDF(x,[0.0],[2.0],['u'],[3])
+    ubaretPDF = PDF(-x,[0.0],[2.0],['u'],[3])
+    detPDF = PDF(x,[0.0],[2.0],['d'],[3])
+    dbaretPDF = PDF(-x,[0.0],[2.0],['d'],[3])
+
+    with open("GUMP_Results/Et_PDF.csv","w",newline='') as my_csv:
+        csvWriter = csv.writer(my_csv,delimiter=',')
+        csvWriter.writerows(np.transpose([x,uetPDF,ubaretPDF,detPDF,dbaretPDF]))
+
+    uhGPD = GPD(x,[0.1],[0.0],[2.0],['u'],[0])
+    ubarhGPD = -GPD(-x,[0.1],[0.0],[2.0],['u'],[0])
+    dhGPD = GPD(x,[0.1],[0.0],[2.0],['d'],[0])
+    dbarhGPD = -GPD(-x,[0.1],[0.0],[2.0],['d'],[0])
+
+    with open("GUMP_Results/H_GPD.csv","w",newline='') as my_csv:
+        csvWriter = csv.writer(my_csv,delimiter=',')
+        csvWriter.writerows(np.transpose([x,uhGPD,ubarhGPD,dhGPD,dbarhGPD]))
+
+    ueGPD = GPD(x,[0.1],[0.0],[2.0],['u'],[1])
+    ubareGPD = -GPD(-x,[0.1],[0.0],[2.0],['u'],[1])
+    deGPD = GPD(x,[0.1],[0.0],[2.0],['d'],[1])
+    dbareGPD = -GPD(-x,[0.1],[0.0],[2.0],['d'],[1])
+
+    with open("GUMP_Results/E_GPD.csv","w",newline='') as my_csv:
+        csvWriter = csv.writer(my_csv,delimiter=',')
+        csvWriter.writerows(np.transpose([x,ueGPD,ubareGPD,deGPD,dbareGPD]))
+
+    uhtGPD = GPD(x,[0.1],[0.0],[2.0],['u'],[2])
+    ubarhtGPD = GPD(-x,[0.1],[0.0],[2.0],['u'],[2])
+    dhtGPD = GPD(x,[0.1],[0.0],[2.0],['d'],[2])
+    dbarhtGPD = GPD(-x,[0.1],[0.0],[2.0],['d'],[2])
+
+    with open("GUMP_Results/Ht_GPD.csv","w",newline='') as my_csv:
+        csvWriter = csv.writer(my_csv,delimiter=',')
+        csvWriter.writerows(np.transpose([x,uhtGPD,ubarhtGPD,dhtGPD,dbarhtGPD]))
+
+    uetGPD = GPD(x,[0.1],[0.0],[2.0],['u'],[3])
+    ubaretGPD = GPD(-x,[0.1],[0.0],[2.0],['u'],[3])
+    detGPD = GPD(x,[0.1],[0.0],[2.0],['d'],[3])
+    dbaretGPD = GPD(-x,[0.1],[0.0],[2.0],['d'],[3])
+
+    with open("GUMP_Results/Et_GPD.csv","w",newline='') as my_csv:
+        csvWriter = csv.writer(my_csv,delimiter=',')
+        csvWriter.writerows(np.transpose([x,uetGPD,ubaretGPD,detGPD,dbaretGPD]))

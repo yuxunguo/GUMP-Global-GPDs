@@ -52,7 +52,7 @@ if __name__ == '__main__':
     Para_Pol_All    = ParaManager_Pol(Paralst_Pol)
 
     DVCS_HERA_pred = np.transpose([DVCSxsec_HERA_theo(DVCS_HERA_data, Para_Unp=Para_Unp_All, Para_Pol=Para_Pol_All)])
-    with open("GUMP_test/HERAxsec.csv","w",newline='') as my_csv:
+    with open("GUMP_Results/HERAxsec.csv","w",newline='') as my_csv:
         csvWriter = csv.writer(my_csv,delimiter=',')
         csvWriter.writerows(DVCS_HERA_pred)
 
@@ -78,11 +78,11 @@ if __name__ == '__main__':
     xsecUUgp0 = np.transpose(np.array([xsecgp0UU['phi'], xsecgp0UU['f'], xsecgp0UU['delta f'], xsecgp0UU_pred]))
     xsecLUgp0 = np.transpose(np.array([xsecgp0LU['phi'], xsecgp0LU['f'], xsecgp0LU['delta f'], xsecgp0LU_pred]))
 
-    with open("GUMP_test/UUxsec.csv","w",newline='') as my_csv:
+    with open("GUMP_Results/UUxsec.csv","w",newline='') as my_csv:
         csvWriter = csv.writer(my_csv,delimiter=',')
         csvWriter.writerows(xsecUUgp0)
 
-    with open("GUMP_test/LUxsec.csv","w",newline='') as my_csv:
+    with open("GUMP_Results/LUxsec.csv","w",newline='') as my_csv:
         csvWriter = csv.writer(my_csv,delimiter=',')
         csvWriter.writerows(xsecLUgp0)
 
