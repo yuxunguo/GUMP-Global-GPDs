@@ -548,10 +548,14 @@ class GPDobserv (object) :
         # Adding a j = 0 term because the contour do not enclose the j = 0 pole which should be the 0th conformal moment.
         # We cannot change the Mellin_Barnes_intercept > 0 to enclose the j = 0 pole only, due to the pomeron pole around j = 0.
         def GPD0():
-
             
             if(self.p == -1):
-                return Integrand_Mellin_Barnes(0)
+
+                ConfFlav     = Moment_Sum(0, self.t, Para_Forward) #(N, 5)
+                ConfFlav_xi2 = Moment_Sum(0, self.t, Para_xi2)
+                ConfFlav_xi4 = Moment_Sum(0, self.t, Para_xi4)
+                # Evolutino kernel has explicit singularity at j = 0 through the limit is finite for p = -1, so j = 0.00001 is used instead of j = 0
+                return Flv_Intp(np.einsum('...ij,...j->...i', ConfWaveConv(0), Moment_Evo(0.00001, NFEFF, self.p, self.Q, ConfFlav)) + self.xi ** 2 * np.einsum('...ij,...j->...i', ConfWaveConv(2), Moment_Evo(2, NFEFF, self.p, self.Q, ConfFlav_xi2))+ self.xi ** 4 * np.einsum('...ij,...j->...i', ConfWaveConv(4), Moment_Evo(4, NFEFF, self.p, self.Q, ConfFlav_xi4)), flv)
 
             if(self.p == 1):
                 """
