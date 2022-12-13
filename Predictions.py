@@ -241,7 +241,7 @@ if __name__ == '__main__':
         csvWriter = csv.writer(my_csv,delimiter=',')
         csvWriter.writerows(np.transpose([x,uetPDF,ubaretPDF,detPDF,dbaretPDF]))
 
-    xgpd = np.concatenate((np.linspace(-0.6, -0.25, 8, dtype = float),np.linspace(-0.2, -0.105, 20, dtype = float),np.linspace(-0.1, 0.1, 94, dtype = float),np.linspace(0.105, 0.20, 20, dtype = float),np.linspace(0.25, 0.6, 8, dtype = float)))
+    xgpd = np.concatenate((np.linspace(-0.6, -0.225, 16, dtype = float),np.linspace(-0.2, -0.1025, 40, dtype = float),np.linspace(-0.1, 0.1, 188, dtype = float),np.linspace(0.1025, 0.20, 40, dtype = float),np.linspace(0.225, 0.6, 16, dtype = float)))
 
     uhGPD = GPD(xgpd,[0.1],[0.0],[2.0],['u'],[0])
     dhGPD = GPD(xgpd,[0.1],[0.0],[2.0],['d'],[0])
