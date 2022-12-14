@@ -45,6 +45,15 @@ def ParaManager_Unp(Paralst: np.array):
      R_Hu_xi4,    R_Hd_xi4,     R_Hg_xi4,
      R_Eu_xi4,    R_Ed_xi4,     R_Eg_xi4,    bexp_HSea] = Paralst
 
+    R_Hd_xi2 = R_Hu_xi2
+    R_Ed_xi2 = R_Eu_xi2
+    R_Hd_xi4 = R_Hu_xi4
+    R_Ed_xi4 = R_Eu_xi4
+    R_Hg_xi2 = 0
+    R_Eg_xi2 = 0
+    R_Hg_xi4 = 0
+    R_Eg_xi4 = 0
+
     # Initial forward parameters for the H of (uV, ubar, dV, dbar,g) distributions
     H_uV =   np.array([[Norm_HuV,   alpha_HuV,   beta_HuV,   alphap_HuV,   0]])
     H_ubar = np.array([[Norm_Hubar, alpha_Hubar, beta_Hubar, alphap_Hqbar, bexp_HSea]])
@@ -117,6 +126,15 @@ def ParaManager_Pol(Paralst: np.array):
      R_Etu_xi2,   R_Etd_xi2,    R_Etg_xi2,
      R_Htu_xi4,   R_Htd_xi4,    R_Htg_xi4,
      R_Etu_xi4,   R_Etd_xi4,    R_Etg_xi4,   bexp_HtSea] = Paralst
+
+    R_Htd_xi2 = R_Htu_xi2
+    R_Etd_xi2 = R_Etu_xi2
+    R_Htd_xi4 = R_Htu_xi4
+    R_Etd_xi4 = R_Etu_xi4
+    R_Htg_xi2 = 0
+    R_Etg_xi2 = 0
+    R_Htg_xi4 = 0
+    R_Etg_xi4 = 0
 
     # Initial forward parameters for the Ht of (uV, ubar, dV, dbar,g) distributions
 

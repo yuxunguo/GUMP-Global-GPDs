@@ -303,8 +303,8 @@ def forward_H_fit(Paralst_Unp):
     time_end = time.time() -time_start
 
     with open('GUMP_Output/H_forward_fit.txt', 'w') as f:
-        print('Total running time: %3.1f minutes. Total call of cost function: %3d.\n' % ( time_end/60, fit_forw_H.nfcn), file=f)
-        print('The chi squared/d.o.f. is: %3.1f / %3d ( = %3.1f ).\n' % (fit_forw_H.fval, ndof_H, fit_forw_H.fval/ndof_H), file = f)
+        print('Total running time: %.1f minutes. Total call of cost function: %3d.\n' % ( time_end/60, fit_forw_H.nfcn), file=f)
+        print('The chi squared/d.o.f. is: %.2f / %3d ( = %.2f ).\n' % (fit_forw_H.fval, ndof_H, fit_forw_H.fval/ndof_H), file = f)
         print('Below are the final output parameters from iMinuit:', file = f)
         print(*fit_forw_H.values, sep=", ", file = f)
         print(*fit_forw_H.errors, sep=", ", file = f)
@@ -407,8 +407,8 @@ def forward_E_fit(Paralst_Unp):
     time_end = time.time() -time_start
 
     with open('GUMP_Output/E_forward_fit.txt', 'w') as f:
-        print('Total running time: %3.1f minutes. Total call of cost function: %3d.\n' % ( time_end/60, fit_forw_E.nfcn), file=f)
-        print('The chi squared/d.o.f. is: %3.1f / %3d ( = %3.1f ).\n' % (fit_forw_E.fval, ndof_E, fit_forw_E.fval/ndof_E), file = f)
+        print('Total running time: %.1f minutes. Total call of cost function: %3d.\n' % ( time_end/60, fit_forw_E.nfcn), file=f)
+        print('The chi squared/d.o.f. is: %.2f / %3d ( = %.2f ).\n' % (fit_forw_E.fval, ndof_E, fit_forw_E.fval/ndof_E), file = f)
         print('Below are the final output parameters from iMinuit:', file = f)
         print(*fit_forw_E.values, sep=", ", file = f)
         print(*fit_forw_E.errors, sep=", ", file = f)
@@ -571,8 +571,8 @@ def forward_Ht_fit(Paralst_Pol):
 
     time_end = time.time() -time_start    
     with open('GUMP_Output/Ht_forward_fit.txt', 'w') as f:
-        print('Total running time: %3.1f minutes. Total call of cost function: %3d.\n' % ( time_end/60, fit_forw_Ht.nfcn), file=f)
-        print('The chi squared/d.o.f. is: %3.1f / %3d ( = %3.1f ).\n' % (fit_forw_Ht.fval, ndof_Ht, fit_forw_Ht.fval/ndof_Ht), file = f)
+        print('Total running time: %.1f minutes. Total call of cost function: %3d.\n' % ( time_end/60, fit_forw_Ht.nfcn), file=f)
+        print('The chi squared/d.o.f. is: %.2f / %3d ( = %.2f ).\n' % (fit_forw_Ht.fval, ndof_Ht, fit_forw_Ht.fval/ndof_Ht), file = f)
         print('Below are the final output parameters from iMinuit:', file = f)
         print(*fit_forw_Ht.values, sep=", ", file = f)
         print(*fit_forw_Ht.errors, sep=", ", file = f)
@@ -674,8 +674,8 @@ def forward_Et_fit(Paralst_Pol):
 
     time_end = time.time() -time_start    
     with open('GUMP_Output/Et_forward_fit.txt', 'w') as f:
-        print('Total running time: %3.1f minutes. Total call of cost function: %3d.\n' % ( time_end/60, fit_forw_Et.nfcn), file=f)
-        print('The chi squared/d.o.f. is: %3.1f / %3d ( = %3.1f ).\n' % (fit_forw_Et.fval, ndof_Et, fit_forw_Et.fval/ndof_Et), file = f)
+        print('Total running time: %.1f minutes. Total call of cost function: %3d.\n' % ( time_end/60, fit_forw_Et.nfcn), file=f)
+        print('The chi squared/d.o.f. is: %.2f / %3d ( = %.2f ).\n' % (fit_forw_Et.fval, ndof_Et, fit_forw_Et.fval/ndof_Et), file = f)
         print('Below are the final output parameters from iMinuit:', file = f)
         print(*fit_forw_Et.values, sep=", ", file = f)
         print(*fit_forw_Et.errors, sep=", ", file = f)
@@ -940,6 +940,16 @@ def off_forward_fit(Paralst_Unp, Paralst_Pol):
     fit_off_forward.fixed['R_Htg_xi4'] = True
     fit_off_forward.fixed['R_Etg_xi4'] = True
 
+    fit_off_forward.fixed['R_Hd_xi2']  = True 
+    fit_off_forward.fixed['R_Ed_xi2']  = True
+    fit_off_forward.fixed['R_Htd_xi2'] = True 
+    fit_off_forward.fixed['R_Etd_xi2'] = True
+
+    fit_off_forward.fixed['R_Hd_xi4']  = True 
+    fit_off_forward.fixed['R_Ed_xi4']  = True
+    fit_off_forward.fixed['R_Htd_xi4'] = True 
+    fit_off_forward.fixed['R_Etd_xi4'] = True
+
     """
     fit_off_forward.fixed['R_Hu_xi4'] = True
     fit_off_forward.fixed['R_Hd_xi4'] = True 
@@ -965,8 +975,8 @@ def off_forward_fit(Paralst_Unp, Paralst_Pol):
     time_end = time.time() -time_start
 
     with open('GUMP_Output/off_forward_fit.txt', 'w') as f:
-        print('Total running time: %3.1f minutes. Total call of cost function: %3d.\n' % ( time_end/60, fit_off_forward.nfcn), file=f)
-        print('The chi squared/d.o.f. is: %3.1f / %3d ( = %3.1f ).\n' % (fit_off_forward.fval, ndof_off_forward, fit_off_forward.fval/ndof_off_forward), file = f)
+        print('Total running time: %.1f minutes. Total call of cost function: %3d.\n' % ( time_end/60, fit_off_forward.nfcn), file=f)
+        print('The chi squared/d.o.f. is: %.2f / %3d ( = %.2f ).\n' % (fit_off_forward.fval, ndof_off_forward, fit_off_forward.fval/ndof_off_forward), file = f)
         print('Below are the final output parameters from iMinuit:', file = f)
         print(*fit_off_forward.values, sep=", ", file = f)
         print(*fit_off_forward.errors, sep=", ", file = f)
