@@ -444,8 +444,8 @@ class GPDobserv (object) :
             ConfFlav_xi4 = np.array( list(map(lambda paraset: Moment_Sum(j, self.t, paraset), Para_xi4)) )
             '''
             ConfFlav     = Moment_Sum(j, self.t, Para_Forward) #(N, 5)
-            ConfFlav_xi2 = Moment_Sum(j, self.t, Para_xi2)
-            ConfFlav_xi4 = Moment_Sum(j, self.t, Para_xi4)
+            ConfFlav_xi2 = Moment_Sum(j+2, self.t, Para_xi2)
+            ConfFlav_xi4 = Moment_Sum(j+4, self.t, Para_xi4)
 
             # shape (N, 5)
             EvoConf_Wilson = (CWilson(j) * Moment_Evo(j, NFEFF, self.p, self.Q, ConfFlav) \
@@ -538,8 +538,8 @@ class GPDobserv (object) :
         def Integrand_Mellin_Barnes(j: complex):
 
             ConfFlav     = Moment_Sum(j, self.t, Para_Forward) #(N, 5)
-            ConfFlav_xi2 = Moment_Sum(j, self.t, Para_xi2)
-            ConfFlav_xi4 = Moment_Sum(j, self.t, Para_xi4)
+            ConfFlav_xi2 = Moment_Sum(j+2, self.t, Para_xi2)
+            ConfFlav_xi4 = Moment_Sum(j+4, self.t, Para_xi4)
 
             return Flv_Intp(np.einsum('...ij,...j->...i', ConfWaveConv(j), Moment_Evo(j, NFEFF, self.p, self.Q, ConfFlav)) + self.xi ** 2 * np.einsum('...ij,...j->...i', ConfWaveConv(j+2), Moment_Evo(j+2, NFEFF, self.p, self.Q, ConfFlav_xi2))+ self.xi ** 4 * np.einsum('...ij,...j->...i', ConfWaveConv(j+4), Moment_Evo(j+4, NFEFF, self.p, self.Q, ConfFlav_xi4)), flv)
 
@@ -552,8 +552,8 @@ class GPDobserv (object) :
             if(self.p == -1):
 
                 ConfFlav     = Moment_Sum(0, self.t, Para_Forward) #(N, 5)
-                ConfFlav_xi2 = Moment_Sum(0, self.t, Para_xi2)
-                ConfFlav_xi4 = Moment_Sum(0, self.t, Para_xi4)
+                ConfFlav_xi2 = Moment_Sum(2, self.t, Para_xi2)
+                ConfFlav_xi4 = Moment_Sum(4, self.t, Para_xi4)
                 # Evolutino kernel has explicit singularity at j = 0 through the limit is finite for p = -1, so j = 0.00001 is used instead of j = 0
                 return Flv_Intp(np.einsum('...ij,...j->...i', ConfWaveConv(0), Moment_Evo(0.00001, NFEFF, self.p, self.Q, ConfFlav)) + self.xi ** 2 * np.einsum('...ij,...j->...i', ConfWaveConv(2), Moment_Evo(2, NFEFF, self.p, self.Q, ConfFlav_xi2))+ self.xi ** 4 * np.einsum('...ij,...j->...i', ConfWaveConv(4), Moment_Evo(4, NFEFF, self.p, self.Q, ConfFlav_xi4)), flv)
 
@@ -569,8 +569,8 @@ class GPDobserv (object) :
                 """
                 # The sea and gluon conformal moments will be nan with alpha > 1, these nan will be eliminated by the conformal wave functions which are zero for them, so we simply set them to be 0
                 ConfFlav     = np.nan_to_num(Moment_Sum(0, self.t, Para_Forward)) #(N, 5)
-                ConfFlav_xi2 = np.nan_to_num(Moment_Sum(0, self.t, Para_xi2))
-                ConfFlav_xi4 = np.nan_to_num(Moment_Sum(0, self.t, Para_xi4))
+                ConfFlav_xi2 = np.nan_to_num(Moment_Sum(2, self.t, Para_xi2))
+                ConfFlav_xi4 = np.nan_to_num(Moment_Sum(4, self.t, Para_xi4))
 
                 return Flv_Intp(np.einsum('...ij,...j->...i', ConfWaveConv(0), ConfFlav) + self.xi ** 2 * np.einsum('...ij,...j->...i', ConfWaveConv(2), Moment_Evo(2, NFEFF, self.p, self.Q, ConfFlav_xi2))+ self.xi ** 4 * np.einsum('...ij,...j->...i', ConfWaveConv(4), Moment_Evo(4, NFEFF, self.p, self.Q, ConfFlav_xi4)), flv)
                 #return Flv_Intp(np.einsum('...j,j', ConfWaveConv(0),ConfFlav) +  self.xi ** 2 * np.einsum('...j,j', ConfWaveConv(2), Moment_Evo(2, NFEFF, self.p, self.Q, ConfFlav_xi2)) + self.xi ** 4 * np.einsum('...j,j', ConfWaveConv(4), Moment_Evo(4, NFEFF, self.p, self.Q, ConfFlav_xi4)), flv)
