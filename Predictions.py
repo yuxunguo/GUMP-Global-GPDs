@@ -202,7 +202,22 @@ def DVCSxsec(y, xB, t, Q, phi, pol):
 
 if __name__ == '__main__':
     pool = Pool()
+    x  =  0.1
+    xi =  0.3
+    t  = -0.5
+    print(GPD([x,-x],[xi],[t],[2.0],['u'],[0]))
+    print(GPD([x,-x],[xi],[t],[2.0],['d'],[0]))
 
+    print(GPD([x,-x],[xi],[t],[2.0],['u'],[2]))
+    print(GPD([x,-x],[xi],[t],[2.0],['d'],[2]))
+
+    print(GPD([x,-x],[xi],[t],[2.0],['u'],[1]))
+    print(GPD([x,-x],[xi],[t],[2.0],['d'],[1]))
+
+    print(GPD([x,-x],[xi],[t],[2.0],['u'],[3]))
+    print(GPD([x,-x],[xi],[t],[2.0],['d'],[3]))
+
+    '''
     x = np.exp(np.linspace(np.log(0.005), np.log(0.6), 100, dtype = float))
 
     uhPDF = PDF(x,[0.0],[2.0],['u'],[0])
@@ -236,16 +251,12 @@ if __name__ == '__main__':
     ubaretPDF = PDF(-x,[0.0],[2.0],['u'],[3])
     detPDF = PDF(x,[0.0],[2.0],['d'],[3])
     dbaretPDF = PDF(-x,[0.0],[2.0],['d'],[3])
-
+    
     with open("GUMP_Results/Et_PDF.csv","w",newline='') as my_csv:
         csvWriter = csv.writer(my_csv,delimiter=',')
         csvWriter.writerows(np.transpose([x,uetPDF,ubaretPDF,detPDF,dbaretPDF]))
 
     xgpd = np.concatenate((np.linspace(-0.6,-0.33,28,dtype = float),np.linspace(-0.32,0.32,66,dtype = float),np.linspace(0.33,0.6,28,dtype = float)))
-
-    #xgpd = np.concatenate((np.linspace(-0.6, -0.25, 8, dtype = float),np.linspace(-0.2, -0.11, 10, dtype = float),np.linspace(-0.1, 0.1, 44, dtype = float),np.linspace(0.11, 0.20, 10, dtype = float),np.linspace(0.25, 0.6, 8, dtype = float)))
-
-    #xgpd = np.concatenate((np.linspace(-0.6, -0.225, 16, dtype = float),np.linspace(-0.2, -0.1025, 40, dtype = float),np.linspace(-0.1, 0.1, 188, dtype = float),np.linspace(0.1025, 0.20, 40, dtype = float),np.linspace(0.225, 0.6, 16, dtype = float)))
 
     uhGPD = GPD(xgpd,[0.33],[-0.5],[2.0],['u'],[0])
     dhGPD = GPD(xgpd,[0.33],[-0.5],[2.0],['d'],[0])
@@ -274,3 +285,4 @@ if __name__ == '__main__':
     with open("GUMP_Results/Et_GPD.csv","w",newline='') as my_csv:
         csvWriter = csv.writer(my_csv,delimiter=',')
         csvWriter.writerows(np.transpose([xgpd,uetGPD,detGPD]))
+    '''
