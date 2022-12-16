@@ -45,10 +45,11 @@ def ParaManager_Unp(Paralst: np.array):
      R_Hu_xi4,    R_Hd_xi4,     R_Hg_xi4,
      R_Eu_xi4,    R_Ed_xi4,     R_Eg_xi4,    bexp_HSea] = Paralst
 
-    R_Hd_xi2 = R_Hu_xi2
-    R_Ed_xi2 = R_Eu_xi2
-    R_Hd_xi4 = R_Hu_xi4
-    R_Ed_xi4 = R_Eu_xi4
+    R_Hu_xi4 = 0
+    R_Hd_xi4 = 0
+    R_Eu_xi4 = 0
+    R_Ed_xi4 = 0
+
     R_Hg_xi2 = 0
     R_Eg_xi2 = 0
     R_Hg_xi4 = 0
@@ -127,10 +128,11 @@ def ParaManager_Pol(Paralst: np.array):
      R_Htu_xi4,   R_Htd_xi4,    R_Htg_xi4,
      R_Etu_xi4,   R_Etd_xi4,    R_Etg_xi4,   bexp_HtSea] = Paralst
 
-    R_Htd_xi2 = R_Htu_xi2
-    R_Etd_xi2 = R_Etu_xi2
-    R_Htd_xi4 = R_Htu_xi4
-    R_Etd_xi4 = R_Etu_xi4
+    R_Htu_xi4 = 0
+    R_Htd_xi4 = 0
+    R_Etu_xi4 = 0
+    R_Etd_xi4 = 0
+    
     R_Htg_xi2 = 0
     R_Etg_xi2 = 0
     R_Htg_xi4 = 0
