@@ -202,6 +202,7 @@ def DVCSxsec(y, xB, t, Q, phi, pol):
 
 if __name__ == '__main__':
     pool = Pool()
+    '''
     x  =  0.1
     xi =  0.3
     t  = -0.5
@@ -216,8 +217,8 @@ if __name__ == '__main__':
 
     print(GPD([x,-x],[xi],[t],[2.0],['u'],[3]))
     print(GPD([x,-x],[xi],[t],[2.0],['d'],[3]))
-
     '''
+
     x = np.exp(np.linspace(np.log(0.005), np.log(0.6), 100, dtype = float))
 
     uhPDF = PDF(x,[0.0],[2.0],['u'],[0])
@@ -255,7 +256,7 @@ if __name__ == '__main__':
     with open("GUMP_Results/Et_PDF.csv","w",newline='') as my_csv:
         csvWriter = csv.writer(my_csv,delimiter=',')
         csvWriter.writerows(np.transpose([x,uetPDF,ubaretPDF,detPDF,dbaretPDF]))
-
+    '''
     xgpd = np.concatenate((np.linspace(-0.6,-0.33,28,dtype = float),np.linspace(-0.32,0.32,66,dtype = float),np.linspace(0.33,0.6,28,dtype = float)))
 
     uhGPD = GPD(xgpd,[0.33],[-0.5],[2.0],['u'],[0])
