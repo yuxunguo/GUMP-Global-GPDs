@@ -176,11 +176,13 @@ def singlet_LO(n: complex, nf: int, p: int, prty: int = 1) -> np.ndarray:
                         [gq0, gg0]])
     '''
 
+    epsilon = 0.00001 * ( n == 1)
+
     # Here, I am making the assumption that a is either 1 or -1
     qq0 = np.where(p>0,  CF*(-3.0-2.0/(n*(1.0+n))+4.0*S1(n)),           CF*(-3.0-2.0/(n*(1.0+n))+4.0*S1(n)))
     qg0 = np.where(p>0,  (-4.0*nf*TF*(2.0+n+n*n))/(n*(1.0+n)*(2.0+n)),  (-4.0*nf*TF*(-1.0+n))/(n*(1.0+n)) )
-    gq0 = np.where(p>0,  (-2.0*CF*(2.0+n+n*n))/((-1.0+n)*n*(1.0+n)),    (-2.0*CF*(2.0+n))/(n*(1.0+n)))
-    gg0 = np.where(p>0,  -4.0*CA*(1/((-1.0+n)*n)+1/((1.0+n)*(2.0+n))-S1(n)) -11*CA/3. + 4*nf*TF/3., \
+    gq0 = np.where(p>0,  (-2.0*CF*(2.0+n+n*n))/((-1.0+n + epsilon)*n*(1.0+n)),    (-2.0*CF*(2.0+n))/(n*(1.0+n)))
+    gg0 = np.where(p>0,  -4.0*CA*(1/((-1.0+n + epsilon)*n)+1/((1.0+n)*(2.0+n))-S1(n)) -11*CA/3. + 4*nf*TF/3., \
         -4.0*CA*(2/(n*(1.0+n))-S1(n)) -11*CA/3. + 4*nf*TF/3. )
 
     # all of the four above have shape (N)

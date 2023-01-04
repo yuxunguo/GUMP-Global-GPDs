@@ -1,4 +1,4 @@
-Total running time: 4.1 minutes. Total call of cost function: 617.
+Total running time: 4.2 minutes. Total call of cost function: 617.
 
 The chi squared/d.o.f. is: 281.69 / 200 ( = 1.41 ).
 

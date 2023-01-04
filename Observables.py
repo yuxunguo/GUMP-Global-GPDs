@@ -486,7 +486,17 @@ class GPDobserv (object) :
             '''
             return result
 
-        return quad_vec(Integrand_CFF, - Max_imJ, + Max_imJ, epsrel = Prec_Goal)[0]
+        # Adding extra j = 0 term for the axial vector CFFs
+        def CFFj0():
+
+            if self.p==1:
+                result = np.ones_like(self.p) * 0
+            else:
+                result = np.ones_like(self.p) * self.xi ** (- 1) * Integrand_Mellin_Barnes_CFF(0) *(2)
+
+            return result
+
+        return quad_vec(Integrand_CFF, - Max_imJ, + Max_imJ, epsrel = Prec_Goal)[0] + CFFj0()
 
         '''
         if (self.p == 1):
@@ -569,13 +579,13 @@ class GPDobserv (object) :
             if(self.p == -1):
 
                 ConfFlav     = Moment_Sum(0, self.t, Para_Forward) #(N, 5)
-                ConfFlav_xi2 = Moment_Sum(0, self.t, Para_xi2)
                 '''
-                # Removing xi^4 terms
+                # Removing xi^2, xi^4 terms
+                ConfFlav_xi2 = Moment_Sum(0, self.t, Para_xi2)
                 ConfFlav_xi4 = Moment_Sum(j, self.t, Para_xi4)
                 '''
                 # Evolutino kernel has explicit singularity at j = 0 through the limit is finite for p = -1, so j = 0.00001 is used instead of j = 0
-                return Flv_Intp(np.einsum('...ij,...j->...i', ConfWaveConv(0), Moment_Evo(0.00001, NFEFF, self.p, self.Q, ConfFlav)) + self.xi ** 2 * np.einsum('...ij,...j->...i', ConfWaveConv(2), Moment_Evo(2, NFEFF, self.p, self.Q, ConfFlav_xi2)), flv)
+                return Flv_Intp(np.einsum('...ij,...j->...i', ConfWaveConv(0), Moment_Evo(0, NFEFF, self.p, self.Q, ConfFlav)), flv)
 
             if(self.p == 1):
                 """
@@ -589,16 +599,16 @@ class GPDobserv (object) :
                 """
                 # The sea and gluon conformal moments will be nan with alpha > 1, these nan will be eliminated by the conformal wave functions which are zero for them, so we simply set them to be 0
                 ConfFlav     = np.nan_to_num(Moment_Sum(0, self.t, Para_Forward)) #(N, 5)
-                ConfFlav_xi2 = np.nan_to_num(Moment_Sum(0, self.t, Para_xi2))
                 '''
                 # Removing xi^4 terms
+                ConfFlav_xi2 = np.nan_to_num(Moment_Sum(0, self.t, Para_xi2))
                 ConfFlav_xi4 = np.nan_to_num(Moment_Sum(0, self.t, Para_xi4))
                 '''
                 # Removing xi^4 terms
                 #return Flv_Intp(np.einsum('...ij,...j->...i', ConfWaveConv(0), ConfFlav) + self.xi ** 2 * np.einsum('...ij,...j->...i', ConfWaveConv(2), Moment_Evo(2, NFEFF, self.p, self.Q, ConfFlav_xi2))+ self.xi ** 4 * np.einsum('...ij,...j->...i', ConfWaveConv(4), Moment_Evo(4, NFEFF, self.p, self.Q, ConfFlav_xi4)), flv)
-                return Flv_Intp(np.einsum('...ij,...j->...i', ConfWaveConv(0), ConfFlav) + self.xi ** 2 * np.einsum('...ij,...j->...i', ConfWaveConv(2), Moment_Evo(2, NFEFF, self.p, self.Q, ConfFlav_xi2)), flv)
+                return Flv_Intp(np.einsum('...ij,...j->...i', ConfWaveConv(0), ConfFlav), flv)
 
-        return quad_vec(lambda imJ : np.real(Integrand_Mellin_Barnes(reJ + 1j* imJ) / (2 * np.sin((reJ + 1j * imJ+1) * np.pi)) ), - Max_imJ, + Max_imJ, epsrel = Prec_Goal)[0] # + np.real(GPD0()) 
+        return quad_vec(lambda imJ : np.real(Integrand_Mellin_Barnes(reJ + 1j* imJ) / (2 * np.sin((reJ + 1j * imJ+1) * np.pi)) ), - Max_imJ, + Max_imJ, epsrel = Prec_Goal)[0] + np.real(GPD0()) 
 
     def GFFj0(self, j: int, flv, ParaAll):
         """
