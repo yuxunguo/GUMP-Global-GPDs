@@ -1,7 +1,6 @@
 """
 LO QCD evolution of moment space GPD. Credits to K. Kumericki at https://github.com/kkumer/gepard.
 
-We used RunDec for the running strong coupling constant alphaS instead and made slight modifications.
 
 Note:
     Functions in this module have as first argument Mellin moment
@@ -14,7 +13,6 @@ Note:
 #from this import d
 
 import numpy as np
-import rundec
 from scipy.special import psi
 from typing import Tuple
 import numba
@@ -51,7 +49,6 @@ inv_flav_trans = np.linalg.inv(flav_trans)
 
 """
 ***********************pQCD running coupling constant***********************
-Here rundec is used instead.
 """
 
 B00 = 11./3. * CA
