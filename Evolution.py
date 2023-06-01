@@ -362,8 +362,12 @@ def Coeff_Evo(j: complex, nf: int, p: int, Q: float, CoeffFlav: np.array) -> np.
     Evolution of coefficients in the flavor space 
 
     Args:
-        uneolved wilson coefficients in flavor space CoeffFlav (in general, this could be a matrix)
+        uneolved wilson coefficients in flavor space CoeffFlav
             For the basis, see Moment_Evo function for more details. 
+            NOTE: here, CoeffFlav should have shape (N, num_flav, num_flav).
+                    where num_flav is the number of flavors
+                    This is to say, besides N, the CoeffFlav is a matrix.
+                    If your coefficient is not a matrix, you need to cast it to a matrix.
         j: conformal spin j (conformal spin is actually j+2 but anyway): scalar
         t: momentum transfer squared
         nf: number of effective fermions; 

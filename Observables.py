@@ -8,6 +8,7 @@ from mpmath import mp, hyp2f1
 from scipy.integrate import quad, quad_vec
 from scipy.special import gamma
 from Evolution import Coeff_Evo
+from Parameters import Flavor_Factor
 
 CFF_trans =np.array([1*(2/3)**2, 2*(2/3)**2, 1*(1/3)**2, 2*(1/3)**2, 0])
 
@@ -460,8 +461,9 @@ class GPDobserv (object) :
                                 + CWilson(j+2) * Moment_Evo(j+2, NFEFF, self.p, self.Q, ConfFlav_xi2) \
                                 + CWilson(j+4) * Moment_Evo(j+4, NFEFF, self.p, self.Q, ConfFlav_xi4))
             """
-            EvoConf_Wilson = (Coeff_Evo(j, NFEFF, self.p, self.Q,CWilson(j)) * ConfFlav \
-                                + Coeff_Evo(j+2, NFEFF, self.p, self.Q, CWilson(j+2)) * ConfFlav_xi2)
+            EvoConf_Wilson = (np.einsum('...ij, ...j->...i',Coeff_Evo(j, NFEFF, self.p, self.Q,CWilson(j)*np.eye(Flavor_Factor)), ConfFlav) \
+                                + np.einsum('...ij, ...j->...i', Coeff_Evo(j+2, NFEFF, self.p, self.Q, CWilson(j+2)*np.eye(Flavor_Factor)), ConfFlav_xi2))
+            # Here, CWilson(j) is a scalar, but Coeff_Evo only takes a matrix. Therefore, we multiply by np.eye
 
             return np.einsum('j, ...j', CFF_trans, EvoConf_Wilson) # shape (N)
 
