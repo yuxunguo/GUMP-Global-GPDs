@@ -357,7 +357,7 @@ def Moment_Evo(j: complex, nf: int, p: int, Q: float, ConfFlav: np.array) -> np.
     return EvoConfFlav
 
 
-def Coeff_Evo(j: complex, nf: int, p: int, Q: float, ConfFlav: np.array) -> np.array:
+def Coeff_Evo(j: complex, nf: int, p: int, Q: float, CoeffFlav: np.array) -> np.array:
     """
     Evolution of coefficients in the flavor space 
 
@@ -394,4 +394,6 @@ def Coeff_Evo(j: complex, nf: int, p: int, Q: float, ConfFlav: np.array) -> np.a
     # Recombing the non-singlet and singlet parts
     EvoCoeff = np.concatenate((EvoCoeffNS, EvoCoeffS), axis=-1) # (N, 5)
     # Inverse transform the evolved coefficients back to the flavor basis
-    EvoConfFlav = np.einsum('...ki, ij->...kj', EvoCoeff, flav_trans) #(N, 5)
+    EvoCoeffFlav = np.einsum('...ki, ij->...kj', EvoCoeff, flav_trans) #(N, 5)
+
+    return EvoCoeffFlav
