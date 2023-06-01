@@ -361,8 +361,9 @@ def Coeff_Evo(j: complex, nf: int, p: int, Q: float, CoeffFlav: np.array) -> np.
     Args:
         uneolved wilson coefficients in flavor space CoeffFlav
             For the basis, see Moment_Evo function for more details. 
-            NOTE: here, CoeffFlav should have shape (N, num_flav, num_flav).
-                    where num_flav is the number of flavors
+            NOTE: here, CoeffFlav should have shape (N, n, num_flav).
+                    where num_flav is the number of flavors, and n is some number.
+                    Namely, (N, n, 5)
                     This is to say, besides N, the CoeffFlav is a matrix.
                     If your coefficient is not a matrix, you need to cast it to a matrix.
         j: conformal spin j (conformal spin is actually j+2 but anyway): scalar
@@ -376,25 +377,25 @@ def Coeff_Evo(j: complex, nf: int, p: int, Q: float, CoeffFlav: np.array) -> np.
 
         return shape (N, 5)
     """
-    CoeffEvoBasis = np.einsum('...ki,ij->...kj', CoeffFlav, inv_flav_trans)
+    CoeffEvoBasis = np.einsum('...ki,ij->...kj', CoeffFlav, inv_flav_trans) #(N, n, 5)
 
 
     # Taking the non-singlet and singlet parts of the Wilson coefficients
-    CoeffNS = CoeffEvoBasis[..., :3] # (N, 3)
-    CoeffS = CoeffEvoBasis[..., -2:] # (N, 2)
+    CoeffNS = CoeffEvoBasis[..., :3] # (N, n, 3)
+    CoeffS = CoeffEvoBasis[..., -2:] # (N, n, 2)
 
 
     # Calling evolution mulitiplier
     [evons, evoa] = evolop(j, nf, p, Q) # (N) and (N, 2, 2)
 
     # non-singlet part evolves multiplicatively
-    EvoCoeffNS = evons[..., np.newaxis] * CoeffNS # (N, 3)
+    EvoCoeffNS = np.einsum('...ij,...->...ij', CoeffNS, evons) # (N, n, 3)
     # singlet part mixes with the gluon
-    EvoCoeffS = np.einsum('...ki,...ij->...kj', CoeffS, evoa) # (N, 2)
+    EvoCoeffS = np.einsum('...ki,...ij->...kj', CoeffS, evoa) # (N, n, 2)
 
     # Recombing the non-singlet and singlet parts
-    EvoCoeff = np.concatenate((EvoCoeffNS, EvoCoeffS), axis=-1) # (N, 5)
+    EvoCoeff = np.concatenate((EvoCoeffNS, EvoCoeffS), axis=-1) # (N, n, 5)
     # Inverse transform the evolved coefficients back to the flavor basis
-    EvoCoeffFlav = np.einsum('...ki, ij->...kj', EvoCoeff, flav_trans) #(N, 5)
+    EvoCoeffFlav = np.einsum('...ki, ij->...kj', EvoCoeff, flav_trans) #(N, n, 5)
 
     return EvoCoeffFlav
