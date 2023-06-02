@@ -7,7 +7,8 @@ import numpy as np
 from mpmath import mp, hyp2f1
 from scipy.integrate import quad, quad_vec
 from scipy.special import gamma
-from Evolution import Moment_Evo
+from Evolution import Coeff_Evo
+from Parameters import Flavor_Factor
 
 CFF_trans =np.array([1*(2/3)**2, 2*(2/3)**2, 1*(1/3)**2, 2*(1/3)**2, 0])
 
@@ -405,7 +406,7 @@ class GPDobserv (object) :
             
             # the result of np.einsum will be (N, 3)
             # Flv_Intp  result (N)
-            return Flv_Intp(np.einsum('...ij,...j->...i', InvMellinWaveConf(s), Moment_Evo(s - 1, NFEFF, self.p, self.Q, ConfFlav)), flv)
+            return Flv_Intp(np.einsum('...ij,...j->...i', Coeff_Evo(s - 1, NFEFF, self.p, self.Q, InvMellinWaveConf(s)), ConfFlav), flv)
 
         return quad_vec(lambda imS : np.real(Integrand_inv_Mellin(reS + 1j * imS)/(2 * np.pi)) , - Max_imS, + Max_imS, epsrel = Prec_Goal)[0]
 
@@ -460,8 +461,9 @@ class GPDobserv (object) :
                                 + CWilson(j+2) * Moment_Evo(j+2, NFEFF, self.p, self.Q, ConfFlav_xi2) \
                                 + CWilson(j+4) * Moment_Evo(j+4, NFEFF, self.p, self.Q, ConfFlav_xi4))
             """
-            EvoConf_Wilson = (CWilson(j) * Moment_Evo(j, NFEFF, self.p, self.Q, ConfFlav) \
-                                + CWilson(j+2) * Moment_Evo(j+2, NFEFF, self.p, self.Q, ConfFlav_xi2))
+            EvoConf_Wilson = (np.einsum('...ij, ...j->...i',Coeff_Evo(j, NFEFF, self.p, self.Q,CWilson(j)*np.eye(Flavor_Factor)), ConfFlav) \
+                                + np.einsum('...ij, ...j->...i', Coeff_Evo(j+2, NFEFF, self.p, self.Q, CWilson(j+2)*np.eye(Flavor_Factor)), ConfFlav_xi2))
+            # Here, CWilson(j) is a scalar, but Coeff_Evo only takes a matrix. Therefore, we multiply by np.eye
 
             return np.einsum('j, ...j', CFF_trans, EvoConf_Wilson) # shape (N)
 
@@ -570,7 +572,7 @@ class GPDobserv (object) :
 
             # Removing xi^4 terms
             #return Flv_Intp(np.einsum('...j,j', ConfWaveConv(j), Moment_Evo(j, NFEFF, self.p, self.Q, ConfFlav))  +  self.xi ** 2 * np.einsum('...j,j', ConfWaveConv(j+2), Moment_Evo(j+2, NFEFF, self.p, self.Q, ConfFlav_xi2)) + self.xi ** 4 * np.einsum('...j,j', ConfWaveConv(j+4), Moment_Evo(j+4, NFEFF, self.p, self.Q, ConfFlav_xi4)), flv)
-            return Flv_Intp(np.einsum('...ij,...j->...i', ConfWaveConv(j), Moment_Evo(j, NFEFF, self.p, self.Q, ConfFlav)) + self.xi ** 2 * np.einsum('...ij,...j->...i', ConfWaveConv(j+2), Moment_Evo(j+2, NFEFF, self.p, self.Q, ConfFlav_xi2)), flv)
+            return Flv_Intp(np.einsum('...ij,...j->...i', Coeff_Evo(j, NFEFF, self.p, self.Q, ConfWaveConv(j)), ConfFlav) + self.xi ** 2 * np.einsum('...ij,...j->...i', Coeff_Evo(j+2, NFEFF, self.p, self.Q, ConfWaveConv(j+2)), ConfFlav_xi2), flv)
         
         # Adding a j = 0 term because the contour do not enclose the j = 0 pole which should be the 0th conformal moment.
         # We cannot change the Mellin_Barnes_intercept > 0 to enclose the j = 0 pole only, due to the pomeron pole around j = 0.
@@ -585,7 +587,7 @@ class GPDobserv (object) :
                 ConfFlav_xi4 = Moment_Sum(j, self.t, Para_xi4)
                 '''
                 # Evolutino kernel has explicit singularity at j = 0 through the limit is finite for p = -1, so j = 0.00001 is used instead of j = 0
-                return Flv_Intp(np.einsum('...ij,...j->...i', ConfWaveConv(0), Moment_Evo(0, NFEFF, self.p, self.Q, ConfFlav)), flv)
+                return Flv_Intp(np.einsum('...ij,...j->...i', Coeff_Evo(0, NFEFF, self.p, self.Q, ConfWaveConv(0)), ConfFlav), flv)
 
             if(self.p == 1):
                 """
@@ -653,5 +655,5 @@ class GPDobserv (object) :
         result = np.empty_like(self.Q)
 
         result[mask] = Flv_Intp(ConfFlav[mask][:, [0,2,4] ] , flv[mask] ) # (N_mask)
-        result[~mask] = Flv_Intp(np.einsum('...ij, ...j->...i', GFF_trans[~mask], Moment_Evo(j[~mask], NFEFF, self.p[~mask], self.Q[~mask], ConfFlav[~mask])), flv[~mask]) # (N_~mask)
+        result[~mask] = Flv_Intp(np.einsum('...ij, ...j->...i', Coeff_Evo(j[~mask], NFEFF, self.p[~mask], self.Q[~mask], GFF_trans[~mask]), ConfFlav[~mask]), flv[~mask]) # (N_~mask)
         return result #(N)
