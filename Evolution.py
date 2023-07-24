@@ -13,7 +13,7 @@ Note:
 #from this import d
 
 import numpy as np
-from scipy.special import psi
+from scipy.special import psi, gamma
 from typing import Tuple
 import numba
 from numba import vectorize, njit
@@ -399,3 +399,83 @@ def Coeff_Evo(j: complex, nf: int, p: int, Q: float, CoeffFlav: np.array) -> np.
     EvoCoeffFlav = np.einsum('...ki, ij->...kj', EvoCoeff, flav_trans) #(N, n, 5)
 
     return EvoCoeffFlav
+
+def CWilson(j: complex) -> complex:
+    return 2 ** (1+j) * gamma(5/2+j) / (gamma(3/2) * gamma(3+j))
+
+def CWilsonT(j: complex, nf: int) -> complex:
+    return np.array([3 * 2 ** (1+j) * gamma(5/2+j) / (gamma(3/2) * gamma(3+j)), 3 * 2 ** (1+j) * gamma(5/2+j) / (gamma(3/2) * gamma(3+j)), 3 * 2 ** (1+j) * gamma(5/2+j) / (gamma(3/2) * gamma(3+j)), 3 * 2 ** (1+j) * gamma(5/2+j) / nf / (gamma(3/2) * gamma(3+j)),  3 * 2 * 2 ** (1+j) * gamma(5/2+j) / (j + 3) / (gamma(3/2) * gamma(3+j))])
+
+
+def Moment_Evo_fast(j: complex, nf: int, p: int, Q: float, ConfFlav: np.array) -> np.array:
+    """
+    Evolution of WCs multiplying conf moments then transformed back into the flavor space 
+
+    Args:
+        uneolved conformal moments in flavor space ConfFlav = [ConfMoment_uV, ConfMoment_ubar, ConfMoment_dV, ConfMoment_dbar, ConfMoment_g] 
+        j: conformal spin j (conformal spin is actually j+2 but anyway): scalar
+        t: momentum transfer squared
+        nf: number of effective fermions; 
+        p (int): 1 for vector-like GPD (Ht, Et), -1 for axial-vector-like GPDs (Ht, Et): array (N,)
+        Q: final evolution scale: array(N,)
+
+    Returns:
+        Evolved conformal moments in flavor space (non-singlet, singlet, gluon)
+
+        return shape (N, 5)
+    """
+    
+    ConfEvoBasis = np.einsum('ij, ...j->...i', flav_trans, ConfFlav) # shape (N, 5)
+    
+    # Taking the non-singlet and singlet parts of the conformal moments
+    ConfNS = ConfEvoBasis[..., :3] # (N, 3)
+    ConfS = ConfEvoBasis[..., -2:] # (N, 2)
+
+    # Calling evolution mulitiplier
+    [evons, evoa] = evolop(j, nf, p, Q) # (N) and (N, 2, 2)
+    
+    EvoWCNS = np.einsum('i,i...->i...', CWilson(j), evons)
+    EvoWCS = np.einsum('i,i...->i...', CWilson(j), evoa)
+  
+    EvoConfNS = EvoWCNS[...,np.newaxis] * ConfNS
+    EvoConfS = np.einsum('...ij,...j->...i', EvoWCS, ConfS)
+    EvoConf = np.concatenate((EvoConfNS,EvoConfS),axis=-1)
+    EvoConfFlav = np.einsum('...ij,...j->...i', inv_flav_trans, EvoConf)
+    
+    return EvoConfFlav
+
+def Moment_Evo_0(j: complex, nf: int, p: int, Q: float, ConfFlav: np.array) -> np.array:
+    """
+    j = 0 pole piece, should find a less cumbersome way to handle this
+    """
+    
+    ConfEvoBasis = np.einsum('ij, ...j->...i', flav_trans, ConfFlav) # shape (N, 5)
+
+    # Taking the non-singlet and singlet parts of the conformal moments
+    ConfNS = ConfEvoBasis[..., :3] # (N, 3)
+    ConfS = ConfEvoBasis[..., -2:] # (N, 2)
+
+    # Calling evolution mulitiplier
+    [evons, evoa] = evolop(j, nf, p, Q) # (N) and (N, 2, 2)
+    
+    # non-singlet part evolves multiplicatively
+    EvoConfNS = evons[..., np.newaxis] * ConfNS # (N, 3)
+    # singlet part mixes with the gluon
+    EvoConfS = np.einsum('...ij, ...j->...i', evoa, ConfS) # (N, 2)
+    
+
+    # Recombing the non-singlet and singlet parts
+    EvoConf = np.concatenate((EvoConfNS, EvoConfS), axis=-1) # (N, 5)
+    # Combine with Wilson coefficients
+    #print(CWilsonT(j,nf))
+    #print(EvoConf)
+    #print("Wilson coef. shape is %.2f", CWilsonT(j,nf).shape)
+    #print("Conf. Moments shape is %.2f", EvoConf.shape)
+    EvoConfwWC = CWilson(j)*EvoConf #(N,5)
+    #print("MB integrand shape is %2f",EvoConfwWC.shape)
+    # Inverse transform the evolved moments back to the flavor basis
+    EvoConfFlav = np.einsum('...ij, ...j->...i', inv_flav_trans, EvoConfwWC) #(N, 5)
+    #print('Wilson co shape is',CWilsonDVCS.shape)
+    #EvoConfFlavwWC = np.einsum('i,i...->i...',CWilson(j),EvoConfFlav)
+
+    return EvoConfFlav

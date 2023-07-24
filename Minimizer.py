@@ -8,6 +8,7 @@ import numpy as np
 import pandas as pd
 import time
 import csv
+from config import Fixed_Order_Quad as foq
 
 Minuit_Counter = 0
 
@@ -49,7 +50,6 @@ DVCSxsec_group_data = list(map(lambda set: DVCSxsec_data[(DVCSxsec_data['xB'] ==
 
 DVCS_HERA_data = pd.read_csv('GUMPDATA/DVCSxsec_HERA.csv', header = None, names = ['y', 'xB', 't', 'Q', 'f', 'delta f', 'pol'] , dtype = {'y': float, 'xB': float, 't': float, 'Q': float, 'f': float, 'delta f': float, 'pol': str})
 
-
 def PDF_theo(PDF_input: pd.DataFrame, Para: np.array):
     # [x, t, Q, f, delta_f, spe, flv] = PDF_input
     xs = PDF_input['x'].to_numpy()
@@ -78,7 +78,6 @@ def PDF_theo(PDF_input: pd.DataFrame, Para: np.array):
 
 tPDF_theo = PDF_theo
       
-
 def GFF_theo(GFF_input: np.array, Para):
     # [j, t, Q, f, delta_f, spe, flv] = GFF_input
     js = GFF_input['j'].to_numpy()
@@ -148,8 +147,11 @@ def DVCSxsec_HERA_theo(DVCSxsec_data_HERA: pd.DataFrame, Para_Unp, Para_Pol):
     #f = DVCSxsec_data_HERA['f'].to_numpy()
     #delta_f = DVCSxsec_data_HERA['delta f'].to_numpy()
     pol = DVCSxsec_data_HERA['pol'].to_numpy()
-
-    [HCFF, ECFF, HtCFF, EtCFF] = CFF_theo(xB, t, Q, np.expand_dims(Para_Unp, axis=0), np.expand_dims(Para_Pol, axis=0))
+    
+    [HCFF, ECFF, HtCFF, EtCFF]=np.transpose(pool.starmap(partial(CFF_theo, Para_Unp = Para_Unp, Para_Pol = Para_Pol), np.transpose([xB,t,Q])))
+    
+    #[HCFF, ECFF, HtCFF, EtCFF] = CFF_theo(xB, t, Q, np.expand_dims(Para_Unp, axis=0), np.expand_dims(Para_Pol, axis=0))
+    
     return dsigma_DVCS_HERA(y, xB, t, Q, pol, HCFF, ECFF, HtCFF, EtCFF)
 
 def cost_forward_H(Norm_HuV,    alpha_HuV,    beta_HuV,    alphap_HuV, 
@@ -992,9 +994,16 @@ def off_forward_fit(Paralst_Unp, Paralst_Pol):
     return fit_off_forward
 
 if __name__ == '__main__':
+    
+    if(foq == 1):
+        print("Runing fixed-order quaduature (faster)")
+    else:
+        print("Runing native quaduature (slower), change the Fixed_Order_Quad in config.py to 1 to switch")
+
     pool = Pool()
+
     time_start = time.time()
-    """
+
     Paralst_Unp     = [4.922551238,0.21635596,3.228702555,2.349193947,0.163440601,1.135738688,6.896742038,0.15,3.358541913,0.184196049,4.41726899,3.475742056,0.249183402,1.051922382,6.548676693,2.864281106,1.052305853,7.412779844,0.15,0.161159704,0.916012032,1.02239598,0.41423421,-0.198595321,0.0,0.18394307,-2.260952723,0,1.159322377,2.569800357,0,0,0,0,0,0,0,3.296968216]
     Paralst_Pol     = [4.529773253,-0.246812532,3.037043159,2.607360484,0.076575866,0.516192897,4.369657188,0.15,-0.711694724,0.210181857,3.243538578,4.319727451,-0.057100694,0.612255908,2.099180441,0.243247279,0.630824175,2.71840147,0.15,9.065736349,0.79999977,7.357005187,2.083472023,-3.562901039,0.0,-0.634095327,-7.058667382,0,2.861662204,23.1231347,0,0,0,0,0,0,0,5.379752095]
 
@@ -1012,7 +1021,6 @@ if __name__ == '__main__':
 
     fit_off_forward = off_forward_fit(Paralst_Unp, Paralst_Pol)
 
-    """
+    """ 
     print(cost_off_forward_test(4.92252245341075, 0.21632833928300776, 3.228525762889928, 2.347470994624827, 0.16344460105600744, 1.135739437288775, 6.893895640954224, 0.15, 3.358767931921898, 0.1842893653407356, 4.417802345266761, 3.4816671934041685, 0.2491737223289409, 1.0519258916411531, 6.553873836594824, 2.8642810381756982, 1.0523058580968585, 7.412779706371915, 0.15, 0.1813228421702434, 0.9068471909677753, 1.1018931174030364, 0.4607676086634599, -0.22341404954304522, 0.7683213780361391, 0.22948701913308733, -2.638627981453611, 0.0, 0.7985103392773935, 3.404262017724412, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 3.44764738950069, 4.833430384423373, -0.26355746727810136, 3.1855567245326317, 2.1817250267982997, 0.06994083000560514, 0.5376473088622284, 4.22898219488582, 0.15, -0.663583721889865, 0.24767388786943867, 3.5722668493718626, 0.5420415127277624, -0.08640413690298866, 0.4946733452347538, 2.553713733867575, 0.24307061469378405, 0.6309890923077655, 2.716624295877619, 0.15, 7.99299605623125, 0.799997370438831, 6.415448025778247, 2.0758963463111515, -2.407059919688728, 37.65971219196447, 0.24589373380232807, 1.6561364171210822, 0.0, 2.6840962695831894, 37.58453653636456, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 9.852441955678458))
-
-
+    """ 
