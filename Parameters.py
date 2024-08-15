@@ -1,8 +1,6 @@
 """
 The minimizer using iMinuit, which takes 1-D array for the input parameters only.
-
 Extra efforts needed to convert the form of the parameters.
-
 """
 # Number of GPD species, 4 leading-twist GPDs including H, E Ht, Et are needed.
 NumofGPDSpecies = 4
@@ -43,24 +41,25 @@ def ParaManager_Unp(Paralst: np.array):
      Norm_EdV,    R_E_Sea,      R_Hu_xi2,    R_Hd_xi2,    R_Hg_xi2,
      R_Eu_xi2,    R_Ed_xi2,     R_Eg_xi2,
      R_Hu_xi4,    R_Hd_xi4,     R_Hg_xi4,
-     R_Eu_xi4,    R_Ed_xi4,     R_Eg_xi4,    bexp_HSea] = Paralst
-
-    R_Hu_xi4 = 0
-    R_Hd_xi4 = 0
+     R_Eu_xi4,    R_Ed_xi4,     R_Eg_xi4,    bexp_HSea, bexp_Hg, norm, norm2] = Paralst
+    
+    #R_E_Sea = 0
+    #R_Hu_xi4 = 0
+    #R_Hd_xi4 = 0
     R_Eu_xi4 = 0
     R_Ed_xi4 = 0
 
-    R_Hg_xi2 = 0
-    R_Eg_xi2 = 0
-    R_Hg_xi4 = 0
-    R_Eg_xi4 = 0
+    #R_Hg_xi2 = 0
+    #R_Eg_xi2 = 0
+    #R_Hg_xi4 = 0
+    #R_Eg_xi4 = 0
 
     # Initial forward parameters for the H of (uV, ubar, dV, dbar,g) distributions
     H_uV =   np.array([[Norm_HuV,   alpha_HuV,   beta_HuV,   alphap_HuV,   0]])
     H_ubar = np.array([[Norm_Hubar, alpha_Hubar, beta_Hubar, alphap_Hqbar, bexp_HSea]])
     H_dV =   np.array([[Norm_HdV,   alpha_HdV,   beta_HdV,   alphap_HdV,   0]])
     H_dbar = np.array([[Norm_Hdbar, alpha_Hdbar, beta_Hdbar, alphap_Hqbar, bexp_HSea]])
-    H_g =    np.array([[Norm_Hg,    alpha_Hg,    beta_Hg,    alphap_Hg,    bexp_HSea ]])
+    H_g =    np.array([[Norm_Hg,    alpha_Hg,    beta_Hg,    alphap_Hg,    bexp_Hg ]])
 
     # Initial xi^2 parameters for the H of (uV, ubar, dV, dbar,g) distributions
     """

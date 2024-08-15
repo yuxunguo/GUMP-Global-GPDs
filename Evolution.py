@@ -1,6 +1,7 @@
 """
 LO QCD evolution of moment space GPD. Credits to K. Kumericki at https://github.com/kkumer/gepard.
 
+We used RunDec for the running strong coupling constant alphaS instead and made slight modifications.
 
 Note:
     Functions in this module have as first argument Mellin moment
@@ -13,16 +14,25 @@ Note:
 #from this import d
 
 import numpy as np
-from scipy.special import psi, gamma
-from typing import Tuple
+import Observables as obs
+import rundec
+from scipy.special import psi, zeta, gamma, orthogonal, loggamma
+from scipy import absolute
+from math import factorial, log
+from mpmath import mp, hyp2f1
+from scipy.integrate import quad_vec, fixed_quad
+from typing import Tuple, Union
 import numba
 from numba import vectorize, njit
+import functools
+import time
 
 """
 ***********************QCD constants***************************************
 Refer to the constants.py at https://github.com/kkumer/gepard.
 """
 
+M_jpsi = 3.097
 NC = 3
 CF = (NC**2 - 1) / (2 * NC)
 CA = NC
@@ -31,7 +41,7 @@ TF = 0.5
 Alpha_Mz = 0.1181
 # All unit in GeV for dimensional quantities.
 Mz = 91.1876
-# Two loop accuracy for running strong coupling constant.
+# One loop accuracy for running strong coupling constant. 
 nloop_alphaS = 2
 # Initial scale of distribution functions at 2 GeV.
 Init_Scale_Q = 2
@@ -49,6 +59,7 @@ inv_flav_trans = np.linalg.inv(flav_trans)
 
 """
 ***********************pQCD running coupling constant***********************
+Here rundec is used instead.
 """
 
 B00 = 11./3. * CA
@@ -110,11 +121,332 @@ def AlphaS(nloop: int, nf: int, Q: float) -> float:
 Refer to the adim.py at https://github.com/kkumer/gepard.
 """
 
-def S1(z: complex) -> complex:
-    """ Harmonic sum S_1. """
+def SOquad_routine(func, a, b, x_list, w_list):
+    c_1 = (b-a)/2.0
+    c_2 = (b+a)/2.0
+    eval_points = map(lambda x: c_1*x+c_2, x_list)
+    func_evals = map(func, eval_points)
+    return c_1 * sum(np.array(func_evals) * np.array(w_list))
+
+
+def SOquad_gauss_7(func, a, b):
+    x_gauss = [-0.949107912342759, -0.741531185599394, -0.405845151377397, 0, 0.405845151377397, 0.741531185599394, 0.949107912342759]
+    w_gauss = np.array([0.129484966168870, 0.279705391489277, 0.381830050505119, 0.417959183673469, 0.381830050505119, 0.279705391489277,0.129484966168870])
+    return SOquad_routine(func,a,b,x_gauss, w_gauss)
+
+def SOquad_kronrod_15(func, a, b):
+    x_kr = [-0.991455371120813,-0.949107912342759, -0.864864423359769, -0.741531185599394, -0.586087235467691,-0.405845151377397, -0.207784955007898, 0.0, 0.207784955007898,0.405845151377397, 0.586087235467691, 0.741531185599394, 0.864864423359769, 0.949107912342759, 0.991455371120813]
+    w_kr = [0.022935322010529, 0.063092092629979, 0.104790010322250, 0.140653259715525, 0.169004726639267, 0.190350578064785, 0.204432940075298, 0.209482141084728, 0.204432940075298, 0.190350578064785, 0.169004726639267, 0.140653259715525,  0.104790010322250, 0.063092092629979, 0.022935322010529]
+    return SOquad_routine(func,a,b,x_kr, w_kr)
+
+class Memoize(object):
+    def __init__(self, func):
+        self.func = func
+        self.eval_points = {}
+    def __call__(self, *args):
+        if args not in self.eval_points:
+            self.eval_points[args] = self.func(*args)
+        return self.eval_points[args]
+
+def SOquad(func,a,b):
+    ''' Output is the 15 point estimate; and the estimated error '''
+    func = Memoize(func) #  Memoize function to skip repeated function calls.
+    g7 = SOquad_gauss_7(func,a,b)
+    k15 = SOquad_kronrod_15(func,a,b)
+    # I don't have much faith in this error estimate taken from wikipedia
+    # without incorporating how it should scale with changing limits
+    return [k15, (200*absolute(g7-k15))**1.5]
+
+def mellin_barnes(c, phi, accuracy: int = 3) -> Tuple[np.ndarray, np.ndarray]:
+    """Construct basic MB array.
+    Args:
+        c: point of crossing the real axis
+        phi: angle with the real axis
+        accuracy: 2*accuracy points per interval
+    Returns:
+        (complex coordinates of MB contour, integration weighths)
+    """
+    c = 0.35
+    phij = phi*1j
+    roots, weights = orthogonal.p_roots(2**accuracy)
+    division = np.array([0., 0.01, 0.08, 0.15, 0.3, 0.5, 1.0,
+                         1.5, 2.0, 4.0, 6.0, 8.0, 10.0])
+    summ = division[1:] + division[:-1]
+    diff = division[1:] - division[:-1]
+    x = []
+    wg = []
+    dv = 0
+    for dv in range(len(division)-1):
+        x.append((diff[dv]*roots + summ[dv])/2)
+        wg.append(diff[dv]*weights/2)
+        x_array = np.array(x).flatten()
+        wg_array = np.array(wg).flatten()
+    n_array = c + 1 + x_array * np.exp(phij)
+    return n_array, wg_array
+
+def quad81_nd(func, a, b, args=()):
+    """Compute a definite integral using 81-order Gaussian quadrature."""
+    roots81, weights81 = orthogonal.p_roots(81)
+    y = (b-a)*(roots81+1)/2.0 + a
+    integrand = np.einsum('...j,j->...j',np.ones_like(func(1, *args))[...,np.newaxis],np.ones_like(y))
+    for i in range(len(y)):
+        integrand[...,i] = func(y[i],*args)
+    integrated = (b-a)/2.0*np.einsum('j,...j',weights81,integrand)
+    return integrated
+
+def quad81(func, a, b, args=()):
+    roots81, weights81 = orthogonal.p_roots(81)
+    y = (b-a) * (roots81 + 1)/2.0 + a
+    yfunc = np.ones_like(y)
+    for i in range(len(y)):
+        yfunc[i] = func(y[i], *args)
+    print(yfunc.shape)
+    return (b-a)/2.0*np.einsum('j,...j',weights81,yfunc)
+
+def quadNLO(func, a, b, args=(), kgrid: int = 500):
+    rootsNLO, weightsNLO = orthogonal.p_roots(200)
+    y = (b-a) * (rootsNLO + 1)/2.0 + a
+    yfunc = np.ones(len(y),dtype=complex)
+    for i in range(len(y)):
+        yfunc[i] = func(y[i]*np.ones(kgrid,dtype=complex))[0]
+        #print(yfunc[i])
+    return (b-a)/2.0*np.einsum('j,...j',weightsNLO,yfunc)
+
+def quadMOM(func, a, b, args=(), n: int = 500):
+    rootsMOM, weightsMOM = orthogonal.p_roots(n)
+    y = (b-a) * (rootsMOM + 1)/2.0 + a
+    yfunc = np.ones(len(y), dtype=complex)
+    for i in range(len(y)):
+        #print(func(np.array([y[i]])).shape)
+        yfunc[i] = func(y[i])
+    #print(yfunc.shape)
+    return (b-a)/2.0*np.einsum('j,j',weightsMOM,yfunc)
+    
+
+def quad_KM(func, a, b, accuracy: int = 3, args=()):
+    """Construct basic MB array.
+    Args:
+        c: point of crossing the real axis
+        phi: angle with the real axis
+        accuracy: 2*accuracy points per interval
+    Returns:
+        (complex coordinates of MB contour, integration weighths)
+    """
+    c = 0.35
+    phij = np.pi*1j/2
+    roots, weights = orthogonal.p_roots(2**accuracy)
+    division = np.array([0., 0.01, 0.08, 0.15, 0.3, 0.5, 1.0,
+                         1.5, 2.0, 4.0, 6.0, 8.0, 10.0])
+    summ = division[1:] + division[:-1]
+    diff = division[1:] - division[:-1]
+    x = []
+    wg = []
+    dv = 0
+    for dv in range(len(division)-1):
+        x.append((diff[dv]*roots + summ[dv])/2)
+        wg.append(diff[dv]*weights/2)
+        x_array = np.array(x).flatten()
+        wg_array = np.array(wg).flatten()
+    n_array = c + 1 + x_array * np.exp(phij)
+    #print("Shape of roots is %f",roots.shape)
+    #print("Shape of pts is %f", n_array.shape)
+    #yfunc = np.ones_like(n_array)
+    #for i in range(len(n_array)):
+    #    yfunc[i] = func(n_array[i], *args)
+    integrated = np.sum(wg_array*func(n_array,*args))
+    return integrated
+    
+    
+    
+def pochhammer(z: Union[complex, np.ndarray], m: int) -> Union[complex, np.ndarray]:
+    """Pochhammer symbol.
+
+    Args:
+        z: complex argument
+        m: integer index
+
+    Returns:
+        complex: pochhammer(z,m)
+
+    """
+    p = z
+    for k in range(1, m):
+        p = p * (z + k)
+    return p
+
+
+
+poch = pochhammer  # just an abbreviation
+
+
+def dpsi_one(z: complex, m: int) -> complex:
+    """Polygamma - m'th derivative of Euler gamma at z."""
+    # Algorithm from Vogt, cf. julia's implementation
+    sub = 0j
+
+    if z.imag < 10:
+        subm = (-1/z)**(m+1) * factorial(m)
+        while z.real < 10:
+            sub += subm
+            z += 1
+            subm = (-1/z)**(m+1) * factorial(m)
+
+    a1 = 1.
+    a2 = 1./2.
+    a3 = 1./6.
+    a4 = -1./30.
+    a5 = 1./42.
+    a6 = -1./30.
+    a7 = 5./66.
+
+    if m != 1:
+        for k2 in range(2, m+1):
+            a1 = a1 * (k2-1)
+            a2 = a2 * k2
+            a3 = a3 * (k2+1)
+            a4 = a4 * (k2+3)
+            a5 = a5 * (k2+5)
+            a6 = a6 * (k2+7)
+            a7 = a7 * (k2+9)
+
+    rz = 1. / z
+    dz = rz * rz
+    res = (sub + (-1)**(m+1) * rz**m *
+           (a1 + rz * (a2 + rz * (a3 + dz *
+            (a4 + dz * (a5 + dz * (a6 + a7 * dz)))))))
+    return res
+
+
+
+dpsi = np.vectorize(dpsi_one)
+
+
+def S1(z: Union[complex, np.ndarray]) -> Union[complex, np.ndarray]:
+    """Harmonic sum S_1."""
     return np.euler_gamma + psi(z+1)
 
-def non_singlet_LO(n: complex, nf: int, p: int, prty: int = 1) -> complex:
+
+
+def S2(z: Union[complex, np.ndarray]) -> Union[complex, np.ndarray]:
+    """Harmonic sum S_2."""
+    return zeta(2) - dpsi(z+1, 1)
+
+
+
+def S3(z: Union[complex, np.ndarray]) -> Union[complex, np.ndarray]:
+    """Harmonic sum S_3."""
+    return zeta(3) + dpsi(z+1, 2) / 2
+
+
+
+def S4(z: Union[complex, np.ndarray]) -> Union[complex, np.ndarray]:
+    """Harmonic sum S_4."""
+    return zeta(4) - dpsi(z+1, 3) / 6
+
+
+
+def S2_prime(z: Union[complex, np.ndarray], prty: int) -> Union[complex, np.ndarray]:
+    """Curci et al Eq. (5.25)."""
+    # note this is related to delS2
+    return (1+prty)*S2(z)/2 + (1-prty)*S2(z-1/2)/2
+
+
+
+def S3_prime(z: Union[complex, np.ndarray], prty: int) -> Union[complex, np.ndarray]:
+    """Curci et al Eq. (5.25)."""
+    return (1+prty)*S3(z)/2 + (1-prty)*S3(z-1/2)/2
+
+
+
+def delS2(z: Union[complex, np.ndarray]) -> Union[complex, np.ndarray]:
+    """Return Harmonic sum S_2 difference.
+
+    Args:
+        z: complex argument
+
+    Returns:
+        delS2((z+1)/2) From Eq. (4.13) of 1310.5394.
+        Note halving of the argument.
+
+    """
+    return S2(z) - S2(z - 1/2)
+
+
+
+def deldelS2(j: Union[complex, np.ndarray], k: int) -> Union[complex, np.ndarray]:
+    """Return diference of harmonic sum S_2 differences.
+
+    Args:
+        j: complex argument
+        k: integer index
+
+    Returns:
+        Equal to delS2((j+1)/2, (k+1)/2) From Eq. (4.38) of 1310.5394.
+        Note halving of the argument.
+
+    """
+    return (delS2(j) - delS2(k)) / (4*(j-k)*(2*j+2*k+1))
+
+
+
+def Sm1(z: Union[complex, np.ndarray], k: int) -> Union[complex, np.ndarray]:
+    """Aux fun. FIXME: not tested."""
+    return - log(2) + 0.5 * (1-2*(k % 2)) * (psi((z+2)/2) - psi((z+1)/2))
+
+
+
+def MellinF2(n: Union[complex, np.ndarray]) -> Union[complex, np.ndarray]:
+    """Return Mellin transform  i.e. x^(N-1) moment of Li2(x)/(1+x).
+
+    Args:
+        n: complex argument
+
+    Returns:
+        According to Eq. (33) in Bluemlein and Kurth, hep-ph/9708388
+
+    """
+    abk = np.array([0.9999964239, -0.4998741238,
+                    0.3317990258, -0.2407338084, 0.1676540711,
+                   -0.0953293897, 0.0360884937, -0.0064535442])
+    psitmp = psi(n)
+    mf2 = 0
+
+    for k in range(1, 9):
+        psitmp = psitmp + 1 / (n + k - 1)
+        mf2 += (abk[k-1] *
+                ((n - 1) * (zeta(2) / (n + k - 1) -
+                 (psitmp + np.euler_gamma) / (n + k - 1)**2) +
+                 (psitmp + np.euler_gamma) / (n + k - 1)))
+
+    return zeta(2) * log(2) - mf2
+
+
+
+def SB3(j: Union[complex, np.ndarray]) -> Union[complex, np.ndarray]:
+    """Eq. (4.44e) of arXiv:1310.5394."""
+    return 0.5*S1(j)*(-S2(-0.5+0.5*j)+S2(0.5*j))+0.125*(-S3(
+             - 0.5 + 0.5 * j) + S3(0.5 * j)) - 2 * (0.8224670334241131 * (
+                 -S1(0.5 * (-1 + j)) + S1(0.5 * j)) - MellinF2(1 + j))
+
+
+
+def S2_tilde(n: Union[complex, np.ndarray], prty: int) -> Union[complex, np.ndarray]:
+    """Eq. (30) of  Bluemlein and Kurth, hep-ph/9708388."""
+    G = psi((n+1)/2) - psi(n/2)
+    return -(5/8)*zeta(3) + prty*(S1(n)/n**2 - (zeta(2)/2)*G + MellinF2(n))
+
+
+def lsum(m: Union[complex, np.ndarray], n: Union[complex, np.ndarray])-> Union[complex, np.ndarray]:
+    
+    return sum( (2*l+1)*(-1)**l * deldelS2((m+1)/2,l/2)/2 for l in range(1))
+
+def lsumrev(m: Union[complex, np.ndarray], n: Union[complex, np.ndarray])-> Union[complex, np.ndarray]:
+    
+    return sum((2*l+1)*deldelS2((m+1)/2,l/2)/2 for l in range(1))
+
+
+
+def non_singlet_LO(n:Union[complex, np.ndarray], nf: int, p: int, prty: int = 1) -> Union[complex, np.ndarray]:
     """
     Non-singlet LO anomalous dimension.
 
@@ -132,7 +464,7 @@ def non_singlet_LO(n: complex, nf: int, p: int, prty: int = 1) -> complex:
 
 
 
-def singlet_LO(n: complex, nf: int, p: int, prty: int = 1) -> np.ndarray:
+def singlet_LO(n: Union[complex, np.ndarray], nf: int, p: int, prty: int = 1) -> np.ndarray:
     """
     Singlet LO anomalous dimensions.
 
@@ -190,6 +522,122 @@ def singlet_LO(n: complex, nf: int, p: int, prty: int = 1) -> np.ndarray:
 
     return np.stack((qq0_qg0, gq0_gg0), axis=-2)# (N, 2, 2)
 
+def gep_singlet_LO(n: complex, nf: int, prty: int = 1) -> np.ndarray:
+    """Singlet LO anomalous dimensions.
+
+    Args:
+        n (complex): which moment (= Mellin moment for integer n)
+        nf (int): number of active quark flavors
+        prty (int): C parity, irrelevant at LO
+
+    Returns:
+        2x2 complex matrix ((QQ, QG),
+                            (GQ, GG))
+
+    """
+    qq0 = CF*(-3.0-2.0/(n*(1.0+n))+4.0*S1(n))
+    qg0 = (-4.0*nf*TF*(2.0+n+n*n))/(n*(1.0+n)*(2.0+n))
+    gq0 = (-2.0*CF*(2.0+n+n*n))/((-1.0+n)*n*(1.0+n))
+    gg0 = (-22*CA/3.-8.0*CA*(1/((-1.0+n)*n)+1/((1.0+n)*(2.0+n))-S1(n))+8*nf*TF/3.)/2.
+
+    return np.array([[qq0, qg0],
+                     [gq0, gg0]])
+
+def non_singlet_NLO(n: complex, nf: int, prty: int) -> complex:
+    """Non-singlet anomalous dimension.
+
+    Args:
+        n (complex): which moment (= Mellin moment for integer n)
+        nf (int): number of active quark flavors
+        prty (int): 1 for NS^{+}, -1 for NS^{-}
+
+    Returns:
+        Non-singlet NLO anomalous dimension.
+
+    """
+    # From Curci et al.
+    nlo = (CF * CG * (
+            16*S1(n)*(2*n+1)/poch(n, 2)**2 +
+            16*(2*S1(n) - 1/poch(n, 2)) * (S2(n)-S2_prime(n/2, prty)) +
+            64 * S2_tilde(n, prty) + 24*S2(n) - 3 - 8*S3_prime(n/2, prty) -
+            8*(3*n**3 + n**2 - 1)/poch(n, 2)**3 -
+            16*prty*(2*n**2 + 2*n + 1)/poch(n, 2)**3) +
+           CF * CA * (S1(n)*(536/9 + 8*(2*n+1)/poch(n, 2)**2) - 16*S1(n)*S2(n) +
+                      S2(n)*(-52/3 + 8/poch(n, 2)) - 43/6 -
+                      4*(151*n**4 + 263*n**3 + 97*n**2 + 3*n + 9)/9/poch(n, 2)**3) +
+           CF * nf * TF * (-(160/9)*S1(n) + (32/3)*S2(n) + 4/3 +
+                           16*(11*n**2 + 5*n - 3)/9/poch(n, 2)**2)) / 4
+
+    return nlo
+    
+
+def singlet_NLO(n: complex, nf: int, p: int, prty: int = 1) -> np.ndarray:
+    """Singlet NLO anomalous dimensions matrix.
+    Args:
+        n (complex): which moment (= Mellin moment for integer n)
+        nf (int): number of active quark flavors
+        p (int): 1 for vector-like GPD (Ht, Et), -1 for axial-vector-like GPDs (Ht, Et)
+        prty (int): C parity
+    Returns:
+        Matrix (LO, NLO) where each is in turn
+        2x2 complex matrix
+        ((QQ, QG),
+        (GQ, GG))
+    """
+    
+    
+   # qq1 = non_singlet_NLO(n, nf, 1) + np.ones_like(p) * (-4*CF*TF*nf*((2 + n*(n + 5))*(4 + n*(4 + n*(7 + 5*n)))/(n-1)/n**3/(n+1)**3/(n+2)**2))
+    
+   # qg1 = np.ones_like(p) * 2*nf*TF*(S1(n)*(2*S1(n)*(-CF*(n-1)*(n+2)**2*(2+n+n**2)*n**2*(n+1)**2 + CA*n**2*(n+1)**2*(n+2)**2*(n**3 + n - 2)) - CF*(n-1)*(n+2)**2*(-4*n*(n+1)**3*(n+2)) - 2*CA*(4*(n-1)*n**3*(n+1)*(n+2)*(2*n + 3))) + S2_prime(n)*(2*CA*n**2*(n+1)**2*(n+2)**2*(n**3 + n - 2)) - CF*(n-1)*(n+1)**2*(64 + 160*(n-1) + 159*(n-1)**2 + 70*(n-1)**3 + 11*(n-1)**4 + n**2*(n+1)**2*5*(2 + n + n**2)) - 2*CA*(16 + 64*n + 104*n**2 + 128*n**3 + 85*n**4 + 36*n**5 + 25*n**6 + 15*n**7 + 6*n**8 + n**9))/(n-1)/n**3/(n+1)**3/(n+2)**3
+    
+  #  gq1 = np.ones_like(p) * (-CF)*(S1(n)*(S1(n)*(18*CA*n**2*(n+1)**2*(n+2)**2*(n**3 + n - 2) - 18*CF*(n-1)*n**2*(n+2)**2*(2 + 5*n + 5*n**2 + 3*n**3 + n**4)) + 18*CF*(n-1)*n**2*(n+2)**2*(10 + 27*n + 25*n**2 + 13*n**3 + 5*n**4) - 6*CA*n*(n+1)**2*(n+2)**2*(-12 + n*(-22 + 41*n + 17*n**3)) + 24*(n-1)*n**2*(n+1)**2*(n+2)**2*(n**2 + n + 2)*TF*nf) + S2(n)*(18*CA*n**2*(n+1)**2*(n+2)**2*(n**3 + n - 2) - 18*CF*(n-1)*n**2*(n+2)**2*(2 + 5*n + 5*n**2 + 3*n**3 + n**4)) + 9*CF*(n-1)*(n+2)**2*(-4 + n*(-12 + n*(-1 + 28*n + 43*n + 43*n**2 + 30*n**3 + 12*n**4))) + 2*CA*(2592 + 21384*(n-1) + 72582*(n-1)**2 + 128024*(n-1)**3 + 133818*(n-1)**4 + 88673*(n-1)**5 + 38822*(n-1)**6 + 10292*(n-1)**7 + 1662*(n-1)**8 + 109*(n-1)**9 - 9*n**2*(n+1)**2*(n+2)**2*(n**3 + n - 2)*S2_prime(n)) - 8*(n-1)*n**2*(n+1)**2*(n+2)**2*(16 + 27*n + 13*n**2 + 8*n**3)*TF*nf)/9/n**3/(n+1)**3/(n**2 + n - 2)**2
+    
+  #  gg1 = np.ones_like(p) * (S1(n)*(CA**2*(134/9 + 16*(2*n + 1)*(-2 + n*(n+1)*(n**2 + n + 2))/(n-1)**2*n**2*(n+1)**2*(n+2)**2 - 4*S2_prime(n)) - 40*CA*TF*nf/9) + CA**2*(-16/3 - (576 + n*(1488 + n*(560 + n*(-1632 + n*(-2344 + n*(1567 + n*(6098 + n*(6040 + 457*n*(6 + n)))))))))/9/(n-1)**2/n**3/(n+1)**3/(n+2)**3 + 8*(n*82 + n + 1)*S2_prime(n)/(n-1)*n*(n+1)*(n+2) - S3_prime(n) + 8*S2_tilde(n)) + 8*CF*TF*nf*(3 + (6+ n*(n+1)*(28 + 19*n*(n+1)))/n**2/(n+1)**2/(n**2 + n - 2))/9 + 2*CF*TF*nf*(-8 + n*(-8 + n*(-10 + n*(-22 + n*(-3 + n*(6 + n*(8 + n*(4 + n)))))))))
+    
+  #  qq1_qg1 = np.stack((qq1, qg1), axis=-1)
+  #  gq1_gg1 = np.stack((gq1, gg1), axis=-1)
+
+   # return np.stack((qq1_qg1, gq1_gg1), axis=-2)# (N, 2, 2)
+    
+    
+    
+    
+   # qq1 = np.where(p>0, non_singlet_NLO(n, nf, 1) - 4*CF*TF*nf*(5*n**5+32*n**4+49*n**3+38*n**2 + 28*n+8)/((n-1)*n**3*(n+1)**3*(n+2)**2), non_singlet_NLO(n, nf, 1) - 4*CF*TF*nf*(5*n**5+32*n**4+49*n**3+38*n**2 + 28*n+8)/((n-1)*n**3*(n+1)**3*(n+2)**2))
+
+   # qg1 = np.where(p>0,(-8*CF*nf*TF*((-4*S1(n))/n**2+(4+8*n + 26*n**3 + 11*n**4 + 15*(n*n))/(n**3*(1+n)**3*(2+n)) + ((2+n+n*n)*(5-2*S2(n) + 2*(S1(n)*S1(n))))/(n*(1+n)*(2+n))) - 8*CA*nf*TF*((8*(3+2*n)*S1(n))/((1+n)**2*(2+n)**2) + (2*(16+64*n+128*n**3+85*n**4+36*n**5+25*n**6 + 15*n**7+6*n**8+n**9+104*(n*n)))/( (-1+n)*n**3*(1+n)**3*(2+n)**3)+( (2+n+n*n)*(2*S2(n)-2*(S1(n)*S1(n))-2*S2(n/2)))/(n*(1+n)*(2+n))))/4, (-8*CF*nf*TF*((-4*S1(n))/n**2+(4+8*n + 26*n**3 + 11*n**4 + 15*(n*n))/(n**3*(1+n)**3*(2+n)) + ((2+n+n*n)*(5-2*S2(n) + 2*(S1(n)*S1(n))))/(n*(1+n)*(2+n))) - 8*CA*nf*TF*((8*(3+2*n)*S1(n))/((1+n)**2*(2+n)**2) + (2*(16+64*n+128*n**3+85*n**4+36*n**5+25*n**6 + 15*n**7+6*n**8+n**9+104*(n*n)))/( (-1+n)*n**3*(1+n)**3*(2+n)**3)+( (2+n+n*n)*(2*S2(n)-2*(S1(n)*S1(n))-2*S2(n/2)))/(n*(1+n)*(2+n))))/4)
+
+   # gq1 = np.where(p>0, (-(32/3)*CF*nf*TF*((1+n)**(-2) + ((-(8/3)+S1(n))*(2+n+n*n))/((-1+n)*n*(1+n))) - 4*(CF*CF)*((-4*S1(n))/(1+n)**2-( -4-12*n+28*n**3+43*n**4 + 30*n**5+12*n**6-n*n)/((-1+n)*n**3*(1+n)**3) + ((2+n+n*n)*(10*S1(n)-2*S2(n)-2*(S1(n)*S1(n))))/((-1+n)*n*(1+n))) - 8*CF*CA*(((1/9)*(144+432*n-1304*n**3-1031*n**4 + 695*n**5+1678*n**6+1400*n**7+621*n**8+109*n**9 - 152*(n*n)))/((-1+n)**2*n**3*(1+n)**3*(2+n)**2) - ((1/3)*S1(n)*(-12-22*n+17*n**4 + 41*(n*n)))/((-1+n)**2*n**2*(1+n))+( (2+n+n*n)*(S2(n) + S1(n)*S1(n)-S2(n/2)))/((-1+n)*n*(1+n))))/4, (-(32/3)*CF*nf*TF*((1+n)**(-2) + ((-(8/3)+S1(n))*(2+n+n*n))/((-1+n)*n*(1+n))) - 4*(CF*CF)*((-4*S1(n))/(1+n)**2-( -4-12*n+28*n**3+43*n**4 + 30*n**5+12*n**6-n*n)/((-1+n)*n**3*(1+n)**3) + ((2+n+n*n)*(10*S1(n)-2*S2(n)-2*(S1(n)*S1(n))))/((-1+n)*n*(1+n))) - 8*CF*CA*(((1/9)*(144+432*n-1304*n**3-1031*n**4 + 695*n**5+1678*n**6+1400*n**7+621*n**8+109*n**9 - 152*(n*n)))/((-1+n)**2*n**3*(1+n)**3*(2+n)**2) - ((1/3)*S1(n)*(-12-22*n+17*n**4 + 41*(n*n)))/((-1+n)**2*n**2*(1+n))+( (2+n+n*n)*(S2(n) + S1(n)*S1(n)-S2(n/2)))/((-1+n)*n*(1+n))))/4)
+
+   # gg1 = np.where(p>0, (CF*nf*TF*(8+(16*(-4-4*n-10*n**3+n**4+4*n**5+2*n**6 - 5*(n*n)))/((-1+n)*n**3*(1+n)**3*(2+n))) + CA*nf*TF*(32/3 - (160/9)*S1(n)+( (16/9)*(12+56*n+76*n**3+38*n**4+94*(n*n)))/((-1+n)*n**2*(1+n)**2*(2+n))) + CA*CA*(-64/3+(536/9)*S1(n)+(64*S1(n)*( -2-2*n+8*n**3+5*n**4+2*n**5+7*(n*n)))/((-1+n)**2*n**2*(1+n)**2*(2+n)**2) - ((4/9)*(576+1488*n-1632*n**3-2344*n**4+1567*n**5 + 6098*n**6+6040*n**7+2742*n**8+457*n**9+560*(n*n)))/( (-1+n)**2*n**3*(1+n)**3*(2+n)**3) - 16*S1(n)*S2(n/2)+(32*(1+n+n*n)*S2(n/2))/( (-1+n)*n*(1+n)*(2+n))-4*S3(n/2) + 32*(S1(n)/n**2-(5/8)*zeta(3)+MellinF2(n) - zeta(2)*(-psi(n/2)+psi((1+n)/2))/2)))/4, (CF*nf*TF*(8+(16*(-4-4*n-10*n**3+n**4+4*n**5+2*n**6 - 5*(n*n)))/((-1+n)*n**3*(1+n)**3*(2+n))) + CA*nf*TF*(32/3 - (160/9)*S1(n)+( (16/9)*(12+56*n+76*n**3+38*n**4+94*(n*n)))/((-1+n)*n**2*(1+n)**2*(2+n))) + CA*CA*(-64/3+(536/9)*S1(n)+(64*S1(n)*( -2-2*n+8*n**3+5*n**4+2*n**5+7*(n*n)))/((-1+n)**2*n**2*(1+n)**2*(2+n)**2) - ((4/9)*(576+1488*n-1632*n**3-2344*n**4+1567*n**5 + 6098*n**6+6040*n**7+2742*n**8+457*n**9+560*(n*n)))/( (-1+n)**2*n**3*(1+n)**3*(2+n)**3) - 16*S1(n)*S2(n/2)+(32*(1+n+n*n)*S2(n/2))/( (-1+n)*n*(1+n)*(2+n))-4*S3(n/2) + 32*(S1(n)/n**2-(5/8)*zeta(3)+MellinF2(n) - zeta(2)*(-psi(n/2)+psi((1+n)/2))/2)))/4)
+
+
+    qq1 = non_singlet_NLO(n, nf, 1) + np.ones_like(p) * (-4*CF*TF*nf*(5*n**5+32*n**4+49*n**3+38*n**2 + 28*n+8)/((n-1)*n**3*(n+1)**3*(n+2)**2))
+    
+    qg1 = np.ones_like(p) * ((-8*CF*nf*TF*((-4*S1(n))/n**2+(4+8*n + 26*n**3 + 11*n**4 + 15*(n*n))/(n**3*(1+n)**3*(2+n)) + ((2+n+n*n)*(5-2*S2(n) + 2*(S1(n)*S1(n))))/(n*(1+n)*(2+n))) - 8*CA*nf*TF*((8*(3+2*n)*S1(n))/((1+n)**2*(2+n)**2) + (2*(16+64*n+128*n**3+85*n**4+36*n**5+25*n**6 + 15*n**7+6*n**8+n**9+104*(n*n)))/( (-1+n)*n**3*(1+n)**3*(2+n)**3)+( (2+n+n*n)*(2*S2(n)-2*(S1(n)*S1(n))-2*S2(n/2)))/(n*(1+n)*(2+n))))/4)
+    
+    gq1 = np.ones_like(p) * ((-(32/3)*CF*nf*TF*((1+n)**(-2) + ((-(8/3)+S1(n))*(2+n+n*n))/((-1+n)*n*(1+n))) - 4*(CF*CF)*((-4*S1(n))/(1+n)**2-( -4-12*n+28*n**3+43*n**4 + 30*n**5+12*n**6-n*n)/((-1+n)*n**3*(1+n)**3) + ((2+n+n*n)*(10*S1(n)-2*S2(n)-2*(S1(n)*S1(n))))/((-1+n)*n*(1+n))) - 8*CF*CA*(((1/9)*(144+432*n-1304*n**3-1031*n**4 + 695*n**5+1678*n**6+1400*n**7+621*n**8+109*n**9 - 152*(n*n)))/((-1+n)**2*n**3*(1+n)**3*(2+n)**2) - ((1/3)*S1(n)*(-12-22*n+17*n**4 + 41*(n*n)))/((-1+n)**2*n**2*(1+n))+( (2+n+n*n)*(S2(n) + S1(n)*S1(n)-S2(n/2)))/((-1+n)*n*(1+n))))/4)
+    
+    gg1 = np.ones_like(p) * ((CF*nf*TF*(8+(16*(-4-4*n-10*n**3+n**4+4*n**5+2*n**6 - 5*(n*n)))/((-1+n)*n**3*(1+n)**3*(2+n))) + CA*nf*TF*(32/3 - (160/9)*S1(n)+( (16/9)*(12+56*n+76*n**3+38*n**4+94*(n*n)))/((-1+n)*n**2*(1+n)**2*(2+n))) + CA*CA*(-64/3+(536/9)*S1(n)+(64*S1(n)*( -2-2*n+8*n**3+5*n**4+2*n**5+7*(n*n)))/((-1+n)**2*n**2*(1+n)**2*(2+n)**2) - ((4/9)*(576+1488*n-1632*n**3-2344*n**4+1567*n**5 + 6098*n**6+6040*n**7+2742*n**8+457*n**9+560*(n*n)))/( (-1+n)**2*n**3*(1+n)**3*(2+n)**3) - 16*S1(n)*S2(n/2)+(32*(1+n+n*n)*S2(n/2))/( (-1+n)*n*(1+n)*(2+n))-4*S3(n/2) + 32*(S1(n)/n**2-(5/8)*zeta(3)+MellinF2(n) - zeta(2)*(-psi(n/2)+psi((1+n)/2))/2)))/4)
+                          
+    #qq1_qg1 = np.stack((qq1, qg1), axis=0)
+    #gq1_gg1 = np.stack((gq1, gg1), axis=0)
+    
+    n_tester = np.array([1.0])
+    if type(n)==type(n_tester):
+        qq1_qg1 = np.stack((qq1, qg1), axis=-1)
+        gq1_gg1 = np.stack((gq1, gg1), axis=-1)
+        result = np.stack((qq1_qg1,gq1_gg1),axis=-1)
+    else:
+        length = 1
+        result = np.reshape(np.array([[qq1, qg1], [gq1, gg1]]),(length,2,2))
+
+    return result# (N, 2, 2)    
+
+                    
+                          
+                          
+    #return np.array([[qq1, qg1],
+    #                 [gq1, gg1]])[np.newaxis,...]*np.ones_like(p)
 
 """
 ***********************Evolution operator of GPD in the moment space*******
@@ -223,6 +671,52 @@ def lambdaf(n: complex, nf: int, p: int, prty: int = 1) -> np.ndarray:
     lam1 = 0.5 * (gam0[..., 0, 0] + gam0[..., 1, 1] - aux) # (N)
     lam2 = lam1 + aux  # (N)
     return np.stack([lam1, lam2], axis=-1) # shape (N, 2)
+
+def gep_lambdaf(gam0) -> np.ndarray:
+    """Eigenvalues of the LO singlet anomalous dimensions matrix.
+
+    Args:
+          gam0: matrix of LO anomalous dimensions
+
+    Returns:
+        lam[a, k]
+        a in [+, -] and k is MB contour point index
+
+    """
+    # To avoid crossing of the square root cut on the
+    # negative real axis we use trick by Dieter Mueller
+    aux = ((gam0[..., 0, 0] - gam0[..., 1, 1]) *
+           np.sqrt(1. + 4.0 * gam0[..., 0, 1] * gam0[..., 1, 0] /
+                   (gam0[..., 0, 0] - gam0[..., 1, 1])**2))
+    lam1 = 0.5 * (gam0[..., 0, 0] + gam0[..., 1, 1] - aux)
+    lam2 = lam1 + aux
+    return np.stack([lam1, lam2])
+
+def gep_projectors(gam0) -> Tuple[np.ndarray, np.ndarray]:
+    """Projectors on evolution quark-gluon singlet eigenaxes.
+
+    Args:
+          gam0: LO anomalous dimension
+
+    Returns:
+         lam: eigenvalues of LO an. dimm matrix lam[a, k]  # Eq. (123)
+          pr: Projector pr[k, a, i, j]  # Eq. (122)
+               k is MB contour point index
+               a in [+, -]
+               i,j in {Q, G}
+
+    """
+    lam = gep_lambdaf(gam0)
+    den = 1. / (lam[0, ...] - lam[1, ...])
+
+    # P+ and P-
+    ssm = gam0 - np.einsum('...,ij->...ij', lam[1, ...], np.identity(2))
+    ssp = gam0 - np.einsum('...,ij->...ij', lam[0, ...], np.identity(2))
+    prp = np.einsum('...,...ij->...ij', den, ssm)
+    prm = np.einsum('...,...ij->...ij', -den, ssp)
+    # We insert a-axis before i,j-axes, i.e. on -3rd place
+    pr = np.stack([prp, prm], axis=-3)
+    return lam, pr
 
 
 def projectors(n: complex, nf: int, p: int, prty: int = 1) -> Tuple[np.ndarray, np.ndarray]:
@@ -258,6 +752,671 @@ def projectors(n: complex, nf: int, p: int, prty: int = 1) -> Tuple[np.ndarray, 
     # We insert a-axis before i,j-axes, i.e. on -3rd place
     pr = np.stack([prp, prm], axis=-3) # (N, 2, 2, 2)
     return lam, pr # (N, 2) and (N, 2, 2, 2)
+
+def gep_erfunc_nd(nf, lamj, lamk, R) -> np.ndarray:
+    """Mu-dep. part of NLO evolution operator. Eq. (126)."""
+    assert lamk.shape == (2,)  # FIX THIS
+    b0 = beta0(nf)
+    bll = np.subtract.outer(lamj.transpose(), lamk)
+    bll = b0 * np.ones_like(bll) + bll
+
+    er1 = (np.ones_like(bll) - (1./R)**(bll/b0)) / bll  # Eq. (126)
+    er1 = b0 * er1   # as defined in gepard-fortran
+    return er1
+
+def rmudep(nf, lamj, lamk, Q):
+    
+    """
+    Scale dependent part of NLO evolution matrix
+    """
+    lamdif = np.ones((lamj.shape[0],2,2),dtype=complex)
+    for i in range(lamj.shape[0]):
+        lamdif[i,...] = np.subtract.outer(lamj[i,...],lamk[i,...]) # shape (Nj,2,2)
+    #print(lamj)
+    b0 = beta0(nf) # scalar
+    b11 = b0 * np.ones_like(lamdif) + lamdif # shape (N,2,2)
+    #print(b11)
+    R = AlphaS(nloop_alphaS, nf, Q)/AlphaS(nloop_alphaS, nf, Init_Scale_Q) # shape N
+    R = np.array(R)
+    #print(R)
+    Rpow = (1/R)[..., np.newaxis, np.newaxis, np.newaxis]**(b11/b0) # shape (N,2,2)
+    #print((np.ones_like(Rpow) - Rpow) / b11)
+    return (np.ones_like(Rpow) - Rpow) / b11 # shape (N,2,2)
+
+def rmudep_nd(nf, lamj, lamk, Q):
+    
+    """
+    Scale dependent part of NLO evolution matrix
+    """
+    lamdif = np.ones((lamj.shape[1],2,2),dtype=complex)
+    #print(lamj.shape)
+    #print(lamk.shape)
+    for i in range(lamj.shape[1]):
+        lamdif[i,...] = np.subtract.outer(lamj[0,i,...],lamk[0,0,...]) # shape (Nj,2,2)
+    #for i in range(lamj.shape[0]):
+    #    lamdif[i,0,0] = 0
+    #    lamdif[i,1,1] = 0
+    #print(lamdif)
+    b0 = beta0(nf) # scalar
+    b11 = b0 * np.ones_like(lamdif) + lamdif # shape (N,2,2)
+    
+    #print(b11)
+    R = AlphaS(nloop_alphaS, nf, Q)/AlphaS(nloop_alphaS, nf, Init_Scale_Q) # shape N
+    R = np.array(R)
+    #print(R)
+    Rpow = (1/R)[..., np.newaxis, np.newaxis, np.newaxis]**(b11/b0) # shape (N,2,2)
+    #print(Rpow)
+    return (np.ones_like(Rpow) - Rpow) * b0 / b11 # shape (N,2,2)
+
+def rmudep_nd_MOM_vec(nf, lamj, lamk, Q):
+    
+    """
+    Scale dependent part of NLO evolution matrix
+    """
+    lamdif = np.ones((1,lamk.shape[1],2,2),dtype=complex)
+    #lamdif[0,:,...] = np.subtract.outer(lamj[0,...],lamk[0,:,...])
+    lamdif[0,:,...] = np.transpose(np.subtract.outer(lamj[0,...],lamk[0,:,...]),(0,2,1,3))
+    #print(lamj.shape)
+    #print(lamk.shape)
+    # for i in range(lamj.shape[1]):
+    #     for j in range(lamk.shape[1]):
+    #         lamdif[i,j,...] = np.subtract.outer(lamj[0,i,...],lamk[0,j,...]) # shape (Nj,2,2)
+    #for i in range(lamj.shape[0]):
+    #    lamdif[i,0,0] = 0
+    #    lamdif[i,1,1] = 0
+    #print(lamdif)
+    b0 = beta0(nf) # scalar
+    b11 = b0 * np.ones_like(lamdif) + lamdif # shape (N,2,2)
+    
+    #print(b11)
+    R = AlphaS(nloop_alphaS, nf, Q)/AlphaS(nloop_alphaS, nf, Init_Scale_Q) # shape N
+    R = np.array(R)
+    #print(R)
+    Rpow = (1/R)[..., np.newaxis, np.newaxis, np.newaxis]**(b11/b0) # shape (N,2,2)
+    #print(Rpow)
+    return (np.ones_like(Rpow) - Rpow) * b0 / b11 # shape (N,2,2)
+
+def rmudep_nd_MOM(nf, lamj, lamk, Q):
+    
+    """
+    Scale dependent part of NLO evolution matrix
+    """
+    lamdif = np.ones((1,2,2),dtype=complex)
+    #print(lamj.shape)
+    #print(lamk.shape)
+    a = np.subtract.outer(lamj,lamk)
+    #print(a.shape)
+    lamdif[0,...] = np.subtract.outer(lamj,lamk) # shape (Nj,2,2)
+    #for i in range(lamj.shape[0]):
+    #    lamdif[i,0,0] = 0
+    #    lamdif[i,1,1] = 0
+    #print(lamdif)
+    b0 = beta0(nf) # scalar
+    b11 = b0 * np.ones_like(lamdif) + lamdif # shape (N,2,2)
+    
+    #print(b11)
+    R = AlphaS(nloop_alphaS, nf, Q)/AlphaS(nloop_alphaS, nf, Init_Scale_Q) # shape N
+    R = np.array(R)
+    #print(R)
+    Rpow = (1/R)[..., np.newaxis, np.newaxis, np.newaxis]**(b11/b0) # shape (N,2,2)
+    #print(Rpow)
+    return (np.ones_like(Rpow) - Rpow) * b0 / b11 # shape (N,2,2)
+
+def rmudep_quad(nf, lamj, lamk, Q):
+    
+    """
+    Scale dependent part of NLO evolution matrix
+    """
+    lamdif = np.subtract.outer(lamj,lamk)
+    #print(lamdif)
+    b0 = beta0(nf) # scalar
+    b11 = b0 * np.ones_like(lamdif) + lamdif # shape (N,2,2)
+    #print(b11)
+    R = AlphaS(nloop_alphaS, nf, Q)/AlphaS(nloop_alphaS, nf, Init_Scale_Q) # shape N
+    R = np.array(R)
+    #print(R)
+    Rpow = (1/R)[..., np.newaxis, np.newaxis, np.newaxis]**(b11/b0) # shape (N,2,2)
+    
+    return (np.ones_like(Rpow) - Rpow) / b11 # shape (N,2,2)
+
+def amuindep(j: complex, nf: int, p: int, prty: int = 1):
+    
+    lam, pr = projectors(j+1, nf, p, prty)
+    #print(singlet_NLO(j+1,nf,p).shape)
+    gam0 = singlet_LO(j+1,nf,p)#.transpose((0,2,1))  # LO singlet an. dim.
+    gam1 = singlet_NLO(j+1,nf,p).transpose((0,2,1))  # NLO singlet an. dim.
+    #print(gam0)
+    #print(gam1)
+    #print(lam)
+    #print(pr)
+    a1 = - gam1 + 0.5 * beta1(nf) * gam0 / beta0(nf)
+    A = np.einsum('...aic,...cd,...bdj->...abij', pr, a1, pr)
+    #print(beta0(nf))
+    return A
+
+def amuindep_quad(j: complex, nf: int, p: int, prty: int = 1):
+    
+    lam, pr = projectors(j+1, nf, p, prty)
+    #print(singlet_NLO(j+1,nf,p).shape)
+    gam0 = singlet_LO(j+1,nf,p)#.transpose((0,2,1))  # LO singlet an. dim.
+    gam1 = singlet_NLO(j+1,nf,p).transpose((0,2,1))  # NLO singlet an. dim.
+    #print(gam0)
+    #print(gam1)
+    #print(lam)
+    #print(pr)
+    a1 = - gam1 + 0.5 * beta1(nf) * gam0 / beta0(nf)
+    A = np.einsum('...aic,...cd,...bdj->...abij', pr, a1, pr)
+    #print(beta1(nf))
+    return A
+
+def bmudep(Q, zn, zk, nf: int, p: int,  NS: bool = False, prty: int = 1):
+   
+    R = AlphaS(nloop_alphaS, nf, Q)/AlphaS(nloop_alphaS, nf, Init_Scale_Q) # shape N
+    R = np.array(R)
+    b0 = beta0(nf)
+    
+    
+    
+    
+    
+    
+    
+    AAA = (S1((zn+zk+2)/2) -
+           S1((zn-zk-2)/2) +
+           2*S1(zn-zk-1) -
+           S1(zn+1))
+    # GOD = "G Over D" = g_jk / d_jk
+    GOD_11 = 2 * CF * (
+            2*AAA + (AAA - S1(zn+1))*(zn-zk)*(
+                zn+zk + 3)/(zk+1)/(zk+2))
+    nzero = np.zeros_like(GOD_11)
+    GOD_12 = nzero
+    GOD_21 = 2*CF*(zn-zk)*(zn+zk+3)/zn/(zk+1)/(zk+2)
+    GOD_22 = 2 * CA * (2*AAA + (AAA - S1(
+        zn + 1)) * (poch(zn, 4) / poch(zk, 4) -
+                    1) + 2 * (zn-zk) * (
+            zn+zk + 3) / poch(zk, 4)) * zk / zn
+    god = np.array([[GOD_11, GOD_12], [GOD_21, GOD_22]])
+    dm_22 = zk/zn
+    dm_11 = np.ones_like(dm_22)
+    dm_12 = np.zeros_like(dm_22)
+    dm = np.array([[dm_11, dm_12], [dm_12, dm_22]])
+    fac = (zk+1)*(zk+2)*(2*zn+3)/(zn+1)/(zn+2)/(zn-zk)/(zn+zk+3)
+    lamn, pn = projectors(zn + 1, nf, p, prty)
+    lamk, pk = projectors(zk + 1, nf, p, prty)
+    proj_DM = np.einsum('mnaif,fgmn,mnbgj->...nabij', pn, dm, pk)
+    #print(proj_DM)
+    proj_GOD = np.einsum('mnaif,fgmn,mnbgj->...nabij', pn, god, pk)
+    #print(proj_GOD)
+    er1 = rmudep_nd(nf, lamn, lamk, Q)
+    #print(er1)
+    bet_proj_DM = np.einsum('...b,...nabij->...nabij', b0-lamk, proj_DM)
+    lamdif = np.ones((lamn.shape[1],2,2),dtype=complex)
+    #print(lamk.shape)
+    for i in range(lamn.shape[1]):
+        lamdif[i,...] = np.subtract.outer(lamn[0,i,...],lamk[0,0,...])
+    #print(er1*lamdif)
+    Bjk = -np.einsum('...n,...nab,...nabij,...b->...nij', fac,
+                    er1*lamdif,
+                    bet_proj_DM + proj_GOD,
+                    R**(-lamk/b0)) / b0
+        
+    
+    
+
+
+    return Bjk
+
+
+# def bmudep(Q, zn, zk, nf: int, p: int, prty: int = 1):
+#     """Non-diagonal part of NLO evol op.
+#     Args:
+#           Q2: evolution point
+#           zn: non-diagonal evolution Mellin-Barnes integration point (array)
+#           zk: COPE Mellin-Barnes integration point (not array! - FIXME)
+#           NS: do we want non-singlet?
+#           nf: number of flavors
+#           p: vector or axial vector
+#           prty: parity
+#     Returns:
+#          B_jk: non-diagonal part of evol. op. from Eq. (140)
+#     Note:
+#          It's multiplied by GAMMA(3/2) GAMMA(K+3) / (2^(K+1) GAMMA(K+5/2))
+#          so it's ready to be combined with diagonally evolved C_K = 1 + ...
+#          where in the end everything will be multiplied by
+#         (2^(K+1) GAMMA(K+5/2))  / ( GAMMA(3/2) GAMMA(K+3) )
+#     """
+#     R = AlphaS(nloop_alphaS, nf, Q)/AlphaS(nloop_alphaS, nf, Init_Scale_Q) # shape N
+#     R = np.array(R)
+#     b0 = beta0(nf)
+    
+#     '''
+#     Ajk = S1((zn + zk)/2 + 1) - S1((zn - zk)/2 - 1) + 2*S1(zn - zk - 1) - S1(zn + 1)
+#     djk = -(2*zk + 30 / ((zn - zk) * (zn + zk + 3)))
+#     gQQ = - CF * (3 + 2*zk) * (2 * Ajk + (Ajk - S1(zn + 1)) * (zn - zk) * (zn + zk + 3) / (zk + 1) / (zk + 2))  / ((zn - zk) * (zn + zk + 3)) 
+#     gQG = np.zeros_like(gQQ)
+#     gGQ = - CF * (3 + 2*zk) / (6 / (zk + 1) / (zk + 2))
+#     gGG = - CA * (3 + 2*zk) * (2 * Ajk + (Ajk - S1(zn + 1)) * (zn - zk) * ((gamma(zn + 4) * gamma(zk) / gamma(zn) / gamma(zk + 4) - 1)) + 2*(zn - zk) * (zn + zk + 3) * gamma(zk) / gamma(zk + 4)) / ((zn - zk) * (zn + zk + 3))
+#     gQQQG = np.stack((gQQ,gQG),axis=-1)
+#     gGQGG = np.stack((gQG,gGG),axis=-1)
+#     gjk = np.stack((gQQQG,gGQGG),axis=-2)
+    
+    
+    
+#     lamn, projn = projectors(zn + 1, nf, p, prty)
+#     lamk, projk = projectors(zk + 1, nf, p, prty)
+#     lamdif = np.ones((lamn.shape[0],2,2),dtype=complex)
+#     for i in range(lamn.shape[0]):
+#         lamdif[i,...] = np.subtract.outer(lamn[i,...],lamk[i,...])
+#     #print(lamdif)
+#     betaminlamk = np.ones_like(lamk)
+#     betaminlamk = b0 * betaminlamk
+#     #print(projn.shape)
+#     #print(projk.shape)
+#     #print(gjk)
+    
+#     Dproj = np.einsum('...aik,...,...bkj->...abij',projn,djk,projk)
+#     Gproj = np.einsum('...aik,...km,...bmj->...abij',projn,gjk,projk)
+#     print(Dproj)
+    
+    
+#     #print(rmudep(nf, lamn, lamk, Q))
+    
+#     Bjk = - np.einsum('...ab,...ab,...b,...abij->...abij', rmudep(nf, lamn, lamk, Q), lamdif, betaminlamk - lamk, Dproj) - np.einsum('...ab,...ab,...b,...abij->...abij', rmudep(nf, lamn, lamk, Q), lamdif, np.ones_like(lamk) , Gproj)
+#     '''
+    
+    
+    
+    
+    
+#     AAA = (S1((zn+zk+2)/2) -
+#            S1((zn-zk-2)/2) +
+#            2*S1(zn-zk-1) -
+#            S1(zn+1))
+#     # GOD = "G Over D" = g_jk / d_jk
+#     GOD_11 = 2 * CF * (
+#             2*AAA + (AAA - S1(zn+1))*(zn-zk)*(
+#                 zn+zk + 3)/(zk+1)/(zk+2))
+#     nzero = np.zeros_like(GOD_11)
+#     GOD_12 = nzero
+#     GOD_21 = 2*CF*(zn-zk)*(zn+zk+3)/zn/(zk+1)/(zk+2)
+#     GOD_22 = 2 * CA * (2*AAA + (AAA - S1(
+#         zn + 1)) * (poch(zn, 4) / poch(zk, 4) -
+#                     1) + 2 * (zn-zk) * (
+#             zn+zk + 3) / poch(zk, 4)) * zk / zn
+#     god = np.array([[GOD_11, GOD_12], [GOD_21, GOD_22]])
+#     dm_22 = zk/zn
+#     dm_11 = np.ones_like(dm_22)
+#     dm_12 = np.zeros_like(dm_22)
+#     dm = np.array([[dm_11, dm_12], [dm_12, dm_22]])
+#     fac = (zk+1)*(zk+2)*(2*zn+3)/(zn+1)/(zn+2)/(zn-zk)/(zn+zk+3)
+#     lamn, pn = projectors(zn + 1, nf, p, prty)
+#     lamk, pk = projectors(zk + 1, nf, p, prty)
+#     #print(pn.shape)
+#     #print(pk.shape)
+#     #print(dm.shape)
+#     #print(god.shape)
+#     proj_DM = np.einsum('mnaif,fgmn,mnbgj->...nabij', pn, dm, pk)
+#     #print("proj DM shape", proj_DM.shape)
+#     proj_GOD = np.einsum('mnaif,fgmn,mnbgj->...nabij', pn, god, pk)
+#     #print(proj_GOD)
+#     er1 = rmudep_nd(nf, lamn, lamk, Q)
+#     #print("er1shape ", er1.shape)
+#     bet_proj_DM = np.einsum('...nb,...nabij->...nabij', b0-lamk, proj_DM)
+#     #print("betproj shape ", bet_proj_DM.shape)
+#     #lamdif = np.ones((lamn.shape[1],lamk.shape[1],2,2),dtype=complex)
+#     #print(lamk.shape)
+    
+#     #lamdif = lamn[0,:,:,np.newaxis] - lamk[0,:,np.newaxis,:]
+#     lamdif = np.ones((1,lamk.shape[1],2,2),dtype=complex)
+    
+#     #print(lamn.shape)
+#     #print("lamk shape", lamk.shape)
+#     #print(np.subtract.outer(lamn,lamk).shape)
+    
+#     lamdif[0,:,...] = np.transpose(np.subtract.outer(lamn[0,...],lamk[0,:,...]),(0,2,1,3))
+#     #print(er1.shape)
+#     #print(lamdif)
+    
+#     # for i in range(lamn.shape[1]):
+#     #     for j in range(lamk.shape[1]):
+#     #         lamdif[i,j,...] = np.subtract.outer(lamn[0,i,...],lamk[0,j,...])
+    
+#     #print("er1 times lamdif shape", (er1*lamdif).shape)
+#     #print("fac shape", fac.shape)
+#     #print("R shape", (R**(-lamk/b0)).shape)
+#     #print("R exp", (R**(-lamk/b0)))
+#     #tempo = -np.einsum('...n,...nab,...nabij->...nabij', fac,
+#     #                er1*lamdif,
+#     #                bet_proj_DM + proj_GOD) / b0 
+#     Bjk = -np.einsum('...n,...nab,...nab,...nabij,...nb->...nij', fac,
+#                     er1,lamdif,
+#                     bet_proj_DM + proj_GOD,
+#                     R**(-lamk/b0)) / b0
+        
+#     #print(Bjk.shape)
+    
+
+
+#     return Bjk
+
+def bmudep_MOM(Q, zn, zk, nf: int, p: int, prty: int = 1):
+    """Non-diagonal part of NLO evol op.
+    Args:
+          Q2: evolution point
+          zn: non-diagonal evolution Mellin-Barnes integration point (array)
+          zk: COPE Mellin-Barnes integration point (not array! - FIXME)
+          NS: do we want non-singlet?
+          nf: number of flavors
+          p: vector or axial vector
+          prty: parity
+    Returns:
+         B_jk: non-diagonal part of evol. op. from Eq. (140)
+    Note:
+         It's multiplied by GAMMA(3/2) GAMMA(K+3) / (2^(K+1) GAMMA(K+5/2))
+         so it's ready to be combined with diagonally evolved C_K = 1 + ...
+         where in the end everything will be multiplied by
+        (2^(K+1) GAMMA(K+5/2))  / ( GAMMA(3/2) GAMMA(K+3) )
+    """
+    R = AlphaS(nloop_alphaS, nf, Q)/AlphaS(nloop_alphaS, nf, Init_Scale_Q) # shape N
+    R = np.array(R)
+    b0 = beta0(nf)
+    
+    '''
+    Ajk = S1((zn + zk)/2 + 1) - S1((zn - zk)/2 - 1) + 2*S1(zn - zk - 1) - S1(zn + 1)
+    djk = -(2*zk + 30 / ((zn - zk) * (zn + zk + 3)))
+    gQQ = - CF * (3 + 2*zk) * (2 * Ajk + (Ajk - S1(zn + 1)) * (zn - zk) * (zn + zk + 3) / (zk + 1) / (zk + 2))  / ((zn - zk) * (zn + zk + 3)) 
+    gQG = np.zeros_like(gQQ)
+    gGQ = - CF * (3 + 2*zk) / (6 / (zk + 1) / (zk + 2))
+    gGG = - CA * (3 + 2*zk) * (2 * Ajk + (Ajk - S1(zn + 1)) * (zn - zk) * ((gamma(zn + 4) * gamma(zk) / gamma(zn) / gamma(zk + 4) - 1)) + 2*(zn - zk) * (zn + zk + 3) * gamma(zk) / gamma(zk + 4)) / ((zn - zk) * (zn + zk + 3))
+    gQQQG = np.stack((gQQ,gQG),axis=-1)
+    gGQGG = np.stack((gQG,gGG),axis=-1)
+    gjk = np.stack((gQQQG,gGQGG),axis=-2)
+    
+    
+    
+    lamn, projn = projectors(zn + 1, nf, p, prty)
+    lamk, projk = projectors(zk + 1, nf, p, prty)
+    lamdif = np.ones((lamn.shape[0],2,2),dtype=complex)
+    for i in range(lamn.shape[0]):
+        lamdif[i,...] = np.subtract.outer(lamn[i,...],lamk[i,...])
+    #print(lamdif)
+    betaminlamk = np.ones_like(lamk)
+    betaminlamk = b0 * betaminlamk
+    #print(projn.shape)
+    #print(projk.shape)
+    #print(gjk)
+    
+    Dproj = np.einsum('...aik,...,...bkj->...abij',projn,djk,projk)
+    Gproj = np.einsum('...aik,...km,...bmj->...abij',projn,gjk,projk)
+    print(Dproj)
+    
+    
+    #print(rmudep(nf, lamn, lamk, Q))
+    
+    Bjk = - np.einsum('...ab,...ab,...b,...abij->...abij', rmudep(nf, lamn, lamk, Q), lamdif, betaminlamk - lamk, Dproj) - np.einsum('...ab,...ab,...b,...abij->...abij', rmudep(nf, lamn, lamk, Q), lamdif, np.ones_like(lamk) , Gproj)
+    '''
+    
+    
+    
+    
+    
+    AAA = (S1((zn+zk+2)/2) -
+           S1((zn-zk-2)/2) +
+           2*S1(zn-zk-1) -
+           S1(zn+1))
+    # GOD = "G Over D" = g_jk / d_jk
+    GOD_11 = 2 * CF * (
+            2*AAA + (AAA - S1(zn+1))*(zn-zk)*(
+                zn+zk + 3)/(zk+1)/(zk+2))
+    nzero = np.zeros_like(GOD_11)
+    GOD_12 = nzero
+    GOD_21 = 2*CF*(zn-zk)*(zn+zk+3)/zn/(zk+1)/(zk+2)
+    GOD_22 = 2 * CA * (2*AAA + (AAA - S1(
+        zn + 1)) * (poch(zn, 4) / poch(zk, 4) -
+                    1) + 2 * (zn-zk) * (
+            zn+zk + 3) / poch(zk, 4)) * zk / zn
+    god = np.array([[GOD_11, GOD_12], [GOD_21, GOD_22]])
+    dm_22 = zk/zn
+    dm_11 = np.ones_like(dm_22)
+    dm_12 = np.zeros_like(dm_22)
+    dm = np.array([[dm_11, dm_12], [dm_12, dm_22]])
+    fac = (zk+1)*(zk+2)*(2*zn+3)/(zn+1)/(zn+2)/(zn-zk)/(zn+zk+3)
+    lamn, pn = projectors(zn + 1, nf, p, prty)
+    lamk, pk = projectors(zk + 1, nf, p, prty)
+    #print(pn.shape)
+    #print(pk.shape)
+    #print(dm.shape)
+    #print(lamn.shape)
+    #print(lamk.shape)
+    #print(god.shape)
+    proj_DM = np.einsum('aif,fg,bgj->abij', pn, dm, pk)
+    #print(proj_DM)
+    proj_GOD = np.einsum('aif,fg,bgj->abij', pn, god, pk)
+    #print(proj_GOD)
+    er1 = rmudep_nd_MOM(nf, lamn, lamk, Q)
+    #print(er1)
+    bet_proj_DM = np.einsum('b,abij->abij', b0-lamk, proj_DM)
+    lamdif = np.ones((1,2,2),dtype=complex)
+    #print(lamk.shape)
+    lamdif[0,...] = np.subtract.outer(lamn,lamk)
+    #print(lamdif)
+    #print(er1*lamdif)
+    Bjk = -np.einsum('...,...ab,...abij,...b->...ij', fac,
+                    er1*lamdif,
+                    bet_proj_DM + proj_GOD,
+                    R**(-lamk/b0)) / b0
+        
+    
+    
+
+
+    return Bjk[0,:,:]
+
+def bmudep_MOM_vec(Q, zn, zk, nf: int, p: int, prty: int = 1):
+    """Non-diagonal part of NLO evol op.
+    Args:
+          Q2: evolution point
+          zn: non-diagonal evolution Mellin-Barnes integration point (array)
+          zk: COPE Mellin-Barnes integration point (not array! - FIXME)
+          NS: do we want non-singlet?
+          nf: number of flavors
+          p: vector or axial vector
+          prty: parity
+    Returns:
+         B_jk: non-diagonal part of evol. op. from Eq. (140)
+    Note:
+         It's multiplied by GAMMA(3/2) GAMMA(K+3) / (2^(K+1) GAMMA(K+5/2))
+         so it's ready to be combined with diagonally evolved C_K = 1 + ...
+         where in the end everything will be multiplied by
+        (2^(K+1) GAMMA(K+5/2))  / ( GAMMA(3/2) GAMMA(K+3) )
+    """
+    R = AlphaS(nloop_alphaS, nf, Q)/AlphaS(nloop_alphaS, nf, Init_Scale_Q) # shape N
+    R = np.array(R)
+    b0 = beta0(nf)
+    
+    
+    AAA = (S1((zn+zk+2)/2) -
+           S1((zn-zk-2)/2) +
+           2*S1(zn-zk-1) -
+           S1(zn+1))
+    # GOD = "G Over D" = g_jk / d_jk
+    GOD_11 = 2 * CF * (
+            2*AAA + (AAA - S1(zn+1))*(zn-zk)*(
+                zn+zk + 3)/(zk+1)/(zk+2))
+    nzero = np.zeros_like(GOD_11)
+    GOD_12 = nzero
+    GOD_21 = 2*CF*(zn-zk)*(zn+zk+3)/zn/(zk+1)/(zk+2)
+    GOD_22 = 2 * CA * (2*AAA + (AAA - S1(
+        zn + 1)) * (poch(zn, 4) / poch(zk, 4) -
+                    1) + 2 * (zn-zk) * (
+            zn+zk + 3) / poch(zk, 4)) * zk / zn
+    god = np.array([[GOD_11, GOD_12], [GOD_21, GOD_22]])
+    dm_22 = zk/zn
+    dm_11 = np.ones_like(dm_22)
+    dm_12 = np.zeros_like(dm_22)
+    dm = np.array([[dm_11, dm_12], [dm_12, dm_22]])
+    fac = (zk+1)*(zk+2)*(2*zn+3)/(zn+1)/(zn+2)/(zn-zk)/(zn+zk+3)
+    lamn, pn = projectors(zn + 1, nf, p, prty)
+    lamk, pk = projectors(zk + 1, nf, p, prty)
+    #print(pn.shape)
+    #print(pk.shape)
+    #print(dm.shape)
+    #print(god.shape)
+    proj_DM = np.einsum('mnaif,fgmn,mnbgj->...nabij', pn, dm, pk)
+    #print("proj DM shape", proj_DM.shape)
+    proj_GOD = np.einsum('mnaif,fgmn,mnbgj->...nabij', pn, god, pk)
+    #print(proj_GOD)
+    er1 = rmudep_nd_MOM_vec(nf, lamn, lamk, Q)
+    #print("er1shape ", er1.shape)
+    bet_proj_DM = np.einsum('...nb,...nabij->...nabij', b0-lamk, proj_DM)
+    #print("betproj shape ", bet_proj_DM.shape)
+    #lamdif = np.ones((lamn.shape[1],lamk.shape[1],2,2),dtype=complex)
+    #print(lamk.shape)
+    
+    #lamdif = lamn[0,:,:,np.newaxis] - lamk[0,:,np.newaxis,:]
+    lamdif = np.ones((1,lamk.shape[1],2,2),dtype=complex)
+    
+    #print(lamn.shape)
+    #print("lamk shape", lamk.shape)
+    #print(np.subtract.outer(lamn,lamk).shape)
+    
+    lamdif[0,:,...] = np.transpose(np.subtract.outer(lamn[0,...],lamk[0,:,...]),(0,2,1,3))
+    #print(er1.shape)
+    #print(lamdif)
+    
+    # for i in range(lamn.shape[1]):
+    #     for j in range(lamk.shape[1]):
+    #         lamdif[i,j,...] = np.subtract.outer(lamn[0,i,...],lamk[0,j,...])
+    
+    #print("er1 times lamdif shape", (er1*lamdif).shape)
+    #print("fac shape", fac.shape)
+    #print("R shape", (R**(-lamk/b0)).shape)
+    #print("R exp", (R**(-lamk/b0)))
+    #tempo = -np.einsum('...n,...nab,...nabij->...nabij', fac,
+    #                er1*lamdif,
+    #                bet_proj_DM + proj_GOD) / b0 
+    Bjk = -np.einsum('...n,...nab,...nab,...nabij,...nb->...nij', fac,
+                    er1,lamdif,
+                    bet_proj_DM + proj_GOD,
+                    R**(-lamk/b0)) / b0
+        
+    #print(Bjk.shape)
+    
+
+
+    return Bjk
+# =============================================================================
+#     BJK = []
+#     
+#     for zn in ZN:
+#         auxseq = []
+#         for zk in ZK:
+#             
+#             AAA = (S1((zn+zk+2)/2) -
+#                    S1((zn-zk-2)/2) +
+#                    2*S1(zn-zk-1) -
+#                    S1(zn+1))
+#             # GOD = "G Over D" = g_jk / d_jk
+#             GOD_11 = 2 * CF * (
+#                     2*AAA + (AAA - S1(zn+1))*(zn-zk)*(
+#                         zn+zk + 3)/(zk+1)/(zk+2))
+#             nzero = np.zeros_like(GOD_11)
+#             GOD_12 = nzero
+#             GOD_21 = 2*CF*(zn-zk)*(zn+zk+3)/zn/(zk+1)/(zk+2)
+#             GOD_22 = 2 * CA * (2*AAA + (AAA - S1(
+#                 zn + 1)) * (poch(zn, 4) / poch(zk, 4) -
+#                             1) + 2 * (zn-zk) * (
+#                     zn+zk + 3) / poch(zk, 4)) * zk / zn
+#             god = np.array([[GOD_11, GOD_12], [GOD_21, GOD_22]])
+#             dm_22 = zk/zn
+#             dm_11 = np.ones_like(dm_22)
+#             dm_12 = np.zeros_like(dm_22)
+#             dm = np.array([[dm_11, dm_12], [dm_12, dm_22]])
+#             fac = (zk+1)*(zk+2)*(2*zn+3)/(zn+1)/(zn+2)/(zn-zk)/(zn+zk+3)
+#             lamn, pn = projectors(zn + 1, nf, p, prty)
+#             lamk, pk = projectors(zk + 1, nf, p, prty)
+#             #print(pn.shape)
+#             #print(pk.shape)
+#             #print(dm.shape)
+#             #print(god.shape)
+#             proj_DM = np.einsum('aif,fg,bgj->abij', pn, dm, pk)
+#             #print(proj_DM)
+#             proj_GOD = np.einsum('aif,fg,bgj->abij', pn, god, pk)
+#             #print(proj_GOD)
+#             er1 = rmudep_nd_MOM(nf, lamn, lamk, Q)
+#             #print(er1)
+#             bet_proj_DM = np.einsum('b,abij->abij', b0-lamk, proj_DM)
+#             lamdif = np.ones((1,2,2),dtype=complex)
+#             #print(lamk.shape)
+#             lamdif[0,...] = np.subtract.outer(lamn,lamk)
+#             #print(er1*lamdif)
+#             Bjk_ent = -np.einsum('...,...ab,...abij,...b->...ij', fac,
+#                             er1*lamdif,
+#                             bet_proj_DM + proj_GOD,
+#                             R**(-lamk/b0)) / b0
+#             
+#             auxseq.append(Bjk_ent[0,:,:])
+#         
+#         auxarr = np.array(auxseq)
+#         BJK.append(auxarr)
+#         
+#     Bjk = np.array(BJK)
+# =============================================================================
+    
+
+
+    
+
+def bmudep_quad(Q, zn, zk, nf: int, p: int,  NS: bool = False, prty: int = 1):
+    
+    
+    R = AlphaS(nloop_alphaS, nf, Q)/AlphaS(nloop_alphaS, nf, Init_Scale_Q) # shape N
+    R = np.array(R)
+    b0 = beta0(nf)
+    Ajk = S1((zn + zk)/2 + 1) - S1((zn - zk)/2 - 1) + 2*S1(zn - zk - 1) - S1(zn + 1)
+    djk = -(2*zk + 30 / ((zn - zk) * (zn + zk + 3)))
+    gQQ = - CF * (3 + 2*zk) * (2 * Ajk + (Ajk - S1(zn + 1)) * (zn - zk) * (zn + zk + 3) / (zk + 1) / (zk + 2))  / ((zn - zk) * (zn + zk + 3)) 
+    gQG = np.zeros_like(gQQ)
+    gGQ = - CF * (3 + 2*zk) / (6 / (zk + 1) / (zk + 2))
+    gGG = - CA * (3 + 2*zk) * (2 * Ajk + (Ajk - S1(zn + 1)) * (zn - zk) * ((gamma(zn + 4) * gamma(zk) / gamma(zn) / gamma(zk + 4) - 1)) + 2*(zn - zk) * (zn + zk + 3) * gamma(zk) / gamma(zk + 4)) / ((zn - zk) * (zn + zk + 3))
+    gQQQG = np.stack((gQQ,gQG),axis=-1)
+    gGQGG = np.stack((gQG,gGG),axis=-1)
+    gjk = np.stack((gQQQG,gGQGG),axis=-2)
+    
+    
+    
+    
+    lamn, projn = projectors(zn + 1, nf, p, prty)
+    lamk, projk = projectors(zk + 1, nf, p, prty)
+    lamdif = np.subtract.outer(lamn,lamk)
+    #print(lamdif)
+    betaminlamk = np.ones_like(lamk)
+    betaminlamk = b0 * betaminlamk
+    #print(projn.shape)
+    #print(projk.shape)
+    #print(gjk)
+    
+    Dproj = np.einsum('...aik,...,...bkj->...abij',projn,djk,projk)
+    Gproj = np.einsum('...aik,...km,...bmj->...abij',projn,gjk,projk)
+    
+    
+    
+    #print(rmudep_quad(nf, lamn, lamk, Q))
+    
+    
+    Bjk = - np.einsum('...ab,...ab,...b,...abij->...abij', rmudep_quad(nf, lamn, lamk, Q), lamdif, betaminlamk - lamk, Dproj) - np.einsum('...ab,...ab,...b,...abij->...abij', rmudep_quad(nf, lamn, lamk, Q), lamdif, np.ones_like(lamk) , Gproj)
+    
+    
+    
+    
+    
+
+
+    return Bjk
+
+
+    
 
 def evolop(j: complex, nf: int, p: int, Q: float):
     """
@@ -299,6 +1458,10 @@ def evolop(j: complex, nf: int, p: int, Q: float):
     # We use instead
     """ 
     evola0 = np.einsum('...aij,...a->...ij', pr, Rfact) # (N, 2, 2)
+    
+    #Singlet NLO evolution matrix
+    
+    
 
     #Non-singlet LO anomalous dimension
     gam0NS = non_singlet_LO(j+1, nf, p) #this function is already numpy compatible
@@ -309,7 +1472,231 @@ def evolop(j: complex, nf: int, p: int, Q: float):
 
     return [evola0NS, evola0] # (N) and (N, 2, 2)
 
-def Moment_Evo(j: complex, nf: int, p: int, Q: float, ConfFlav: np.array) -> np.array:
+# Need Wilson coefficients for evolution. Allows numerical pre-calculation of non-diagonal piece using Mellin-Barnes integral
+
+def CWilson(j: complex) -> complex:
+    return 2 ** (1+j) * gamma(5/2+j) / (gamma(3/2) * gamma(3+j))
+
+def CWilsonT(j: complex, nf: int) -> complex:
+    return np.array([3 * 2 ** (1+j) * gamma(5/2+j) / (gamma(3/2) * gamma(3+j)), 3 * 2 ** (1+j) * gamma(5/2+j) / (gamma(3/2) * gamma(3+j)), 3 * 2 ** (1+j) * gamma(5/2+j) / (gamma(3/2) * gamma(3+j)), 3 * 2 ** (1+j) * gamma(5/2+j) / nf / (gamma(3/2) * gamma(3+j)),  3 * 2 * 2 ** (1+j) * gamma(5/2+j) / (j + 3) / (gamma(3/2) * gamma(3+j))])
+
+def CWilsonT_glue(j: complex, nf: int) -> complex:
+    return np.array([0*j,0*j, 0*j, 0*j, 3 * 2 * 2 ** (1+j) * gamma(5/2+j) / (j + 3) / (gamma(3/2) * gamma(3+j))])
+
+def CWilsonT_quark(j: complex, nf: int) -> complex:
+    return np.array([3 * 2 ** (1+j) * gamma(5/2+j) / (gamma(3/2) * gamma(3+j)), 3 * 2 ** (1+j) * gamma(5/2+j) / (gamma(3/2) * gamma(3+j)), 3 * 2 ** (1+j) * gamma(5/2+j) / (gamma(3/2) * gamma(3+j)), 3 * 2 ** (1+j) * gamma(5/2+j) / nf / (gamma(3/2) * gamma(3+j)),  0*j])
+
+
+'''
+# Not used right now since we are just uding NLO evolution without NLO hard factor and DA corrections. Unifinished for full implementation 
+def evolopNLO(j: complex, nf: int, p: int, Q: float, prty: int = 1, aord: int = 1, pclass: int = 1):
+
+    """GPD evolution operator.
+    Args:
+         m: instance of the model
+         j: MB contour points (overrides m.jpoints)
+         Q2: final evolution momentum squared
+         process_class: DIS, DVCS or DVMP
+    Returns:
+         Array corresponding Eq. (121) of Towards DVCS paper.
+         evolop[k, p, i, j]
+         -  k is index of point on MB contour,
+         -  p is pQCD order (0=LO, 1=NLO)
+         -  i, j in [Q, G]
+    Todo:
+        Argument should not be a process class but GPD vs PDF, or we
+        should avoid it altogether somehow. This serves here only
+        to get the correct choice of evolution scheme (msbar vs csbar).
+    """
+    # 1. Alpha-strong ratio.
+    # When m.p=1 (NLO), LO part of the evolution operator
+    # will still be multiplied by ratio of alpha_strongs
+    # evaluated at NLO, as it should.
+    R = AlphaS(nloop_alphaS, nf, Q)/AlphaS(nloop_alphaS, nf, Init_Scale_Q) # shape N
+    R = np.array(R)
+    b0 = beta0(nf)
+
+    # 2. egeinvalues, projectors, projected mu-indep. part
+    lam, pr = projectors(j+1, nf, p)
+    pproj = amuindep(j, nf, p)
+    
+    # 3. LO errfunc
+    rmu1 = rmudep(nf, lam, lam, Q)
+
+    Rfact = R[...,np.newaxis]**(-lam/b0)  # LO evolution (alpha(mu)/alpha(mu0))^(-gamma/beta0)
+    evola0ab = np.einsum('kaij,ab->kabij', pr,  np.identity(2))
+    evola0 = np.einsum('kabij,kb->kij', evola0ab, Rfact)
+
+ #   if aord == 1:
+ #       # Cf. eq. (124), but with opposite sign, as in gepard-fortran
+ #       evola1ab = - np.einsum('kab,kabij->kabij', rmu1, pproj)
+ #       evola1 = np.einsum('kabij,kb->kij', evola1ab, Rfact)
+ #       # adding non-diagonal evolution when needed or asked for
+ #       # if ((process_class == 'DVMP') or (
+ #       #        process_class == 'DVCS' and m.scheme == 'msbar')):
+ #       if (pclass == 1):
+ #           # FIXME: find a way to do it array-wise i.e. get rid of j_single
+ #           nd = []
+ #           for j_single in j:
+ #               znd, wgnd = quadrature.nd_mellin_barnes()
+ #               ndphij = 1.57j
+ #               ephnd = np.exp(ndphij)
+ #               tginv = ephnd/np.tan(np.pi*znd/2)
+ #               tginvc = ephnd.conjugate()/np.tan(np.pi*znd.conjugate()/2)
+ #               cb1f = cb1(m, Q2, j_single + znd + 2, j_single)
+ #               cb1fc = cb1(m, Q2, j_single + znd.conjugate() + 2, j_single)
+ #               ndint = np.einsum('n,nij,n->ij', wgnd, cb1f, tginv)
+ #               ndint -= np.einsum('n,nij,n->ij', wgnd, cb1fc, tginvc)
+ #               ndint = ndint * 0.25j
+ #               nd.append(ndint)
+ #           evola1 += np.array(nd)
+ #   else:
+ #       evola1 = np.zeros_like(evola0)
+
+ #   evola = np.stack((evola0, evola1), axis=1)
+
+ #   return evola
+    
+    
+    
+    
+    
+    
+ #   return[evolaNS,evola]
+'''
+
+# Modified to use WCs in evolution basis
+
+def Moment_Evo_DVCS(j: complex, nf: int, p: int, Q: float, ConfFlav: np.array) -> np.array:
+    """
+    Evolution of moments in the flavor space 
+
+    Args:
+        uneolved conformal moments in flavor space ConfFlav = [ConfMoment_uV, ConfMoment_ubar, ConfMoment_dV, ConfMoment_dbar, ConfMoment_g] 
+        j: conformal spin j (conformal spin is actually j+2 but anyway): scalar
+        t: momentum transfer squared
+        nf: number of effective fermions; 
+        p (int): 1 for vector-like GPD (Ht, Et), -1 for axial-vector-like GPDs (Ht, Et): array (N,)
+        Q: final evolution scale: array(N,)
+
+    Returns:
+        Evolved conformal moments in flavor space (non-singlet, singlet, gluon)
+
+        return shape (N, 5)
+    """
+
+    # flavor_trans (5, 5) ConfFlav (N, 5)
+
+    # Transform the unevolved moments to evolution basis
+    # ConfEvoBasis = np.einsum('...j,j', flav_trans, ConfFlav) # originally, output will be (5), I want it to be (N, 5)
+    ConfEvoBasis = np.einsum('ij, ...j->...i', flav_trans, ConfFlav) # shape (N, 5)
+
+
+    # Taking the non-singlet and singlet parts of the conformal moments
+    ConfNS = ConfEvoBasis[..., :3] # (N, 3)
+    ConfS = ConfEvoBasis[..., -2:] # (N, 2)
+
+    # Calling evolution mulitiplier
+    [evons, evoa] = evolop(j, nf, p, Q) # (N) and (N, 2, 2)
+    
+    
+
+    # non-singlet part evolves multiplicatively
+   # EvoConfNS = evons[..., np.newaxis] * ConfNS # (N, 3)
+    # singlet part mixes with the gluon
+   # EvoConfS = np.einsum('...ij, ...j->...i', evoa, ConfS) # (N, 2)
+    
+    EvoWCNS = np.einsum('i,i...->i...', CWilson(j), evons)
+    EvoWCS = np.einsum('i,i...->i...', CWilson(j), evoa)
+    
+  #  CWilsonDVCS = CWilson(j)[np.newaxis,...]*np.ones((5,len(j)))
+  #  CWilsonDVCS[-1,...] = 0
+  
+    EvoConfNS = EvoWCNS[...,np.newaxis] * ConfNS
+    EvoConfS = np.einsum('...ij,...j->...i', EvoWCS, ConfS)
+    EvoConf = np.concatenate((EvoConfNS,EvoConfS),axis=-1)
+    EvoConfFlav = np.einsum('...ij,...j->...i', inv_flav_trans, EvoConf)
+    
+    
+    '''
+    # Recombing the non-singlet and singlet parts
+    EvoConf = np.concatenate((EvoConfNS, EvoConfS), axis=-1) # (N, 5)
+    # Combine with Wilson coefficients
+    #print(CWilsonT(j,nf))
+    #print(EvoConf)
+    #print("Wilson coef. shape is %.2f", CWilsonT(j,nf).shape)
+    #print("Conf. Moments shape is %.2f", EvoConf.shape)
+    EvoConfwWC = np.einsum('ji,ij...->ij...',CWilsonDVCS,EvoConf) #(N,5)
+    #print("MB integrand shape is %2f",EvoConfwWC.shape)
+    # Inverse transform the evolved moments back to the flavor basis
+    EvoConfFlav = np.einsum('...ij, ...j->...i', inv_flav_trans, EvoConfwWC) #(N, 5)
+    #print('Wilson co shape is',CWilsonDVCS.shape)
+    #EvoConfFlavwWC = np.einsum('i,i...->i...',CWilson(j),EvoConfFlav)
+    '''
+
+    return EvoConfFlav
+
+def Moment_Evo_0(j: complex, nf: int, p: int, Q: float, ConfFlav: np.array) -> np.array:
+    """
+    Evolution of moments in the flavor space 
+
+    Args:
+        uneolved conformal moments in flavor space ConfFlav = [ConfMoment_uV, ConfMoment_ubar, ConfMoment_dV, ConfMoment_dbar, ConfMoment_g] 
+        j: conformal spin j (conformal spin is actually j+2 but anyway): scalar
+        t: momentum transfer squared
+        nf: number of effective fermions; 
+        p (int): 1 for vector-like GPD (Ht, Et), -1 for axial-vector-like GPDs (Ht, Et): array (N,)
+        Q: final evolution scale: array(N,)
+
+    Returns:
+        Evolved conformal moments in flavor space (non-singlet, singlet, gluon)
+
+        return shape (N, 5)
+    """
+
+    # flavor_trans (5, 5) ConfFlav (N, 5)
+
+    # Transform the unevolved moments to evolution basis
+    # ConfEvoBasis = np.einsum('...j,j', flav_trans, ConfFlav) # originally, output will be (5), I want it to be (N, 5)
+    ConfEvoBasis = np.einsum('ij, ...j->...i', flav_trans, ConfFlav) # shape (N, 5)
+
+
+    # Taking the non-singlet and singlet parts of the conformal moments
+    ConfNS = ConfEvoBasis[..., :3] # (N, 3)
+    ConfS = ConfEvoBasis[..., -2:] # (N, 2)
+
+    # Calling evolution mulitiplier
+    [evons, evoa] = evolop(j, nf, p, Q) # (N) and (N, 2, 2)
+    
+    
+
+    # non-singlet part evolves multiplicatively
+    EvoConfNS = evons[..., np.newaxis] * ConfNS # (N, 3)
+    # singlet part mixes with the gluon
+    EvoConfS = np.einsum('...ij, ...j->...i', evoa, ConfS) # (N, 2)
+    
+    #CWilsonDVCS = CWilson(j)[np.newaxis,...]*np.ones_like(CWilsonT(j,nf))
+    #CWilsonDVCS[-1,...] = 0
+    
+    
+
+    # Recombing the non-singlet and singlet parts
+    EvoConf = np.concatenate((EvoConfNS, EvoConfS), axis=-1) # (N, 5)
+    # Combine with Wilson coefficients
+    #print(CWilsonT(j,nf))
+    #print(EvoConf)
+    #print("Wilson coef. shape is %.2f", CWilsonT(j,nf).shape)
+    #print("Conf. Moments shape is %.2f", EvoConf.shape)
+    EvoConfwWC = CWilson(j)*EvoConf #(N,5)
+    #print("MB integrand shape is %2f",EvoConfwWC.shape)
+    # Inverse transform the evolved moments back to the flavor basis
+    EvoConfFlav = np.einsum('...ij, ...j->...i', inv_flav_trans, EvoConfwWC) #(N, 5)
+    #print('Wilson co shape is',CWilsonDVCS.shape)
+    #EvoConfFlavwWC = np.einsum('i,i...->i...',CWilson(j),EvoConfFlav)
+
+    return EvoConfFlav
+
+def Moment_Evo_old(j: complex, nf: int, p: int, Q: float, ConfFlav: np.array) -> np.array:
     """
     Evolution of moments in the flavor space 
 
@@ -353,19 +1740,12 @@ def Moment_Evo(j: complex, nf: int, p: int, Q: float, ConfFlav: np.array) -> np.
 
     return EvoConfFlav
 
-
-def Coeff_Evo(j: complex, nf: int, p: int, Q: float, CoeffFlav: np.array) -> np.array:
+def Moment_Evo_old_T(j: complex, nf: int, p: int, Q: float, ConfFlav: np.array, muset=1) -> np.array:
     """
-    Evolution of coefficients in the flavor space 
+    Evolution of moments in the flavor space 
 
     Args:
-        uneolved wilson coefficients in flavor space CoeffFlav
-            For the basis, see Moment_Evo function for more details. 
-            NOTE: here, CoeffFlav should have shape (N, n, num_flav).
-                    where num_flav is the number of flavors, and n is some number.
-                    Namely, (N, n, 5)
-                    This is to say, besides N, the CoeffFlav is a matrix.
-                    If your coefficient is not a matrix, you need to cast it to a matrix.
+        uneolved conformal moments in flavor space ConfFlav = [ConfMoment_uV, ConfMoment_ubar, ConfMoment_dV, ConfMoment_dbar, ConfMoment_g] 
         j: conformal spin j (conformal spin is actually j+2 but anyway): scalar
         t: momentum transfer squared
         nf: number of effective fermions; 
@@ -377,39 +1757,121 @@ def Coeff_Evo(j: complex, nf: int, p: int, Q: float, CoeffFlav: np.array) -> np.
 
         return shape (N, 5)
     """
-    CoeffEvoBasis = np.einsum('...ki,ij->...kj', CoeffFlav, inv_flav_trans) #(N, n, 5)
+
+    # flavor_trans (5, 5) ConfFlav (N, 5)
+
+    # Transform the unevolved moments to evolution basis
+    # ConfEvoBasis = np.einsum('...j,j', flav_trans, ConfFlav) # originally, output will be (5), I want it to be (N, 5)
+    ConfEvoBasis = np.einsum('ij, ...j->...i', flav_trans, ConfFlav) # shape (N, 5)
 
 
-    # Taking the non-singlet and singlet parts of the Wilson coefficients
-    CoeffNS = CoeffEvoBasis[..., :3] # (N, n, 3)
-    CoeffS = CoeffEvoBasis[..., -2:] # (N, n, 2)
+    # Taking the non-singlet and singlet parts of the conformal moments
+    ConfNS = ConfEvoBasis[..., :3] # (N, 3)
+    ConfS = ConfEvoBasis[..., -2:] # (N, 2)
 
+    Alphafact = np.array(AlphaS(nloop_alphaS, nf, np.sqrt(muset)*Q)) / np.pi / 2
+    R = AlphaS(nloop_alphaS, nf, np.sqrt(muset)*Q)/AlphaS(nloop_alphaS, nf, Init_Scale_Q) # shape N
+    R = np.array(R)
+ 
+    b0 = beta0(nf)
+    lam, pr = projectors(j+1, nf, p)
+    pproj = amuindep(j, nf, p)
+  
+    rmu1 = rmudep(nf, lam, lam, np.sqrt(muset)*Q)
+  
 
-    # Calling evolution mulitiplier
-    [evons, evoa] = evolop(j, nf, p, Q) # (N) and (N, 2, 2)
+    Rfact = R[...,np.newaxis]**(-lam/b0)  # LO evolution (alpha(mu)/alpha(mu0))^(-gamma/beta0)
+   
+    evola0 = np.einsum('...aij,...a->...ij', pr, Rfact)
+ 
+    gam0NS = non_singlet_LO(j+1, nf, p)
+    evola0NS = R**(-gam0NS/b0)
 
     # non-singlet part evolves multiplicatively
-    EvoCoeffNS = np.einsum('...ij,...->...ij', CoeffNS, evons) # (N, n, 3)
+    EvoConfNS = evola0NS[..., np.newaxis] * ConfNS # (N, 3)
     # singlet part mixes with the gluon
-    EvoCoeffS = np.einsum('...ki,...ij->...kj', CoeffS, evoa) # (N, n, 2)
+    EvoConfS = np.einsum('...ij, ...j->...i', evola0, ConfS) # (N, 2)
+    
+    CWNS = CWilsonT(j, nf)[:3]
+    CWSG = CWilsonT(j,nf)[-2:]
+    
+    EvoNS = np.einsum('i,i->i',CWNS,EvoConfNS)
+    EvoSG = np.einsum('i,i->i',CWSG,EvoConfS)
 
     # Recombing the non-singlet and singlet parts
-    EvoCoeff = np.concatenate((EvoCoeffNS, EvoCoeffS), axis=-1) # (N, n, 5)
-    # Inverse transform the evolved coefficients back to the flavor basis
-    EvoCoeffFlav = np.einsum('...ki, ij->...kj', EvoCoeff, flav_trans) #(N, n, 5)
+    EvoConf = np.concatenate((EvoNS, EvoSG), axis=-1) # (N, 5)
+    # Inverse transform the evolved moments back to the flavor basis
+    EvoConfFlav = np.einsum('...ij, ...j->...i', inv_flav_trans, EvoConf) #(N, 5)
 
-    return EvoCoeffFlav
+    return EvoConfFlav
 
-def CWilson(j: complex) -> complex:
-    return 2 ** (1+j) * gamma(5/2+j) / (gamma(3/2) * gamma(3+j))
-
-def CWilsonT(j: complex, nf: int) -> complex:
-    return np.array([3 * 2 ** (1+j) * gamma(5/2+j) / (gamma(3/2) * gamma(3+j)), 3 * 2 ** (1+j) * gamma(5/2+j) / (gamma(3/2) * gamma(3+j)), 3 * 2 ** (1+j) * gamma(5/2+j) / (gamma(3/2) * gamma(3+j)), 3 * 2 ** (1+j) * gamma(5/2+j) / nf / (gamma(3/2) * gamma(3+j)),  3 * 2 * 2 ** (1+j) * gamma(5/2+j) / (j + 3) / (gamma(3/2) * gamma(3+j))])
-
-
-def Moment_Evo_fast(j: complex, nf: int, p: int, Q: float, ConfFlav: np.array) -> np.array:
+def Moment_Evo_old_GPD(j: complex, nf: int, p: int, Q: float, ConfFlav: np.array, muset=1) -> np.array:
     """
-    Evolution of WCs multiplying conf moments then transformed back into the flavor space 
+    Evolution of moments in the flavor space 
+
+    Args:
+        uneolved conformal moments in flavor space ConfFlav = [ConfMoment_uV, ConfMoment_ubar, ConfMoment_dV, ConfMoment_dbar, ConfMoment_g] 
+        j: conformal spin j (conformal spin is actually j+2 but anyway): scalar
+        t: momentum transfer squared
+        nf: number of effective fermions; 
+        p (int): 1 for vector-like GPD (Ht, Et), -1 for axial-vector-like GPDs (Ht, Et): array (N,)
+        Q: final evolution scale: array(N,)
+
+    Returns:
+        Evolved conformal moments in flavor space (non-singlet, singlet, gluon)
+
+        return shape (N, 5)
+    """
+
+    # flavor_trans (5, 5) ConfFlav (N, 5)
+
+    # Transform the unevolved moments to evolution basis
+    # ConfEvoBasis = np.einsum('...j,j', flav_trans, ConfFlav) # originally, output will be (5), I want it to be (N, 5)
+    ConfEvoBasis = np.einsum('ij, ...j->...i', flav_trans, ConfFlav) # shape (N, 5)
+
+
+    # Taking the non-singlet and singlet parts of the conformal moments
+    ConfNS = ConfEvoBasis[..., :3] # (N, 3)
+    ConfS = ConfEvoBasis[..., -2:] # (N, 2)
+
+    Alphafact = np.array(AlphaS(nloop_alphaS, nf, np.sqrt(muset)*Q)) / np.pi / 2
+    R = AlphaS(nloop_alphaS, nf, np.sqrt(muset)*Q)/AlphaS(nloop_alphaS, nf, Init_Scale_Q) # shape N
+    R = np.array(R)
+ 
+    b0 = beta0(nf)
+    lam, pr = projectors(j+1, nf, p)
+    pproj = amuindep(j, nf, p)
+  
+    rmu1 = rmudep(nf, lam, lam, np.sqrt(muset)*Q)
+  
+
+    Rfact = R[...,np.newaxis]**(-lam/b0)  # LO evolution (alpha(mu)/alpha(mu0))^(-gamma/beta0)
+   
+    evola0 = np.einsum('...aij,...a->...ij', pr, Rfact)
+ 
+    gam0NS = non_singlet_LO(j+1, nf, p)
+    evola0NS = R**(-gam0NS/b0)
+
+    # non-singlet part evolves multiplicatively
+    EvoConfNS = evola0NS[..., np.newaxis] * ConfNS # (N, 3)
+    # singlet part mixes with the gluon
+    EvoConfS = np.einsum('...ij, ...j->...i', evola0, ConfS) # (N, 2)
+    
+    
+    
+    
+
+    # Recombing the non-singlet and singlet parts
+    EvoConf = np.concatenate((EvoConfNS, EvoConfS), axis=-1) # (N, 5)
+    # Inverse transform the evolved moments back to the flavor basis
+    EvoConfFlav = np.einsum('...ij, ...j->...i', inv_flav_trans, EvoConf) #(N, 5)
+
+    return EvoConfFlav
+
+
+def Moment_Evo(j: complex, nf: int, p: int, Q: float, ConfFlav: np.array, muset = 1) -> np.array:
+    """
+    Evolution of moments in the flavor space 
 
     Args:
         uneolved conformal moments in flavor space ConfFlav = [ConfMoment_uV, ConfMoment_ubar, ConfMoment_dV, ConfMoment_dbar, ConfMoment_g] 
@@ -425,31 +1887,48 @@ def Moment_Evo_fast(j: complex, nf: int, p: int, Q: float, ConfFlav: np.array) -
         return shape (N, 5)
     """
     
+    # flavor_trans (5, 5) ConfFlav (N, 5)
+
+    # Transform the unevolved moments to evolution basis
+    # ConfEvoBasis = np.einsum('...j,j', flav_trans, ConfFlav) # originally, output will be (5), I want it to be (N, 5)
     ConfEvoBasis = np.einsum('ij, ...j->...i', flav_trans, ConfFlav) # shape (N, 5)
-    
+
+
     # Taking the non-singlet and singlet parts of the conformal moments
     ConfNS = ConfEvoBasis[..., :3] # (N, 3)
     ConfS = ConfEvoBasis[..., -2:] # (N, 2)
 
     # Calling evolution mulitiplier
-    [evons, evoa] = evolop(j, nf, p, Q) # (N) and (N, 2, 2)
+    [evons, evoa] = evolop(j, nf, p, np.sqrt(muset)*Q) # (N) and (N, 2, 2)
     
-    EvoWCNS = np.einsum('i,i...->i...', CWilson(j), evons)
-    EvoWCS = np.einsum('i,i...->i...', CWilson(j), evoa)
+    
+
+    # non-singlet part evolves multiplicatively
+   # EvoConfNS = evons[..., np.newaxis] * ConfNS # (N, 3)
+    # singlet part mixes with the gluon
+   # EvoConfS = np.einsum('...ij, ...j->...i', evoa, ConfS) # (N, 2)
+    
+    EvoWCNS = np.einsum('i...,...->...i',CWilsonT(j,nf)[:3,...],evons)
+    EvoWCS = np.einsum('ik,kij->kij', CWilsonT(j,nf)[-2:,...], evoa)
+    
+  #  CWilsonDVCS = CWilson(j)[np.newaxis,...]*np.ones((5,len(j)))
+  #  CWilsonDVCS[-1,...] = 0
   
-    EvoConfNS = EvoWCNS[...,np.newaxis] * ConfNS
-    EvoConfS = np.einsum('...ij,...j->...i', EvoWCS, ConfS)
+    EvoConfNS = np.einsum('...j,...j->...j',EvoWCNS, ConfNS)
+    EvoConfS = np.einsum('kij,kj->ki', EvoWCS, ConfS)
+    #print(EvoConfNS.shape)
+    #print(EvoConfS.shape)
     EvoConf = np.concatenate((EvoConfNS,EvoConfS),axis=-1)
     EvoConfFlav = np.einsum('...ij,...j->...i', inv_flav_trans, EvoConf)
     
-    return EvoConfFlav
-
-def Moment_Evo_0(j: complex, nf: int, p: int, Q: float, ConfFlav: np.array) -> np.array:
-    """
-    j = 0 pole piece, should find a less cumbersome way to handle this
-    """
     
+    '''
+    # flavor_trans (5, 5) ConfFlav (N, 5)
+
+    # Transform the unevolved moments to evolution basis
+    # ConfEvoBasis = np.einsum('...j,j', flav_trans, ConfFlav) # originally, output will be (5), I want it to be (N, 5)
     ConfEvoBasis = np.einsum('ij, ...j->...i', flav_trans, ConfFlav) # shape (N, 5)
+
 
     # Taking the non-singlet and singlet parts of the conformal moments
     ConfNS = ConfEvoBasis[..., :3] # (N, 3)
@@ -458,10 +1937,13 @@ def Moment_Evo_0(j: complex, nf: int, p: int, Q: float, ConfFlav: np.array) -> n
     # Calling evolution mulitiplier
     [evons, evoa] = evolop(j, nf, p, Q) # (N) and (N, 2, 2)
     
+    
+
     # non-singlet part evolves multiplicatively
     EvoConfNS = evons[..., np.newaxis] * ConfNS # (N, 3)
     # singlet part mixes with the gluon
     EvoConfS = np.einsum('...ij, ...j->...i', evoa, ConfS) # (N, 2)
+    
     
 
     # Recombing the non-singlet and singlet parts
@@ -471,11 +1953,2890 @@ def Moment_Evo_0(j: complex, nf: int, p: int, Q: float, ConfFlav: np.array) -> n
     #print(EvoConf)
     #print("Wilson coef. shape is %.2f", CWilsonT(j,nf).shape)
     #print("Conf. Moments shape is %.2f", EvoConf.shape)
-    EvoConfwWC = CWilson(j)*EvoConf #(N,5)
+    EvoConfwWC = np.einsum('j...,...j->...j',CWilsonT(j, nf),EvoConf) #(N,5)
     #print("MB integrand shape is %2f",EvoConfwWC.shape)
     # Inverse transform the evolved moments back to the flavor basis
     EvoConfFlav = np.einsum('...ij, ...j->...i', inv_flav_trans, EvoConfwWC) #(N, 5)
-    #print('Wilson co shape is',CWilsonDVCS.shape)
-    #EvoConfFlavwWC = np.einsum('i,i...->i...',CWilson(j),EvoConfFlav)
+    '''
 
     return EvoConfFlav
+
+#NLO moment evo for NLO evolution only, no hard factor / DA corrections
+
+def WilsonT_NLO_test(j: complex, k: complex):
+    
+    Q = 1
+    mufact = Q**2
+    mures = Q**2
+    
+    CGNC = ((-np.log(Q**2 / mufact) + S1(j+1) + 3*S1(k+1)/2 + 0.5 + 1/(j+1)/(j+2))*(4*S1(j+1) + 4/(j+1)/(j+2) - 12/j/(j+3)) * 0.5 - (3 * (2*S1(j+1) + S1(k+1) - 6) / j / (j+3)) + (8 + 4*np.pi**2 / 6 - (k+1)*(k+2)*delS2((k+1)/2))/8 - delS2((j+1)/2)/2 - (10*(j+1)*(j+2) + 4)/(j+1)**2 / (j+2)**2 - (delS2((j+1)/2) / 2 / (k+1) / (k+2) - (k-1)*deldelS2((j+1)/2,k/2)/(2*k+3) + (k+4)*deldelS2((j+1)/2,(k+2)/2)/(2*k+3))*k*(k+1)*(k+2)*(k+3)/4 + ((k+1)*(k+2)*S1(k+1)-2)/(j+1)/(j+2)/(k+1)/(k+2))
+    
+    CGCF = ((-np.log(Q**2 / mufact) + S1(j+1) + S1(k+1) - 3/4 - 1/2/(k+1)/(k+2) - 1/(j+1)/(j+2))*(4*S1(k+1) - 3 - 2/(k+1)/(k+2))/2 + (-np.log(Q**2 / mufact) + 1 + 3*S1(j+1) - 0.5 + (2*S1(j+1)-1)/(k+1)/(k+2) -1/(j+1)/(j+2))*(-(4+2*(j+1)*(j+2))/(j+1)/(j+2)/(j+3))*(j+3)/4 - (35 - ((k+1)*(k+2) + 2)*delS2((k+1)/2) - 4/(k+1)**2/(k+2)**2)/8 + (((k+1)*(k+2) + 2)*S1(j+1)/(k+1)/(k+2) +1)/(j+1)/(j+2) + (delS2((j+1)/2)/2/(k+1)/(k+2) - ((k-1)*k*deldelS2((j+1)/2,k/2) - (k+3)*(k+4)*deldelS2((j+1)/2,(k+2)/2))/2/(2*k+3))*((k+1)*(k+2)*((k+1)*(k+2) +2)/4) - ((k+1)*(k+2) + 2)/2/(j+1)/(j+2)/(k+1)/(k+2))
+    
+    return NC*CGNC + CF*CGCF
+    
+def WilsonT_NLO(j: complex, k: complex, nf: int, Q: float, muset: float):
+    'NLO Wilson coefficients for gluons, currently setting factorization scale and renormalization scale equal to Q^2'
+    
+    mufact = muset*Q**2
+    mures = muset*Q**2
+    muphi = muset*Q**2
+    
+   # CQCF = (-np.log(Q**2/mufact) + S1(j+1) + S1(k + 1) - 1 - 1/2/(j+1)/(j+2) - 1/2/(k+1)/(k+2))*(4*S1(j+1) - 3 - 2/(j+1)/(j+2))/2 + (-np.log(Q**2/muphi) + S1(k+1) + S1(j + 1) - 1 - 1/2/(k+1)/(k+2) - 1/2/(j+1)/(j+2))*(4*S1(k+1) - 3 - 2/(k+1)/(k+2))/2 - 23/3 + (3*(j+1)*(j+2)+1)/2/(j+1)**2/(j+2)**2 + (3*(k+1)*(k+2)+1)/2/(k+1)**2/(k+2)**2
+    
+   # CQCG = (2*S1(j+2) - 1/(j+1)/(j+2))*(1 + (-1)**k - (-1)**k * (k+1)*(k+2)*Delta_S2((k+1)/2)/2) + (2*S1(k+2) - 1/(k+1)/(k+2))*(1 + (-1) - (-1) * (j+1)*(j+2)*Delta_S2((j+1)/2)/2) + np.pi**2 / 3 - 7/3 + ((-1)**k * Script_S3(k+1) + (-1)**k * Delta_S2((k+1)/2) / 2 / (k+1) / (k+2) - S3(k+1) + zeta(3) - ((k+1)*(k+2)-1)/2/(k+1)**2/(k+2)**2)*2*(k+1)*(k+2) + ((-1) * Script_S3(j+1) + (-1) * Delta_S2((j+1)/2) / 2 / (j+1) / (j+2) - S3(j+1) + zeta(3) - ((j+1)*(j+2)-1)/2/(j+1)**2/(j+2)**2)*2*(j+1)*(j+2) - 2*(1+(-1)**k)*((k+1)*(k+2)+1)/(k+1)**2/(k+2)**2 - 2*(1+(-1))*((j+1)*(j+2)+1)/(j+1)**2/(j+2)**2 - 2*(-1)**(1+k)/(j+1)/(j+2)/(k+1)/(k+2) + 2*(j-k)*(j+k+3)*(S3(j+1) - zeta(3) + (-1)**k *(k+1)*DDelta_S2((j+1)/2,(k+1)/2)/2 - lsum(j,k)) + 2*(k-j)*(j+k+3)*(-1) * (Script_S3(j+1) - S1(k+1)*Delta_S2((j+1)/2)/2 - lsumrev(j,k)) + ((-1)**k *(k+1)*(k+2)/2)*sum((-1)**b * (2*k + 3*b) * (4 + 3*b*(3-b) + 2*k*b + 2*(k+1)**2)*DDelta_S2((j+1)/2,(k+b)/2)/(3 + (-1)**b)/(2*k + 3) for b in range(3)) - ((-1) * (k+1)*(k+2) / 2)*sum((2*k + 3*b) * (4 + 3*b*(3-b) + 2*k*b + 2*(k+1)**2)*DDelta_S2((j+1)/2,(k+b)/2)/(3 + (-1)**b)/(2*k + 3) for b in range(3)) + ((-1)**k *((j+1)*(j+2) - 1)*((k+1)*(k+2)*Delta_S2((k+1)/2) - 2)/2/(j+1)/(j+2)) - 2*(-1)**k / (j+1) / (j+2) / (k+1) / (k+2) - ((k+1)**2 + 2 +(j+1)*(j+2)/(k+1)/(k+2))*((-1) * Delta_S2((j+1)/2)/2) - ((-1) * (k+1) * Delta_S2((k+1)/2) / 2) + ((-1))/(k+1)/(k+2)
+    
+   # CQBeta = np.log(Q**2/mures)/4 - S1(j+1) - S1(k+1) -5/6 + 1/2/(j+1)/(j+2) + 1/2/(k+1)/(k+2)
+   
+    ptyk = 1
+    sgntr = 1
+    
+    
+    MCQ1CF = -np.log(Q**2 / mufact)-23/3+(0.5*(1.+3.*(1.+j)*(2.+j)))/((
+             1 + j)**2*(2.+j)**2)+(0.5*(1.+3.*(1.+k)*(2.+k)))/((1.+k)**2
+             *(2.+k)**2)+0.5*(-3.-2./((1.+j)*(2.+j))+4.*S1(1.+j))*((-
+             0.5*(1.+(1.+j)*(2.+j)))/((1.+j)*(2.+j))-(0.5*(1.+(1.+k)*(
+             2.+k)))/((1.+k)*(2.+k))-0.+S1(1.+j)+S1(1.+k))+0.5 * \
+             ((-0.5*(1.+(1.+j)*(2.+j)))/((1.+j)*(2.+j))-(0.5*(1.+(1.+k
+             )*(2.+k)))/((1.+k)*(2.+k))-0.+S1(1.+j)+S1(1.+k))*(-
+             3.-2./((1.+k)*(2.+k))+4.*S1(1.+k))
+
+    MCQ1BET0 = np.log(Q**2/mures)/4-5/6+0.5/((1.+j)*(2.+j))+0.5/((
+               1 + k)*(2.+k))+0.5*0.-S1(1.+j)-S1(1.+k)
+
+    SUMA = 0j
+    SUMB = 0j
+
+    for LI in range(0, 1):
+        SUMANDB = (0.125*(1.+2.*LI)*(S2(0.5*(1.+j))-S2(-0.5+0.5*(
+           1.+j))+S2(-0.5+0.5*LI)-S2(0.5*LI)))/((0.5*(1.+j)-0.5*LI)*(2.+j+LI))
+        SUMB += SUMANDB
+        SUMA += (-1)**LI * SUMANDB
+
+    DELc1aGJK = (-2.*ptyk)/((1.+j)*(2.+j)*(1.+k)*(2.+k))+(0.5
+       *(-1.+(1.+j)*(2.+j))*(-2.+(1.+k)*(2.+k)*(S2(0.5*(1.+k)) -
+       S2(-0.5+0.5*(1.+k))))*ptyk)/((1.+j)*(2.+j))+(1.+k)*(2.
+       +k)*(2.+0.5*(1.+k)*(2.+k))*((0.25*k*(2.+(1.+k)**2)*(S2(
+       0.5*(1.+j))-S2(-0.5+0.5*(1.+j))+S2(-0.5+0.5*k)-S2(0.5*k
+       )))/((0.5*(1.+j)-0.5*k)*(2.+j+k)*(3.+2.*k)*(4.+(1.+k)*(2.
+       +k)))-(0.25*(S2(0.5*(1.+j))-S2(-0.5+0.5*(1.+j))-S2(0.5
+       *(1.+k))+S2(-0.5+0.5*(1.+k))))/((0.5*(1.+j)+0.5*(-1.-k))
+       *(3.+j+k))+(0.25*(3.+k)*(2.+(2.+k)**2)*(S2(0.5*(1.+j)) -
+       S2(-0.5+0.5*(1.+j))-S2(0.5*(2.+k))+S2(-0.5+0.5*(2.+k)))
+       )/((0.5*(1.+j)+0.5*(-2.-k))*(4.+j+k)*(3.+2.*k)*(4.+(1.+k)
+       *(2.+k))))*ptyk+2.*(j-k)*(3.+j+k)*(-SUMA-zeta(3)+S3(1.+j
+       )+(0.125*(1.+k)*(S2(0.5*(1.+j))-S2(-0.5+0.5*(1.+j))-S2
+       (0.5*(1.+k))+S2(-0.5+0.5*(1.+k)))*ptyk)/((0.5*(1.+j)+0.5
+       *(-1.-k))*(3.+j+k)))
+
+    DELc1bGKJ = 1/((1.+k)*(2.+k))+0.5*(-2.-(1.+k)**2-((1.+j)*(2
+       +j))/((1.+k)*(2.+k)))*(S2(0.5*(1.+j))-S2(-0.5+0.5*(1. +
+       j)))-0.5*(1.+k)*(S2(0.5*(1.+k))-S2(-0.5+0.5*(1.+k)))-(0.125
+       *(1.+k)*(2.+k)*(4.+(1.+k)*(2.+k))*(S2(0.5*(1.+j)) -
+       S2(-0.5+0.5*(1.+j))-S2(0.5*(1.+k))+S2(-0.5+0.5*(1.+k)))) \
+       / ((0.5*(1.+j)+0.5*(-1.-k))*(3.+j+k))-(0.5*(1.+k)*(2.+k)*(
+          (0.25*k*(2.+(1.+k)**2)*(S2(0.5*(1.+j))-S2(-0.5+0.5*(1. +
+       j))+S2(-0.5+0.5*k)-S2(0.5*k)))/((0.5*(1.+j)-0.5*k)*(2. +
+       j+k))+(0.25*(3.+k)*(2.+(2.+k)**2)*(S2(0.5*(1.+j))-S2(-0.5
+       +0.5*(1.+j))-S2(0.5*(2.+k))+S2(-0.5+0.5*(2.+k))))/((0.5
+       *(1.+j)+0.5*(-2.-k))*(4.+j+k))))/(3.+2.*k)+2.*(-j+k)*(3
+       +j+k)*(-SUMB-0.5*S1(1.+k)*(S2(0.5*(1.+j))-S2(-0.5+0.5
+       *(1.+j)))+SB3(1+j))
+
+    MCQ1CG = 0.9565348003631189+DELc1aGJK-(2.*(1.+(1.+j)*(2.+j)
+       )*(1.-sgntr))/((1.+j)**2*(2.+j)**2)-DELc1bGKJ*sgntr+(-(1 /
+       ((1.+k)*(2.+k)))+2.*S1(1.+k))*(1.-sgntr+0.5*(1.+j)*(2.+j
+       )*sgntr*(-S2(0.5*j)+S2(0.5*(1.+j)))) + (2.*sgntr*ptyk)/(
+               (1.+j)*(2.+j)*(1.+k)*(2.+k))-(
+               2.*(1.+(1.+k)*(2.+k))*(1.+
+       ptyk))/((1.+k)**2*(2.+k)**2)+(-(1/((1.+j)*(2.+j))) +
+       2*S1(1.+j))*(1.+ptyk-0.5*(1.+k)*(2.+k)*(-S2(0.5*k) +
+       S2(0.5*(1.+k)))*ptyk)+2.*(1.+j)*(2.+j)*((-0.5*(-1.+(1.+j)*(
+       2.+j)))/((1.+j)**2*(2.+j)**2)+zeta(3)-(0.5*sgntr*(-S2(0.5 *
+       j)+S2(0.5*(1.+j))))/((1.+j)*(2.+j))-S3(1.+j)-sgntr*SB3(
+       1+j))+2.*(1.+k)*(2.+k)*((-0.5*(-1.+(1.+k)*(2.+k)))/((1. +
+       k)**2*(2.+k)**2)+zeta(3)-S3(1.+k)+(0.5*(-S2(0.5*k) +
+           S2(0.5*(1.+k)))*ptyk)/((1.+k)*(2.+k))+ptyk*SB3(1+k))
+
+    CQNS = AlphaS(nloop_alphaS, nf, Init_Scale_Q) / 2 / np.pi * (CF * MCQ1CF + (CF - NC/2) * MCQ1CG + beta0(nf) * MCQ1BET0)
+    
+    
+    CQPS = AlphaS(nloop_alphaS, nf, Init_Scale_Q) / 2 / np.pi * ((-np.log(Q**2/mufact) - 1 + 2*S1(j+1) + 2*S1(k+1) - 1)*(-2*(4 + 3*j + j**2)/j/(j+1)/(j+2)/(j+3)) - (1/2 + 1/(j+1)/(j+2) + 1/(k+1)/(k+2))*2/(j+1)/(j+2) + k*(k+1)*(k+2)*(k+3)*(deldelS2((j+1)/2,k/1) - deldelS2((j+1)/2,(k+1)/2))/2/(2*k+3) )
+    
+    CGNC =  AlphaS(nloop_alphaS, nf, Init_Scale_Q) / 2 / np.pi * ((-np.log(Q**2 / mufact) + S1(j+1) + 3*S1(k+1)/2 + 0.5 + 1/(j+1)/(j+2))*(4*S1(j+1) + 4/(j+1)/(j+2) - 12/j/(j+3)) * 0.5 - (3 * (2*S1(j+1) + S1(k+1) - 6) / j / (j+3)) + (8 + 4*np.pi**2 / 6 - (k+1)*(k+2)*delS2((k+1)/2))/8 - delS2((j+1)/2)/2 - (10*(j+1)*(j+2) + 4)/(j+1)**2 / (j+2)**2 - (delS2((j+1)/2) / 2 / (k+1) / (k+2) - (k-1)*deldelS2((j+1)/2,k/2)/(2*k+3) + (k+4)*deldelS2((j+1)/2,(k+2)/2)/(2*k+3))*k*(k+1)*(k+2)*(k+3)/4 + ((k+1)*(k+2)*S1(k+1)-2)/(j+1)/(j+2)/(k+1)/(k+2))
+    
+    CGCF = AlphaS(nloop_alphaS, nf, Init_Scale_Q) / 2 / np.pi * ((-np.log(Q**2 / muphi) + S1(j+1) + S1(k+1) - 3/4 - 1/2/(k+1)/(k+2) - 1/(j+1)/(j+2))*(4*S1(k+1) - 3 - 2/(k+1)/(k+2))/2 + (-np.log(Q**2 / mufact) + 1 + 3*S1(j+1) - 0.5 + (2*S1(j+1)-1)/(k+1)/(k+2) -1/(j+1)/(j+2))*(-(4+2*(j+1)*(j+2))/(j+1)/(j+2)/(j+3))*(j+3)/4 - (35 - ((k+1)*(k+2) + 2)*delS2((k+1)/2) - 4/(k+1)**2/(k+2)**2)/8 + (((k+1)*(k+2) + 2)*S1(j+1)/(k+1)/(k+2) +1)/(j+1)/(j+2) + (delS2((j+1)/2)/2/(k+1)/(k+2) - ((k-1)*k*deldelS2((j+1)/2,k/2) - (k+3)*(k+4)*deldelS2((j+1)/2,(k+2)/2))/2/(2*k+3))*((k+1)*(k+2)*((k+1)*(k+2) +2)/4) - ((k+1)*(k+2) + 2)/2/(j+1)/(j+2)/(k+1)/(k+2))
+    
+    # Without sea quarks
+    #return np.array([0*j, 0*j, 0*j, 0*j, 3 * 2 * 2 ** (1+j) * gamma(5/2+j) / (j + 3) / (gamma(3/2) * gamma(3+j)) * (NC*CGNC + CF*CGCF)],dtype=complex) #+ beta0(nf)*np.log(mufacf/mures)
+    
+    # With sea quarks
+    return np.array([0*j, 0*j, 0*j,CQNS*(3 * 2 ** (1+j) * gamma(5/2+j) / (gamma(3/2) * gamma(3+j)))/nf + CQPS * (3 * 2 ** (1+j) * gamma(5/2+j) / (gamma(3/2) * gamma(3+j))), 3 * 2 * 2 ** (1+j) * gamma(5/2+j) / (j + 3) / (gamma(3/2) * gamma(3+j)) * (NC*CGNC + CF*CGCF + beta0(nf)*np.log(mufact/mures)/2)],dtype=complex) #+ beta0(nf)*np.log(mufact/mures)
+
+def WilsonT_NLO_quark(j: complex, k: complex, nf: int, Q: float, muset: float):
+    'NLO Wilson coefficients for gluons, currently setting factorization scale and renormalization scale equal to Q^2'
+    
+    mufact = muset*Q**2
+    mures = muset*Q**2
+    muphi = muset*Q**2
+    
+   # CQCF = (-np.log(Q**2/mufact) + S1(j+1) + S1(k + 1) - 1 - 1/2/(j+1)/(j+2) - 1/2/(k+1)/(k+2))*(4*S1(j+1) - 3 - 2/(j+1)/(j+2))/2 + (-np.log(Q**2/muphi) + S1(k+1) + S1(j + 1) - 1 - 1/2/(k+1)/(k+2) - 1/2/(j+1)/(j+2))*(4*S1(k+1) - 3 - 2/(k+1)/(k+2))/2 - 23/3 + (3*(j+1)*(j+2)+1)/2/(j+1)**2/(j+2)**2 + (3*(k+1)*(k+2)+1)/2/(k+1)**2/(k+2)**2
+    
+   # CQCG = (2*S1(j+2) - 1/(j+1)/(j+2))*(1 + (-1)**k - (-1)**k * (k+1)*(k+2)*Delta_S2((k+1)/2)/2) + (2*S1(k+2) - 1/(k+1)/(k+2))*(1 + (-1) - (-1) * (j+1)*(j+2)*Delta_S2((j+1)/2)/2) + np.pi**2 / 3 - 7/3 + ((-1)**k * Script_S3(k+1) + (-1)**k * Delta_S2((k+1)/2) / 2 / (k+1) / (k+2) - S3(k+1) + zeta(3) - ((k+1)*(k+2)-1)/2/(k+1)**2/(k+2)**2)*2*(k+1)*(k+2) + ((-1) * Script_S3(j+1) + (-1) * Delta_S2((j+1)/2) / 2 / (j+1) / (j+2) - S3(j+1) + zeta(3) - ((j+1)*(j+2)-1)/2/(j+1)**2/(j+2)**2)*2*(j+1)*(j+2) - 2*(1+(-1)**k)*((k+1)*(k+2)+1)/(k+1)**2/(k+2)**2 - 2*(1+(-1))*((j+1)*(j+2)+1)/(j+1)**2/(j+2)**2 - 2*(-1)**(1+k)/(j+1)/(j+2)/(k+1)/(k+2) + 2*(j-k)*(j+k+3)*(S3(j+1) - zeta(3) + (-1)**k *(k+1)*DDelta_S2((j+1)/2,(k+1)/2)/2 - lsum(j,k)) + 2*(k-j)*(j+k+3)*(-1) * (Script_S3(j+1) - S1(k+1)*Delta_S2((j+1)/2)/2 - lsumrev(j,k)) + ((-1)**k *(k+1)*(k+2)/2)*sum((-1)**b * (2*k + 3*b) * (4 + 3*b*(3-b) + 2*k*b + 2*(k+1)**2)*DDelta_S2((j+1)/2,(k+b)/2)/(3 + (-1)**b)/(2*k + 3) for b in range(3)) - ((-1) * (k+1)*(k+2) / 2)*sum((2*k + 3*b) * (4 + 3*b*(3-b) + 2*k*b + 2*(k+1)**2)*DDelta_S2((j+1)/2,(k+b)/2)/(3 + (-1)**b)/(2*k + 3) for b in range(3)) + ((-1)**k *((j+1)*(j+2) - 1)*((k+1)*(k+2)*Delta_S2((k+1)/2) - 2)/2/(j+1)/(j+2)) - 2*(-1)**k / (j+1) / (j+2) / (k+1) / (k+2) - ((k+1)**2 + 2 +(j+1)*(j+2)/(k+1)/(k+2))*((-1) * Delta_S2((j+1)/2)/2) - ((-1) * (k+1) * Delta_S2((k+1)/2) / 2) + ((-1))/(k+1)/(k+2)
+    
+   # CQBeta = np.log(Q**2/mures)/4 - S1(j+1) - S1(k+1) -5/6 + 1/2/(j+1)/(j+2) + 1/2/(k+1)/(k+2)
+   
+    ptyk = 1
+    sgntr = 1
+    
+    
+    MCQ1CF = -np.log(Q**2 / mufact)-23/3+(0.5*(1.+3.*(1.+j)*(2.+j)))/((
+             1 + j)**2*(2.+j)**2)+(0.5*(1.+3.*(1.+k)*(2.+k)))/((1.+k)**2
+             *(2.+k)**2)+0.5*(-3.-2./((1.+j)*(2.+j))+4.*S1(1.+j))*((-
+             0.5*(1.+(1.+j)*(2.+j)))/((1.+j)*(2.+j))-(0.5*(1.+(1.+k)*(
+             2.+k)))/((1.+k)*(2.+k))-0.+S1(1.+j)+S1(1.+k))+0.5 * \
+             ((-0.5*(1.+(1.+j)*(2.+j)))/((1.+j)*(2.+j))-(0.5*(1.+(1.+k
+             )*(2.+k)))/((1.+k)*(2.+k))-0.+S1(1.+j)+S1(1.+k))*(-
+             3.-2./((1.+k)*(2.+k))+4.*S1(1.+k))
+
+    MCQ1BET0 = np.log(Q**2/mures)/4-5/6+0.5/((1.+j)*(2.+j))+0.5/((
+               1 + k)*(2.+k))+0.5*0.-S1(1.+j)-S1(1.+k)
+
+    SUMA = 0j
+    SUMB = 0j
+
+    for LI in range(0, 1):
+        SUMANDB = (0.125*(1.+2.*LI)*(S2(0.5*(1.+j))-S2(-0.5+0.5*(
+           1.+j))+S2(-0.5+0.5*LI)-S2(0.5*LI)))/((0.5*(1.+j)-0.5*LI)*(2.+j+LI))
+        SUMB += SUMANDB
+        SUMA += (-1)**LI * SUMANDB
+
+    DELc1aGJK = (-2.*ptyk)/((1.+j)*(2.+j)*(1.+k)*(2.+k))+(0.5
+       *(-1.+(1.+j)*(2.+j))*(-2.+(1.+k)*(2.+k)*(S2(0.5*(1.+k)) -
+       S2(-0.5+0.5*(1.+k))))*ptyk)/((1.+j)*(2.+j))+(1.+k)*(2.
+       +k)*(2.+0.5*(1.+k)*(2.+k))*((0.25*k*(2.+(1.+k)**2)*(S2(
+       0.5*(1.+j))-S2(-0.5+0.5*(1.+j))+S2(-0.5+0.5*k)-S2(0.5*k
+       )))/((0.5*(1.+j)-0.5*k)*(2.+j+k)*(3.+2.*k)*(4.+(1.+k)*(2.
+       +k)))-(0.25*(S2(0.5*(1.+j))-S2(-0.5+0.5*(1.+j))-S2(0.5
+       *(1.+k))+S2(-0.5+0.5*(1.+k))))/((0.5*(1.+j)+0.5*(-1.-k))
+       *(3.+j+k))+(0.25*(3.+k)*(2.+(2.+k)**2)*(S2(0.5*(1.+j)) -
+       S2(-0.5+0.5*(1.+j))-S2(0.5*(2.+k))+S2(-0.5+0.5*(2.+k)))
+       )/((0.5*(1.+j)+0.5*(-2.-k))*(4.+j+k)*(3.+2.*k)*(4.+(1.+k)
+       *(2.+k))))*ptyk+2.*(j-k)*(3.+j+k)*(-SUMA-zeta(3)+S3(1.+j
+       )+(0.125*(1.+k)*(S2(0.5*(1.+j))-S2(-0.5+0.5*(1.+j))-S2
+       (0.5*(1.+k))+S2(-0.5+0.5*(1.+k)))*ptyk)/((0.5*(1.+j)+0.5
+       *(-1.-k))*(3.+j+k)))
+
+    DELc1bGKJ = 1/((1.+k)*(2.+k))+0.5*(-2.-(1.+k)**2-((1.+j)*(2
+       +j))/((1.+k)*(2.+k)))*(S2(0.5*(1.+j))-S2(-0.5+0.5*(1. +
+       j)))-0.5*(1.+k)*(S2(0.5*(1.+k))-S2(-0.5+0.5*(1.+k)))-(0.125
+       *(1.+k)*(2.+k)*(4.+(1.+k)*(2.+k))*(S2(0.5*(1.+j)) -
+       S2(-0.5+0.5*(1.+j))-S2(0.5*(1.+k))+S2(-0.5+0.5*(1.+k)))) \
+       / ((0.5*(1.+j)+0.5*(-1.-k))*(3.+j+k))-(0.5*(1.+k)*(2.+k)*(
+          (0.25*k*(2.+(1.+k)**2)*(S2(0.5*(1.+j))-S2(-0.5+0.5*(1. +
+       j))+S2(-0.5+0.5*k)-S2(0.5*k)))/((0.5*(1.+j)-0.5*k)*(2. +
+       j+k))+(0.25*(3.+k)*(2.+(2.+k)**2)*(S2(0.5*(1.+j))-S2(-0.5
+       +0.5*(1.+j))-S2(0.5*(2.+k))+S2(-0.5+0.5*(2.+k))))/((0.5
+       *(1.+j)+0.5*(-2.-k))*(4.+j+k))))/(3.+2.*k)+2.*(-j+k)*(3
+       +j+k)*(-SUMB-0.5*S1(1.+k)*(S2(0.5*(1.+j))-S2(-0.5+0.5
+       *(1.+j)))+SB3(1+j))
+
+    MCQ1CG = 0.9565348003631189+DELc1aGJK-(2.*(1.+(1.+j)*(2.+j)
+       )*(1.-sgntr))/((1.+j)**2*(2.+j)**2)-DELc1bGKJ*sgntr+(-(1 /
+       ((1.+k)*(2.+k)))+2.*S1(1.+k))*(1.-sgntr+0.5*(1.+j)*(2.+j
+       )*sgntr*(-S2(0.5*j)+S2(0.5*(1.+j)))) + (2.*sgntr*ptyk)/(
+               (1.+j)*(2.+j)*(1.+k)*(2.+k))-(
+               2.*(1.+(1.+k)*(2.+k))*(1.+
+       ptyk))/((1.+k)**2*(2.+k)**2)+(-(1/((1.+j)*(2.+j))) +
+       2*S1(1.+j))*(1.+ptyk-0.5*(1.+k)*(2.+k)*(-S2(0.5*k) +
+       S2(0.5*(1.+k)))*ptyk)+2.*(1.+j)*(2.+j)*((-0.5*(-1.+(1.+j)*(
+       2.+j)))/((1.+j)**2*(2.+j)**2)+zeta(3)-(0.5*sgntr*(-S2(0.5 *
+       j)+S2(0.5*(1.+j))))/((1.+j)*(2.+j))-S3(1.+j)-sgntr*SB3(
+       1+j))+2.*(1.+k)*(2.+k)*((-0.5*(-1.+(1.+k)*(2.+k)))/((1. +
+       k)**2*(2.+k)**2)+zeta(3)-S3(1.+k)+(0.5*(-S2(0.5*k) +
+           S2(0.5*(1.+k)))*ptyk)/((1.+k)*(2.+k))+ptyk*SB3(1+k))
+
+    CQNS = AlphaS(nloop_alphaS, nf, Init_Scale_Q) / 2 / np.pi * (CF * MCQ1CF + (CF - NC/2) * MCQ1CG + beta0(nf) * MCQ1BET0)
+    
+    
+    CQPS = AlphaS(nloop_alphaS, nf, Init_Scale_Q) / 2 / np.pi * ((-np.log(Q**2/mufact) - 1 + 2*S1(j+1) + 2*S1(k+1) - 1)*(-2*(4 + 3*j + j**2)/j/(j+1)/(j+2)/(j+3)) - (1/2 + 1/(j+1)/(j+2) + 1/(k+1)/(k+2))*2/(j+1)/(j+2) + k*(k+1)*(k+2)*(k+3)*(deldelS2((j+1)/2,k/1) - deldelS2((j+1)/2,(k+1)/2))/2/(2*k+3) )
+    
+    
+    # Only sea quarks
+    return np.array([0*j, 0*j, 0*j,CQNS*(3 * 2 ** (1+j) * gamma(5/2+j) / (gamma(3/2) * gamma(3+j)))/nf + CQPS * (3 * 2 ** (1+j) * gamma(5/2+j) / (gamma(3/2) * gamma(3+j))), 0*j],dtype=complex) #+ beta0(nf)*np.log(mufact/mures)
+
+def WilsonT_NLO_glue(j: complex, k: complex, nf: int, Q: float, muset: float):
+    'NLO Wilson coefficients for gluons, currently setting factorization scale and renormalization scale equal to Q^2'
+    
+    mufact = muset*Q**2
+    mures = muset*Q**2
+    muphi = muset*Q**2
+    
+   # CQCF = (-np.log(Q**2/mufact) + S1(j+1) + S1(k + 1) - 1 - 1/2/(j+1)/(j+2) - 1/2/(k+1)/(k+2))*(4*S1(j+1) - 3 - 2/(j+1)/(j+2))/2 + (-np.log(Q**2/muphi) + S1(k+1) + S1(j + 1) - 1 - 1/2/(k+1)/(k+2) - 1/2/(j+1)/(j+2))*(4*S1(k+1) - 3 - 2/(k+1)/(k+2))/2 - 23/3 + (3*(j+1)*(j+2)+1)/2/(j+1)**2/(j+2)**2 + (3*(k+1)*(k+2)+1)/2/(k+1)**2/(k+2)**2
+    
+   # CQCG = (2*S1(j+2) - 1/(j+1)/(j+2))*(1 + (-1)**k - (-1)**k * (k+1)*(k+2)*Delta_S2((k+1)/2)/2) + (2*S1(k+2) - 1/(k+1)/(k+2))*(1 + (-1) - (-1) * (j+1)*(j+2)*Delta_S2((j+1)/2)/2) + np.pi**2 / 3 - 7/3 + ((-1)**k * Script_S3(k+1) + (-1)**k * Delta_S2((k+1)/2) / 2 / (k+1) / (k+2) - S3(k+1) + zeta(3) - ((k+1)*(k+2)-1)/2/(k+1)**2/(k+2)**2)*2*(k+1)*(k+2) + ((-1) * Script_S3(j+1) + (-1) * Delta_S2((j+1)/2) / 2 / (j+1) / (j+2) - S3(j+1) + zeta(3) - ((j+1)*(j+2)-1)/2/(j+1)**2/(j+2)**2)*2*(j+1)*(j+2) - 2*(1+(-1)**k)*((k+1)*(k+2)+1)/(k+1)**2/(k+2)**2 - 2*(1+(-1))*((j+1)*(j+2)+1)/(j+1)**2/(j+2)**2 - 2*(-1)**(1+k)/(j+1)/(j+2)/(k+1)/(k+2) + 2*(j-k)*(j+k+3)*(S3(j+1) - zeta(3) + (-1)**k *(k+1)*DDelta_S2((j+1)/2,(k+1)/2)/2 - lsum(j,k)) + 2*(k-j)*(j+k+3)*(-1) * (Script_S3(j+1) - S1(k+1)*Delta_S2((j+1)/2)/2 - lsumrev(j,k)) + ((-1)**k *(k+1)*(k+2)/2)*sum((-1)**b * (2*k + 3*b) * (4 + 3*b*(3-b) + 2*k*b + 2*(k+1)**2)*DDelta_S2((j+1)/2,(k+b)/2)/(3 + (-1)**b)/(2*k + 3) for b in range(3)) - ((-1) * (k+1)*(k+2) / 2)*sum((2*k + 3*b) * (4 + 3*b*(3-b) + 2*k*b + 2*(k+1)**2)*DDelta_S2((j+1)/2,(k+b)/2)/(3 + (-1)**b)/(2*k + 3) for b in range(3)) + ((-1)**k *((j+1)*(j+2) - 1)*((k+1)*(k+2)*Delta_S2((k+1)/2) - 2)/2/(j+1)/(j+2)) - 2*(-1)**k / (j+1) / (j+2) / (k+1) / (k+2) - ((k+1)**2 + 2 +(j+1)*(j+2)/(k+1)/(k+2))*((-1) * Delta_S2((j+1)/2)/2) - ((-1) * (k+1) * Delta_S2((k+1)/2) / 2) + ((-1))/(k+1)/(k+2)
+    
+   # CQBeta = np.log(Q**2/mures)/4 - S1(j+1) - S1(k+1) -5/6 + 1/2/(j+1)/(j+2) + 1/2/(k+1)/(k+2)
+   
+    ptyk = 1
+    sgntr = 1
+    
+    
+   
+
+    SUMA = 0j
+    SUMB = 0j
+
+    for LI in range(0, 1):
+        SUMANDB = (0.125*(1.+2.*LI)*(S2(0.5*(1.+j))-S2(-0.5+0.5*(
+           1.+j))+S2(-0.5+0.5*LI)-S2(0.5*LI)))/((0.5*(1.+j)-0.5*LI)*(2.+j+LI))
+        SUMB += SUMANDB
+        SUMA += (-1)**LI * SUMANDB
+
+    DELc1aGJK = (-2.*ptyk)/((1.+j)*(2.+j)*(1.+k)*(2.+k))+(0.5
+       *(-1.+(1.+j)*(2.+j))*(-2.+(1.+k)*(2.+k)*(S2(0.5*(1.+k)) -
+       S2(-0.5+0.5*(1.+k))))*ptyk)/((1.+j)*(2.+j))+(1.+k)*(2.
+       +k)*(2.+0.5*(1.+k)*(2.+k))*((0.25*k*(2.+(1.+k)**2)*(S2(
+       0.5*(1.+j))-S2(-0.5+0.5*(1.+j))+S2(-0.5+0.5*k)-S2(0.5*k
+       )))/((0.5*(1.+j)-0.5*k)*(2.+j+k)*(3.+2.*k)*(4.+(1.+k)*(2.
+       +k)))-(0.25*(S2(0.5*(1.+j))-S2(-0.5+0.5*(1.+j))-S2(0.5
+       *(1.+k))+S2(-0.5+0.5*(1.+k))))/((0.5*(1.+j)+0.5*(-1.-k))
+       *(3.+j+k))+(0.25*(3.+k)*(2.+(2.+k)**2)*(S2(0.5*(1.+j)) -
+       S2(-0.5+0.5*(1.+j))-S2(0.5*(2.+k))+S2(-0.5+0.5*(2.+k)))
+       )/((0.5*(1.+j)+0.5*(-2.-k))*(4.+j+k)*(3.+2.*k)*(4.+(1.+k)
+       *(2.+k))))*ptyk+2.*(j-k)*(3.+j+k)*(-SUMA-zeta(3)+S3(1.+j
+       )+(0.125*(1.+k)*(S2(0.5*(1.+j))-S2(-0.5+0.5*(1.+j))-S2
+       (0.5*(1.+k))+S2(-0.5+0.5*(1.+k)))*ptyk)/((0.5*(1.+j)+0.5
+       *(-1.-k))*(3.+j+k)))
+
+    DELc1bGKJ = 1/((1.+k)*(2.+k))+0.5*(-2.-(1.+k)**2-((1.+j)*(2
+       +j))/((1.+k)*(2.+k)))*(S2(0.5*(1.+j))-S2(-0.5+0.5*(1. +
+       j)))-0.5*(1.+k)*(S2(0.5*(1.+k))-S2(-0.5+0.5*(1.+k)))-(0.125
+       *(1.+k)*(2.+k)*(4.+(1.+k)*(2.+k))*(S2(0.5*(1.+j)) -
+       S2(-0.5+0.5*(1.+j))-S2(0.5*(1.+k))+S2(-0.5+0.5*(1.+k)))) \
+       / ((0.5*(1.+j)+0.5*(-1.-k))*(3.+j+k))-(0.5*(1.+k)*(2.+k)*(
+          (0.25*k*(2.+(1.+k)**2)*(S2(0.5*(1.+j))-S2(-0.5+0.5*(1. +
+       j))+S2(-0.5+0.5*k)-S2(0.5*k)))/((0.5*(1.+j)-0.5*k)*(2. +
+       j+k))+(0.25*(3.+k)*(2.+(2.+k)**2)*(S2(0.5*(1.+j))-S2(-0.5
+       +0.5*(1.+j))-S2(0.5*(2.+k))+S2(-0.5+0.5*(2.+k))))/((0.5
+       *(1.+j)+0.5*(-2.-k))*(4.+j+k))))/(3.+2.*k)+2.*(-j+k)*(3
+       +j+k)*(-SUMB-0.5*S1(1.+k)*(S2(0.5*(1.+j))-S2(-0.5+0.5
+       *(1.+j)))+SB3(1+j))
+
+    
+
+    #CQNS = AlphaS(nloop_alphaS, nf, Init_Scale_Q) / 2 / np.pi * (CF * MCQ1CF + (CF - NC/2) * MCQ1CG + beta0(nf) * MCQ1BET0)
+    
+    
+    #CQPS = AlphaS(nloop_alphaS, nf, Init_Scale_Q) / 2 / np.pi * ((-np.log(Q**2/mufact) - 1 + 2*S1(j+1) + 2*S1(k+1) - 1)*(-2*(4 + 3*j + j**2)/j/(j+1)/(j+2)/(j+3)) - (1/2 + 1/(j+1)/(j+2) + 1/(k+1)/(k+2))*2/(j+1)/(j+2) + k*(k+1)*(k+2)*(k+3)*(DDelta_S2((j+1)/2,k/1) - DDelta_S2((j+1)/2,(k+1)/2))/2/(2*k+3) )
+    
+    CGNC =  AlphaS(nloop_alphaS, nf, Init_Scale_Q) / 2 / np.pi * ((-np.log(Q**2 / mufact) + S1(j+1) + 3*S1(k+1)/2 + 0.5 + 1/(j+1)/(j+2))*(4*S1(j+1) + 4/(j+1)/(j+2) - 12/j/(j+3)) * 0.5 - (3 * (2*S1(j+1) + S1(k+1) - 6) / j / (j+3)) + (8 + 4*np.pi**2 / 6 - (k+1)*(k+2)*delS2((k+1)/2))/8 - delS2((j+1)/2)/2 - (10*(j+1)*(j+2) + 4)/(j+1)**2 / (j+2)**2 - (delS2((j+1)/2) / 2 / (k+1) / (k+2) - (k-1)*deldelS2((j+1)/2,k/2)/(2*k+3) + (k+4)*deldelS2((j+1)/2,(k+2)/2)/(2*k+3))*k*(k+1)*(k+2)*(k+3)/4 + ((k+1)*(k+2)*S1(k+1)-2)/(j+1)/(j+2)/(k+1)/(k+2))
+    
+    CGCF = AlphaS(nloop_alphaS, nf, Init_Scale_Q) / 2 / np.pi * ((-np.log(Q**2 / muphi) + S1(j+1) + S1(k+1) - 3/4 - 1/2/(k+1)/(k+2) - 1/(j+1)/(j+2))*(4*S1(k+1) - 3 - 2/(k+1)/(k+2))/2 + (-np.log(Q**2 / mufact) + 1 + 3*S1(j+1) - 0.5 + (2*S1(j+1)-1)/(k+1)/(k+2) -1/(j+1)/(j+2))*(-(4+2*(j+1)*(j+2))/(j+1)/(j+2)/(j+3))*(j+3)/4 - (35 - ((k+1)*(k+2) + 2)*delS2((k+1)/2) - 4/(k+1)**2/(k+2)**2)/8 + (((k+1)*(k+2) + 2)*S1(j+1)/(k+1)/(k+2) +1)/(j+1)/(j+2) + (delS2((j+1)/2)/2/(k+1)/(k+2) - ((k-1)*k*deldelS2((j+1)/2,k/2) - (k+3)*(k+4)*deldelS2((j+1)/2,(k+2)/2))/2/(2*k+3))*((k+1)*(k+2)*((k+1)*(k+2) +2)/4) - ((k+1)*(k+2) + 2)/2/(j+1)/(j+2)/(k+1)/(k+2))
+    
+    
+    # Only gluons
+    return np.array([0*j, 0*j, 0*j,0*j, 3 * 2 * 2 ** (1+j) * gamma(5/2+j) / (j + 3) / (gamma(3/2) * gamma(3+j)) * (NC*CGNC + CF*CGCF + beta0(nf)*np.log(mufact/mures)/2)],dtype=complex) #+ beta0(nf)*np.log(mufact/mures)
+
+
+def np_cache(function):
+    @functools.cache
+    def cached_wrapper(tupled_arr):
+        [arr, nf, p, Q, muset] = np.array(tupled_arr[0]), int(tupled_arr[1]), int(tupled_arr[2]), float(tupled_arr[3]), float(tupled_arr[4])
+        return function(arr, nf, p, Q, muset)
+
+    @functools.wraps(function)
+    def wrapper(arr, nf, p, Q, muset):
+        return cached_wrapper(tuple((tuple(arr), nf, p, Q, muset)))
+
+    # copy lru_cache attributes over too
+    wrapper.cache_info = cached_wrapper.cache_info
+    wrapper.cache_clear = cached_wrapper.cache_clear
+
+    return wrapper
+
+def np_gpd_cache(function):
+    @functools.cache
+    def cached_wrapper(tupled_arr):
+        [arr, nf, p, Q, ConfFlav, prty, muset] = np.array(tupled_arr[0]), int(tupled_arr[1]), int(tupled_arr[2]), float(tupled_arr[3]), np.array(tupled_arr[4]), int(tupled_arr[5]), float(tupled_arr[6])
+        return function(arr, nf, p, Q, ConfFlav, prty, muset)
+
+    @functools.wraps(function)
+    def wrapper(arr, nf, p, Q, ConfFlav, prty, muset):
+        return cached_wrapper(tuple((tuple(arr), nf, p, Q, tuple(ConfFlav), prty, muset)))
+
+    # copy lru_cache attributes over too
+    wrapper.cache_info = cached_wrapper.cache_info
+    wrapper.cache_clear = cached_wrapper.cache_clear
+
+    return wrapper
+
+#(j: complex, nf: int, p: int, Q: float, ConfFlav: np.array, prty: int = 1, muset: float = 1)
+
+@np_cache
+def WCoef_Evo_NLO(j: complex, nf: int, p: int, Q: float, muset: float) -> Tuple[np.ndarray, np.ndarray]:
+    
+    # Separate out NS and S/G Wilson coefficients
+     CWNS = CWilsonT(j, nf)[:3]
+     CWSG = CWilsonT(j,nf)[-2:]
+     
+     
+     
+    
+     
+    # Set up MB integral for non-diagonal NLO evolution
+    #intercept for inverse Mellin transformation
+     inv_Mellin_intercept = 0.25
+
+    #Cutoff for inverse Mellin transformation
+     inv_Mellin_cutoff = 20
+
+    #Cutoff for Mellin Barnes integral
+     Mellin_Barnes_intercept = 0.3
+
+    #Cutoff for Mellin Barnes integral
+     Mellin_Barnes_cutoff = 20
+
+    #Relative precision Goal of quad set to be 1e-3
+     Prec_Goal = 1e-3
+     
+     reK = 0.8*Mellin_Barnes_intercept 
+     Max_imK = Mellin_Barnes_cutoff
+    
+     
+    #Set up evolution operator for WCs
+     Alphafact = np.array(AlphaS(nloop_alphaS, nf, np.sqrt(muset)*Q)) / np.pi / 2
+     R = AlphaS(nloop_alphaS, nf, np.sqrt(muset)*Q)/AlphaS(nloop_alphaS, nf, Init_Scale_Q) # shape N
+     R = np.array(R)
+    # R_as2 = AlphaS(nloop_alphaS + 1, nf, Q)/AlphaS(nloop_alphaS + 1, nf, Init_Scale_Q)
+    # R_as2 = np.array(R_as2)
+     #print(R)
+     b0 = beta0(nf)
+     lam, pr = projectors(j+1, nf, p)
+     pproj = amuindep(j, nf, p)
+     #print(amuindep(j, nf, p))
+     
+     rmu1 = rmudep(nf, lam, lam, np.sqrt(muset)*Q)
+     #print(rmu1)
+     #print(pproj)
+     #print(rmu1.shape)
+
+     Rfact = R[...,np.newaxis]**(-lam/b0)  # LO evolution (alpha(mu)/alpha(mu0))^(-gamma/beta0)
+     #Rfact_as2 = R_as2[...,np.newaxis]**(-lam/b0)
+     
+     # S/G LO evolution operator
+     evola0 = np.einsum('...aij,...a->...ij', pr, Rfact)
+     #evola0_as2 = np.einsum('...aij,...a->...ij',pr,Rfact_as2)
+     #evola0ab = np.einsum('...aij,ab->...abij', pr,  np.identity(2))
+     #evola0 = np.einsum('...abij,...b->...ij', evola0ab, Rfact)
+     
+     # NS LO evolution operator
+     gam0NS = non_singlet_LO(j+1, nf, p)
+     evola0NS = R**(-gam0NS/b0)
+   
+         
+     # S/G diagonal NLO evolution operator
+     
+     evola1_diag_ab = np.einsum('kab,kabij->kabij', rmu1, pproj)
+     #print(np.einsum('...abij,...b->...ij', evola1_diag_ab, Rfact))
+     evola1_diag = np.einsum('...abij,...b,...->...ij', evola1_diag_ab, Rfact,Alphafact)
+     #print(rmu1)
+     #print(pproj)
+     
+     
+     
+      
+     # S/G non-diagonal NLO evolution operator
+     
+     CWNS_ev1 = np.zeros_like(evola0NS[np.newaxis, ...] * CWNS)
+     CWSG_ev1_diag = np.einsum('...ij,i...->...ij',evola1_diag,CWSG)
+     def non_diag_integrand(imK):
+         
+         CWk = CWilsonT(j + 2 - reK + 1j*imK, nf)[-2:]
+         #print(CWk.shape)
+         #print(j + 2 - reK + 1j*imK)
+         Bjk = bmudep(np.sqrt(muset)*Q, np.array([j + 2 - reK + 1j*imK],dtype=complex), np.array([j],dtype=complex), nf,p)*Alphafact
+         #print(Bjk.shape)
+         return np.einsum('...ij,...->...ij',np.einsum('...ij,i...->...ij',Bjk,CWk), -1j + 1/np.tan(np.pi * (-reK + 1j*imK) / 2))
+     
+     #print(non_diag_integrand(np.array([Max_imK / 100])))
+     
+     
+     #intd_non_diag_ev1 = np.array([1j * fixed_quad(lambda imK: non_diag_integrand(imK)[...,0], - Max_imK, + Max_imK,n=500)[0] / 4, 1j * fixed_quad(lambda imK: non_diag_integrand(imK)[...,1], - Max_imK, + Max_imK,n=500)[0] / 4])
+     
+     
+     intd_non_diag_ev1 = np.array([[1j * (fixed_quad(lambda imK: non_diag_integrand(imK)[...,0,0], - Max_imK, Max_imK,n=500)[0] ) / 4, 1j * (fixed_quad(lambda imK: non_diag_integrand(imK)[...,0,1], - Max_imK, Max_imK,n=500)[0]  ) / 4],[1j * (fixed_quad(lambda imK: non_diag_integrand(imK)[...,1,0], - Max_imK, Max_imK,n=500)[0] ) / 4, 1j * (fixed_quad(lambda imK: non_diag_integrand(imK)[...,1,1], - Max_imK, Max_imK,n=500)[0] ) / 4]])
+     
+     
+     CWSG_ev1_non_diag = np.einsum('ijk...->...ij',intd_non_diag_ev1)
+     #print(CWSG_ev1_non_diag.shape)
+      
+    
+     # LO evolved WCs
+     CWNS_ev0 = evola0NS[np.newaxis, ...] * CWNS
+     CWSG_ev0 = np.einsum('...ij,i...->...ij',evola0,CWSG)
+     #CWSG_as2_ev0 = np.einsum('...ij,i...->...j',evola0_as2,CWSG)
+     
+     
+     
+     # NLO evolved, just S/G for now
+     
+     CWSG_ev1 = 0*CWSG_ev1_diag - CWSG_ev1_non_diag     # NOT SURE ABOUT THE MINUS SIGN HERE
+     #print(CWSG_ev1_diag)
+     
+     CWilsonT_1_SG = WilsonT_NLO(j,0,nf,Q,muset)[-2:]
+     
+     CWilsonT_1_SG_ev0 = np.einsum('i...,...ij->...ij',CWilsonT_1_SG,evola0)
+     
+     
+     # LO plus NLO evolution
+     
+     CWilsonT_ev_NS_tot = 0*np.transpose(CWNS_ev0) #+ CWNS_ev1
+     CWilsonT_ev_SG_tot = 0*CWSG_ev0 + CWSG_ev1 + 0*CWilsonT_1_SG_ev0
+     
+     
+     
+     return CWilsonT_ev_NS_tot, CWilsonT_ev_SG_tot
+    
+    
+
+def Moment_Evo_NLO(j: complex, nf: int, p: int, Q: float, ConfFlav: np.array, prty: int = 1, muset: float = 1) -> np.array:
+    """
+    Evolution of moments in the flavor space 
+
+    Args:
+        uneolved conformal moments in flavor space ConfFlav = [ConfMoment_uV, ConfMoment_ubar, ConfMoment_dV, ConfMoment_dbar, ConfMoment_g] 
+        j: conformal spin j (conformal spin is actually j+2 but anyway): scalar
+        t: momentum transfer squared
+        nf: number of effective fermions; 
+        p (int): 1 for vector-like GPD (Ht, Et), -1 for axial-vector-like GPDs (Ht, Et): array (N,)
+        Q: final evolution scale: array(N,)
+
+    Returns:
+        Evolved conformal moments in flavor space (non-singlet, singlet, gluon)
+
+        return shape (N, 5)
+    """
+   
+    [CWilsonT_ev_NS_tot, CWilsonT_ev_SG_tot] = WCoef_Evo_NLO(j, nf, p, Q, muset)
+    
+    
+    
+    
+    
+    # flavor_trans (5, 5) ConfFlav (N, 5)
+
+    # Transform the unevolved moments to evolution basis
+    # ConfEvoBasis = np.einsum('...j,j', flav_trans, ConfFlav) # originally, output will be (5), I want it to be (N, 5)
+    ConfEvoBasis = np.einsum('ij, ...j->...i', flav_trans, ConfFlav) # shape (N, 5)
+    
+   
+
+
+    # Taking the non-singlet and singlet parts of the conformal moments
+    ConfNS = ConfEvoBasis[..., :3] # (N, 3)
+    ConfSG = ConfEvoBasis[..., -2:] # (N, 2)
+
+    
+    '''
+    # non-singlet part evolves multiplicatively
+    EvoConfNS = np.einsum('i,...i,...i->...i', CWNS, evola0NS[...,np.newaxis], ConfNS) 
+    # singlet part mixes with the gluon
+    EvoConfSG = np.einsum('i,...ij, ...j->...i', CWSG, (evola0 + evola1), ConfSG) #+ np.einsum('...j,...j->...j', CWSG_ev1_non_diag, ConfSG) # (N, 2)
+    '''
+    
+
+    EvoConfNS = np.einsum('...j,...j->...j', CWilsonT_ev_NS_tot, ConfNS)
+    EvoConfSG = np.einsum('...ij,...j->...i', CWilsonT_ev_SG_tot, ConfSG)
+                            
+    
+    
+    
+
+    # Recombing the non-singlet and singlet parts
+    EvoConf = np.concatenate((EvoConfNS, EvoConfSG), axis=-1) # (N, 5)
+    #EvoConf = np.einsum('i,...i->...i',EvoCW,ConfEvoBasis)
+    # Inverse transform the evolved moments back to the flavor basis
+    EvoConfFlav = np.einsum('...ij, ...j->...i', inv_flav_trans, EvoConf) #(N, 5)
+    
+
+    return EvoConfFlav
+
+
+
+
+
+
+def TFF_Moment_Evo_NLO_test(j: complex, nf: int, p: int, Q: float, t: float, ConfFlav: np.array, Para: np.array, prty: int = 1, muset: float = 1) -> np.array:
+    
+   
+    
+    
+    ConfEvoBasis = np.einsum('ij, ...j->...i', flav_trans, ConfFlav) # shape (N, 5)
+    
+   
+
+
+    ConfNS = ConfEvoBasis[..., :3] # (N, 3)
+    ConfSG = ConfEvoBasis[..., -2:] # (N, 2)
+
+    
+  
+    inv_Mellin_intercept = 0.25
+
+  
+    inv_Mellin_cutoff = 20
+
+    Mellin_Barnes_intercept = 0.33
+
+    Mellin_Barnes_cutoff = 5*20
+    Prec_Goal = 1e-3
+    
+    reK = Mellin_Barnes_intercept * 1
+    Max_imK = Mellin_Barnes_cutoff
+   
+    
+   #Set up evolution operator for WCs
+    Alphafact = np.array(AlphaS(nloop_alphaS, nf, np.sqrt(muset)*Q)) / np.pi / 2
+    R = AlphaS(nloop_alphaS, nf, np.sqrt(muset)*Q)/AlphaS(nloop_alphaS, nf, Init_Scale_Q) # shape N
+    R = np.array(R)
+  
+    b0 = beta0(nf)
+    lam, pr = projectors(j+1, nf, p)
+    pproj = amuindep(j, nf, p)
+    #print(amuindep(j, nf, p))
+    
+    rmu1 = rmudep(nf, lam, lam, np.sqrt(muset)*Q)
+    #print(rmu1)
+    #print(pproj)
+    #print(rmu1.shape)
+
+    Rfact = R[...,np.newaxis]**(-lam/b0)  # LO evolution (alpha(mu)/alpha(mu0))^(-gamma/beta0)
+    #Rfact_as2 = R_as2[...,np.newaxis]**(-lam/b0)
+    
+    
+    evola0 = np.einsum('...aij,...a->...ij', pr, Rfact)
+   
+    gam0NS = non_singlet_LO(j+1, nf, p)
+    evola0NS = R**(-gam0NS/b0)
+  
+        
+    # S/G diagonal NLO evolution operator
+    
+    evola1_diag_ab = np.einsum('kab,kabij->kabij', rmu1, pproj)
+    #print(evola1_diag_ab)
+    evola1_diag = np.einsum('...abij,...b,...->...ij', evola1_diag_ab, Rfact,Alphafact)
+    
+    
+    
+     
+    # S/G non-diagonal NLO evolution operator
+    
+   # confNS_ev1 = np.zeros_like(evola0NS[..., np.newaxis] * ConfNS)
+    confSG_ev1_diag = np.einsum('...ij,...j->...i',evola1_diag,ConfSG)
+    def non_diag_integrand(imK):
+        
+        ConfFlavk     = obs.Moment_Sum(np.array([reK + 1j*imK],dtype=complex), t, Para)
+        ConfEvoBasisk = np.einsum('ij, ...j->...i', flav_trans, ConfFlavk)
+        #print(ConfFlavk.shape)
+        ConfSGk = ConfEvoBasisk[0,-2:]
+        #print(ConfSG.shape)
+        ConfFlav_shift     = obs.Moment_Sum(np.array([j - 2 + reK + 1j*imK],dtype=complex), t, Para)
+        ConfEvoBasis_shift = np.einsum('ij, ...j->...i', flav_trans, ConfFlav_shift) 
+        ConfSG_shift = ConfEvoBasis_shift[0,-2:]
+        #print(CWk)
+        #print(j + 2 - reK + 1j*imK)
+        Bjk = bmudep_MOM(np.sqrt(muset)*Q, j, reK + 1j*imK, nf,p)*Alphafact
+        #print(Bjk.shape)
+        #Bjk = Bjk[0,...]
+        Bjk_shift = bmudep_MOM(np.sqrt(muset)*Q, j, j-2 + reK + 1j*imK, nf,p)*Alphafact
+        #Bjk_shift = Bjk_shift[0,...]
+        
+        return (np.einsum('ij,j->i',Bjk,ConfSGk) / np.tan(np.pi * (j - reK - 1j*imK) / 2)) - (np.einsum('...ij,...j->...i',Bjk_shift,ConfSG_shift) / np.tan(np.pi * (2 - reK - 1j*imK) / 2)) 
+        #return np.einsum('...i,...->...i',np.einsum('...ij,...j->...i',Bjk_shift,ConfSG_shift),1 / np.tan(np.pi * (-reK + 1j*imK) / 2)) 
+    
+    #print(non_diag_integrand(np.array([Max_imK / 100])).shape)
+    
+    
+    
+    intd_non_diag_ev1 = np.array([1j * (quadMOM(lambda imK: non_diag_integrand(imK)[0], - Max_imK, Max_imK ,n=5000)  ) / 4, 1j * (quadMOM(lambda imK: non_diag_integrand(imK)[1], - Max_imK, Max_imK,n=5000)  )/ 4])
+    
+    
+    #intd_non_diag_ev1 = np.array([[1j * fixed_quad(lambda imK: non_diag_integrand(imK)[...,0,0], - Max_imK, + Max_imK,n=500)[0] / 4, 1j * fixed_quad(lambda imK: non_diag_integrand(imK)[...,0,1], - Max_imK, + Max_imK,n=500)[0] / 4],[1j * fixed_quad(lambda imK: non_diag_integrand(imK)[...,1,0], - Max_imK, + Max_imK,n=500)[0] / 4, 1j * fixed_quad(lambda imK: non_diag_integrand(imK)[...,1,1], - Max_imK, + Max_imK,n=500)[0] / 4]])
+    
+    
+    confSG_ev1_non_diag = intd_non_diag_ev1
+    #print(confSG_ev1_non_diag.shape)
+     
+   
+    # LO evolved moments
+    confNS_ev0 = evola0NS[..., np.newaxis] * ConfNS
+    confSG_ev0 = np.einsum('...ij,...j->...i',evola0,ConfSG)
+    #CWSG_as2_ev0 = np.einsum('...ij,i...->...j',evola0_as2,CWSG)
+    
+    
+    
+    # NLO evolved, just S/G for now
+    
+    #confSG_ev1 = confSG_ev1_diag + confSG_ev1_non_diag     
+    
+    #print(confSG_ev1_diag.shape,confSG_ev1_non_diag.shape)
+    
+    confSG_ev1 = - confSG_ev1_non_diag#confSG_ev1_diag[0,:] - confSG_ev1_non_diag
+    
+    
+    # LO plus NLO evolution
+    
+    conf_ev_NS_tot = np.zeros_like(confNS_ev0)#confNS_ev0 #+ np.transpose(confNS_ev1)
+    conf_ev_SG_tot = confSG_ev1#confSG_ev0 + confSG_ev1
+    
+    NSCoef_0 = CWilsonT(j,nf)[:3]
+    SCoef_0 = CWilsonT(j,nf)[-2:]
+    SCoef_1 = WilsonT_NLO(j,0,nf,Q,muset)[-2:]
+    
+    #print(NSCoef_0.shape,conf_ev_NS_tot.shape)
+    
+    NS_full = np.einsum('i...,...i->...i',NSCoef_0,conf_ev_NS_tot)
+    
+    Sev1_full = np.einsum('i...,...i->...i',SCoef_0,conf_ev_SG_tot)
+    Sev0_full = np.einsum('i...,...i->...i',SCoef_1,confSG_ev0)
+    #print(Sev1_full.shape)
+    S_full = Sev1_full #+ Sev0_full
+    #print(NS_full.shape)
+    #print(S_full.shape)
+    
+    # Recombing the non-singlet and singlet parts
+    EvoConf = np.concatenate((NS_full, S_full), axis=-1) # (N, 5)
+    #EvoConf = np.einsum('i,...i->...i',EvoCW,ConfEvoBasis)
+    # Inverse transform the evolved moments back to the flavor basis
+    EvoConfFlav = np.einsum('...ij, ...j->...i', inv_flav_trans, EvoConf) #(N, 5)
+    
+
+    return EvoConfFlav
+
+
+
+
+
+
+
+def TFF_Moment_Evo_NLO(j: complex, nf: int, p: int, Q: float, t: float, xi: complex, ConfFlav: np.array, Para: np.array, mbcut, prty: int = 1, muset: float = 1) -> np.array:
+    
+   
+    
+    
+    ConfEvoBasis = np.einsum('ij, ...j->...i', flav_trans, ConfFlav) # shape (N, 5)
+    
+   
+
+
+    ConfNS = ConfEvoBasis[..., :3] # (N, 3)
+    ConfSG = ConfEvoBasis[..., -2:] # (N, 2)
+
+    
+  
+    inv_Mellin_intercept = 0.25
+
+  
+    inv_Mellin_cutoff = 20
+
+    Mellin_Barnes_intercept = 0.3
+
+    Mellin_Barnes_cutoff = 120
+    Prec_Goal = 1e-3
+    
+    reJ = Mellin_Barnes_intercept
+    reK = Mellin_Barnes_intercept #* 6 
+    Max_imK = Mellin_Barnes_cutoff
+   
+    
+   #Set up evolution operator for WCs
+    Alphafact = np.array(AlphaS(nloop_alphaS, nf, np.sqrt(muset)*Q)) / np.pi / 2
+    R = AlphaS(nloop_alphaS, nf, np.sqrt(muset)*Q)/AlphaS(nloop_alphaS, nf, Init_Scale_Q) # shape N
+    R = np.array(R)
+  
+    b0 = beta0(nf)
+    lam, pr = projectors(j+1, nf, p)
+    pproj = amuindep(j, nf, p)
+    #print(amuindep(j, nf, p))
+    
+    rmu1 = rmudep(nf, lam, lam, np.sqrt(muset)*Q)
+    #print(rmu1)
+    #print(pproj)
+    #print(rmu1.shape)
+
+    Rfact = R[...,np.newaxis]**(-lam/b0)  # LO evolution (alpha(mu)/alpha(mu0))^(-gamma/beta0)
+    #Rfact_as2 = R_as2[...,np.newaxis]**(-lam/b0)
+    
+    
+    evola0 = np.einsum('...aij,...a->...ij', pr, Rfact)
+   
+    gam0NS = non_singlet_LO(j+1, nf, p)
+    evola0NS = R**(-gam0NS/b0)
+  
+        
+    # S/G diagonal NLO evolution operator
+    
+    evola1_diag_ab = np.einsum('kab,kabij->kabij', rmu1, pproj)
+    #print(evola1_diag_ab)
+    evola1_diag = np.einsum('...abij,...b,...->...ij', evola1_diag_ab, Rfact,Alphafact)
+    
+    
+    
+     
+    # S/G non-diagonal NLO evolution operator
+    
+    confNS_ev1 = np.zeros_like(np.einsum('...,...i->i...',evola0NS, ConfNS))
+    confSG_ev1_diag = np.einsum('...ij,...j->...i',evola1_diag,ConfSG)
+    #print(confSG_ev1_diag.shape)
+    # def non_diag_integrand(imK):
+        
+    def non_diag_integrand(imK):
+        
+        #jarray = j[0]*np.ones_like(imK)
+        #print(j)
+        ConfFlavk     = obs.Moment_Sum(np.array([reK + 1j*imK],dtype=complex), t, Para)
+        ConfEvoBasisk = np.einsum('ij, ...j->...i', flav_trans, ConfFlavk)
+        #print(ConfEvoBasisk.shape)
+        ConfSGk = ConfEvoBasisk[0,:,-2:]
+        #print(ConfSGk.shape)
+        ConfFlav_shift = obs.Moment_Sum(np.array([j + reK + 1j*imK]), t, Para)
+        #ConfFlav_shift     = obs.Moment_Sum(np.array([j - 2 + reK + 1j*imK],dtype=complex), t, Para)
+        ConfEvoBasis_shift = np.einsum('ij, ...j->...i', flav_trans, ConfFlav_shift) 
+        #print(ConfEvoBasis_shift.shape)
+        ConfSG_shift = ConfEvoBasis_shift[0,:,-2:]
+        #print(ConfSG_shift.shape)
+        #print(CWk)
+        #print(j)
+        #print(imK)
+        #atime = time.time()
+        Bjk = bmudep_MOM_vec(np.sqrt(muset)*Q, np.array([j]), np.array([reK + 1j*imK]), nf,p)*Alphafact
+        #btime = time.time()
+        #print(btime - atime)
+        #print(Bjk[9000,0,...])
+        Bjk = Bjk[0,...]
+        #print(j)
+        #print(imK)
+        #print(Bjk.shape)
+        Bjk_shift = bmudep_MOM_vec(np.sqrt(muset)*Q, np.array([j]), np.array([j + reK + 1j*imK]), nf,p)*Alphafact
+        #print(Bjk_shift.shape)
+        Bjk_shift = Bjk_shift[0,...]
+        #print(Bjk_shift.shape)
+        #outshaper = (np.einsum('ij,i->ij',np.einsum('b,bij,bj->bi',xi**((- reK - imK*1j - 1)),Bjk,ConfSGk), (1 * np.tan(np.pi * ( reK + 1j*imK) / 2)))) - (np.einsum('ij,i->ij',np.einsum('b,bij,bj->bi',xi**((-j + 2 - reK - imK*1j - 1)),Bjk_shift,ConfSG_shift), (1 * np.tan(np.pi * (j - 2 + reK + 1j*imK) / 2))))
+        #print('out shape is', outshaper.shape)
+        
+        return  (np.einsum('ij,i->ij',np.einsum('b,bij,bj->bi',xi**(-reK - 1j*imK - 1),Bjk,ConfSGk), (1 * np.tan(np.pi * ( reK + 1j*imK) / 2)))) - (np.einsum('ij,i->ij',np.einsum('b,bij,bj->bi',xi**(-j -reK - 1j*imK - 1),Bjk_shift,ConfSG_shift), (1 * np.tan(np.pi * (j + reK + 1j*imK) / 2)))) 
+        
+        
+
+    #     ConfFlavk     = obs.Moment_Sum(np.array([reK + 1j*imK],dtype=complex), t, Para)
+    #     ConfEvoBasisk = np.einsum('ij, ...j->...i', flav_trans, ConfFlavk)
+    #     #print(ConfEvoBasisk.shape)
+    #     ConfSGk = ConfEvoBasisk[0,-2:]
+    #     #print(ConfSGk.shape)
+    #     ConfFlav_shift     = obs.Moment_Sum(np.array([j - 2 + reK + 1j*imK],dtype=complex), t, Para)
+    #     ConfEvoBasis_shift = np.einsum('ij, ...j->...i', flav_trans, ConfFlav_shift) 
+    #     ConfSG_shift = ConfEvoBasis_shift[0,-2:]
+    #     #print(ConfSG_shift.shape)
+    #     #print(CWk)
+    #     #print(j)
+    #     #print(imK)
+    #     Bjk = bmudep_MOM(np.sqrt(muset)*Q, j, reK + 1j*imK, nf,p)*Alphafact
+    #     #Bjk = Bjk[0,0,0,...]
+    #     #print(j)
+    #     #print(imK)
+    #     #print(Bjk)
+    #     Bjk_shift = bmudep_MOM(np.sqrt(muset)*Q, j, j-2 + reK + 1j*imK, nf,p)*Alphafact
+    #     #print(Bjk_shift.shape)
+    #     #Bjk_shift = Bjk_shift[0,0,0,...]
+        
+    #     return  (np.einsum('ij,j->i',Bjk,ConfSGk) / np.tan(np.pi * (j - reK - 1j*imK) / 2)) - (np.einsum('ij,j->i',Bjk_shift,ConfSG_shift) / np.tan(np.pi * (2 - reK - 1j*imK) / 2)) 
+        
+
+        
+
+        #return np.einsum('...i,...->...i',np.einsum('...ij,...j->...i',Bjk,ConfSGk),1 / np.tan(np.pi * (j - reK - 1j*imK) / 2))[0,0,...] - np.einsum('...i,...->...i',np.einsum('...ij,...j->...i',Bjk_shift,ConfSG_shift),1 / np.tan(np.pi * (2 - reK - 1j*imK) / 2))[0,0,...] 
+        
+        #return np.einsum('...i,...->...i',np.einsum('...ij,...j->...i',Bjk_shift,ConfSG_shift),1 / np.tan(np.pi * (2 - reK - 1j*imK) / 2)) 
+    
+    
+    #print(non_diag_integrand(np.array([Max_imK / 100])))
+    
+    
+    
+    intd_non_diag_ev1 = np.array([1j * (fixed_quad(lambda imK: non_diag_integrand(imK)[...,0], - Max_imK, Max_imK , n=mbcut*500 )[0] / 4), 1j * (fixed_quad(lambda imK: non_diag_integrand(imK)[...,1], - Max_imK, Max_imK,n=mbcut*500)[0]  )/ 4])
+   
+    
+    #intd_non_diag_ev1 = np.array([[1j * fixed_quad(lambda imK: non_diag_integrand(imK)[...,0,0], - Max_imK, + Max_imK,n=mbcut*500)[0] / 4, 1j * fixed_quad(lambda imK: non_diag_integrand(imK)[...,0,1], - Max_imK, + Max_imK,n=mbcut*500)[0] / 4],[1j * fixed_quad(lambda imK: non_diag_integrand(imK)[...,1,0], - Max_imK, + Max_imK,n=mbcut*500)[0] / 4, 1j * fixed_quad(lambda imK: non_diag_integrand(imK)[...,1,1], - Max_imK, + Max_imK,n=mbcut*500)[0] / 4]])
+    
+    
+    confSG_ev1_non_diag = intd_non_diag_ev1
+    #print(confSG_ev1_non_diag.shape)
+     
+   
+    # LO evolved moments
+    confNS_ev0 = evola0NS[..., np.newaxis] * ConfNS
+    confSG_ev0 = np.einsum('...ij,...j->...i',evola0,ConfSG)
+    #CWSG_as2_ev0 = np.einsum('...ij,i...->...j',evola0_as2,CWSG)
+    
+    
+    
+    # NLO evolved, just S/G for now
+    
+    #confSG_ev1 = confSG_ev1_diag + confSG_ev1_non_diag     
+    
+    confSG_ev1 = 0*confSG_ev1_diag - confSG_ev1_non_diag 
+    
+    
+    # LO plus NLO evolution
+    
+    conf_ev_NS_tot = 0*confNS_ev0 #+ np.transpose(confNS_ev1)
+    conf_ev_SG_tot = 0*confSG_ev0 + confSG_ev1
+    
+    NSCoef_0 = CWilsonT(j,nf)[:3]
+    SCoef_0 = CWilsonT(j,nf)[-2:]
+    SCoef_1 = 0*WilsonT_NLO(j,0,nf,Q,muset)[-2:]
+    
+    #print(NSCoef_0.shape,conf_ev_NS_tot.shape)
+    
+    NS_full = np.einsum('i...,...i->...i',NSCoef_0,conf_ev_NS_tot)
+    
+    Sev1_full = np.einsum('i...,...i->...i',SCoef_0,conf_ev_SG_tot)
+    Sev0_full = np.einsum('i...,...i->...i',SCoef_1,confSG_ev0)
+    #print(Sev1_full.shape)
+    S_full = Sev1_full + Sev0_full
+    #print(NS_full.shape)
+    #print(S_full.shape)
+    
+    # Recombing the non-singlet and singlet parts
+    EvoConf = np.concatenate((NS_full, S_full), axis=-1) # (N, 5)
+    #EvoConf = np.einsum('i,...i->...i',EvoCW,ConfEvoBasis)
+    # Inverse transform the evolved moments back to the flavor basis
+    EvoConfFlav = np.einsum('...ij, ...j->...i', inv_flav_trans, EvoConf) #(N, 5)
+    
+
+    return EvoConfFlav
+
+
+def TFF_Moment_Evo_NLO_vec_test(j: complex, nf: int, p: int, Q: float, t: float, ConfFlav: np.array, Para: np.array, mbcut, prty: int = 1, muset: float = 1) -> np.array:
+    
+   
+    
+    
+    ConfEvoBasis = np.einsum('ij, ...j->...i', flav_trans, ConfFlav) # shape (N, 5)
+    
+   
+
+
+    ConfNS = ConfEvoBasis[..., :3] # (N, 3)
+    ConfSG = ConfEvoBasis[..., -2:] # (N, 2)
+
+    
+  
+    inv_Mellin_intercept = 0.25
+
+  
+    inv_Mellin_cutoff = 20
+
+    Mellin_Barnes_intercept = 0.9
+
+    Mellin_Barnes_cutoff = 80
+    Prec_Goal = 1e-3
+    
+    reJ = Mellin_Barnes_intercept
+    reK = Mellin_Barnes_intercept #* 6 
+    Max_imK = Mellin_Barnes_cutoff
+   
+    
+   #Set up evolution operator for WCs
+    Alphafact = np.array(AlphaS(nloop_alphaS, nf, np.sqrt(muset)*Q)) / np.pi / 2
+    R = AlphaS(nloop_alphaS, nf, np.sqrt(muset)*Q)/AlphaS(nloop_alphaS, nf, Init_Scale_Q) # shape N
+    R = np.array(R)
+  
+    b0 = beta0(nf)
+    lam, pr = projectors(j+1, nf, p)
+    pproj = amuindep(j, nf, p)
+    #print(amuindep(j, nf, p))
+    
+    rmu1 = rmudep(nf, lam, lam, np.sqrt(muset)*Q)
+    #print(rmu1)
+    #print(pproj)
+    #print(rmu1.shape)
+
+    Rfact = R[...,np.newaxis]**(-lam/b0)  # LO evolution (alpha(mu)/alpha(mu0))^(-gamma/beta0)
+    #Rfact_as2 = R_as2[...,np.newaxis]**(-lam/b0)
+    
+    
+    evola0 = np.einsum('...aij,...a->...ij', pr, Rfact)
+   
+    gam0NS = non_singlet_LO(j+1, nf, p)
+    evola0NS = R**(-gam0NS/b0)
+  
+        
+    # S/G diagonal NLO evolution operator
+    
+    evola1_diag_ab = np.einsum('kab,kabij->kabij', rmu1, pproj)
+    #print(evola1_diag_ab)
+    evola1_diag = np.einsum('...abij,...b,...->...ij', evola1_diag_ab, Rfact,Alphafact)
+    
+    
+    
+     
+    # S/G non-diagonal NLO evolution operator
+    
+    confNS_ev1 = np.zeros_like(np.einsum('...,...i->i...',evola0NS, ConfNS))
+    confSG_ev1_diag = np.einsum('...ij,...j->...i',evola1_diag,ConfSG)
+    #print(confSG_ev1_diag.shape)
+    def non_diag_integrand(imK):
+        
+        jarray = j[0]*np.ones_like(imK)
+        ConfFlavk     = obs.Moment_Sum(np.array([reK + 1j*imK],dtype=complex), t, Para)
+        ConfEvoBasisk = np.einsum('ij, ...j->...i', flav_trans, ConfFlavk)
+        #print(ConfEvoBasisk.shape)
+        ConfSGk = ConfEvoBasisk[0,:,-2:]
+        #print(ConfSGk.shape)
+        ConfFlav_shift = obs.Moment_Sum(np.array([j - 2 + reK + 1j*imK]), t, Para)
+        #ConfFlav_shift     = obs.Moment_Sum(np.array([j - 2 + reK + 1j*imK],dtype=complex), t, Para)
+        ConfEvoBasis_shift = np.einsum('ij, ...j->...i', flav_trans, ConfFlav_shift) 
+        #print(ConfEvoBasis_shift.shape)
+        ConfSG_shift = ConfEvoBasis_shift[0,:,-2:]
+        #print(ConfSG_shift.shape)
+        #print(CWk)
+        #print(j)
+        #print(imK)
+        #atime = time.time()
+        Bjk = bmudep_MOM_vec(np.sqrt(muset)*Q, np.array([j]), np.array([reK + 1j*imK]), nf,p)*Alphafact
+        #btime = time.time()
+        #print(btime - atime)
+        #print(Bjk[9000,0,...])
+        Bjk = Bjk[0,...]
+        #print(j)
+        #print(imK)
+        #print(Bjk.shape)
+        Bjk_shift = bmudep_MOM_vec(np.sqrt(muset)*Q, np.array([j]), np.array([j-2 + reK + 1j*imK]), nf,p)*Alphafact
+        #print(Bjk_shift.shape)
+        Bjk_shift = Bjk_shift[0,...]
+        #print(Bjk_shift.shape)
+        
+        return  (np.einsum('ij,i->ij',np.einsum('bij,bj->bi',Bjk,ConfSGk), 1/np.tan(np.pi * (j - reK - 1j*imK) / 2))) - (np.einsum('ij,i->ij',np.einsum('bij,bj->bi',Bjk_shift,ConfSG_shift), 1 / np.tan(np.pi * (2 - reK - 1j*imK) / 2))) 
+        
+
+        
+
+        #return np.einsum('...i,...->...i',np.einsum('...ij,...j->...i',Bjk,ConfSGk),1 / np.tan(np.pi * (j - reK - 1j*imK) / 2))[0,0,...] - np.einsum('...i,...->...i',np.einsum('...ij,...j->...i',Bjk_shift,ConfSG_shift),1 / np.tan(np.pi * (2 - reK - 1j*imK) / 2))[0,0,...] 
+        
+        #return np.einsum('...i,...->...i',np.einsum('...ij,...j->...i',Bjk_shift,ConfSG_shift),1 / np.tan(np.pi * (2 - reK - 1j*imK) / 2)) 
+    
+    
+    #print(non_diag_integrand(np.array([Max_imK / 100])))
+    
+    
+    
+    intd_non_diag_ev1 = np.array([1j * (fixed_quad(lambda imK: non_diag_integrand(imK)[...,0], - Max_imK, Max_imK , n=mbcut*500 )[0] / 4), 1j * (fixed_quad(lambda imK: non_diag_integrand(imK)[...,1], - Max_imK, Max_imK,n=mbcut*500)[0]  )/ 4])
+    
+    
+    #intd_non_diag_ev1 = np.array([[1j * fixed_quad(lambda imK: non_diag_integrand(imK)[...,0,0], - Max_imK, + Max_imK,n=mbcut*500)[0] / 4, 1j * fixed_quad(lambda imK: non_diag_integrand(imK)[...,0,1], - Max_imK, + Max_imK,n=mbcut*500)[0] / 4],[1j * fixed_quad(lambda imK: non_diag_integrand(imK)[...,1,0], - Max_imK, + Max_imK,n=mbcut*500)[0] / 4, 1j * fixed_quad(lambda imK: non_diag_integrand(imK)[...,1,1], - Max_imK, + Max_imK,n=mbcut*500)[0] / 4]])
+    
+    
+    confSG_ev1_non_diag = intd_non_diag_ev1
+    #print(confSG_ev1_non_diag.shape)
+     
+   
+    # LO evolved moments
+    confNS_ev0 = evola0NS[..., np.newaxis] * ConfNS
+    confSG_ev0 = np.einsum('...ij,...j->...i',evola0,ConfSG)
+    #CWSG_as2_ev0 = np.einsum('...ij,i...->...j',evola0_as2,CWSG)
+    
+    
+    
+    # NLO evolved, just S/G for now
+    
+    #confSG_ev1 = confSG_ev1_diag + confSG_ev1_non_diag     
+    
+    confSG_ev1 = - confSG_ev1_non_diag#confSG_ev1_diag - confSG_ev1_non_diag
+    
+    
+    # LO plus NLO evolution
+    
+# =============================================================================
+#     conf_ev_NS_tot = np.zeros_like(confNS_ev0)#confNS_ev0 #+ np.transpose(confNS_ev1)
+#     conf_ev_SG_tot = confSG_ev1#confSG_ev0 + confSG_ev1
+#     
+#     NSCoef_0 = CWilsonT(j,nf)[:3]
+#     SCoef_0 = CWilsonT(j,nf)[-2:]
+#     SCoef_1 = WilsonT_NLO(j,0,nf,Q,muset)[-2:]
+#     
+#     #print(NSCoef_0.shape,conf_ev_NS_tot.shape)
+#     
+#     NS_full = np.einsum('i...,...i->...i',NSCoef_0,conf_ev_NS_tot)
+#     
+#     Sev1_full = np.einsum('i...,...i->...i',SCoef_0,conf_ev_SG_tot)
+#     Sev0_full = np.einsum('i...,...i->...i',SCoef_1,confSG_ev0)
+#     #print(Sev1_full.shape)
+#     S_full = Sev1_full #+ Sev0_full
+#     #print(NS_full.shape)
+#     #print(S_full.shape)
+#     
+#     # Recombing the non-singlet and singlet parts
+#     EvoConf = np.concatenate((NS_full, S_full), axis=-1) # (N, 5)
+#     #EvoConf = np.einsum('i,...i->...i',EvoCW,ConfEvoBasis)
+#     # Inverse transform the evolved moments back to the flavor basis
+#     EvoConfFlav = np.einsum('...ij, ...j->...i', inv_flav_trans, EvoConf) #(N, 5)
+# =============================================================================
+    
+
+    return intd_non_diag_ev1#EvoConfFlav
+
+
+def off_diag_test(j: complex, nf: int, p: int, Q: float, t: float, ConfFlav: np.array, Para: np.array, mbcut, prty: int = 1, muset: float = 1) -> np.array:
+
+    ConfEvoBasis = np.einsum('ij, ...j->...i', flav_trans, ConfFlav) # shape (N, 5)
+    
+   
+
+
+    ConfNS = ConfEvoBasis[..., :3] # (N, 3)
+    ConfSG = ConfEvoBasis[..., -2:] # (N, 2)
+
+    
+  
+    inv_Mellin_intercept = 0.25
+
+  
+    inv_Mellin_cutoff = 20
+
+    Mellin_Barnes_intercept = 0.001
+
+    Mellin_Barnes_cutoff = 40
+    Prec_Goal = 1e-3
+    
+    reJ = Mellin_Barnes_intercept
+    reK = Mellin_Barnes_intercept * 30 
+    Max_imK = Mellin_Barnes_cutoff
+   
+    
+   #Set up evolution operator for WCs
+    Alphafact = np.array(AlphaS(nloop_alphaS, nf, np.sqrt(muset)*Q)) / np.pi / 2
+    R = AlphaS(nloop_alphaS, nf, np.sqrt(muset)*Q)/AlphaS(nloop_alphaS, nf, Init_Scale_Q) # shape N
+    R = np.array(R)
+  
+    b0 = beta0(nf)
+    lam, pr = projectors(j+1, nf, p)
+    pproj = amuindep(j, nf, p)
+    #print(amuindep(j, nf, p))
+    
+    rmu1 = rmudep(nf, lam, lam, np.sqrt(muset)*Q)
+    #print(rmu1)
+    #print(pproj)
+    #print(rmu1.shape)
+
+    Rfact = R[...,np.newaxis]**(-lam/b0)  # LO evolution (alpha(mu)/alpha(mu0))^(-gamma/beta0)
+    #Rfact_as2 = R_as2[...,np.newaxis]**(-lam/b0)
+    
+    
+    evola0 = np.einsum('...aij,...a->...ij', pr, Rfact)
+    
+    def non_diag_sum(imK):
+        jval = int(np.floor(np.real(j[0])))
+        #print(jval)
+        kvals = []
+        for i in range(1,jval):
+            if(jval-2*i>=1):
+                kvals.append(j-2*i)
+                        
+        kvals = np.array(kvals)[:,0]
+        #print(kvals)
+        #print(j)        
+        #return kvals
+                
+        prod = []
+                
+        for i in kvals:
+                 arri = np.array([i],dtype=complex)
+                 ConfFlavk = obs.Moment_Sum(arri, t, Para)
+                 ConfEvoBasisk = np.einsum('ij, ...j->...i', flav_trans, ConfFlavk)
+                 ConfSGk = ConfEvoBasisk[0,-2:]
+                 #print(i)
+                 Bjk = bmudep(np.sqrt(muset)*Q, np.array([j],dtype=complex), np.array([arri],dtype=complex), nf,p)*Alphafact
+                 Bjk = Bjk[0,0,:]
+                 prod.append(np.einsum('...ij,...j->...i',Bjk,ConfSGk))
+                 #print(np.einsum('...ij,...j->...i',Bjk,ConfSGk))
+        prod = np.array(prod)
+                
+        #print(prod)
+                
+                 #BCSG = np.einsum('abij,aj->abi',Bjk,ConfSG) 
+                 #BCSG2 = np.einsum('...ij,...j->...i', Bjk, ConfSG)
+                 #print(BCSG.shape, BCSG2.shape)
+                
+                 #return Bjk
+        #print(np.einsum('ij->j',prod))       
+        return np.einsum('ij->j',prod)
+        
+    return non_diag_sum(1)
+
+''' Quark Only and Gluon Only Moment_Evo_NLO'''
+
+@np_cache
+def WCoef_Evo_NLO_quark(j: complex, nf: int, p: int, Q: float, muset: float) -> Tuple[np.ndarray, np.ndarray]:
+    
+    # Separate out NS and S/G Wilson coefficients
+     CWNS = CWilsonT_quark(j, nf)[:3]
+     CWSG = CWilsonT_quark(j,nf)[-2:]
+     
+     
+     
+    
+     
+    # Set up MB integral for non-diagonal NLO evolution
+    #intercept for inverse Mellin transformation
+     inv_Mellin_intercept = 0.25
+
+    #Cutoff for inverse Mellin transformation
+     inv_Mellin_cutoff = 20
+
+    #Cutoff for Mellin Barnes integral
+     Mellin_Barnes_intercept = 0.3
+
+    #Cutoff for Mellin Barnes integral
+     Mellin_Barnes_cutoff = 20
+
+    #Relative precision Goal of quad set to be 1e-3
+     Prec_Goal = 1e-3
+     
+     reK = Mellin_Barnes_intercept 
+     Max_imK = Mellin_Barnes_cutoff
+    
+     
+    #Set up evolution operator for WCs
+     Alphafact = np.array(AlphaS(nloop_alphaS, nf, np.sqrt(muset)*Q)) / np.pi / 2
+     R = AlphaS(nloop_alphaS, nf, np.sqrt(muset)*Q)/AlphaS(nloop_alphaS, nf, Init_Scale_Q) # shape N
+     R = np.array(R)
+    # R_as2 = AlphaS(nloop_alphaS + 1, nf, Q)/AlphaS(nloop_alphaS + 1, nf, Init_Scale_Q)
+    # R_as2 = np.array(R_as2)
+     #print(R)
+     b0 = beta0(nf)
+     lam, pr = projectors(j+1, nf, p)
+     pproj = amuindep(j, nf, p)
+     #print(amuindep(j, nf, p))
+     
+     rmu1 = rmudep(nf, lam, lam, np.sqrt(muset)*Q)
+     #print(rmu1)
+     #print(pproj)
+     #print(rmu1.shape)
+
+     Rfact = R[...,np.newaxis]**(-lam/b0)  # LO evolution (alpha(mu)/alpha(mu0))^(-gamma/beta0)
+     #Rfact_as2 = R_as2[...,np.newaxis]**(-lam/b0)
+     
+     # S/G LO evolution operator
+     evola0 = np.einsum('...aij,...a->...ij', pr, Rfact)
+     #evola0_as2 = np.einsum('...aij,...a->...ij',pr,Rfact_as2)
+     #evola0ab = np.einsum('...aij,ab->...abij', pr,  np.identity(2))
+     #evola0 = np.einsum('...abij,...b->...ij', evola0ab, Rfact)
+     
+     # NS LO evolution operator
+     gam0NS = non_singlet_LO(j+1, nf, p)
+     evola0NS = R**(-gam0NS/b0)
+   
+         
+     # S/G diagonal NLO evolution operator
+     
+     evola1_diag_ab = np.einsum('kab,kabij->kabij', rmu1, pproj)
+     #print(evola1_diag_ab)
+     evola1_diag = np.einsum('...abij,...b,...->...ij', evola1_diag_ab, Rfact,Alphafact)
+     
+     
+     
+      
+     # S/G non-diagonal NLO evolution operator
+     
+     CWNS_ev1 = np.zeros_like(np.einsum('...,i...->...i',evola0NS, CWNS))
+     CWSG_ev1_diag = np.einsum('...ij,i...->...ij',evola1_diag,CWSG)
+     def non_diag_integrand(imK):
+         
+         CWk = CWilsonT_quark(j + 2 - reK + 1j*imK, nf)[-2:]
+         #print(CWk)
+         #print(j + 2 - reK + 1j*imK)
+         Bjk = np.einsum('...abij,...b,...->...ij',bmudep(np.sqrt(muset)*Q, np.array([j + 2 - reK + 1j*imK],dtype=complex), np.array([j],dtype=complex), nf,p), Rfact,Alphafact)
+         
+         return np.einsum('...ij,...->...ij',np.einsum('...ij,i...->...ij',Bjk,CWk), 1 / np.tan(np.pi * (-reK + 1j*imK) / 2))
+     
+     #print(non_diag_integrand(np.array([Max_imK / 100])))
+     
+     
+    # intd_non_diag_ev1 = np.array([1j * fixed_quad(lambda imK: non_diag_integrand(imK)[...,0], - Max_imK, + Max_imK,n=500)[0] / 4, 1j * fixed_quad(lambda imK: non_diag_integrand(imK)[...,1], - Max_imK, + Max_imK,n=500)[0] / 4])
+     
+     
+     intd_non_diag_ev1 = np.array([[1j * fixed_quad(lambda imK: non_diag_integrand(imK)[...,0,0], - Max_imK, + Max_imK,n=500)[0] / 4, 1j * fixed_quad(lambda imK: non_diag_integrand(imK)[...,0,1], - Max_imK, + Max_imK,n=500)[0] / 4],[1j * fixed_quad(lambda imK: non_diag_integrand(imK)[...,1,0], - Max_imK, + Max_imK,n=500)[0] / 4, 1j * fixed_quad(lambda imK: non_diag_integrand(imK)[...,1,1], - Max_imK, + Max_imK,n=500)[0] / 4]])
+     
+     
+     CWSG_ev1_non_diag = intd_non_diag_ev1
+     #print(CWSG_ev1_non_diag.shape)
+      
+    
+     # LO evolved WCs
+     CWNS_ev0 = evola0NS[np.newaxis, ...] * CWNS
+     CWSG_ev0 = np.einsum('...ij,i...->...ij',evola0,CWSG)
+     #CWSG_as2_ev0 = np.einsum('...ij,i...->...j',evola0_as2,CWSG)
+     
+     
+     
+     # NLO evolved, just S/G for now
+     
+     #CWSG_ev1 = CWSG_ev1_diag - CWSG_ev1_non_diag 
+     CWSG_ev1 = np.einsum('...ij,ijk...->...ij',CWSG_ev1_diag, - CWSG_ev1_non_diag) # NOT SURE ABOUT THE MINUS SIGN HERE
+     #print(CWSG_ev1_diag)
+     
+     CWilsonT_1_SG = WilsonT_NLO_quark(j,0,nf,Q,muset)[-2:]
+     
+     CWilsonT_1_SG_ev0 = np.einsum('i...,...ij->...ij',CWilsonT_1_SG,evola0)
+     
+     
+     # LO plus NLO evolution
+     
+     CWilsonT_ev_NS_tot = np.transpose(CWNS_ev0) #+ CWNS_ev1
+     CWilsonT_ev_SG_tot = CWSG_ev0 + CWSG_ev1 + CWilsonT_1_SG_ev0
+     
+     
+     
+     return CWilsonT_ev_NS_tot, CWilsonT_ev_SG_tot
+    
+    
+
+def Moment_Evo_NLO_quark(j: complex, nf: int, p: int, Q: float, ConfFlav: np.array, prty: int = 1, muset: float = 1) -> np.array:
+    """
+    Evolution of moments in the flavor space 
+
+    Args:
+        uneolved conformal moments in flavor space ConfFlav = [ConfMoment_uV, ConfMoment_ubar, ConfMoment_dV, ConfMoment_dbar, ConfMoment_g] 
+        j: conformal spin j (conformal spin is actually j+2 but anyway): scalar
+        t: momentum transfer squared
+        nf: number of effective fermions; 
+        p (int): 1 for vector-like GPD (Ht, Et), -1 for axial-vector-like GPDs (Ht, Et): array (N,)
+        Q: final evolution scale: array(N,)
+
+    Returns:
+        Evolved conformal moments in flavor space (non-singlet, singlet, gluon)
+
+        return shape (N, 5)
+    """
+   
+    [CWilsonT_ev_NS_tot, CWilsonT_ev_SG_tot] = WCoef_Evo_NLO_quark(j, nf, p, Q, muset)
+    
+    
+    
+    
+    
+    # flavor_trans (5, 5) ConfFlav (N, 5)
+
+    # Transform the unevolved moments to evolution basis
+    # ConfEvoBasis = np.einsum('...j,j', flav_trans, ConfFlav) # originally, output will be (5), I want it to be (N, 5)
+    ConfEvoBasis = np.einsum('ij, ...j->...i', flav_trans, ConfFlav) # shape (N, 5)
+    
+   
+
+
+    # Taking the non-singlet and singlet parts of the conformal moments
+    ConfNS = ConfEvoBasis[..., :3] # (N, 3)
+    ConfSG = ConfEvoBasis[..., -2:] # (N, 2)
+
+    
+    '''
+    # non-singlet part evolves multiplicatively
+    EvoConfNS = np.einsum('i,...i,...i->...i', CWNS, evola0NS[...,np.newaxis], ConfNS) 
+    # singlet part mixes with the gluon
+    EvoConfSG = np.einsum('i,...ij, ...j->...i', CWSG, (evola0 + evola1), ConfSG) #+ np.einsum('...j,...j->...j', CWSG_ev1_non_diag, ConfSG) # (N, 2)
+    '''
+    
+
+    EvoConfNS = np.einsum('...j,...j->...j', CWilsonT_ev_NS_tot, ConfNS)
+    EvoConfSG = np.einsum('...ij,...j->...i', CWilsonT_ev_SG_tot, ConfSG)
+                            
+    
+    
+    
+
+    # Recombing the non-singlet and singlet parts
+    EvoConf = np.concatenate((EvoConfNS, EvoConfSG), axis=-1) # (N, 5)
+    #EvoConf = np.einsum('i,...i->...i',EvoCW,ConfEvoBasis)
+    # Inverse transform the evolved moments back to the flavor basis
+    EvoConfFlav = np.einsum('...ij, ...j->...i', inv_flav_trans, EvoConf) #(N, 5)
+    
+
+    return EvoConfFlav
+
+
+@np_cache
+def WCoef_Evo_NLO_glue(j: complex, nf: int, p: int, Q: float, muset: float) -> Tuple[np.ndarray, np.ndarray]:
+    
+    # Separate out NS and S/G Wilson coefficients
+     CWNS = CWilsonT_glue(j, nf)[:3]
+     CWSG = CWilsonT_glue(j,nf)[-2:]
+     
+     
+     
+    
+     
+    # Set up MB integral for non-diagonal NLO evolution
+    #intercept for inverse Mellin transformation
+     inv_Mellin_intercept = 0.25
+
+    #Cutoff for inverse Mellin transformation
+     inv_Mellin_cutoff = 20
+
+    #Cutoff for Mellin Barnes integral
+     Mellin_Barnes_intercept = 0.3
+
+    #Cutoff for Mellin Barnes integral
+     Mellin_Barnes_cutoff = 20
+
+    #Relative precision Goal of quad set to be 1e-3
+     Prec_Goal = 1e-3
+     
+     reK = Mellin_Barnes_intercept 
+     Max_imK = Mellin_Barnes_cutoff
+    
+     
+    #Set up evolution operator for WCs
+     Alphafact = np.array(AlphaS(nloop_alphaS, nf, np.sqrt(muset)*Q)) / np.pi / 2
+     R = AlphaS(nloop_alphaS, nf, np.sqrt(muset)*Q)/AlphaS(nloop_alphaS, nf, Init_Scale_Q) # shape N
+     R = np.array(R)
+    # R_as2 = AlphaS(nloop_alphaS + 1, nf, Q)/AlphaS(nloop_alphaS + 1, nf, Init_Scale_Q)
+    # R_as2 = np.array(R_as2)
+     #print(R)
+     b0 = beta0(nf)
+     lam, pr = projectors(j+1, nf, p)
+     pproj = amuindep(j, nf, p)
+     #print(amuindep(j, nf, p))
+     
+     rmu1 = rmudep(nf, lam, lam, np.sqrt(muset)*Q)
+     #print(rmu1)
+     #print(pproj)
+     #print(rmu1.shape)
+
+     Rfact = R[...,np.newaxis]**(-lam/b0)  # LO evolution (alpha(mu)/alpha(mu0))^(-gamma/beta0)
+     #Rfact_as2 = R_as2[...,np.newaxis]**(-lam/b0)
+     
+     # S/G LO evolution operator
+     evola0 = np.einsum('...aij,...a->...ij', pr, Rfact)
+     #evola0_as2 = np.einsum('...aij,...a->...ij',pr,Rfact_as2)
+     #evola0ab = np.einsum('...aij,ab->...abij', pr,  np.identity(2))
+     #evola0 = np.einsum('...abij,...b->...ij', evola0ab, Rfact)
+     
+     # NS LO evolution operator
+     gam0NS = non_singlet_LO(j+1, nf, p)
+     evola0NS = R**(-gam0NS/b0)
+   
+         
+     # S/G diagonal NLO evolution operator
+     
+     evola1_diag_ab = np.einsum('kab,kabij->kabij', rmu1, pproj)
+     #print(evola1_diag_ab)
+     evola1_diag = np.einsum('...abij,...b,...->...ij', evola1_diag_ab, Rfact,Alphafact)
+     
+     
+     
+      
+     # S/G non-diagonal NLO evolution operator
+     
+     CWNS_ev1 = np.zeros_like(np.einsum('...,i...->...i',evola0NS, CWNS))
+     CWSG_ev1_diag = np.einsum('...ij,i...->...ij',evola1_diag,CWSG)
+     def non_diag_integrand(imK):
+         
+         CWk = CWilsonT_glue(j + 2 - reK + 1j*imK, nf)[-2:]
+         #print(CWk)
+         #print(j + 2 - reK + 1j*imK)
+         Bjk = np.einsum('...abij,...b,...->...ij',bmudep(np.sqrt(muset)*Q, np.array([j + 2 - reK + 1j*imK],dtype=complex), np.array([j],dtype=complex), nf,p), Rfact,Alphafact)
+         
+         return np.einsum('...ij,...->...ij',np.einsum('...ij,i...->...ij',Bjk,CWk), 1 / np.tan(np.pi * (-reK + 1j*imK) / 2))
+     
+     #print(non_diag_integrand(np.array([Max_imK / 100])))
+     
+     
+     #intd_non_diag_ev1 = np.array([1j * fixed_quad(lambda imK: non_diag_integrand(imK)[...,0], - Max_imK, + Max_imK,n=500)[0] / 4, 1j * fixed_quad(lambda imK: non_diag_integrand(imK)[...,1], - Max_imK, + Max_imK,n=500)[0] / 4])
+     
+     
+     intd_non_diag_ev1 = np.array([[1j * fixed_quad(lambda imK: non_diag_integrand(imK)[...,0,0], - Max_imK, + Max_imK,n=500)[0] / 4, 1j * fixed_quad(lambda imK: non_diag_integrand(imK)[...,0,1], - Max_imK, + Max_imK,n=500)[0] / 4],[1j * fixed_quad(lambda imK: non_diag_integrand(imK)[...,1,0], - Max_imK, + Max_imK,n=500)[0] / 4, 1j * fixed_quad(lambda imK: non_diag_integrand(imK)[...,1,1], - Max_imK, + Max_imK,n=500)[0] / 4]])
+     
+     
+     CWSG_ev1_non_diag = intd_non_diag_ev1
+     #print(CWSG_ev1_non_diag.shape)
+      
+    
+     # LO evolved WCs
+     CWNS_ev0 = evola0NS[np.newaxis, ...] * CWNS
+     CWSG_ev0 = np.einsum('...ij,i...->...ij',evola0,CWSG)
+     #CWSG_as2_ev0 = np.einsum('...ij,i...->...j',evola0_as2,CWSG)
+     
+     
+     
+     # NLO evolved, just S/G for now
+     
+     CWSG_ev1 = CWSG_ev1_diag - CWSG_ev1_non_diag
+     CWSG_ev1 = np.einsum('...ij,ijk...->...ij',CWSG_ev1_diag, - CWSG_ev1_non_diag)      # NOT SURE ABOUT THE MINUS SIGN HERE
+     #print(CWSG_ev1_diag)
+     
+     CWilsonT_1_SG = WilsonT_NLO_glue(j,0,nf,Q,muset)[-2:]
+     
+     CWilsonT_1_SG_ev0 = np.einsum('i...,...ij->...ij',CWilsonT_1_SG,evola0)
+     
+     
+     # LO plus NLO evolution
+     
+     CWilsonT_ev_NS_tot = np.transpose(CWNS_ev0) #+ CWNS_ev1
+     CWilsonT_ev_SG_tot = CWSG_ev0 + CWSG_ev1 + CWilsonT_1_SG_ev0
+     
+     
+     
+     return CWilsonT_ev_NS_tot, CWilsonT_ev_SG_tot
+    
+    
+
+def Moment_Evo_NLO_gluon(j: complex, nf: int, p: int, Q: float, ConfFlav: np.array, prty: int = 1, muset: float = 1) -> np.array:
+    """
+    Evolution of moments in the flavor space 
+
+    Args:
+        uneolved conformal moments in flavor space ConfFlav = [ConfMoment_uV, ConfMoment_ubar, ConfMoment_dV, ConfMoment_dbar, ConfMoment_g] 
+        j: conformal spin j (conformal spin is actually j+2 but anyway): scalar
+        t: momentum transfer squared
+        nf: number of effective fermions; 
+        p (int): 1 for vector-like GPD (Ht, Et), -1 for axial-vector-like GPDs (Ht, Et): array (N,)
+        Q: final evolution scale: array(N,)
+
+    Returns:
+        Evolved conformal moments in flavor space (non-singlet, singlet, gluon)
+
+        return shape (N, 5)
+    """
+   
+    [CWilsonT_ev_NS_tot, CWilsonT_ev_SG_tot] = WCoef_Evo_NLO_glue(j, nf, p, Q, muset)
+    
+    
+    
+    
+    
+    # flavor_trans (5, 5) ConfFlav (N, 5)
+
+    # Transform the unevolved moments to evolution basis
+    # ConfEvoBasis = np.einsum('...j,j', flav_trans, ConfFlav) # originally, output will be (5), I want it to be (N, 5)
+    ConfEvoBasis = np.einsum('ij, ...j->...i', flav_trans, ConfFlav) # shape (N, 5)
+    
+   
+
+
+    # Taking the non-singlet and singlet parts of the conformal moments
+    ConfNS = ConfEvoBasis[..., :3] # (N, 3)
+    ConfSG = ConfEvoBasis[..., -2:] # (N, 2)
+
+    
+    '''
+    # non-singlet part evolves multiplicatively
+    EvoConfNS = np.einsum('i,...i,...i->...i', CWNS, evola0NS[...,np.newaxis], ConfNS) 
+    # singlet part mixes with the gluon
+    EvoConfSG = np.einsum('i,...ij, ...j->...i', CWSG, (evola0 + evola1), ConfSG) #+ np.einsum('...j,...j->...j', CWSG_ev1_non_diag, ConfSG) # (N, 2)
+    '''
+    
+
+    EvoConfNS = np.einsum('...j,...j->...j', CWilsonT_ev_NS_tot, ConfNS)
+    EvoConfSG = np.einsum('...ij,...j->...i', CWilsonT_ev_SG_tot, ConfSG)
+                            
+    
+    
+    
+
+    # Recombing the non-singlet and singlet parts
+    EvoConf = np.concatenate((EvoConfNS, EvoConfSG), axis=-1) # (N, 5)
+    #EvoConf = np.einsum('i,...i->...i',EvoCW,ConfEvoBasis)
+    # Inverse transform the evolved moments back to the flavor basis
+    EvoConfFlav = np.einsum('...ij, ...j->...i', inv_flav_trans, EvoConf) #(N, 5)
+    
+
+    return EvoConfFlav
+
+
+
+'''***********************************************'''
+
+    
+    
+
+def Moms_Evo_NLO(j: complex, nf: int, p: int, Q: float, t, Pars: np.array, ConfFlav: np.array, prty: int = 1, muset: float = 1) -> np.array:
+    """
+    Evolution of moments in the flavor space 
+
+    Args:
+        uneolved conformal moments in flavor space ConfFlav = [ConfMoment_uV, ConfMoment_ubar, ConfMoment_dV, ConfMoment_dbar, ConfMoment_g] 
+        j: conformal spin j (conformal spin is actually j+2 but anyway): scalar
+        t: momentum transfer squared
+        nf: number of effective fermions; 
+        p (int): 1 for vector-like GPD (Ht, Et), -1 for axial-vector-like GPDs (Ht, Et): array (N,)
+        Q: final evolution scale: array(N,)
+
+    Returns:
+        Evolved conformal moments in flavor space (non-singlet, singlet, gluon)
+
+        return shape (N, 5)
+    """
+   
+    
+    
+    
+    
+    
+    
+    # flavor_trans (5, 5) ConfFlav (N, 5)
+
+    # Transform the unevolved moments to evolution basis
+    # ConfEvoBasis = np.einsum('...j,j', flav_trans, ConfFlav) # originally, output will be (5), I want it to be (N, 5)
+    ConfEvoBasis = np.einsum('ij, ...j->...i', flav_trans, ConfFlav) # shape (N, 5)
+    
+   
+
+
+    # Taking the non-singlet and singlet parts of the conformal moments
+    ConfNS = ConfEvoBasis[..., :3] # (N, 3)
+    ConfSG = ConfEvoBasis[..., -2:] # (N, 2)
+    
+    # Set up MB integral for non-diagonal NLO evolution
+    #intercept for inverse Mellin transformation
+    inv_Mellin_intercept = 0.25
+
+    #Cutoff for inverse Mellin transformation
+    inv_Mellin_cutoff = 20
+
+    #Cutoff for Mellin Barnes integral
+    Mellin_Barnes_intercept = 0.3
+
+    #Cutoff for Mellin Barnes integral
+    Mellin_Barnes_cutoff = 20
+
+    #Relative precision Goal of quad set to be 1e-3
+    Prec_Goal = 1e-3
+     
+    reK = Mellin_Barnes_intercept 
+    Max_imK = Mellin_Barnes_cutoff
+    
+     
+    #Set up evolution operator for WCs
+    Alphafact = np.array(AlphaS(nloop_alphaS, nf, np.sqrt(muset)*Q)) / np.pi / 2
+    R = AlphaS(nloop_alphaS, nf, np.sqrt(muset)*Q)/AlphaS(nloop_alphaS, nf, Init_Scale_Q) # shape N
+    R = np.array(R)
+    # R_as2 = AlphaS(nloop_alphaS + 1, nf, Q)/AlphaS(nloop_alphaS + 1, nf, Init_Scale_Q)
+    # R_as2 = np.array(R_as2)
+     #print(R)
+    b0 = beta0(nf)
+    lam, pr = projectors(j+1, nf, p)
+    pproj = amuindep(j, nf, p)
+     #print(amuindep(j, nf, p))
+     
+    rmu1 = rmudep(nf, lam, lam, np.sqrt(muset)*Q)
+     #print(rmu1)
+     #print(pproj)
+     #print(rmu1.shape)
+
+    Rfact = R[...,np.newaxis]**(-lam/b0)  # LO evolution (alpha(mu)/alpha(mu0))^(-gamma/beta0)
+     #Rfact_as2 = R_as2[...,np.newaxis]**(-lam/b0)
+     
+     # S/G LO evolution operator
+    evola0 = np.einsum('...aij,...a->...ij', pr, Rfact)
+     #evola0_as2 = np.einsum('...aij,...a->...ij',pr,Rfact_as2)
+     #evola0ab = np.einsum('...aij,ab->...abij', pr,  np.identity(2))
+     #evola0 = np.einsum('...abij,...b->...ij', evola0ab, Rfact)
+     
+     # NS LO evolution operator
+    gam0NS = non_singlet_LO(j+1, nf, p)
+    evola0NS = R**(-gam0NS/b0)
+   
+         
+     # S/G diagonal NLO evolution operator
+     
+    evola1_diag_ab = np.einsum('kab,kabij->kabij', rmu1, pproj)
+     #print(evola1_diag_ab)
+    evola1_diag = np.einsum('...abij,...b,...->...ij', evola1_diag_ab, Rfact,Alphafact)
+     
+     
+     
+      
+     # S/G non-diagonal NLO evolution operator
+     
+    ConfNS_ev1 = np.zeros_like(np.einsum('...,...i->...i',evola0NS, ConfNS))
+    ConfSG_ev1_diag = np.einsum('...ij,...j->...i',evola1_diag,ConfSG)
+    def non_diag_integrand(imK):
+         
+        ConfFlavk    = obs.Moment_Sum(- reK + 1j*imK, t, Pars)
+        ConfEvoBasisk = np.einsum('ij, ...j->...i', flav_trans, ConfFlavk)
+        ConfSGk = ConfEvoBasisk[...,-2:]
+        ConfFlavk_shift    = obs.Moment_Sum(j - 1 - reK + 1j*imK, t, Pars)
+        ConfEvoBasisk_shift = np.einsum('ij, ...j->...i', flav_trans, ConfFlavk)
+        ConfSGk_shift = ConfEvoBasisk_shift[...,-2:]
+         #print(CWk)
+         #print(j + 2 - reK + 1j*imK)
+        Bjk = np.einsum('...abij,...b,...->...ij',bmudep_quad(Q, j, - reK + 1j*imK, nf,p), Rfact,Alphafact)
+        Bjk_shift = np.einsum('...abij,...b,...->...ij',bmudep_quad(Q, j, j - 1 - reK + 1j*imK, nf,p), Rfact,Alphafact)
+         
+        return np.einsum('...ij,...j->...i',Bjk,ConfSGk) / np.tan(np.pi * (-reK + 1j*imK) / 2) - np.einsum('...ij,...j->...i',Bjk,ConfSGk_shift) / np.tan(np.pi * (j - 1 -reK + 1j*imK) / 2)
+     #print(non_diag_integrand(Max_imK / 100))  
+    intd_non_diag_ev1 = 1j * (quad_vec(lambda imK: non_diag_integrand(imK), - Max_imK, 0,epsrel=Prec_Goal)[0] + quad_vec(lambda imK: non_diag_integrand(imK), 0, Max_imK, epsrel=Prec_Goal)[0]) / 4 
+      
+    ConfSG_ev1_non_diag = intd_non_diag_ev1
+     #print(CWSG_ev1_non_diag.shape)
+      
+    
+     # LO evolved WCs
+    ConfNS_ev0 = evola0NS[...,np.newaxis] * ConfNS
+    ConfSG_ev0 = np.einsum('...ij,...j->...i',evola0,ConfSG)
+     #CWSG_as2_ev0 = np.einsum('...ij,i...->...j',evola0_as2,CWSG)
+     
+     
+     
+     # NLO evolved, just S/G for now
+     
+    ConfSG_ev1 = ConfSG_ev1_diag - ConfSG_ev1_non_diag     # NOT SURE ABOUT THE MINUS SIGN HERE
+     #print(CWSG_ev1_diag)
+     
+    CWilsonT_1_SG = WilsonT_NLO(j,0,nf,Q,muset)[-2:]
+     
+    CWilsonT_1_SG_ev0 = np.einsum('j...,...j->...j',CWilsonT_1_SG,ConfSG_ev0)
+    
+    EvConfNS = ConfNS_ev0 #+ ConfNS_ev1
+    EvConfSG = ConfSG_ev0 + ConfSG_ev1
+    
+    Ev_Mom_NS_tot = np.einsum('i...,...i->...i',CWilsonT(j,nf)[:3],EvConfNS)
+    Ev_Mom_SG = np.einsum('i...,...i->...i',CWilsonT(j,nf)[-2:],EvConfSG)
+    Ev_Mom_SG_tot = Ev_Mom_SG + CWilsonT_1_SG_ev0
+     
+     # LO plus NLO evolution
+     
+    
+
+    
+    '''
+    # non-singlet part evolves multiplicatively
+    EvoConfNS = np.einsum('i,...i,...i->...i', CWNS, evola0NS[...,np.newaxis], ConfNS) 
+    # singlet part mixes with the gluon
+    EvoConfSG = np.einsum('i,...ij, ...j->...i', CWSG, (evola0 + evola1), ConfSG) #+ np.einsum('...j,...j->...j', CWSG_ev1_non_diag, ConfSG) # (N, 2)
+    '''
+    
+
+    
+                            
+    
+    
+    
+
+    # Recombing the non-singlet and singlet parts
+    EvoConf = np.concatenate((Ev_Mom_NS_tot, Ev_Mom_SG_tot), axis=-1) # (N, 5)
+    #EvoConf = np.einsum('i,...i->...i',EvoCW,ConfEvoBasis)
+    # Inverse transform the evolved moments back to the flavor basis
+    EvoConfFlav = np.einsum('...ij, ...j->...i', inv_flav_trans, EvoConf) #(N, 5)
+    
+
+    return EvoConfFlav
+
+
+
+
+def Moment_Evo_NLO_quad(j: complex, nf: int, p: int, Q: float, ConfFlav: np.array, prty: int = 1) -> np.array:
+    """
+    Evolution of moments in the flavor space 
+
+    Args:
+        uneolved conformal moments in flavor space ConfFlav = [ConfMoment_uV, ConfMoment_ubar, ConfMoment_dV, ConfMoment_dbar, ConfMoment_g] 
+        j: conformal spin j (conformal spin is actually j+2 but anyway): scalar
+        t: momentum transfer squared
+        nf: number of effective fermions; 
+        p (int): 1 for vector-like GPD (Ht, Et), -1 for axial-vector-like GPDs (Ht, Et): array (N,)
+        Q: final evolution scale: array(N,)
+
+    Returns:
+        Evolved conformal moments in flavor space (non-singlet, singlet, gluon)
+
+        return shape (N, 5)
+    """
+   
+    
+   
+   # Separate out NS and S/G Wilson coefficients
+    CWNS = CWilsonT(j, nf)[:3]
+    CWSG = CWilsonT(j,nf)[-2:]
+    
+    
+    
+   
+    
+   # Set up MB integral for non-diagonal NLO evolution
+   #intercept for inverse Mellin transformation
+    inv_Mellin_intercept = 0.25
+
+   #Cutoff for inverse Mellin transformation
+    inv_Mellin_cutoff = 20
+
+   #Cutoff for Mellin Barnes integral
+    Mellin_Barnes_intercept = 0.3
+
+   #Cutoff for Mellin Barnes integral
+    Mellin_Barnes_cutoff = 20
+
+   #Relative precision Goal of quad set to be 1e-3
+    Prec_Goal = 1e-3
+    
+    reK = Mellin_Barnes_intercept 
+    Max_imK = Mellin_Barnes_cutoff
+   
+    
+   #Set up evolution operator for WCs
+    Alphafact = np.array(AlphaS(nloop_alphaS, nf, Q)) / np.pi / 2
+    R = AlphaS(nloop_alphaS, nf, Q)/AlphaS(nloop_alphaS, nf, Init_Scale_Q) # shape N
+    R = np.array(R)
+    #print(R)
+    b0 = beta0(nf)
+    lam, pr = projectors(j+1, nf, p)
+    pproj = amuindep_quad(j, nf, p)
+    #print(pproj.shape)
+    
+    rmu1 = rmudep_quad(nf, lam, lam, Q)
+    #print(rmu1)
+    #print(pproj)
+    #print(rmu1.shape)
+
+    Rfact = R[...,np.newaxis]**(-lam/b0)  # LO evolution (alpha(mu)/alpha(mu0))^(-gamma/beta0)
+    
+    # S/G LO evolution operator
+    evola0 = np.einsum('...aij,...a->...ij', pr, Rfact)
+    #evola0ab = np.einsum('...aij,ab->...abij', pr,  np.identity(2))
+    #evola0 = np.einsum('...abij,...b->...ij', evola0ab, Rfact)
+    
+    # NS LO evolution operator
+    gam0NS = non_singlet_LO(j+1, nf, p)
+    evola0NS = R**(-gam0NS/b0)
+  
+        
+    # S/G diagonal NLO evolution operator
+    
+    evola1_diag_ab = np.einsum('kab,kabij->kabij', rmu1, pproj)
+    #print(evola1_diag_ab)
+    evola1_diag = np.einsum('...abij,...b,...->...ij', evola1_diag_ab, Rfact,Alphafact)
+    
+    
+    
+    
+     
+    # S/G non-diagonal NLO evolution operator
+    
+    CWNS_ev1 = np.zeros_like(np.einsum('...,i...->...i',evola0NS, CWNS))
+    CWSG_ev1_diag = np.einsum('...ij,...i->...j',evola1_diag,CWSG)
+    def non_diag_integrand(imK):
+        
+        CWk = CWilsonT(j + 2 - reK + 1j*imK, nf)[-2:]
+        #print(CWk)
+        #print(j + 2 - reK + 1j*imK)
+        Bjk = np.einsum('...abij,...b,...->...ij',bmudep_quad(Q, j + 2 - reK + 1j*imK, j, nf,p), Rfact,Alphafact)
+        
+        return np.einsum('...ij,i...->...j',Bjk,CWk) / np.tan(np.pi * (-reK + 1j*imK) / 2)
+    #print(non_diag_integrand(Max_imK / 100))  
+    intd_non_diag_ev1 = 1j * quad_vec(lambda imK: non_diag_integrand(imK), - Max_imK, + Max_imK,epsrel=Prec_Goal)[0] / 4 
+    
+    
+    
+    
+    CWSG_ev1_non_diag = intd_non_diag_ev1
+    #print(CWSG_ev1_non_diag)
+     
+     
+   
+    # LO evolved WCs
+    CWNS_ev0 = evola0NS[np.newaxis, ...] * CWNS
+    CWSG_ev0 = np.einsum('ij,i->j',evola0,CWSG)
+    
+    
+    
+    # NLO evolved, just S/G for now
+    
+    CWSG_ev1 = CWSG_ev1_diag - CWSG_ev1_non_diag     # NOT SURE ABOUT THE MINUS SIGN HERE
+    
+    #print(CWSG_ev0.shape)
+    #print(CWSG_ev1_diag.shape)
+    #print(CWSG_ev1_non_diag.shape)
+    
+    # LO plus NLO evolution
+    
+    CWilsonT_ev_NS_tot = np.transpose(CWNS_ev0) + CWNS_ev1
+    CWilsonT_ev_SG_tot = CWSG_ev0 + CWSG_ev1
+    
+    
+    
+    #print(evola0)
+    
+    
+    # flavor_trans (5, 5) ConfFlav (N, 5)
+
+    # Transform the unevolved moments to evolution basis
+    # ConfEvoBasis = np.einsum('...j,j', flav_trans, ConfFlav) # originally, output will be (5), I want it to be (N, 5)
+    ConfEvoBasis = np.einsum('ij, ...j->...i', flav_trans, ConfFlav) # shape (N, 5)
+    
+    
+
+
+    # Taking the non-singlet and singlet parts of the conformal moments
+    ConfNS = ConfEvoBasis[..., :3] # (N, 3)
+    ConfSG = ConfEvoBasis[..., -2:] # (N, 2)
+    
+
+    
+    '''
+    # non-singlet part evolves multiplicatively
+    EvoConfNS = np.einsum('i,...i,...i->...i', CWNS, evola0NS[...,np.newaxis], ConfNS) 
+    # singlet part mixes with the gluon
+    EvoConfSG = np.einsum('i,...ij, ...j->...i', CWSG, (evola0 + evola1), ConfSG) #+ np.einsum('...j,...j->...j', CWSG_ev1_non_diag, ConfSG) # (N, 2)
+    '''
+    
+
+    EvoConfNS = np.einsum('...j,j->...j', CWilsonT_ev_NS_tot, ConfNS)
+    
+    EvoConfSG = np.einsum('...j,j->...j', CWilsonT_ev_SG_tot, ConfSG)
+    
+    EvoConfSG = np.reshape(EvoConfSG,(2,))
+    
+    #print(EvoConfSG.shape)
+                            
+    
+    
+    
+
+    # Recombing the non-singlet and singlet parts
+    EvoConf = np.concatenate((EvoConfNS, EvoConfSG), axis=-1) # (N, 5)
+    #EvoConf = np.einsum('i,...i->...i',EvoCW,ConfEvoBasis)
+    # Inverse transform the evolved moments back to the flavor basis
+    EvoConfFlav = np.einsum('...ij, ...j->...i', inv_flav_trans, EvoConf) #(N, 5)
+    
+    
+
+    return EvoConfFlav
+
+
+
+
+#@np_gpd_cache
+def GPD_Moment_Evo_NLO(j: complex, nf: int, p: int, Q: float,t: float, ConfFlav: np.array, Para: np.array, prty: int = 1, muset: float = 1) -> np.array:
+    
+     
+     ConfEvoBasis = np.einsum('ij, ...j->...i', flav_trans, ConfFlav) # shape (N, 5)
+     
+    
+
+
+     ConfNS = ConfEvoBasis[..., :3] # (N, 3)
+     ConfSG = ConfEvoBasis[..., -2:] # (N, 2)
+
+     
+   
+     inv_Mellin_intercept = 0.25
+
+   
+     inv_Mellin_cutoff = 20
+
+     Mellin_Barnes_intercept = 0.3
+
+     Mellin_Barnes_cutoff = 20
+     Prec_Goal = 1e-3
+     
+     reK = Mellin_Barnes_intercept * 0.8
+     Max_imK = Mellin_Barnes_cutoff
+    
+     
+    #Set up evolution operator for WCs
+     Alphafact = np.array(AlphaS(nloop_alphaS, nf, np.sqrt(muset)*Q)) / np.pi / 2
+     R = AlphaS(nloop_alphaS, nf, np.sqrt(muset)*Q)/AlphaS(nloop_alphaS, nf, Init_Scale_Q) # shape N
+     R = np.array(R)
+   
+     b0 = beta0(nf)
+     lam, pr = projectors(j+1, nf, p)
+     pproj = amuindep(j, nf, p)
+     #print(amuindep(j, nf, p))
+     
+     rmu1 = rmudep(nf, lam, lam, np.sqrt(muset)*Q)
+     #print(rmu1)
+     #print(pproj)
+     #print(rmu1.shape)
+
+     Rfact = R[...,np.newaxis]**(-lam/b0)  # LO evolution (alpha(mu)/alpha(mu0))^(-gamma/beta0)
+     #Rfact_as2 = R_as2[...,np.newaxis]**(-lam/b0)
+     
+     
+     evola0 = np.einsum('...aij,...a->...ij', pr, Rfact)
+    
+     gam0NS = non_singlet_LO(j+1, nf, p)
+     evola0NS = R**(-gam0NS/b0)
+   
+         
+     # S/G diagonal NLO evolution operator
+     
+     evola1_diag_ab = np.einsum('kab,kabij->kabij', rmu1, pproj)
+     #print(evola1_diag_ab)
+     evola1_diag = np.einsum('...abij,...b,...->...ij', evola1_diag_ab, Rfact,Alphafact)
+     
+     
+     
+      
+     # S/G non-diagonal NLO evolution operator
+     
+     confNS_ev1 = np.zeros_like(np.einsum('...,...i->i...',evola0NS, ConfNS))
+     confSG_ev1_diag = np.einsum('...ij,...j->...i',evola1_diag,ConfSG)
+     def non_diag_integrand(imK):
+         
+         ConfFlavk     = obs.Moment_Sum(np.array([-reK + 1j*imK],dtype=complex), t, Para)
+         ConfEvoBasisk = np.einsum('ij, ...j->...i', flav_trans, ConfFlavk)
+         #print(ConfFlav.shape)
+         ConfSGk = ConfEvoBasisk[0,:,-2:]
+         #print(ConfSG.shape)
+         ConfFlav_shift     = obs.Moment_Sum(np.array([j - reK + 1j*imK],dtype=complex), t, Para)
+         ConfEvoBasis_shift = np.einsum('ij, ...j->...i', flav_trans, ConfFlav_shift) 
+         ConfSG_shift = ConfEvoBasis_shift[0,:,-2:]
+         #print(CWk)
+         #print(j + 2 - reK + 1j*imK)
+         Bjk = bmudep(np.sqrt(muset)*Q, np.array([j],dtype=complex), np.array([- reK + 1j*imK],dtype=complex), nf,p)*Alphafact
+         Bjk_shift = bmudep(np.sqrt(muset)*Q, np.array([j],dtype=complex), np.array([j - reK + 1j*imK],dtype=complex), nf,p)*Alphafact
+         
+         return np.einsum('...i,...->...i',np.einsum('...ij,...j->...i',Bjk,ConfSGk),1 / np.tan(np.pi * (j -reK + 1j*imK) / 2)) - np.einsum('...i,...->...i',np.einsum('...ij,...j->...i',Bjk_shift,ConfSG_shift),1 / np.tan(np.pi * (j -reK + 1j*imK) / 2)) 
+         #return np.einsum('...i,...->...i',np.einsum('...ij,...j->...i',Bjk_shift,ConfSG_shift),1 / np.tan(np.pi * (-reK + 1j*imK) / 2)) 
+     
+     #print(non_diag_integrand(np.array([Max_imK / 100])))
+     
+     
+     
+     intd_non_diag_ev1 = np.array([1j * (fixed_quad(lambda imK: non_diag_integrand(imK)[...,0], - Max_imK, Max_imK ,n=500)[0] ) / 4, 1j * (fixed_quad(lambda imK: non_diag_integrand(imK)[...,1], - Max_imK, Max_imK,n=500)[0]  )/ 4])
+     
+     
+     #intd_non_diag_ev1 = np.array([[1j * fixed_quad(lambda imK: non_diag_integrand(imK)[...,0,0], - Max_imK, + Max_imK,n=500)[0] / 4, 1j * fixed_quad(lambda imK: non_diag_integrand(imK)[...,0,1], - Max_imK, + Max_imK,n=500)[0] / 4],[1j * fixed_quad(lambda imK: non_diag_integrand(imK)[...,1,0], - Max_imK, + Max_imK,n=500)[0] / 4, 1j * fixed_quad(lambda imK: non_diag_integrand(imK)[...,1,1], - Max_imK, + Max_imK,n=500)[0] / 4]])
+     
+     
+     confSG_ev1_non_diag = intd_non_diag_ev1
+     #print(MomSG_ev1_non_diag.shape)
+      
+    
+     # LO evolved moments
+     confNS_ev0 = evola0NS[..., np.newaxis] * ConfNS
+     confSG_ev0 = np.einsum('...ij,...j->...i',evola0,ConfSG)
+     #CWSG_as2_ev0 = np.einsum('...ij,i...->...j',evola0_as2,CWSG)
+     
+     
+     
+     # NLO evolved, just S/G for now
+     
+     #confSG_ev1 = confSG_ev1_diag + confSG_ev1_non_diag     
+     
+     confSG_ev1 = np.einsum('ij,jki->ij',confSG_ev1_diag, - confSG_ev1_non_diag)
+     
+     
+     # LO plus NLO evolution
+     
+     conf_ev_NS_tot = confNS_ev0 + np.transpose(confNS_ev1)
+     conf_ev_SG_tot = confSG_ev0 + confSG_ev1
+     
+     
+     
+     # Recombing the non-singlet and singlet parts
+     EvoConf = np.concatenate((conf_ev_NS_tot, conf_ev_SG_tot), axis=-1) # (N, 5)
+     #EvoConf = np.einsum('i,...i->...i',EvoCW,ConfEvoBasis)
+     # Inverse transform the evolved moments back to the flavor basis
+     EvoConfFlav = np.einsum('...ij, ...j->...i', inv_flav_trans, EvoConf) #(N, 5)
+     
+
+     return EvoConfFlav
+ 
+ 
+def GPD_Moment_Evo_NLO_slow(j: complex, nf: int, p: int, Q: float, t: float, Pars: np.array, ConfFlav: np.array, prty: int = 1, muset: float = 1) -> np.array:
+    
+     # flavor_trans (5, 5) ConfFlav (N, 5)
+
+     # Transform the unevolved moments to evolution basis
+     # ConfEvoBasis = np.einsum('...j,j', flav_trans, ConfFlav) # originally, output will be (5), I want it to be (N, 5)
+     ConfEvoBasis = np.einsum('ij,j->i', flav_trans, ConfFlav) # shape (N, 5)
+     
+    
+
+
+     # Taking the non-singlet and singlet parts of the conformal moments
+     ConfNS = ConfEvoBasis[..., :3] # (N, 3)
+     ConfSG = ConfEvoBasis[..., -2:] # (N, 2)
+
+     
+     
+      
+      
+      
+     
+      
+     # Set up MB integral for non-diagonal NLO evolution
+     #intercept for inverse Mellin transformation
+     inv_Mellin_intercept = 0.25
+
+     #Cutoff for inverse Mellin transformation
+     inv_Mellin_cutoff = 20
+
+     #Cutoff for Mellin Barnes integral
+     Mellin_Barnes_intercept = 0.3
+
+     #Cutoff for Mellin Barnes integral
+     Mellin_Barnes_cutoff = 20
+
+     #Relative precision Goal of quad set to be 1e-3
+     Prec_Goal = 1e-3
+      
+     reK = Mellin_Barnes_intercept  
+     Max_imK = Mellin_Barnes_cutoff
+     
+      
+     #Set up evolution operator for WCs
+     Alphafact = np.array(AlphaS(nloop_alphaS, nf, Q)) / np.pi / 2
+     R = AlphaS(nloop_alphaS, nf, Q)/AlphaS(nloop_alphaS, nf, Init_Scale_Q) # shape N
+     R = np.array(R)
+     #print(R)
+     b0 = beta0(nf)
+     lam, pr = projectors(j+1, nf, p)
+     pproj = amuindep_quad(j, nf, p)
+     #print(pproj.shape)
+      
+     rmu1 = rmudep_quad(nf, lam, lam, Q)
+     #print(rmu1)
+      #print(pproj)
+      #print(rmu1.shape)
+
+     Rfact = R[...,np.newaxis]**(-lam/b0)  # LO evolution (alpha(mu)/alpha(mu0))^(-gamma/beta0)
+      
+      # S/G LO evolution operator
+     evola0 = np.einsum('...aij,...a->...ij', pr, Rfact)
+      #evola0ab = np.einsum('...aij,ab->...abij', pr,  np.identity(2))
+      #evola0 = np.einsum('...abij,...b->...ij', evola0ab, Rfact)
+      
+      # NS LO evolution operator
+     gam0NS = non_singlet_LO(j+1, nf, p)
+     evola0NS = R**(-gam0NS/b0)
+    
+          
+      # S/G diagonal NLO evolution operator
+      
+     evola1_diag_ab = np.einsum('kab,kabij->kabij', rmu1, pproj)
+      #print(evola1_diag_ab)
+     evola1_diag = np.einsum('...abij,...b,...->...ij', evola1_diag_ab, Rfact,Alphafact)
+      
+      
+      
+      
+       
+      # S/G non-diagonal NLO evolution operator
+      
+     ConfNS_ev1 = np.zeros_like(evola0NS[np.newaxis, ...] * ConfNS)
+     ConfSG_ev1_diag = np.einsum('...ij,j->...i',evola1_diag,ConfSG)
+     def non_diag_integrand(imK):
+          
+         ConfFlavk    = obs.Moment_Sum(- reK + 1j*imK, t, Pars)
+         ConfEvoBasisk = np.einsum('ij, ...j->...i', flav_trans, ConfFlavk)
+         ConfSGk = ConfEvoBasisk[...,-2:]
+          #print(CWk)
+          #print(j + 2 - reK + 1j*imK)
+         Bjk = np.einsum('...abij,...b,...->...ij',bmudep_quad(Q, j, - reK + 1j*imK, nf,p), Rfact,Alphafact)
+          
+         return np.einsum('...ij,i...->...j',Bjk,ConfSGk) / np.tan(np.pi * (-reK + 1j*imK) / 2)
+      #print(non_diag_integrand(Max_imK / 100))  
+     intd_non_diag_ev1 = 1j * (quad_vec(lambda imK: non_diag_integrand(imK), - Max_imK, 0,epsrel=Prec_Goal)[0] + quad_vec(lambda imK: non_diag_integrand(imK), 0, Max_imK, epsrel=Prec_Goal)[0]) / 4 
+      
+      
+      
+      
+     ConfSG_ev1_non_diag = intd_non_diag_ev1
+      #print(CWSG_ev1_non_diag)
+       
+       
+     
+      # LO evolved WCs
+     ConfNS_ev0 = evola0NS[np.newaxis, ...] * ConfNS
+     ConfSG_ev0 = np.einsum('...ij,i->...j',evola0,ConfSG)
+      
+      
+      
+      # NLO evolved, just S/G for now
+      
+     ConfSG_ev1 = ConfSG_ev1_diag - ConfSG_ev1_non_diag     # NOT SURE ABOUT THE MINUS SIGN HERE
+      
+      #print(CWSG_ev1)
+      
+      # LO plus NLO evolution
+      
+     ConfNS_tot = ConfNS_ev0 + ConfNS_ev1
+     ConfSG_tot = ConfSG_ev0 + ConfSG_ev1
+     ConfSG_tot = np.reshape(ConfSG_tot,(2,))
+      
+      
+     
+      
+
+      
+      
+      
+
+     
+                              
+      
+      
+      
+
+      # Recombing the non-singlet and singlet parts
+     EvoConf = np.concatenate((ConfNS_tot, ConfSG_tot), axis=-1) # (N, 5)
+      #EvoConf = np.einsum('i,...i->...i',EvoCW,ConfEvoBasis)
+      # Inverse transform the evolved moments back to the flavor basis
+     EvoConfFlav = np.einsum('...ij, ...j->...i', inv_flav_trans, EvoConf) #(N, 5)
+      
+      
+
+     return EvoConfFlav
+
+   
+ 
+ 
+def GPD_Moment_ev0_test(j: complex, x, nf: int, p: int, Q: float, ConfFlav: np.array, prty: int = 1, muset: float = 1) -> np.array:
+    
+    ConfEvoBasis = np.einsum('ij, ...j->...i', flav_trans, ConfFlav) # shape (N, 5)
+    
+    gpd_coefs = np.array([0*j,0*j,0*j,gamma(5/2 + j) / gamma(3/2) / gamma(3+j),gamma(5/2 + j) * 2 * x / gamma(3/2) / gamma(3+j) / (3+j)])
+
+
+    # Taking the non-singlet and singlet parts of the conformal moments
+    ConfNS = ConfEvoBasis[..., :3] # (N, 3)
+    ConfSG = ConfEvoBasis[..., -2:] # (N, 2)
+    
+    gpdcNS = gpd_coefs[:3,...]
+    gpdcSG = gpd_coefs[-2:,...]
+    
+    [evons, evoa] = evolop(j, nf, p, Q)
+    
+    
+    
+  #  CWilsonDVCS = CWilson(j)[np.newaxis,...]*np.ones((5,len(j)))
+  #  CWilsonDVCS[-1,...] = 0
+  
+    gpdcNS_evo = np.einsum('ij,j->ij',gpdcNS,evons)
+    gpdcSG_evo = np.einsum('ik,kij->jk', gpdcSG, evoa)
+    EvoConfNS = np.einsum('ij,ji->ji',gpdcNS_evo,ConfNS)
+    EvoConfSG = np.einsum('ik,ki->ki',gpdcSG_evo,ConfSG)
+    #print(EvoConfNS.shape)
+    #print(EvoConfS.shape)
+    EvoConf = np.concatenate((EvoConfNS,EvoConfSG),axis=-1)
+    EvoConfFlav = np.einsum('...ij,...j->...i', inv_flav_trans, EvoConf)
+    
+    return EvoConfFlav
+
+def GPD_Moment_Evo_NLO_lowprec(j: complex, nf: int, p: int, Q: float, ConfFlav: np.array, prty: int = 1, muset: float = 1) -> np.array:
+    
+     # flavor_trans (5, 5) ConfFlav (N, 5)
+
+     # Transform the unevolved moments to evolution basis
+     # ConfEvoBasis = np.einsum('...j,j', flav_trans, ConfFlav) # originally, output will be (5), I want it to be (N, 5)
+     ConfEvoBasis = np.einsum('ij, ...j->...i', flav_trans, ConfFlav) # shape (N, 5)
+     
+    
+
+
+     # Taking the non-singlet and singlet parts of the conformal moments
+     ConfNS = ConfEvoBasis[..., :3] # (N, 3)
+     ConfSG = ConfEvoBasis[..., -2:] # (N, 2)
+
+     
+    # Set up MB integral for non-diagonal NLO evolution
+    #intercept for inverse Mellin transformation
+     inv_Mellin_intercept = 0.25
+
+    #Cutoff for inverse Mellin transformation
+     inv_Mellin_cutoff = 20
+
+    #Cutoff for Mellin Barnes integral
+     Mellin_Barnes_intercept = 0.3
+
+    #Cutoff for Mellin Barnes integral
+     Mellin_Barnes_cutoff = 20
+
+    #Relative precision Goal of quad set to be 1e-3
+     Prec_Goal = 1e-3
+     
+     reK = Mellin_Barnes_intercept 
+     Max_imK = Mellin_Barnes_cutoff
+    
+     
+    #Set up evolution operator for WCs
+     Alphafact = np.array(AlphaS(nloop_alphaS, nf, np.sqrt(muset)*Q)) / np.pi / 2
+     R = AlphaS(nloop_alphaS, nf, np.sqrt(muset)*Q)/AlphaS(nloop_alphaS, nf, Init_Scale_Q) # shape N
+     R = np.array(R)
+    # R_as2 = AlphaS(nloop_alphaS + 1, nf, Q)/AlphaS(nloop_alphaS + 1, nf, Init_Scale_Q)
+    # R_as2 = np.array(R_as2)
+     #print(R)
+     b0 = beta0(nf)
+     lam, pr = projectors(j+1, nf, p)
+     pproj = amuindep(j, nf, p)
+     #print(amuindep(j, nf, p))
+     
+     rmu1 = rmudep(nf, lam, lam, np.sqrt(muset)*Q)
+     #print(rmu1)
+     #print(pproj)
+     #print(rmu1.shape)
+
+     Rfact = R[...,np.newaxis]**(-lam/b0)  # LO evolution (alpha(mu)/alpha(mu0))^(-gamma/beta0)
+     #Rfact_as2 = R_as2[...,np.newaxis]**(-lam/b0)
+     
+     # S/G LO evolution operator
+     evola0 = np.einsum('...aij,...a->...ij', pr, Rfact)
+     #evola0_as2 = np.einsum('...aij,...a->...ij',pr,Rfact_as2)
+     #evola0ab = np.einsum('...aij,ab->...abij', pr,  np.identity(2))
+     #evola0 = np.einsum('...abij,...b->...ij', evola0ab, Rfact)
+     
+     # NS LO evolution operator
+     gam0NS = non_singlet_LO(j+1, nf, p)
+     evola0NS = R**(-gam0NS/b0)
+   
+         
+     # S/G diagonal NLO evolution operator
+     
+     evola1_diag_ab = np.einsum('kab,kabij->kabij', rmu1, pproj)
+     #print(evola1_diag_ab)
+     evola1_diag = np.einsum('...abij,...b,...->...ij', evola1_diag_ab, Rfact,Alphafact)
+     
+     
+     
+      
+     # S/G non-diagonal NLO evolution operator
+     
+     MomNS_ev1 = np.zeros_like(np.einsum('...,...i->i...',evola0NS, ConfNS))
+     MomSG_ev1_diag = np.einsum('...ij,...j->...i',evola1_diag,ConfSG)
+     def non_diag_integrand(imK):
+         
+         
+         #print(CWk)
+         #print(j + 2 - reK + 1j*imK)
+         Bjk = np.einsum('...abij,...b,...->...ij',bmudep(np.sqrt(muset)*Q, j, reK + 1j*imK, nf,p), Rfact,Alphafact)
+         Bjk_shift = np.einsum('...abij,...b,...->...ij',bmudep(np.sqrt(muset)*Q, j, j - 1 - reK + 1j*imK, nf,p), Rfact,Alphafact)
+         
+         return np.einsum('...j,...->...j',np.einsum('...ij,...j->...i',Bjk - Bjk_shift,ConfSG), 1 / np.tan(np.pi * (-reK + 1j*imK) / 2))
+     
+     #print(non_diag_integrand(np.array([Max_imK / 100])))
+     
+     
+     
+     intd_non_diag_ev1 = np.zeros((2,),dtype=complex)  
+     for i in range(2):
+         #t1 = time.time()
+         intd_non_diag_ev1[i] = 1j * fixed_quad(lambda imK: non_diag_integrand(imK)[...,i], - Max_imK, + Max_imK,n=100)[0] / 4
+         #t2 = time.time()
+         
+         #print("integration time", t2-t1)
+     
+     MomSG_ev1_non_diag = intd_non_diag_ev1
+     #print(MomSG_ev1_non_diag.shape)
+      
+    
+     # LO evolved moments
+     MomNS_ev0 = evola0NS[..., np.newaxis] * ConfNS
+     MomSG_ev0 = np.einsum('...ij,...j->...i',evola0,ConfSG)
+     #CWSG_as2_ev0 = np.einsum('...ij,i...->...j',evola0_as2,CWSG)
+     
+     
+     
+     # NLO evolved, just S/G for now
+     
+     MomSG_ev1 = MomSG_ev1_diag - MomSG_ev1_non_diag     
+     
+     
+     
+     
+     # LO plus NLO evolution
+     
+     
+     
+     Mom_ev_NS_tot = MomNS_ev0 + np.transpose(MomNS_ev1)
+     Mom_ev_SG_tot = MomSG_ev0 + MomSG_ev1
+     
+     
+     
+     # Recombing the non-singlet and singlet parts
+     #EvoConf = np.concatenate((MomNS_ev0, MomSG_ev0), axis=-1)
+     EvoConf = np.concatenate((Mom_ev_NS_tot, Mom_ev_SG_tot), axis=-1) # (N, 5)
+     #EvoConf = np.einsum('i,...i->...i',EvoCW,ConfEvoBasis)
+     # Inverse transform the evolved moments back to the flavor basis
+     EvoConfFlav = np.einsum('...ij, ...j->...i', inv_flav_trans, EvoConf) #(N, 5)
+     
+
+     return EvoConfFlav
+
+
+
+@np_gpd_cache
+def tPDF_Moment_Evo_NLO(j: complex, nf: int, p: int, Q: float, ConfFlav: np.array, prty: int = 1, muset: float = 1) -> np.array:
+    
+     # flavor_trans (5, 5) ConfFlav (N, 5)
+
+     # Transform the unevolved moments to evolution basis
+     # ConfEvoBasis = np.einsum('...j,j', flav_trans, ConfFlav) # originally, output will be (5), I want it to be (N, 5)
+     ConfEvoBasis = np.einsum('ij, ...j->...i', flav_trans, ConfFlav) # shape (N, 5)
+     
+    
+
+
+     # Taking the non-singlet and singlet parts of the conformal moments
+     ConfNS = ConfEvoBasis[..., :3] # (N, 3)
+     ConfSG = ConfEvoBasis[..., -2:] # (N, 2)
+
+     
+    # Set up MB integral for non-diagonal NLO evolution
+    #intercept for inverse Mellin transformation
+     inv_Mellin_intercept = 0.25
+
+    #Cutoff for inverse Mellin transformation
+     inv_Mellin_cutoff = 20
+
+    #Cutoff for Mellin Barnes integral
+     Mellin_Barnes_intercept = 0.3
+
+    #Cutoff for Mellin Barnes integral
+     Mellin_Barnes_cutoff = 20
+
+    #Relative precision Goal of quad set to be 1e-3
+     Prec_Goal = 1e-3
+     
+     reK = Mellin_Barnes_intercept 
+     Max_imK = Mellin_Barnes_cutoff
+    
+     
+    #Set up evolution operator for WCs
+     Alphafact = np.array(AlphaS(nloop_alphaS, nf, np.sqrt(muset)*Q)) / np.pi / 2
+     R = AlphaS(nloop_alphaS, nf, np.sqrt(muset)*Q)/AlphaS(nloop_alphaS, nf, Init_Scale_Q) # shape N
+     R = np.array(R)
+    # R_as2 = AlphaS(nloop_alphaS + 1, nf, Q)/AlphaS(nloop_alphaS + 1, nf, Init_Scale_Q)
+    # R_as2 = np.array(R_as2)
+     #print(R)
+     b0 = beta0(nf)
+     lam, pr = projectors(j+1, nf, p)
+     pproj = amuindep(j, nf, p)
+     #print(amuindep(j, nf, p))
+     
+     rmu1 = rmudep(nf, lam, lam, np.sqrt(muset)*Q)
+     #print(rmu1)
+     #print(pproj)
+     #print(rmu1.shape)
+
+     Rfact = R[...,np.newaxis]**(-lam/b0)  # LO evolution (alpha(mu)/alpha(mu0))^(-gamma/beta0)
+     #Rfact_as2 = R_as2[...,np.newaxis]**(-lam/b0)
+     
+     # S/G LO evolution operator
+     evola0 = np.einsum('...aij,...a->...ij', pr, Rfact)
+     #evola0_as2 = np.einsum('...aij,...a->...ij',pr,Rfact_as2)
+     #evola0ab = np.einsum('...aij,ab->...abij', pr,  np.identity(2))
+     #evola0 = np.einsum('...abij,...b->...ij', evola0ab, Rfact)
+     
+     # NS LO evolution operator
+     gam0NS = non_singlet_LO(j+1, nf, p)
+     evola0NS = R**(-gam0NS/b0)
+   
+         
+     # S/G diagonal NLO evolution operator
+     
+     evola1_diag_ab = np.einsum('kab,kabij->kabij', rmu1, pproj)
+     #print(evola1_diag_ab)
+     evola1_diag = np.einsum('...abij,...b,...->...ij', evola1_diag_ab, Rfact,Alphafact)
+     
+     
+     
+      
+     # S/G non-diagonal NLO evolution operator
+     
+     MomNS_ev1 = np.zeros_like(np.einsum('...,...i->i...',evola0NS, ConfNS))
+     MomSG_ev1_diag = np.einsum('...ij,...j->...i',evola1_diag,ConfSG)
+     
+      
+    
+     # LO evolved moments
+     MomNS_ev0 = evola0NS[..., np.newaxis] * ConfNS
+     MomSG_ev0 = np.einsum('...ij,...j->...i',evola0,ConfSG)
+     #CWSG_as2_ev0 = np.einsum('...ij,i...->...j',evola0_as2,CWSG)
+     
+     
+     
+     # NLO evolved, just S/G for now
+     
+     MomSG_ev1 = MomSG_ev1_diag   
+     
+     
+     
+     
+     # LO plus NLO evolution
+     
+     Mom_ev_NS_tot = MomNS_ev0 + np.transpose(MomNS_ev1)
+     Mom_ev_SG_tot = MomSG_ev0 + MomSG_ev1
+     
+     
+     
+     # Recombing the non-singlet and singlet parts
+     EvoConf = np.concatenate((Mom_ev_NS_tot, Mom_ev_SG_tot), axis=-1) # (N, 5)
+     #EvoConf = np.einsum('i,...i->...i',EvoCW,ConfEvoBasis)
+     # Inverse transform the evolved moments back to the flavor basis
+     EvoConfFlav = np.einsum('...ij, ...j->...i', inv_flav_trans, EvoConf) #(N, 5)
+     
+
+     return EvoConfFlav
+
+
+
+    
+
+# precision for the hypergeometric function
+mp.dps = 25
+
+hyp2f1_nparray = np.frompyfunc(hyp2f1,4,1)
+
+def ConfWaveFuncQ(j: complex, x: float, xi: float) -> complex:
+    """ 
+    Quark conformal wave function p_j(x,xi) check e.g. https://arxiv.org/pdf/hep-ph/0509204.pdf
+
+    Args:
+        j: conformal spin j (conformal spin is actually j+2 but anyway)
+        x: momentum fraction x
+        xi: skewness parameter xi
+
+    Returns:
+        quark conformal wave function p_j(x,xi)
+    """  
+    """
+    if(x > xi):
+        pDGLAP = np.sin(np.pi * (j+1))/ np.pi * x**(-j-1) * complex(hyp2f1( (j+1)/2, (j+2)/2, j+5/2, (xi/x) ** 2)) 
+        return pDGLAP
+
+    if(x > -xi):
+        pERBL = 2 ** (1+j) * gamma(5/2+j) / (gamma(1/2) * gamma(1+j)) * xi ** (-j-1) * (1+x/xi) * complex(hyp2f1(-1-j,j+2,2, (x+xi)/(2*xi)))
+        return pERBL
+    
+    return 0
+    """
+
+    pDGLAP = np.where(x >= xi,                np.sin(np.pi * (j+1))/ np.pi * x**(-j-1) * np.array(hyp2f1_nparray( (j+1)/2, (j+2)/2, j+5/2, (xi/x) ** 2), dtype= complex)                           , 0)
+
+    pERBL = np.where(((x > -xi) & (x < xi)), 2 ** (1+j) * gamma(5/2+j) / (gamma(1/2) * gamma(1+j)) * xi ** (-j-1) * (1+x/xi) * np.array(hyp2f1_nparray(-1-j,j+2,2, (x+xi)/(2*xi)), dtype= complex), 0)
+
+    return pDGLAP + pERBL
+
+
+def ConfWaveFuncG(j: complex, x: float, xi: float) -> complex:
+    """ 
+    Gluon conformal wave function p_j(x,xi) check e.g. https://arxiv.org/pdf/hep-ph/0509204.pdf
+
+    Args:
+        j: conformal spin j (actually conformal spin is j+2 but anyway)
+        x: momentum fraction x
+        xi: skewness parameter xi
+
+    Returns:
+        gluon conformal wave function p_j(x,xi)
+    """ 
+    # An extra minus sign defined different from the orginal definition to absorb the extra minus sign of MB integral for gluon
+    """
+    Minus = -1
+    if(x > xi):
+        pDGLAP = np.sin(np.pi * j)/ np.pi * x**(-j) * complex(hyp2f1( j/2, (j+1)/2, j+5/2, (xi/x) ** 2)) 
+        return Minus * pDGLAP
+
+    if(x > -xi):
+        pERBL = 2 ** j * gamma(5/2+j) / (gamma(1/2) * gamma(j)) * xi ** (-j) * (1+x/xi) ** 2 * complex(hyp2f1(-1-j,j+2,3, (x+xi)/(2*xi)))
+        return Minus * pERBL
+    
+    return 0
+    """
+    Minus = -1
+
+    pDGLAP = np.where(x >= xi,                Minus * np.sin(np.pi * j)/ np.pi * x**(-j) * np.array(hyp2f1_nparray( j/2, (j+1)/2, j+5/2, (xi/x) ** 2), dtype= complex)                                   , 0)
+
+    pERBL = np.where(((x > -xi) & (x < xi)), Minus * 2 ** j * gamma(5/2+j) / (gamma(1/2) * gamma(j)) * xi ** (-j) * (1+x/xi) ** 2 * np.array((hyp2f1_nparray(-1-j,j+2,3, (x+xi)/(2*xi))), dtype= complex), 0)
+
+    return pDGLAP + pERBL
+
+    
+def Conf_Wave_Flav(j, x, xi, p):
+    
+    return np.array([ConfWaveFuncQ(j, x, xi), ConfWaveFuncQ(j, x, xi) - p*ConfWaveFuncQ(j, -x, xi),ConfWaveFuncQ(j, x, xi), ConfWaveFuncQ(j, x, xi) - p*ConfWaveFuncQ(j, -x, xi), ConfWaveFuncG(j, x, xi) + p*ConfWaveFuncG(j, -x, xi)])
+    
+def Conf_Wave_Evo_NLO(j, x, xi, Q, nf=2, p=1, prty=1):
+    
+    # flavor_trans (5, 5) ConfFlav (N, 5)
+    muset = 1
+    ConfWaveFlav = Conf_Wave_Flav(j, x, xi, p)
+
+    # Transform the unevolved moments to evolution basis
+    # ConfEvoBasis = np.einsum('...j,j', flav_trans, ConfFlav) # originally, output will be (5), I want it to be (N, 5)
+    ConfEvoBasis = np.einsum('ij, j...->...i', flav_trans, ConfWaveFlav) # shape (N, 5)
+    
+   
+
+
+    # Taking the non-singlet and singlet parts of the conformal moments
+    ConfNS = ConfEvoBasis[..., :3] # (N, 3)
+    ConfSG = ConfEvoBasis[..., -2:] # (N, 2)
+
+    
+   # Set up MB integral for non-diagonal NLO evolution
+   #intercept for inverse Mellin transformation
+    inv_Mellin_intercept = 0.25
+
+   #Cutoff for inverse Mellin transformation
+    inv_Mellin_cutoff = 20
+
+   #Cutoff for Mellin Barnes integral
+    Mellin_Barnes_intercept = 0.3
+
+   #Cutoff for Mellin Barnes integral
+    Mellin_Barnes_cutoff = 20
+
+   #Relative precision Goal of quad set to be 1e-3
+    Prec_Goal = 1e-3
+    
+    reK = Mellin_Barnes_intercept 
+    Max_imK = Mellin_Barnes_cutoff
+   
+    
+   #Set up evolution operator for WCs
+    Alphafact = np.array(AlphaS(nloop_alphaS, nf, np.sqrt(muset)*Q)) / np.pi / 2
+    R = AlphaS(nloop_alphaS, nf, np.sqrt(muset)*Q)/AlphaS(nloop_alphaS, nf, Init_Scale_Q) # shape N
+    R = np.array(R)
+   # R_as2 = AlphaS(nloop_alphaS + 1, nf, Q)/AlphaS(nloop_alphaS + 1, nf, Init_Scale_Q)
+   # R_as2 = np.array(R_as2)
+    #print(R)
+    b0 = beta0(nf)
+    lam, pr = projectors(j+1, nf, p)
+    pproj = amuindep(j, nf, p)
+    #print(amuindep(j, nf, p))
+    
+    rmu1 = rmudep(nf, lam, lam, np.sqrt(muset)*Q)
+    #print(rmu1)
+    #print(pproj)
+    #print(rmu1.shape)
+
+    Rfact = R[...,np.newaxis]**(-lam/b0)  # LO evolution (alpha(mu)/alpha(mu0))^(-gamma/beta0)
+    #Rfact_as2 = R_as2[...,np.newaxis]**(-lam/b0)
+    
+    # S/G LO evolution operator
+    evola0 = np.einsum('...aij,...a->...ij', pr, Rfact)
+    #evola0_as2 = np.einsum('...aij,...a->...ij',pr,Rfact_as2)
+    #evola0ab = np.einsum('...aij,ab->...abij', pr,  np.identity(2))
+    #evola0 = np.einsum('...abij,...b->...ij', evola0ab, Rfact)
+    
+    # NS LO evolution operator
+    gam0NS = non_singlet_LO(j+1, nf, p)
+    evola0NS = R**(-gam0NS/b0)
+  
+        
+    # S/G diagonal NLO evolution operator
+    
+    evola1_diag_ab = np.einsum('kab,kabij->kabij', rmu1, pproj)
+    #print(evola1_diag_ab)
+    evola1_diag = np.einsum('...abij,...b,...->...ij', evola1_diag_ab, Rfact,Alphafact)
+    
+    
+    
+     
+    # S/G non-diagonal NLO evolution operator
+    
+    MomNS_ev1 = np.zeros_like(np.einsum('...,...i->i...',evola0NS, ConfNS))
+    MomSG_ev1_diag = np.einsum('...ij,...i->...j',evola1_diag,ConfSG)
+    def non_diag_integrand(imK):
+        
+        
+        #print(CWk)
+        #print(j + 2 - reK + 1j*imK)
+        Bjk = np.einsum('...abij,...b,...->...ij',bmudep(np.sqrt(muset)*Q, j + 2 - reK + 1j*imK, j, nf,p), Rfact,Alphafact)
+        
+        return np.einsum('...j,...->...j',np.einsum('...ij,...i->...j',Bjk,ConfSG), 1 / np.tan(np.pi * (-reK + 1j*imK) / 2))
+    
+    #print(non_diag_integrand(np.array([Max_imK / 100])))
+    
+    
+    
+    intd_non_diag_ev1 = np.zeros((2,),dtype=complex)  
+    for i in range(2):
+        #t1 = time.time()
+        intd_non_diag_ev1[i] = 1j * fixed_quad(lambda imK: non_diag_integrand(imK)[...,i], - Max_imK, + Max_imK,n=500)[0] / 4
+        #t2 = time.time()
+        
+        #print("integration time", t2-t1)
+    
+    MomSG_ev1_non_diag = intd_non_diag_ev1
+    #print(MomSG_ev1_non_diag.shape)
+     
+   
+    # LO evolved moments
+    MomNS_ev0 = evola0NS[..., np.newaxis] * ConfNS
+    MomSG_ev0 = np.einsum('...ij,...i->...j',evola0,ConfSG)
+    #CWSG_as2_ev0 = np.einsum('...ij,i...->...j',evola0_as2,CWSG)
+    
+    
+    
+    # NLO evolved, just S/G for now
+    
+    MomSG_ev1 = MomSG_ev1_diag - MomSG_ev1_non_diag     
+    
+    
+    
+    
+    # LO plus NLO evolution
+    
+    Mom_ev_NS_tot = MomNS_ev0 + np.transpose(MomNS_ev1)
+    Mom_ev_SG_tot = MomSG_ev0 + MomSG_ev1
+    
+    
+    
+    # Recombing the non-singlet and singlet parts
+    EvoConf = np.concatenate((Mom_ev_NS_tot, Mom_ev_SG_tot), axis=-1) # (N, 5)
+    #EvoConf = np.einsum('i,...i->...i',EvoCW,ConfEvoBasis)
+    # Inverse transform the evolved moments back to the flavor basis
+    EvoConfFlav = np.einsum('...ij, ...j->...i', inv_flav_trans, EvoConf) #(N, 5)
+    
+
+    return EvoConfFlav
+
+
+def Conf_Wave_Evo_LO_lowprec(j, x, xi, Q, nf=2, p=1, prty=1):
+    
+    # flavor_trans (5, 5) ConfFlav (N, 5)
+    muset = 1
+    ConfWaveFlav = Conf_Wave_Flav(j, x, xi, p)
+
+    # Transform the unevolved moments to evolution basis
+    # ConfEvoBasis = np.einsum('...j,j', flav_trans, ConfFlav) # originally, output will be (5), I want it to be (N, 5)
+    ConfEvoBasis = np.einsum('ij, j...->...i', flav_trans, ConfWaveFlav) # shape (N, 5)
+    
+   
+
+
+    # Taking the non-singlet and singlet parts of the conformal moments
+    ConfNS = ConfEvoBasis[..., :3] # (N, 3)
+    ConfSG = ConfEvoBasis[..., -2:] # (N, 2)
+    
+    
+    [evons, evoa] = evolop(j, nf, p, Q) # (N) and (N, 2, 2)
+    
+    
+    EvoWCNS = np.einsum('ij,i->ij', ConfNS, evons)
+    EvoWCS = np.einsum('ij,ijk->ik', ConfSG, evoa)
+    
+    EvoConf = np.concatenate((EvoWCNS, EvoWCS), axis=-1) # (N, 5)
+    #EvoConf = np.einsum('i,...i->...i',EvoCW,ConfEvoBasis)
+    # Inverse transform the evolved moments back to the flavor basis
+    EvoConfFlav = np.einsum('...ij, ...j->...i', inv_flav_trans, EvoConf) #(N, 5)
+    
+
+    return EvoConfFlav
+    
+
+
+def Conf_Wave_Evo_NLO_lowprec(j, x, xi, Q, nf=2, p=1, prty=1):
+    
+    # flavor_trans (5, 5) ConfFlav (N, 5)
+    muset = 1
+    ConfWaveFlav = Conf_Wave_Flav(j, x, xi, p)
+
+    # Transform the unevolved moments to evolution basis
+    # ConfEvoBasis = np.einsum('...j,j', flav_trans, ConfFlav) # originally, output will be (5), I want it to be (N, 5)
+    ConfEvoBasis = np.einsum('ij, j...->...i', flav_trans, ConfWaveFlav) # shape (N, 5)
+    
+   
+
+
+    # Taking the non-singlet and singlet parts of the conformal moments
+    ConfNS = ConfEvoBasis[..., :3] # (N, 3)
+    ConfSG = ConfEvoBasis[..., -2:] # (N, 2)
+
+    
+   # Set up MB integral for non-diagonal NLO evolution
+   #intercept for inverse Mellin transformation
+    inv_Mellin_intercept = 0.25
+
+   #Cutoff for inverse Mellin transformation
+    inv_Mellin_cutoff = 20
+
+   #Cutoff for Mellin Barnes integral
+    Mellin_Barnes_intercept = 0.3
+
+   #Cutoff for Mellin Barnes integral
+    Mellin_Barnes_cutoff = 20
+
+   #Relative precision Goal of quad set to be 1e-3
+    Prec_Goal = 1e-3
+    
+    reK = Mellin_Barnes_intercept 
+    Max_imK = Mellin_Barnes_cutoff
+   
+    
+   #Set up evolution operator for WCs
+    Alphafact = np.array(AlphaS(nloop_alphaS, nf, np.sqrt(muset)*Q)) / np.pi / 2
+    R = AlphaS(nloop_alphaS, nf, np.sqrt(muset)*Q)/AlphaS(nloop_alphaS, nf, Init_Scale_Q) # shape N
+    R = np.array(R)
+   # R_as2 = AlphaS(nloop_alphaS + 1, nf, Q)/AlphaS(nloop_alphaS + 1, nf, Init_Scale_Q)
+   # R_as2 = np.array(R_as2)
+    #print(R)
+    b0 = beta0(nf)
+    lam, pr = projectors(j+1, nf, p)
+    pproj = amuindep(j, nf, p)
+    #print(amuindep(j, nf, p))
+    
+    rmu1 = rmudep(nf, lam, lam, np.sqrt(muset)*Q)
+    #print(rmu1)
+    #print(pproj)
+    #print(rmu1.shape)
+
+    Rfact = R[...,np.newaxis]**(-lam/b0)  # LO evolution (alpha(mu)/alpha(mu0))^(-gamma/beta0)
+    #Rfact_as2 = R_as2[...,np.newaxis]**(-lam/b0)
+    
+    # S/G LO evolution operator
+    evola0 = np.einsum('...aij,...a->...ij', pr, Rfact)
+    #evola0_as2 = np.einsum('...aij,...a->...ij',pr,Rfact_as2)
+    #evola0ab = np.einsum('...aij,ab->...abij', pr,  np.identity(2))
+    #evola0 = np.einsum('...abij,...b->...ij', evola0ab, Rfact)
+    
+    # NS LO evolution operator
+    gam0NS = non_singlet_LO(j+1, nf, p)
+    evola0NS = R**(-gam0NS/b0)
+  
+        
+    # S/G diagonal NLO evolution operator
+    
+    evola1_diag_ab = np.einsum('kab,kabij->kabij', rmu1, pproj)
+    #print(evola1_diag_ab)
+    evola1_diag = np.einsum('...abij,...b,...->...ij', evola1_diag_ab, Rfact,Alphafact)
+    
+    
+    
+     
+    # S/G non-diagonal NLO evolution operator
+    
+    MomNS_ev1 = np.zeros_like(np.einsum('...,...i->i...',evola0NS, ConfNS))
+    MomSG_ev1_diag = np.einsum('...ij,...i->...j',evola1_diag,ConfSG)
+    def non_diag_integrand(imK):
+        
+        
+        #print(CWk)
+        #print(j + 2 - reK + 1j*imK)
+        Bjk = np.einsum('...abij,...b,...->...ij',bmudep(np.sqrt(muset)*Q, j + 2 - reK + 1j*imK, j, nf,p), Rfact,Alphafact)
+        
+        return np.einsum('...j,...->...j',np.einsum('...ij,...i->...j',Bjk,ConfSG), 1 / np.tan(np.pi * (-reK + 1j*imK) / 2))
+    
+    #print(non_diag_integrand(np.array([Max_imK / 100])))
+    
+    
+    
+    intd_non_diag_ev1 = np.zeros((2,),dtype=complex)  
+    for i in range(2):
+        #t1 = time.time()
+        intd_non_diag_ev1[i] = 1j * fixed_quad(lambda imK: non_diag_integrand(imK)[...,i], - Max_imK, + Max_imK,n=200)[0] / 4
+        #t2 = time.time()
+        
+        #print("integration time", t2-t1)
+    
+    MomSG_ev1_non_diag = intd_non_diag_ev1
+    #print(MomSG_ev1_non_diag.shape)
+     
+   
+    # LO evolved moments
+    MomNS_ev0 = evola0NS[..., np.newaxis] * ConfNS
+    MomSG_ev0 = np.einsum('...ij,...i->...j',evola0,ConfSG)
+    #CWSG_as2_ev0 = np.einsum('...ij,i...->...j',evola0_as2,CWSG)
+    
+    
+    
+    # NLO evolved, just S/G for now
+    
+    MomSG_ev1 = MomSG_ev1_diag - MomSG_ev1_non_diag     
+    
+    
+    
+    
+    # LO plus NLO evolution
+    
+    Mom_ev_NS_tot = MomNS_ev0 + np.transpose(MomNS_ev1)
+    Mom_ev_SG_tot = MomSG_ev0 + MomSG_ev1
+    
+    
+    
+    # Recombing the non-singlet and singlet parts
+    EvoConf = np.concatenate((Mom_ev_NS_tot, Mom_ev_SG_tot), axis=-1) # (N, 5)
+    #EvoConf = np.einsum('i,...i->...i',EvoCW,ConfEvoBasis)
+    # Inverse transform the evolved moments back to the flavor basis
+    EvoConfFlav = np.einsum('...ij, ...j->...i', inv_flav_trans, EvoConf) #(N, 5)
+    
+
+    return EvoConfFlav
+
+def CW_cross(j, x):
+    
+    return np.array([0*j, 0*j, 0*j, gamma(5/2 + j) / gamma(3/2) / gamma(3+j), gamma(5/2 + j) * 2 * x / gamma(3/2) / gamma(3+j) / (3+j)])
+    
+def GPD_cross_moment_evo(j: complex, x, nf: int, p: int, Q: float, ConfFlav: np.array, prty: int = 1, muset: float = 1):
+    
+    # Transform the unevolved moments to evolution basis
+    # ConfEvoBasis = np.einsum('...j,j', flav_trans, ConfFlav) # originally, output will be (5), I want it to be (N, 5)
+    #print(ConfFlav.shape)
+    ConfEvoBasis = np.einsum('ij, j->i', flav_trans, ConfFlav) # shape (N, 5)
+    
+   
+
+
+    # Taking the non-singlet and singlet parts of the conformal moments
+    ConfNS = ConfEvoBasis[..., :3] # (N, 3)
+    ConfSG = ConfEvoBasis[..., -2:] # (N, 2)
+    
+    #Set up evolution operator for WCs
+    Alphafact = np.array(AlphaS(nloop_alphaS, nf, np.sqrt(muset)*Q)) / np.pi / 2
+    R = AlphaS(nloop_alphaS, nf, np.sqrt(muset)*Q)/AlphaS(nloop_alphaS, nf, Init_Scale_Q) # shape N
+    R = np.array(R)
+    # R_as2 = AlphaS(nloop_alphaS + 1, nf, Q)/AlphaS(nloop_alphaS + 1, nf, Init_Scale_Q)
+    # R_as2 = np.array(R_as2)
+     #print(R)
+    b0 = beta0(nf)
+    lam, pr = projectors(j+1, nf, p)
+    pproj = amuindep(j, nf, p)
+     #print(amuindep(j, nf, p))
+     
+    rmu1 = rmudep(nf, lam, lam, np.sqrt(muset)*Q)
+     #print(rmu1)
+     #print(pproj)
+     #print(rmu1.shape)
+
+    Rfact = R[...,np.newaxis]**(-lam/b0)  # LO evolution (alpha(mu)/alpha(mu0))^(-gamma/beta0)
+     #Rfact_as2 = R_as2[...,np.newaxis]**(-lam/b0)
+     
+     # S/G LO evolution operator
+    evola0 = np.einsum('...aij,...a->...ij', pr, Rfact)
+     #evola0_as2 = np.einsum('...aij,...a->...ij',pr,Rfact_as2)
+     #evola0ab = np.einsum('...aij,ab->...abij', pr,  np.identity(2))
+     #evola0 = np.einsum('...abij,...b->...ij', evola0ab, Rfact)
+     
+     # NS LO evolution operator
+    gam0NS = non_singlet_LO(j+1, nf, p)
+    evola0NS = R**(-gam0NS/b0)
+    
+    
+
+    # non-singlet part evolves multiplicatively
+   # EvoConfNS = evons[..., np.newaxis] * ConfNS # (N, 3)
+    # singlet part mixes with the gluon
+   # EvoConfS = np.einsum('...ij, ...j->...i', evoa, ConfS) # (N, 2)
+    
+    EvoWCNS = evola0NS[..., np.newaxis]*CW_cross(j,x)[:3,...]
+    EvoWCS = np.einsum('i,ij->ij', CW_cross(j,x)[-2:,...], evola0)
+    #print(EvoWCS)
+    
+  #  CWilsonDVCS = CWilson(j)[np.newaxis,...]*np.ones((5,len(j)))
+  #  CWilsonDVCS[-1,...] = 0
+  
+    EvoConfNS = np.transpose(np.einsum('i,i->i',EvoWCNS, ConfNS))
+    EvoConfS = np.einsum('ij,j->i', EvoWCS, ConfSG)
+    #print(EvoConfS)
+    #print(EvoConfNS.shape)
+    #print(EvoConfS.shape)
+    EvoConf = np.concatenate((EvoConfNS,EvoConfS),axis=-1)
+   # EvoConfFlav = np.einsum('ij,j->i', inv_flav_trans, EvoConf)
+    #print(EvoConfFlav[0,-1])
+    return EvoConf
