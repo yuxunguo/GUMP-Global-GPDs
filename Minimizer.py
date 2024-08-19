@@ -333,16 +333,6 @@ def TFF_theo_jpsi_LO(xB, t, Q, Para_Unp, muset=1):
 
     return [ HTFF_jpsi, ETFF_jpsi ]
 
-def TFF_theo_jpsi_LO_old(xB, t, Q, Para_Unp, muset=1):
-    x = 0
-    xi = (1/(2 - xB) - (2*t*(-1 + xB))/((Q**2 + dvmp.M_jpsi**2)*(-2 + xB)**2))*xB
-    H_E = GPDobserv(x, xi, t, np.sqrt(Q**2 + dvmp.M_jpsi**2), 1)
-    HTFF_jpsi = H_E.TFF_old(Para_Unp[..., 0, :, :, :, :],3,muset)
-    ETFF_jpsi = H_E.TFF_old(Para_Unp[..., 1, :, :, :, :],3,muset)
-    
-
-    return [ HTFF_jpsi, ETFF_jpsi ]
-
 def TFF_theo_jpsi_NLO(xB, t, Q, Para_Unp, extraparam):
     x = 0
     xi = (1/(2 - xB) - (2*t*(-1 + xB))/((Q**2 + dvmp.M_jpsi**2)*(-2 + xB)**2))*xB
@@ -1299,8 +1289,9 @@ def cost_dvmp(Norm_HuV,    alpha_HuV,    beta_HuV,    alphap_HuV,
                     R_Eu_xi4,    R_Ed_xi4,     R_Eg_xi4,    bexp_HSea, bexp_Hg, norm, norm2]
 
     jpsinorm = Para_Unp_lst[-2]
-    xsecnorm = Para_Unp_lst[-1]    
-    Para_Unp_all = ParaManager_Unp(Para_Unp_lst)
+    xsecnorm = Para_Unp_lst[-1] 
+    
+    Para_Unp_all = ParaManager_Unp(Para_Unp_lst[:-2])
     
     
 

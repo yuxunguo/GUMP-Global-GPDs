@@ -32,6 +32,7 @@ def ParaManager_Unp(Paralst: np.array):
      Here is the parameters manager, as there are over 100 free parameters. Therefore not all of them can be set free.
      Each element F_{q} is a two-dimensional matrix with init_NumofAnsatz = 1 row and Single_Param_Size = 4 columns
     """
+
     [Norm_HuV,    alpha_HuV,    beta_HuV,    alphap_HuV, 
      Norm_Hubar,  alpha_Hubar,  beta_Hubar,  alphap_Hqbar,
      Norm_HdV,    alpha_HdV,    beta_HdV,    alphap_HdV,
@@ -41,7 +42,7 @@ def ParaManager_Unp(Paralst: np.array):
      Norm_EdV,    R_E_Sea,      R_Hu_xi2,    R_Hd_xi2,    R_Hg_xi2,
      R_Eu_xi2,    R_Ed_xi2,     R_Eg_xi2,
      R_Hu_xi4,    R_Hd_xi4,     R_Hg_xi4,
-     R_Eu_xi4,    R_Ed_xi4,     R_Eg_xi4,    bexp_HSea, bexp_Hg, norm, norm2] = Paralst
+     R_Eu_xi4,    R_Ed_xi4,     R_Eg_xi4,    bexp_HSea, bexp_Hg] = Paralst
     
     #R_E_Sea = 0
     #R_Hu_xi4 = 0

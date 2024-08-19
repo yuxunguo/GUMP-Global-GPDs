@@ -7,7 +7,8 @@ import csv
 from Minimizer import PDF_theo, tPDF_theo, GFF_theo, CFF_theo
 from Minimizer import DVCSxsec_theo, DVCSxsec_cost_xBtQ, DVCSxsec_HERA_theo
 from multiprocessing import Pool
-
+import time
+'''
 df_Para = pd.read_csv('GUMP_Params/params.csv', index_col=0)
 para_list_unp = df_Para['value'][:38].to_numpy()
 para_list_pol = df_Para['value'][38:].to_numpy()
@@ -15,8 +16,14 @@ para_list_pol = df_Para['value'][38:].to_numpy()
 Para_Unp = ParaManager_Unp(para_list_unp)
 Para_Pol = ParaManager_Pol(para_list_pol)
 Para_All = np.concatenate([Para_Unp, Para_Pol], axis=0)
+'''
+Paralst_Pol     = [4.833430384423373, -0.26355746727810136, 3.1855567245326317, 2.1817250267982997, 0.06994083000560514, 0.5376473088622284, 4.22898219488582, 0.15, -0.663583721889865, 0.24767388786943867, 3.5722668493718626, 0.5420415127277624, -0.08640413690298866, 0.4946733452347538, 2.553713733867575, 0.24307061469378405, 0.6309890923077655, 2.716624295877619, 0.15, 7.99299605623125, 0.799997370438831, 6.415448025778247, 2.0758963463111515, -2.407059919688728, 37.65971219196447, 0.24589373380232807, 1.6561364171210822, 0.0, 2.6840962695831894, 37.58453653636456, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 9.852441955678458]
+Paralst_Unp = [4.92252245341075, 0.21632833928300776, 3.228525762889928, 2.347470994624827, 0.16344460105600744, 1.135739437288775, 6.893895640954224, 0.15, 3.358767931921898, 0.1842893653407356, 4.417802345266761, 3.4816671934041685, 0.2491737223289409, 1.0519258916411531, 6.553873836594824, 1.8318696701278339, 1.0965234601821583, 9.99999305383342, 0.15, 0.1813228421702434, 0.9068471909677753, 1.1018931174030364, 0.4607676086634599, -0.22341404954304522, 0.7683213780361391, 0.22948701913308733, -2.638627981453611, -0.13980648369003512, 0.7985103392773935, 3.404262017724412, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 3.44764738950069, 1.7955307337138424]
 
-
+Para_Unp = ParaManager_Unp(np.array(Paralst_Unp))
+Para_Pol = ParaManager_Pol(np.array(Paralst_Pol))
+Para_All = np.concatenate([Para_Unp, Para_Pol], axis=0)
+"""
 def PDF(x, t, Q, flv, spe):
     '''
     Return parton distribution function (PDF) at a given point.
@@ -154,7 +161,6 @@ def GFF(j, t, Q, flv, spe):
     
     return _gff
 
-
 def CFF(xB, t, Q):
     '''
     CFF
@@ -171,7 +177,6 @@ def CFF(xB, t, Q):
     t   = np.array(t)
     Q   = np.array(Q)
     return CFF_theo(xB, t, Q, np.expand_dims(Para_Unp, axis=0), np.expand_dims(Para_Pol, axis=0))
-
 
 def DVCSxsec(y, xB, t, Q, phi, pol):
     '''
@@ -199,6 +204,7 @@ def DVCSxsec(y, xB, t, Q, phi, pol):
 
     [HCFF, ECFF, HtCFF, EtCFF] = CFF(xB, t, Q)
     return dsigma_TOT(y, xB, t, Q, phi, pol, HCFF, ECFF, HtCFF, EtCFF)
+"""
 
 if __name__ == '__main__':
     pool = Pool()
@@ -218,7 +224,18 @@ if __name__ == '__main__':
     print(GPD([x,-x],[xi],[t],[2.0],['u'],[3]))
     print(GPD([x,-x],[xi],[t],[2.0],['d'],[3]))
     '''
+    Para_spe = Para_All[0] 
+    _GPD_theo = GPDobserv(0.1,0.1,-1.0,3.0,1)
+    ts=time.time()
+    _GPD1 = _GPD_theo.TFF(Para_spe,3,2,1)
+    print(_GPD1)
+    print(time.time()-ts)
 
+    ts=time.time()    
+    _GPD2 = _GPD_theo.TFFNLO_evMom(Para_spe,3)    
+    print(_GPD2)
+    print(time.time()-ts)
+    '''
     x = np.exp(np.linspace(np.log(0.005), np.log(0.6), 100, dtype = float))
 
     uhPDF = PDF(x,[0.0],[2.0],['u'],[0])
@@ -256,6 +273,7 @@ if __name__ == '__main__':
     with open("GUMP_Results/Et_PDF.csv","w",newline='') as my_csv:
         csvWriter = csv.writer(my_csv,delimiter=',')
         csvWriter.writerows(np.transpose([x,uetPDF,ubaretPDF,detPDF,dbaretPDF]))
+    '''
     '''
     xgpd = np.concatenate((np.linspace(-0.6,-0.33,28,dtype = float),np.linspace(-0.32,0.32,66,dtype = float),np.linspace(0.33,0.6,28,dtype = float)))
 
