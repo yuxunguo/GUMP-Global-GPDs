@@ -146,9 +146,7 @@ JpsiphotoH1xsec_data = JpsiphotoH1xsec_data[(JpsiphotoH1xsec_data['Q']>Q_thresho
 xBtQlst_JpsiphotoH1 = JpsiphotoH1xsec_data.drop_duplicates(subset = ['xB', 't', 'Q'], keep = 'first')[['xB','t','Q']].values.tolist()
 '''
 
-
-
-def PDF_theo(PDF_input: pd.DataFrame, Para: np.array):
+def PDF_theo(PDF_input: pd.DataFrame, Para: np.array, p_order = 1):
     # [x, t, Q, f, delta_f, spe, flv] = PDF_input
     xs = PDF_input['x'].to_numpy()
     ts = PDF_input['t'].to_numpy()
@@ -156,11 +154,13 @@ def PDF_theo(PDF_input: pd.DataFrame, Para: np.array):
     flvs = PDF_input['flv'].to_numpy()
     spes = PDF_input['spe'].to_numpy()
  
-    xi = 0
+    xis = np.zeros_like(xs)
 
     ps = np.where(spes<=1, 1, -1)
     spes = np.where(spes<=1, spes, spes-2)
 
+    Para_spe = Para[spes] # fancy indexing. Output (N, 3, 5, 1, 5)
+    
     '''
     if(spe == 0 or spe == 1):
         spe, p = spe, 1
@@ -169,69 +169,14 @@ def PDF_theo(PDF_input: pd.DataFrame, Para: np.array):
         spe, p = spe - 2 , -1
     '''
     # Para: (4, 2, 5, 1, 4)
-
-    Para_spe = Para[spes] # fancy indexing. Output (N, 3, 5, 1, 5)
-    PDF_theo = GPDobserv(xs, xi, ts, Qs, ps)
-    return PDF_theo.tPDF(flvs, Para_spe)  # array length N
+    def PDF_theo_scalar(x, xi, t, Q, p, flv, Para):
+        _PDF_theo = GPDobserv(x, xi, t, Q, p)
+        return _PDF_theo.tPDF(flv, Para, p_order)
+    
+    result = np.array([PDF_theo_scalar(x_i, xi_i, t_i, Q_i, p_i, flv_i, Para_i) for x_i, xi_i, t_i, Q_i, p_i, flv_i, Para_i in zip(xs, xis, ts, Qs, ps, flvs, Para_spe)])
+    return result
 
 tPDF_theo = PDF_theo
-
-def PDF_theo_NLO(flav: str, x, t, Q, Para: np.array):
-    # [x, t, Q, f, delta_f, spe, flv] = PDF_input
-    #xs = PDF_input['x'].to_numpy()
-    #ts = PDF_input['t'].to_numpy()
-    #Qs = PDF_input['Q'].to_numpy()
-    #flvs = PDF_input['flv'].to_numpy()
-   # spes = PDF_input['spe'].to_numpy()
- 
-    xi = 0
-
-    #ps = np.where(spes<=1, 1, -1)
-    #spes = np.where(spes==0)
-
-    '''
-    if(spe == 0 or spe == 1):
-        spe, p = spe, 1
-
-    if(spe == 2 or spe == 3):
-        spe, p = spe - 2 , -1
-    '''
-    # Para: (4, 2, 5, 1, 4)
-
-    #Para_spe = Para[spes] # fancy indexing. Output (N, 3, 5, 1, 5)
-    PDF_theo = GPDobserv(x, xi, t, Q, 1)
-    return PDF_theo.tPDFNLO(flav,Para[..., 0, :, :, :, :])  # array length N
-
-tPDF_theo_NLO = PDF_theo_NLO
-
-def PDF_theo_LO(flav: str, x, t, Q, Para: np.array):
-    # [x, t, Q, f, delta_f, spe, flv] = PDF_input
-    #xs = PDF_input['x'].to_numpy()
-    #ts = PDF_input['t'].to_numpy()
-    #Qs = PDF_input['Q'].to_numpy()
-    #flvs = PDF_input['flv'].to_numpy()
-   # spes = PDF_input['spe'].to_numpy()
- 
-    xi = 0
-
-    #ps = np.where(spes<=1, 1, -1)
-    #spes = np.where(spes==0)
-
-    '''
-    if(spe == 0 or spe == 1):
-        spe, p = spe, 1
-
-    if(spe == 2 or spe == 3):
-        spe, p = spe - 2 , -1
-    '''
-    # Para: (4, 2, 5, 1, 4)
-
-    #Para_spe = Para[spes] # fancy indexing. Output (N, 3, 5, 1, 5)
-    PDF_theo = GPDobserv(x, xi, t, Q, 1)
-    return PDF_theo.tPDF(flav,Para[..., 0, :, :, :, :])  # array length N
-
-tPDF_theo_LO = PDF_theo_LO
-      
 
 def GFF_theo(GFF_input: np.array, Para):
     # [j, t, Q, f, delta_f, spe, flv] = GFF_input
@@ -343,13 +288,6 @@ def TFF_theo_jpsi_NLO(xB, t, Q, Para_Unp, extraparam):
 
     return  [ HTFF_jpsi, ETFF_jpsi ]
 
-
-
-
-
-
-
-
 def DVCSxsec_theo(DVCSxsec_input: pd.DataFrame, CFF_input: np.array):
     # CFF_input is a list of np.arrays
     # [y, xB, t, Q, phi, f, delta_f, pol] = DVCSxsec_input    
@@ -416,16 +354,13 @@ def DVjpsiPxsec_theo(DVjpsiPxsec_input: pd.DataFrame, TFF_jpsi_input: np.array):
     [HTFF_jpsi, ETFF_jpsi] = TFF_jpsi_input
     return dvmp.dsigma_Jpsi_dt(y, xB, t, Q, 0, HTFF_jpsi, ETFF_jpsi)
 
-def DVjpsiPxsec_NLO_theo(DVjpsiPxsec_input: pd.DataFrame, TFF_LO_jpsi_input: np.array, TFF_NLO_jpsi_input: np.array):
+def DVjpsiPxsec_NLO_theo(DVjpsiPxsec_input: pd.DataFrame, TFF_jpsi_input: np.array):
     y = DVjpsiPxsec_input['y'].to_numpy()
     xB = DVjpsiPxsec_input['xB'].to_numpy()
     t = DVjpsiPxsec_input['t'].to_numpy()
     Q = DVjpsiPxsec_input['Q'].to_numpy()    
-    [HTFF_jpsi, ETFF_jpsi]  = TFF_LO_jpsi_input
-    [HTFF_NLO_jpsi, ETFF_NLO_jpsi] = TFF_NLO_jpsi_input
-    return dvmp.dsigma_Jpsi_dt_NLO(y, xB, t, Q, 0, HTFF_jpsi, HTFF_NLO_jpsi, ETFF_jpsi, ETFF_NLO_jpsi)
-
-
+    [HTFF_jpsi, ETFF_jpsi] = TFF_jpsi_input
+    return dvmp.dsigma_Jpsi_dt(y, xB, t, Q, 0, HTFF_jpsi, ETFF_jpsi)
 
 def DVrhoPxsec_cost_xBtQ(DVrhoPxsec_data_xBtQ: pd.DataFrame, Para_Unp, xsec_norm):
     [xB, t, Q] = [DVrhoPxsec_data_xBtQ['xB'].iat[0], DVrhoPxsec_data_xBtQ['t'].iat[0], DVrhoPxsec_data_xBtQ['Q'].iat[0]] 
@@ -453,9 +388,8 @@ def DVjpsiPxsec_cost_xBtQ(DVjpsiPxsec_data_xBtQ: pd.DataFrame, Para_Unp, xsec_no
 
 def DVjpsiPxsec_NLO_cost_xBtQ(DVjpsiPxsec_data_xBtQ: pd.DataFrame, Para_Unp, xsec_norm):
     [xB, t, Q] = [DVjpsiPxsec_data_xBtQ['xB'].iat[0], DVjpsiPxsec_data_xBtQ['t'].iat[0], DVjpsiPxsec_data_xBtQ['Q'].iat[0]] 
-    [HTFF_jpsi, ETFF_jpsi] = TFF_theo_jpsi_LO(xB, t, Q, Para_Unp) # scalar for each of them
-    [HTFF_NLO_jpsi, ETFF_NLO_jpsi] = TFF_theo_jpsi_NLO(xB, t, Q, Para_Unp, 1)
-    DVjpsiP_pred_xBtQ = DVjpsiPxsec_NLO_theo(DVjpsiPxsec_data_xBtQ, TFF_LO_jpsi_input = [HTFF_jpsi, ETFF_jpsi], TFF_NLO_jpsi_input = [HTFF_NLO_jpsi, ETFF_NLO_jpsi]) * xsec_norm**2
+    [HTFF_jpsi, ETFF_jpsi] = TFF_theo_jpsi_NLO(xB, t, Q, Para_Unp, 1)
+    DVjpsiP_pred_xBtQ = DVjpsiPxsec_NLO_theo(DVjpsiPxsec_data_xBtQ, TFF_jpsi_input = [HTFF_jpsi, ETFF_jpsi]) * xsec_norm**2
     return np.sum(((DVjpsiP_pred_xBtQ - DVjpsiPxsec_data_xBtQ['f'])/ DVjpsiPxsec_data_xBtQ['delta f']) ** 2 )
 
 def cost_forward_H(Norm_HuV,    alpha_HuV,    beta_HuV,    alphap_HuV, 
@@ -1293,8 +1227,6 @@ def cost_dvmp(Norm_HuV,    alpha_HuV,    beta_HuV,    alphap_HuV,
     
     Para_Unp_all = ParaManager_Unp(Para_Unp_lst[:-2])
     
-    
-
    # cost_DVrhoPZEUS_xBtQ = np.array(list(pool.map(partial(DVrhoPxsec_cost_xBtQ, Para_Unp = Para_Unp_all, xsec_norm = xsecnorm), DVrhoPZEUSxsec_group_data)))
    # cost_DVrhoPZEUSxsec = np.sum(cost_DVrhoPZEUS_xBtQ)
     
@@ -1310,15 +1242,9 @@ def cost_dvmp(Norm_HuV,    alpha_HuV,    beta_HuV,    alphap_HuV,
    # cost_DVphiPH1_xBtQ = np.array(list(pool.map(partial(DVphiPxsec_cost_xBtQ, Para_Unp = Para_Unp_all), DVphiPH1xsec_group_data)))
    # cost_DVphiPH1xsec = np.sum(cost_DVphiPH1_xBtQ)
    
-   
-    
-    PDF_H_g_smallx_pred = PDF_theo(PDFg_smallx_data, Para=Para_Unp_all)
+    PDF_H_g_smallx_pred = PDF_theo(PDFg_smallx_data, Para=Para_Unp_all, p_order = 2)
     cost_PDF_H_g_smallx = np.sum(((PDF_H_g_smallx_pred - PDFg_smallx_data['f'])/ PDFg_smallx_data['delta f']) ** 2 )
 
-
-  
-    
-   
    # cost_DVjpsiPZEUS_xBtQ = np.array(list(pool.map(partial(DVjpsiPxsec_cost_xBtQ, Para_Unp = Para_Unp_all), DVJpsiPZEUSxsec_group_data)))
    # cost_DVjpsiPZEUSxsec = np.sum(cost_DVjpsiPZEUS_xBtQ)
     
@@ -1327,8 +1253,6 @@ def cost_dvmp(Norm_HuV,    alpha_HuV,    beta_HuV,    alphap_HuV,
     
     cost_DVjpsiPH1_xBtQ = np.array(list(pool.map(partial(DVjpsiPxsec_NLO_cost_xBtQ, Para_Unp = Para_Unp_all, xsec_norm = jpsinorm), DVJpsiPH1xsec_group_data)))
     cost_DVjpsiPH1xsec = np.sum(cost_DVjpsiPH1_xBtQ)
-
-    
 
     return  cost_DVjpsiPH1xsec + cost_PDF_H_g_smallx
 
@@ -1454,7 +1378,7 @@ def dvmp_fit(Paralst_Unp):
 
     time_end = time.time() -time_start
 
-    with open('GUMP_Output/dvmp_fit_NLOPDF.txt', 'w') as f:
+    with open('GUMP_Output/dvmp_fit_NLOPDF.txt', 'w', encoding="utf-8") as f:
         print('Total running time: %.1f minutes. Total call of cost function: %3d.\n' % ( time_end/60, fit_dvmp.nfcn), file=f)
         print('The chi squared/d.o.f. is: %.2f / %3d ( = %.2f ).\n' % (fit_dvmp.fval, ndof_dvmp, fit_dvmp.fval/ndof_dvmp), file = f)
         print('Below are the final output parameters from iMinuit:', file = f)
@@ -1462,7 +1386,7 @@ def dvmp_fit(Paralst_Unp):
         print(*fit_dvmp.errors, sep=", ", file = f)
         print(fit_dvmp.params, file = f)
 
-    with open("GUMP_Output/dvmp_cov.csv","w",newline='') as my_csv:
+    with open("GUMP_Output/dvmp_cov.csv","w", newline='', encoding="utf-8") as my_csv:
         csvWriter = csv.writer(my_csv,delimiter=',')
         csvWriter.writerows([*fit_dvmp.covariance])
 
@@ -1472,8 +1396,7 @@ def dvmp_fit(Paralst_Unp):
 if __name__ == '__main__':
     pool = Pool()
     time_start = time.time()
-    
-   
+       
    # Paralst_Unp     = [0*4.92252245341075, 0.21632833928300776, 3.228525762889928, 2.347470994624827, 0.16344460105600744, 1.135739437288775, 6.893895640954224, 0.15, 0*3.358767931921898, 0.1842893653407356, 4.417802345266761, 3.4816671934041685, 0.2491737223289409, 1.0519258916411531, 6.553873836594824, 2.8642810381756982, 1.0523058580968585, 7.412779706371915, 0.15, 0*0.1813228421702434, 0.9068471909677753, 1.1018931174030364, 0.4607676086634599, -0*0.22341404954304522, 0*0.7683213780361391, 0.22948701913308733, -2.638627981453611, 0.0, 0.7985103392773935, 3.404262017724412, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 3.86/2, 3.86/2, 1.0]
    
     # from everything through DVCS
