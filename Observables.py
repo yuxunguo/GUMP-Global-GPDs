@@ -11,20 +11,6 @@ from Evolution import Moment_Evo_LO,TFF_Evo_LO, CFF_Evo_LO, TFF_Evo_NLO_evWC, TF
 
 CFF_trans =np.array([1*(2/3)**2, 2*(2/3)**2, 1*(1/3)**2, 2*(1/3)**2, 0])
 
-# decay constants, currently matching KM for rho and phi but give more precise values
-f_rho_u = 0.209 # Change to 0.222
-f_rho_d = 0.209 # Change to 0.210
-f_rho_g = 0.209 # Change to 0.216
-f_phi = 0.221 # Change to 0.233
-f_jpsi = 0.406
-
-TFF_rho_trans = np.array([f_rho_u * 2 / 3 / np.sqrt(2), f_rho_u * 4 / 3 / np.sqrt(2), f_rho_d * 1 / 3 / np.sqrt(2), f_rho_d * 2 / 3 / np.sqrt(2), f_rho_g * 3 / 4 / np.sqrt(2)])#np.array([f_rho_u * 2 / 3 / np.sqrt(2), f_rho_u * 4 / 3 / np.sqrt(2), f_rho_d / 3 / np.sqrt(2), f_rho_d * 2 / 3 / np.sqrt(2), f_rho_g * 3 / 4 / np.sqrt(2)])
-TFF_phi_trans = np.array([0, 0, 0, 0, -f_phi / 4]) # strange contribution should be included but doesn't exist in current 2 quark framework
-TFF_jpsi_trans = np.array([0, 0, 0, 0, f_jpsi / 2])
-TFF_ggpd_trans = np.array([0,0,0,0,1])
-
-#np.array([0, f_rho_u * 8 / 5 / np.sqrt(2), 0, f_rho_d * 4 / 5 / np.sqrt(2), f_rho_g * 3 / 4 / np.sqrt(2)])
-
 """
 ***********************GPD moments***************************************
 """
@@ -316,14 +302,6 @@ def ConfWaveFuncG(j: complex, x: float, xi: float) -> complex:
     pERBL = np.where(((x > -xi) & (x < xi)), Minus * 2 ** j * gamma(5/2+j) / (gamma(1/2) * gamma(j)) * xi ** (-j) * (1+x/xi) ** 2 * np.array((hyp2f1_nparray(-1-j,j+2,3, (x+xi)/(2*xi))), dtype= complex), 0)
 
     return pDGLAP + pERBL
-
-
-def CWilson(j: complex) -> complex:
-    return 2 ** (1+j) * gamma(5/2+j) / (gamma(3/2) * gamma(3+j))
-
-def CWilsonT(j: complex, nf: int) -> complex:
-    #return np.array([3 * 2 ** (1+j) * gamma(5/2+j) / (gamma(3/2) * gamma(3+j)), 3 * 2 ** (1+j) * gamma(5/2+j) / nf / (gamma(3/2) * gamma(3+j)), 3 * 2 ** (1+j) * gamma(5/2+j) / (gamma(3/2) * gamma(3+j)), 3 * 2 ** (1+j) * gamma(5/2+j) / nf / (gamma(3/2) * gamma(3+j)),  3 * 2 * 2 ** (1+j) * gamma(5/2+j) / (j + 3) / (gamma(3/2) * gamma(3+j))])
-    return np.array([3 * 2 ** (1+j) * gamma(5/2 + j) / (gamma(3/2) * gamma(3 + j)), 3 * 2 ** (1+j) * gamma(5/2+j) / nf / (gamma(3/2) * gamma(3+j)), 3 * 2 ** (1+j) * gamma(5/2 + j) / (gamma(3/2) * gamma(3 + j)), 3 * 2 ** (1+j) * gamma(5/2+j) / nf / (gamma(3/2) * gamma(3+j)), 3 * 2 * 2 ** (1+j) * gamma(5/2+j) / (j + 3) / (gamma(3/2) * gamma(3+j))])
 
 """
 ***********************Observables***************************************
@@ -736,21 +714,13 @@ class GPDobserv (object) :
                 ConfFlav_xi2 = Moment_Sum(j, self.t, Para_xi2)
                 ConfFlav_xi4 = Moment_Sum(j, self.t, Para_xi4)
                 
-                EvoConf_Wilson = (TFF_Evo_LO(j, NFEFF, self.p, self.Q, ConfFlav, muset) \
-                                    + TFF_Evo_LO(j+2, NFEFF, self.p, self.Q, ConfFlav_xi2, muset) \
-                                        + TFF_Evo_LO(j+4, NFEFF, self.p, self.Q, ConfFlav_xi4, muset))
+                EvoConf_Wilson = (TFF_Evo_LO(j, NFEFF, self.p, self.Q, ConfFlav, meson, muset) \
+                                    + TFF_Evo_LO(j+2, NFEFF, self.p, self.Q, ConfFlav_xi2, meson, muset) \
+                                        + TFF_Evo_LO(j+4, NFEFF, self.p, self.Q, ConfFlav_xi4, meson, muset))
                 
                 fmask = flvmask(flv)
-                
-                if(meson == 1):
-                    return np.einsum('j,j, ...j', fmask, TFF_rho_trans, EvoConf_Wilson)                
-                if(meson== 2):
-                    return np.einsum('j,j, ...j', fmask, TFF_phi_trans, EvoConf_Wilson)                
-                if(meson == 3):
-                    return np.einsum('j,j, ...j', fmask, TFF_jpsi_trans, EvoConf_Wilson)
-            
-            
-
+                return np.einsum('j, ...j', fmask, EvoConf_Wilson)  
+         
             def Integrand_TFF(imJ: complex):
                 # mask = (self.p==1) # assume p can only be either 1 or -1
 
@@ -851,9 +821,9 @@ class GPDobserv (object) :
                                     + CWilson(j+2) * Moment_Evo(j+2, NFEFF, self.p, self.Q, ConfFlav_xi2) \
                                     + CWilson(j+4) * Moment_Evo(j+4, NFEFF, self.p, self.Q, ConfFlav_xi4))
                 """
-                EvoConf_Wilson = (TFF_Evo_NLO_evWC(j, NFEFF, self.p, self.Q, ConfFlav, muset) \
-                                 +  TFF_Evo_NLO_evWC(j+2, NFEFF, self.p, self.Q, ConfFlav_xi2, muset) \
-                                 +  TFF_Evo_NLO_evWC(j+4, NFEFF, self.p, self.Q, ConfFlav_xi4, muset))
+                EvoConf_Wilson = (TFF_Evo_NLO_evWC(j, NFEFF, self.p, self.Q, ConfFlav, meson, muset) \
+                                 +  TFF_Evo_NLO_evWC(j+2, NFEFF, self.p, self.Q, ConfFlav_xi2, meson, muset) \
+                                 +  TFF_Evo_NLO_evWC(j+4, NFEFF, self.p, self.Q, ConfFlav_xi4, meson, muset))
                 
                 '''
                 if(meson == 1):
@@ -864,13 +834,7 @@ class GPDobserv (object) :
                     return np.einsum('j, ...j', TFF_jpsi_trans, EvoConf_Wilson)
                 '''                
                 fmask = flvmask(flv)
-                
-                if(meson == 1):
-                    return np.einsum('j,j, ...j', fmask, TFF_rho_trans, EvoConf_Wilson)                
-                if(meson== 2):
-                    return np.einsum('j,j, ...j', fmask, TFF_phi_trans, EvoConf_Wilson)                
-                if(meson == 3):
-                    return np.einsum('j,j, ...j', fmask, TFF_jpsi_trans, EvoConf_Wilson)
+                return np.einsum('j, ...j', fmask, EvoConf_Wilson)
             
             def tan_factor(j):
                 if (self.p==1):
@@ -951,9 +915,9 @@ class GPDobserv (object) :
                                     + CWilson(j+2) * Moment_Evo(j+2, NFEFF, self.p, self.Q, ConfFlav_xi2) \
                                     + CWilson(j+4) * Moment_Evo(j+4, NFEFF, self.p, self.Q, ConfFlav_xi4))
                 """
-                EvoConf_Wilson = (TFF_Evo_NLO_evMOM(j, NFEFF, self.p, self.Q, self.t, self.xi, ConfFlav, Para_Forward, 0, muset) \
-                                          +  TFF_Evo_NLO_evMOM(j+2, NFEFF, self.p, self.Q, self.t, self.xi, ConfFlav_xi2, Para_xi2, 2, muset) \
-                                              +  TFF_Evo_NLO_evMOM(j+4, NFEFF, self.p, self.Q, self.t, self.xi, ConfFlav_xi4, Para_xi4, 4, muset))
+                EvoConf_Wilson = (TFF_Evo_NLO_evMOM(j, NFEFF, self.p, self.Q, self.t, self.xi, ConfFlav, Para_Forward, 0, meson, muset) \
+                                          +  TFF_Evo_NLO_evMOM(j+2, NFEFF, self.p, self.Q, self.t, self.xi, ConfFlav_xi2, Para_xi2, 2, meson, muset) \
+                                              +  TFF_Evo_NLO_evMOM(j+4, NFEFF, self.p, self.Q, self.t, self.xi, ConfFlav_xi4, Para_xi4, 4, meson, muset))
                 '''
                 if(meson == 1):
                     return np.einsum('j, ...j', TFF_rho_trans, EvoConf_Wilson)                
@@ -962,15 +926,8 @@ class GPDobserv (object) :
                 if(meson == 3):
                     return np.einsum('j, ...j', TFF_jpsi_trans, EvoConf_Wilson)                
                 '''
-
                 fmask = flvmask(flv)
-                
-                if(meson == 1):
-                    return np.einsum('j,j, ...j', fmask, TFF_rho_trans, EvoConf_Wilson)                
-                if(meson== 2):
-                    return np.einsum('j,j, ...j', fmask, TFF_phi_trans, EvoConf_Wilson)                
-                if(meson == 3):
-                    return np.einsum('j,j, ...j', fmask, TFF_jpsi_trans, EvoConf_Wilson)
+                return np.einsum('j, ...j', fmask, EvoConf_Wilson)
             
             def tan_factor(j):
                 if (self.p==1):

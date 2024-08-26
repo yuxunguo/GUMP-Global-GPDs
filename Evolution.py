@@ -57,6 +57,16 @@ flav_trans =np.array([[1, 0, 1, 0, 0],
 
 inv_flav_trans = np.linalg.inv(flav_trans)
 
+f_rho_u = 0.209 # Change to 0.222
+f_rho_d = 0.209 # Change to 0.210
+f_rho_g = 0.209 # Change to 0.216
+f_phi = 0.221 # Change to 0.233
+f_jpsi = 0.406
+
+TFF_rho_trans = np.array([f_rho_u * 2 / 3 / np.sqrt(2), f_rho_u * 4 / 3 / np.sqrt(2), f_rho_d * 1 / 3 / np.sqrt(2), f_rho_d * 2 / 3 / np.sqrt(2), f_rho_g * 3 / 4 / np.sqrt(2)])#np.array([f_rho_u * 2 / 3 / np.sqrt(2), f_rho_u * 4 / 3 / np.sqrt(2), f_rho_d / 3 / np.sqrt(2), f_rho_d * 2 / 3 / np.sqrt(2), f_rho_g * 3 / 4 / np.sqrt(2)])
+TFF_phi_trans = np.array([0, 0, 0, 0, -f_phi / 4]) # strange contribution should be included but doesn't exist in current 2 quark framework
+TFF_jpsi_trans = np.array([0, 0, 0, 0, f_jpsi / 2])
+
 """
 ***********************pQCD running coupling constant***********************
 Here rundec is used instead.
@@ -727,16 +737,21 @@ def evolop(j: complex, nf: int, p: int, Q: float):
 def CWilson(j: complex) -> complex:
     return 2 ** (1+j) * gamma(5/2+j) / (gamma(3/2) * gamma(3+j))
 
-def CWilsonT(j: complex, nf: int) -> complex:
-    return np.array([3 * 2 ** (1+j) * gamma(5/2+j) / (gamma(3/2) * gamma(3+j)), 3 * 2 ** (1+j) * gamma(5/2+j) / (gamma(3/2) * gamma(3+j)), 3 * 2 ** (1+j) * gamma(5/2+j) / (gamma(3/2) * gamma(3+j)), 3 * 2 ** (1+j) * gamma(5/2+j) / nf / (gamma(3/2) * gamma(3+j)),  3 * 2 * 2 ** (1+j) * gamma(5/2+j) / (j + 3) / (gamma(3/2) * gamma(3+j))])
+def CWilsonT(j: complex, nf: int, meson: int) -> complex:
+    CWT = np.array([3 * 2 ** (1+j) * gamma(5/2+j) / (gamma(3/2) * gamma(3+j)), \
+                     3 * 2 ** (1+j) * gamma(5/2+j) / (gamma(3/2) * gamma(3+j)), \
+                     3 * 2 ** (1+j) * gamma(5/2+j) / (gamma(3/2) * gamma(3+j)), \
+                     3 * 2 ** (1+j) * gamma(5/2+j) / nf / (gamma(3/2) * gamma(3+j)),\
+                     3 * 2 * 2 ** (1+j) * gamma(5/2+j) / (j + 3) / (gamma(3/2) * gamma(3+j))])
+                
+    if(meson == 1):
+        return np.einsum('j, j...->j...', TFF_rho_trans, CWT)                
+    if(meson== 2):
+        return np.einsum('j, j...->j...', TFF_phi_trans, CWT)                
+    if(meson == 3):
+        return np.einsum('j, j...->j...', TFF_jpsi_trans, CWT)
 
-def CWilsonT_glue(j: complex, nf: int) -> complex:
-    return np.array([0*j,0*j, 0*j, 0*j, 3 * 2 * 2 ** (1+j) * gamma(5/2+j) / (j + 3) / (gamma(3/2) * gamma(3+j))])
-
-def CWilsonT_quark(j: complex, nf: int) -> complex:
-    return np.array([3 * 2 ** (1+j) * gamma(5/2+j) / (gamma(3/2) * gamma(3+j)), 3 * 2 ** (1+j) * gamma(5/2+j) / (gamma(3/2) * gamma(3+j)), 3 * 2 ** (1+j) * gamma(5/2+j) / (gamma(3/2) * gamma(3+j)), 3 * 2 ** (1+j) * gamma(5/2+j) / nf / (gamma(3/2) * gamma(3+j)),  0*j])
-
-def WilsonT_NLO(j: complex, k: complex, nf: int, Q: float, muset: float):
+def WilsonT_NLO(j: complex, k: complex, nf: int, Q: float, meson: int, muset: float):
     'NLO Wilson coefficients for gluons, currently setting factorization scale and renormalization scale equal to Q^2'
     
     mufact = muset*Q**2
@@ -831,17 +846,26 @@ def WilsonT_NLO(j: complex, k: complex, nf: int, Q: float, muset: float):
     #return np.array([0*j, 0*j, 0*j, 0*j, 3 * 2 * 2 ** (1+j) * gamma(5/2+j) / (j + 3) / (gamma(3/2) * gamma(3+j)) * (NC*CGNC + CF*CGCF)],dtype=complex) #+ beta0(nf)*np.log(mufacf/mures)
     
     # With sea quarks
-    return np.array([0*j, 0*j, 0*j, CQNS*(3 * 2 ** (1+j) * gamma(5/2+j) / (gamma(3/2) * gamma(3+j)))/nf + CQPS * (3 * 2 ** (1+j) * gamma(5/2+j) / (gamma(3/2) * gamma(3+j))), 3 * 2 * 2 ** (1+j) * gamma(5/2+j) / (j + 3) / (gamma(3/2) * gamma(3+j)) * (NC*CGNC + CF*CGCF + beta0(nf)*np.log(mufact/mures)/2)],dtype=complex) #+ beta0(nf)*np.log(mufact/mures)
+    CWT= np.array([0*j, 0*j, 0*j, \
+                   CQNS*(3 * 2 ** (1+j) * gamma(5/2+j) / (gamma(3/2) * gamma(3+j)))/nf + CQPS * (3 * 2 ** (1+j) * gamma(5/2+j) / (gamma(3/2) * gamma(3+j))), \
+                   3 * 2 * 2 ** (1+j) * gamma(5/2+j) / (j + 3) / (gamma(3/2) * gamma(3+j)) * (NC*CGNC + CF*CGCF + beta0(nf)*np.log(mufact/mures)/2)],dtype=complex) #+ beta0(nf)*np.log(mufact/mures)
+
+    if(meson == 1):
+        return np.einsum('j, j...->j...', TFF_rho_trans, CWT)                
+    if(meson== 2):
+        return np.einsum('j, j...->j...', TFF_phi_trans, CWT)                
+    if(meson == 3):
+        return np.einsum('j, j...->j...', TFF_jpsi_trans, CWT)
 
 def np_cache(function):
     @functools.cache
     def cached_wrapper(tupled_arr):
-        [arr, nf, p, Q, muset] = np.array(tupled_arr[0]), int(tupled_arr[1]), int(tupled_arr[2]), float(tupled_arr[3]), float(tupled_arr[4])
-        return function(arr, nf, p, Q, muset)
+        [arr, nf, p, Q, meson, muset] = np.array(tupled_arr[0]), int(tupled_arr[1]), int(tupled_arr[2]), float(tupled_arr[3]), int(tupled_arr[4]), float(tupled_arr[5])
+        return function(arr, nf, p, Q, meson, muset)
 
     @functools.wraps(function)
-    def wrapper(arr, nf, p, Q, muset):
-        return cached_wrapper(tuple((tuple(arr), nf, p, Q, muset)))
+    def wrapper(arr, nf, p, Q, meson, muset):
+        return cached_wrapper(tuple((tuple(arr), nf, p, Q, meson, muset)))
 
     # copy lru_cache attributes over too
     wrapper.cache_info = cached_wrapper.cache_info
@@ -985,7 +1009,7 @@ def CFF_Evo_LO(j: complex, nf: int, p: int, Q: float, ConfFlav: np.array) -> np.
 
     return EvoConfFlav
 
-def TFF_Evo_LO(j: complex, nf: int, p: int, Q: float, ConfFlav: np.array, muset = 1) -> np.array:
+def TFF_Evo_LO(j: complex, nf: int, p: int, Q: float, ConfFlav: np.array, meson: int, muset: float = 1) -> np.array:
     """
     Leading order evolution of the combination of DVMP Wilson coefficient and conformal moments
 
@@ -1013,8 +1037,8 @@ def TFF_Evo_LO(j: complex, nf: int, p: int, Q: float, ConfFlav: np.array, muset 
     [evons, evoa] = evolop(j, nf, p, np.sqrt(muset)*Q) # (N) and (N, 2, 2)
     
     # Combine with the corresponding wilson coefficient in the evolution basis
-    EvoWCNS = np.einsum('i...,...->...i',CWilsonT(j,nf)[:3,...],evons)
-    EvoWCS = np.einsum('ik,kij->kij', CWilsonT(j,nf)[-2:,...], evoa)
+    EvoWCNS = np.einsum('i...,...->...i',CWilsonT(j,nf, meson)[:3,...],evons)
+    EvoWCS = np.einsum('ik,kij->kij', CWilsonT(j,nf, meson)[-2:,...], evoa)
 
     # Non-singlet part evolves multiplicatively
     EvoConfNS = np.einsum('...j,...j->...j',EvoWCNS, ConfNS)
@@ -1029,7 +1053,7 @@ def TFF_Evo_LO(j: complex, nf: int, p: int, Q: float, ConfFlav: np.array, muset 
     return EvoConfFlav
 
 @np_cache
-def WCoef_Evo_NLO(j: complex, nf: int, p: int, Q: float, muset: float) -> Tuple[np.ndarray, np.ndarray]:
+def WCoef_Evo_NLO(j: complex, nf: int, p: int, Q: float, meson: int, muset: float) -> Tuple[np.ndarray, np.ndarray]:
     """
     Next-to-leading order evolution of the DVMP Wilson coefficient (Evolved Wilson coefficient method)
 
@@ -1046,8 +1070,8 @@ def WCoef_Evo_NLO(j: complex, nf: int, p: int, Q: float, muset: float) -> Tuple[
     """
     
     # Separate out NS and S/G Wilson coefficients
-    CWNS = CWilsonT(j, nf)[:3]
-    CWSG = CWilsonT(j,nf)[-2:]
+    CWNS = CWilsonT(j, nf, meson)[:3]
+    CWSG = CWilsonT(j, nf, meson)[-2:]
      
     #Set up evolution operator for WCs
     Alphafact = np.array(AlphaS(nloop_alphaS, nf, np.sqrt(muset)*Q)) / np.pi / 2
@@ -1092,7 +1116,7 @@ def WCoef_Evo_NLO(j: complex, nf: int, p: int, Q: float, muset: float) -> Tuple[
         jmesh=jmesh.reshape(-1)
         kmesh=kmesh.reshape(-1)
         
-        CWk = CWilsonT(jmesh+kmesh+1, nf)[-2:]        
+        CWk = CWilsonT(jmesh+kmesh+1, nf, meson)[-2:]        
         Bjk = np.array(bmudep(np.sqrt(muset)*Q, np.array(jmesh+kmesh+1,dtype=complex), np.array(jmesh,dtype=complex), nf,p))*Alphafact
         out = np.einsum('...ij,...->...ij',np.einsum('...ij,i...->...ij',Bjk,CWk), 1/4*np.tan(np.pi * kmesh / 2))  
 
@@ -1109,7 +1133,7 @@ def WCoef_Evo_NLO(j: complex, nf: int, p: int, Q: float, muset: float) -> Tuple[
     CWSG_ev1 = CWSG_ev1_diag + CWSG_ev1_non_diag
      
     # NLO Wilson coefficient combined with leading-order evolved conformal moment
-    CWilsonT_1_SG = WilsonT_NLO(j,0,nf,Q,muset)[-2:]     
+    CWilsonT_1_SG = WilsonT_NLO(j,0,nf,Q, meson, muset)[-2:]     
     CWilsonT_1_SG_ev0 = np.einsum('i...,...ij->...ij',CWilsonT_1_SG,evola0)
      
     # LO plus NLO evolution    
@@ -1118,7 +1142,7 @@ def WCoef_Evo_NLO(j: complex, nf: int, p: int, Q: float, muset: float) -> Tuple[
     
     return CWilsonT_ev_NS_tot, CWilsonT_ev_SG_tot
 
-def TFF_Evo_NLO_evWC(j: complex, nf: int, p: int, Q: float, ConfFlav: np.array, muset: float = 1) -> np.array:
+def TFF_Evo_NLO_evWC(j: complex, nf: int, p: int, Q: float, ConfFlav: np.array, meson: int, muset: float = 1) -> np.array:
     """
     Next-to-leading order evolved DVMP Wilson coefficients in the flavor space combined with the conformal moments (Evolved Wilson coefficient method)
     
@@ -1135,7 +1159,7 @@ def TFF_Evo_NLO_evWC(j: complex, nf: int, p: int, Q: float, ConfFlav: np.array, 
         return shape (N, 5)
     """
     # Retrive the evolved Wilson coefficient from WCoef_Evo_NLO()
-    [CWilsonT_ev_NS_tot, CWilsonT_ev_SG_tot] = WCoef_Evo_NLO(j, nf, p, Q, muset)
+    [CWilsonT_ev_NS_tot, CWilsonT_ev_SG_tot] = WCoef_Evo_NLO(j, nf, p, Q, meson, muset)
 
     # Transform the unevolved moments to evolution basis
     ConfEvoBasis = np.einsum('ij, ...j->...i', flav_trans, ConfFlav) # shape (N, 5)   
@@ -1272,7 +1296,7 @@ def Moment_Evo_NLO(j: complex, nf: int, p: int, Q: float, t: float, xi: float, C
 
     return conf_ev_NS_tot, conf_ev_SG_tot, confSG_ev0
 
-def TFF_Evo_NLO_evMOM(j: complex, nf: int, p: int, Q: float, t: float, xi: float, ConfFlav: np.array, Para: np.array, momshift: int, muset: float = 1) -> np.array:
+def TFF_Evo_NLO_evMOM(j: complex, nf: int, p: int, Q: float, t: float, xi: float, ConfFlav: np.array, Para: np.array, momshift: int, meson: int, muset: float = 1) -> np.array:
     """
     Next-to-leading order evolved conformal moments combined with the DVMP Wilson coefficients in the flavor space (Evolved moment method)
     
@@ -1297,11 +1321,11 @@ def TFF_Evo_NLO_evMOM(j: complex, nf: int, p: int, Q: float, t: float, xi: float
     conf_ev_NS_tot, conf_ev_SG_tot, confSG_ev0 = Moment_Evo_NLO(j, nf, p, Q, t, xi, ConfFlav, Para, momshift, muset)
     
     # Leading order non-singlet DVMP Wilson coefficient
-    NSCoef_0 = CWilsonT(j,nf)[:3]
+    NSCoef_0 = CWilsonT(j,nf, meson)[:3]
     # Leading order singlet DVMP Wilson coefficient
-    SCoef_0 = CWilsonT(j,nf)[-2:]
+    SCoef_0 = CWilsonT(j,nf, meson)[-2:]
     # Next-to-leading order singlet DVMP Wilson coefficient
-    SCoef_1 = WilsonT_NLO(j,0,nf,Q,muset)[-2:]
+    SCoef_1 = WilsonT_NLO(j,0,nf,Q, meson, muset)[-2:]
     
     # Combing the LO Wilson coefficients with corresponding evolved moment
     NS_full = np.einsum('i...,...i->...i',NSCoef_0,conf_ev_NS_tot)    

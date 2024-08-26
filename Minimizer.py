@@ -255,37 +255,15 @@ def TFF_theo_phi(xB, t, Q, Para_Unp):
     HTFF_phi = H_E.TFFLO(Para_Unp[..., 0, :, :, :, :],2)
     ETFF_phi = H_E.TFFLO(Para_Unp[..., 1, :, :, :, :],2)
     
-
     return [ HTFF_phi, ETFF_phi ]
 
-def TFF_theo_jpsi(xB, t, Q, Para_Unp):
+def TFF_theo_jpsi(xB, t, Q, Para_Unp, p_order = 1, muset =1, flv = 'All'):
     x = 0
     xi = (1/(2 - xB) - (2*t*(-1 + xB))/((Q**2 + dvmp.M_jpsi**2)*(-2 + xB)**2))*xB
     H_E = GPDobserv(x, xi, t, np.sqrt(Q**2 + dvmp.M_jpsi**2), 1)
-    HTFF_jpsi = H_E.TFFLO(Para_Unp[..., 0, :, :, :, :],3)
-    ETFF_jpsi = H_E.TFFLO(Para_Unp[..., 1, :, :, :, :],3)
+    HTFF_jpsi = H_E.TFF(Para_Unp[..., 0, :, :, :, :], 3, p_order, muset, flv)
+    ETFF_jpsi = H_E.TFF(Para_Unp[..., 1, :, :, :, :],3, p_order, muset, flv)
     
-
-    return [HTFF_jpsi, ETFF_jpsi]
-
-def TFF_theo_jpsi_LO(xB, t, Q, Para_Unp, muset=1):
-    x = 0
-    xi = (1/(2 - xB) - (2*t*(-1 + xB))/((Q**2 + dvmp.M_jpsi**2)*(-2 + xB)**2))*xB
-    H_E = GPDobserv(x, xi, t, np.sqrt(Q**2 + dvmp.M_jpsi**2), 1)
-    HTFF_jpsi = H_E.TFFLO(Para_Unp[..., 0, :, :, :, :],3,muset)
-    ETFF_jpsi = H_E.TFFLO(Para_Unp[..., 1, :, :, :, :],3,muset)
-    
-
-    return [ HTFF_jpsi, ETFF_jpsi ]
-
-def TFF_theo_jpsi_NLO(xB, t, Q, Para_Unp, extraparam):
-    x = 0
-    xi = (1/(2 - xB) - (2*t*(-1 + xB))/((Q**2 + dvmp.M_jpsi**2)*(-2 + xB)**2))*xB
-    H_E = GPDobserv(x, xi, t, np.sqrt(Q**2 + dvmp.M_jpsi**2), 1)
-    HTFF_jpsi = H_E.TFF(Para_Unp[..., 0, :, :, :, :],3,2,extraparam)
-    ETFF_jpsi = H_E.TFF(Para_Unp[..., 1, :, :, :, :],3,2,extraparam)
-    
-
     return  [ HTFF_jpsi, ETFF_jpsi ]
 
 def DVCSxsec_theo(DVCSxsec_input: pd.DataFrame, CFF_input: np.array):
@@ -354,14 +332,6 @@ def DVjpsiPxsec_theo(DVjpsiPxsec_input: pd.DataFrame, TFF_jpsi_input: np.array):
     [HTFF_jpsi, ETFF_jpsi] = TFF_jpsi_input
     return dvmp.dsigma_Jpsi_dt(y, xB, t, Q, 0, HTFF_jpsi, ETFF_jpsi)
 
-def DVjpsiPxsec_NLO_theo(DVjpsiPxsec_input: pd.DataFrame, TFF_jpsi_input: np.array):
-    y = DVjpsiPxsec_input['y'].to_numpy()
-    xB = DVjpsiPxsec_input['xB'].to_numpy()
-    t = DVjpsiPxsec_input['t'].to_numpy()
-    Q = DVjpsiPxsec_input['Q'].to_numpy()    
-    [HTFF_jpsi, ETFF_jpsi] = TFF_jpsi_input
-    return dvmp.dsigma_Jpsi_dt(y, xB, t, Q, 0, HTFF_jpsi, ETFF_jpsi)
-
 def DVrhoPxsec_cost_xBtQ(DVrhoPxsec_data_xBtQ: pd.DataFrame, Para_Unp, xsec_norm):
     [xB, t, Q] = [DVrhoPxsec_data_xBtQ['xB'].iat[0], DVrhoPxsec_data_xBtQ['t'].iat[0], DVrhoPxsec_data_xBtQ['Q'].iat[0]] 
     [HTFF_rho, ETFF_rho] = TFF_theo_rho(xB, t, Q, Para_Unp) # scalar for each of them
@@ -374,22 +344,10 @@ def DVrhoPxsec_NLO_cost_xBtQ(DVrhoPxsec_data_xBtQ: pd.DataFrame, Para_Unp, xsec_
     DVrhoP_pred_xBtQ = DVrhoPxsec_theo(DVrhoPxsec_data_xBtQ, TFF_rho_input = [HTFF_rho, ETFF_rho]) * xsec_norm
     return np.sum(((DVrhoP_pred_xBtQ - DVrhoPxsec_data_xBtQ['f'])/ DVrhoPxsec_data_xBtQ['delta f']) ** 2 )
 
-def DVphiPxsec_cost_xBtQ(DVphiPxsec_data_xBtQ: pd.DataFrame, Para_Unp, xsec_norm):
-    [xB, t, Q] = [DVphiPxsec_data_xBtQ['xB'].iat[0], DVphiPxsec_data_xBtQ['t'].iat[0], DVphiPxsec_data_xBtQ['Q'].iat[0]] 
-    [HTFF_phi, ETFF_phi] = TFF_theo_phi(xB, t, Q, Para_Unp) # scalar for each of them
-    DVphiP_pred_xBtQ = DVphiPxsec_theo(DVphiPxsec_data_xBtQ, TFF_phi_input = [HTFF_phi, ETFF_phi])
-    return np.sum(((DVphiP_pred_xBtQ - DVphiPxsec_data_xBtQ['f'])/ DVphiPxsec_data_xBtQ['delta f']) ** 2 )
-
-def DVjpsiPxsec_cost_xBtQ(DVjpsiPxsec_data_xBtQ: pd.DataFrame, Para_Unp, xsec_norm):
+def DVjpsiPxsec_cost_xBtQ(DVjpsiPxsec_data_xBtQ: pd.DataFrame, Para_Unp, xsec_norm, p_order = 2):
     [xB, t, Q] = [DVjpsiPxsec_data_xBtQ['xB'].iat[0], DVjpsiPxsec_data_xBtQ['t'].iat[0], DVjpsiPxsec_data_xBtQ['Q'].iat[0]] 
-    [HTFF_jpsi, ETFF_jpsi] = TFF_theo_jpsi(xB, t, Q, Para_Unp) # scalar for each of them
-    DVjpsiP_pred_xBtQ = DVjpsiPxsec_theo(DVjpsiPxsec_data_xBtQ, TFF_jpsi_input = [HTFF_jpsi, ETFF_jpsi]) * xsec_norm
-    return np.sum(((DVjpsiP_pred_xBtQ - DVjpsiPxsec_data_xBtQ['f'])/ DVjpsiPxsec_data_xBtQ['delta f']) ** 2 )
-
-def DVjpsiPxsec_NLO_cost_xBtQ(DVjpsiPxsec_data_xBtQ: pd.DataFrame, Para_Unp, xsec_norm):
-    [xB, t, Q] = [DVjpsiPxsec_data_xBtQ['xB'].iat[0], DVjpsiPxsec_data_xBtQ['t'].iat[0], DVjpsiPxsec_data_xBtQ['Q'].iat[0]] 
-    [HTFF_jpsi, ETFF_jpsi] = TFF_theo_jpsi_NLO(xB, t, Q, Para_Unp, 1)
-    DVjpsiP_pred_xBtQ = DVjpsiPxsec_NLO_theo(DVjpsiPxsec_data_xBtQ, TFF_jpsi_input = [HTFF_jpsi, ETFF_jpsi]) * xsec_norm**2
+    [HTFF_jpsi, ETFF_jpsi] = TFF_theo_jpsi(xB, t, Q, Para_Unp, p_order)
+    DVjpsiP_pred_xBtQ = DVjpsiPxsec_theo(DVjpsiPxsec_data_xBtQ, TFF_jpsi_input = [HTFF_jpsi, ETFF_jpsi]) * xsec_norm**2
     return np.sum(((DVjpsiP_pred_xBtQ - DVjpsiPxsec_data_xBtQ['f'])/ DVjpsiPxsec_data_xBtQ['delta f']) ** 2 )
 
 def cost_forward_H(Norm_HuV,    alpha_HuV,    beta_HuV,    alphap_HuV, 
@@ -1251,7 +1209,7 @@ def cost_dvmp(Norm_HuV,    alpha_HuV,    beta_HuV,    alphap_HuV,
    # cost_DVjpsiPZEUS_xBtQ = np.array(list(pool.map(partial(DVjpsiPxsec_NLO_cost_xBtQ, Para_Unp = Para_Unp_all, xsec_norm = xsecnorm), DVJpsiPZEUSxsec_group_data)))
    # cost_DVjpsiPZEUSxsec = np.sum(cost_DVjpsiPZEUS_xBtQ)
     
-    cost_DVjpsiPH1_xBtQ = np.array(list(pool.map(partial(DVjpsiPxsec_NLO_cost_xBtQ, Para_Unp = Para_Unp_all, xsec_norm = jpsinorm), DVJpsiPH1xsec_group_data)))
+    cost_DVjpsiPH1_xBtQ = np.array(list(pool.map(partial(DVjpsiPxsec_cost_xBtQ, Para_Unp = Para_Unp_all, xsec_norm = jpsinorm, p_order = 2), DVJpsiPH1xsec_group_data)))
     cost_DVjpsiPH1xsec = np.sum(cost_DVjpsiPH1_xBtQ)
 
     return  cost_DVjpsiPH1xsec + cost_PDF_H_g_smallx
@@ -1324,7 +1282,8 @@ def dvmp_fit(Paralst_Unp):
 
     fit_dvmp.limits['Norm_Hg']=(0,10)
     fit_dvmp.limits['alpha_Hg']=(0,2)
-    fit_dvmp.limits['beta_Hg']=(1,10)
+    fit_dvmp.fixed['beta_Hg'] = True
+    #fit_dvmp.limits['beta_Hg']=(1,10)
 
    # fit_dvmp.fixed['Norm_Hg'] = True
    # fit_dvmp.fixed['alpha_Hg'] = True
@@ -1338,7 +1297,6 @@ def dvmp_fit(Paralst_Unp):
     fit_dvmp.fixed['Norm_EdV'] = True
 
     fit_dvmp.fixed['alphap_Hg'] = True
-    
 
    # fit_dvmp.limits['R_E_Sea']=(0,10)    
 
@@ -1363,9 +1321,7 @@ def dvmp_fit(Paralst_Unp):
     fit_dvmp.fixed['R_Hd_xi4']  = True 
     fit_dvmp.fixed['R_Ed_xi4']  = True
     
-
     
-
     global Minuit_Counter, Time_Counter, time_start
     Minuit_Counter = 0
     Time_Counter = 1
@@ -1404,7 +1360,7 @@ if __name__ == '__main__':
     Paralst_Pol     = [4.833430384423373, -0.26355746727810136, 3.1855567245326317, 2.1817250267982997, 0.06994083000560514, 0.5376473088622284, 4.22898219488582, 0.15, -0.663583721889865, 0.24767388786943867, 3.5722668493718626, 0.5420415127277624, -0.08640413690298866, 0.4946733452347538, 2.553713733867575, 0.24307061469378405, 0.6309890923077655, 2.716624295877619, 0.15, 7.99299605623125, 0.799997370438831, 6.415448025778247, 2.0758963463111515, -2.407059919688728, 37.65971219196447, 0.24589373380232807, 1.6561364171210822, 0.0, 2.6840962695831894, 37.58453653636456, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 9.852441955678458]
     
      #from J/psi and gluon PDF using everything through DVCS as input except gluon PDF
-    Paralst_Unp = [4.92252245341075, 0.21632833928300776, 3.228525762889928, 2.347470994624827, 0.16344460105600744, 1.135739437288775, 6.893895640954224, 0.15, 3.358767931921898, 0.1842893653407356, 4.417802345266761, 3.4816671934041685, 0.2491737223289409, 1.0519258916411531, 6.553873836594824, 1.8318696701278339, 1.0965234601821583, 9.99999305383342, 0.15, 0.1813228421702434, 0.9068471909677753, 1.1018931174030364, 0.4607676086634599, -0.22341404954304522, 0.7683213780361391, 0.22948701913308733, -2.638627981453611, -0.13980648369003512, 0.7985103392773935, 3.404262017724412, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 3.44764738950069, 1.7955307337138424, 1.0849192935931364, 0.6]
+    Paralst_Unp = [4.92252245341075, 0.21632833928300776, 3.228525762889928, 2.347470994624827, 0.16344460105600744, 1.135739437288775, 6.893895640954224, 0.15, 3.358767931921898, 0.1842893653407356, 4.417802345266761, 3.4816671934041685, 0.2491737223289409, 1.0519258916411531, 6.553873836594824, 1.8318696701278339, 1.0965234601821583, 7.0, 0.15, 0.1813228421702434, 0.9068471909677753, 1.1018931174030364, 0.4607676086634599, -0.22341404954304522, 0.7683213780361391, 0.22948701913308733, -2.638627981453611, -0.13980648369003512, 0.7985103392773935, 3.404262017724412, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 3.44764738950069, 1.7955307337138424, 1.0849192935931364, 0.6]
 
     fit_dvmp = dvmp_fit(Paralst_Unp)
     
