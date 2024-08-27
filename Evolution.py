@@ -849,13 +849,17 @@ def WilsonT_NLO(j: complex, k: complex, nf: int, Q: float, meson: int, muset: fl
     CWT= np.array([0*j, 0*j, 0*j, \
                    CQNS*(3 * 2 ** (1+j) * gamma(5/2+j) / (gamma(3/2) * gamma(3+j)))/nf + CQPS * (3 * 2 ** (1+j) * gamma(5/2+j) / (gamma(3/2) * gamma(3+j))), \
                    3 * 2 * 2 ** (1+j) * gamma(5/2+j) / (j + 3) / (gamma(3/2) * gamma(3+j)) * (NC*CGNC + CF*CGCF + beta0(nf)*np.log(mufact/mures)/2)],dtype=complex) #+ beta0(nf)*np.log(mufact/mures)
-
+    '''
     if(meson == 1):
         return np.einsum('j, j...->j...', TFF_rho_trans, CWT)                
     if(meson== 2):
         return np.einsum('j, j...->j...', TFF_phi_trans, CWT)                
     if(meson == 3):
         return np.einsum('j, j...->j...', TFF_jpsi_trans, CWT)
+    '''
+    # Only sea quark implemented, not apply to rho production.
+    return CWT * f_jpsi / 2
+
 
 def np_cache(function):
     @functools.cache
