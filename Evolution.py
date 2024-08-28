@@ -62,11 +62,11 @@ f_rho_d = 0.209 # Change to 0.210
 f_rho_g = 0.209 # Change to 0.216
 f_phi = 0.221 # Change to 0.233
 f_jpsi = 0.406
-
+'''
 TFF_rho_trans = np.array([f_rho_u * 2 / 3 / np.sqrt(2), f_rho_u * 4 / 3 / np.sqrt(2), f_rho_d * 1 / 3 / np.sqrt(2), f_rho_d * 2 / 3 / np.sqrt(2), f_rho_g * 3 / 4 / np.sqrt(2)])#np.array([f_rho_u * 2 / 3 / np.sqrt(2), f_rho_u * 4 / 3 / np.sqrt(2), f_rho_d / 3 / np.sqrt(2), f_rho_d * 2 / 3 / np.sqrt(2), f_rho_g * 3 / 4 / np.sqrt(2)])
-TFF_phi_trans = np.array([0, 0, 0, 0, -f_phi / 4]) # strange contribution should be included but doesn't exist in current 2 quark framework
-TFF_jpsi_trans = np.array([0, 0, 0, 0, f_jpsi / 2])
-
+TFF_phi_trans = np.array([0, 0, 0, 0, -1/3]) # strange contribution should be included but doesn't exist in current 2 quark framework
+TFF_jpsi_trans = np.array([0, 0, 0, 0, 2/3])
+'''
 """
 ***********************pQCD running coupling constant***********************
 Here rundec is used instead.
@@ -741,15 +741,11 @@ def CWilsonT(j: complex, nf: int, meson: int) -> complex:
     CWT = np.array([3 * 2 ** (1+j) * gamma(5/2+j) / (gamma(3/2) * gamma(3+j)), \
                      3 * 2 ** (1+j) * gamma(5/2+j) / (gamma(3/2) * gamma(3+j)), \
                      3 * 2 ** (1+j) * gamma(5/2+j) / (gamma(3/2) * gamma(3+j)), \
-                     3 * 2 ** (1+j) * gamma(5/2+j) / nf / (gamma(3/2) * gamma(3+j)),\
-                     3 * 2 * 2 ** (1+j) * gamma(5/2+j) / (j + 3) / (gamma(3/2) * gamma(3+j))])
-                
-    if(meson == 1):
-        return np.einsum('j, j...->j...', TFF_rho_trans, CWT)                
-    if(meson== 2):
-        return np.einsum('j, j...->j...', TFF_phi_trans, CWT)                
+                     1/ nf * 3 * 2 ** (1+j) * gamma(5/2+j) / (gamma(3/2) * gamma(3+j)),\
+                     2 /CF/ (j+3) * 3 * 2 ** (1+j) * gamma(5/2+j) / (gamma(3/2) * gamma(3+j))])
+                             
     if(meson == 3):
-        return np.einsum('j, j...->j...', TFF_jpsi_trans, CWT)
+        return np.einsum('j, j...->j...', [0,0,0,0,1], CWT) * f_jpsi * CF/NC* (2/3)
 
 def WilsonT_NLO(j: complex, k: complex, nf: int, Q: float, meson: int, muset: float):
     'NLO Wilson coefficients for gluons, currently setting factorization scale and renormalization scale equal to Q^2'
@@ -847,8 +843,8 @@ def WilsonT_NLO(j: complex, k: complex, nf: int, Q: float, meson: int, muset: fl
     
     # With sea quarks
     CWT= np.array([0*j, 0*j, 0*j, \
-                   CQNS*(3 * 2 ** (1+j) * gamma(5/2+j) / (gamma(3/2) * gamma(3+j)))/nf + CQPS * (3 * 2 ** (1+j) * gamma(5/2+j) / (gamma(3/2) * gamma(3+j))), \
-                   3 * 2 * 2 ** (1+j) * gamma(5/2+j) / (j + 3) / (gamma(3/2) * gamma(3+j)) * (NC*CGNC + CF*CGCF + beta0(nf)*np.log(mufact/mures)/2)],dtype=complex) #+ beta0(nf)*np.log(mufact/mures)
+                   0 * CQNS*(3 * 2 ** (1+j) * gamma(5/2+j) / (gamma(3/2) * gamma(3+j)))/nf + CQPS * (3 * 2 ** (1+j) * gamma(5/2+j) / (gamma(3/2) * gamma(3+j))), \
+                   2/ CF / (j + 3) * 3 * 2 ** (1+j) * gamma(5/2+j) / (gamma(3/2) * gamma(3+j)) * (NC*CGNC + CF*CGCF + beta0(nf)*np.log(mufact/mures)/2)],dtype=complex) #+ beta0(nf)*np.log(mufact/mures)
     '''
     if(meson == 1):
         return np.einsum('j, j...->j...', TFF_rho_trans, CWT)                
@@ -858,7 +854,8 @@ def WilsonT_NLO(j: complex, k: complex, nf: int, Q: float, meson: int, muset: fl
         return np.einsum('j, j...->j...', TFF_jpsi_trans, CWT)
     '''
     # Only sea quark implemented, not apply to rho production.
-    return CWT * f_jpsi / 2
+    if(meson == 3):
+        return CWT * f_jpsi  * CF/NC * (2/3)
 
 
 def np_cache(function):

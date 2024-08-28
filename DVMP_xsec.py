@@ -118,25 +118,8 @@ def dsigma_Jpsi_dt(y: float, xB: float, t: float, Q: float, phi: float, HTFF_jps
     unpolarized nucleon to unpolarized nucleon
     
     """
+    LplusT = (1 - y) / (1 - y - y**2 / 2) + M_jpsi**2 / Q**2 
     
+    return LplusT * gevtonb * 4 * np.pi ** 2 * alphaEM * xB ** 2 / ((Q**2 + M_jpsi**2) ** 2) * ev.AlphaS(2, 2, np.sqrt(Q**2 + M_jpsi**2))**2  * (Real(HTFF_jpsi* Conjugate(HTFF_jpsi)) - t/4/ M_p**2 * Real(ETFF_jpsi* Conjugate(ETFF_jpsi))) * (Q/ (Q**2 + M_jpsi**2)) ** 2
     # Version including mass corrections! Extra factor of 3 C_F**2 needed to account for different factors included in gluon TFF. 
-    return ((1 - y) / (1 - y - y**2 / 2) + M_jpsi**2 / Q**2) * gevtonb * 4 / 9 * 2 * np.pi**2 * alphaEM * ev.AlphaS(2, 2, np.sqrt(Q**2 + M_jpsi**2))**2 * ev.CF**2 * Q**2 * (((1 - (xB / (2 - xB))**2) * Real((HTFF_jpsi - (xB**2 / 4 / (1-xB)) * ETFF_jpsi) * Conjugate(HTFF_jpsi - (xB**2 / 4 / (1-xB)) * ETFF_jpsi)) / ev.NC**2 / (M_jpsi**2 + Q**2)**2 / ((M_jpsi**2 + Q**2) / xB - Q**2 - M_p**2) / np.sqrt(((M_jpsi**2 + Q**2) / xB - Q**2)**2 + Q**4 + M_p**4 + 2 * ((M_jpsi**2 + Q**2) / xB - Q**2) * Q**2 + 2 * Q**2 * M_p**2 - 2 * ((M_jpsi**2 + Q**2) / xB - Q**2) * M_p**2)) + (((-t - (M_p**2 * xB**2 / (1-xB))) / 2 / M_p) * Real((ETFF_jpsi) * Conjugate(ETFF_jpsi)) / ev.NC**2 / (M_jpsi**2 + Q**2)**2 / ((M_jpsi**2 + Q**2) / xB - Q**2 - M_p**2) / np.sqrt(((M_jpsi**2 + Q**2) / xB - Q**2)**2 + Q**4 + M_p**4 + 2 * ((M_jpsi**2 + Q**2) / xB - Q**2) * Q**2 + 2 * Q**2 * M_p**2 - 2 * ((M_jpsi**2 + Q**2) / xB - Q**2) * M_p**2)))
-    
-    # Just keeping contribution from H
-   # return ((1 - y) / (1 - y - y**2 / 2) + M_jpsi**2 / Q**2) * gevtonb * 4 / 9 * 2 * np.pi**2 * alphaEM * ev.AlphaS(2, 2, np.sqrt(Q**2 + M_jpsi**2))**2 * ev.CF**2 * Q**2 * (((1 - (xB / (2 - xB))**2) * Real(HTFF_jpsi * Conjugate(HTFF_jpsi)) / ev.NC**2 / (M_jpsi**2 + Q**2)**2 / ((M_jpsi**2 + Q**2) / xB - Q**2 - M_p**2) / np.sqrt(((M_jpsi**2 + Q**2) / xB - Q**2)**2 + Q**4 + M_p**4 + 2 * ((M_jpsi**2 + Q**2) / xB - Q**2) * Q**2 + 2 * Q**2 * M_p**2 - 2 * ((M_jpsi**2 + Q**2) / xB - Q**2) * M_p**2)) + (((-t - (M_p**2 * xB**2 / (1-xB))) / 2 / M_p) * 0 / ev.NC**2 / (M_jpsi**2 + Q**2)**2 / ((M_jpsi**2 + Q**2) / xB - Q**2 - M_p**2) / np.sqrt(((M_jpsi**2 + Q**2) / xB - Q**2)**2 + Q**4 + M_p**4 + 2 * ((M_jpsi**2 + Q**2) / xB - Q**2) * Q**2 + 2 * Q**2 * M_p**2 - 2 * ((M_jpsi**2 + Q**2) / xB - Q**2) * M_p**2)))
-    
-    #((1 - y) / (1 - y - y**2 / 2) + M_jpsi**2 / Q**2)
-    
-   # return prefac_jpsi(y, xB, t, Q, phi) * ((4 * (1 - xB) * (1 - xB * (m2(xB, Q, t) - t) / (Q ** 2)) - (m2(xB, Q, t) * eps(xB, Q) ** 2 / (M_p ** 2))) / ((2 - xB - (xB * (m2(xB, Q, t) - t) / Q ** 2)) ** 2) * (HTFF_jpsi - ((xB ** 2 * ((1 + (m2(xB, Q, t) - t) / Q ** 2) ** 2) + 4 * xB * t / Q ** 2) * ETFF_jpsi / (4 * (1 - xB) * (1 - xB * (m2(xB, Q, t) - t) / Q ** 2) - (m2(xB, Q, t) * eps(xB,Q) ** 2 / M_p ** 2)))) * Conjugate((HTFF_jpsi - ((xB ** 2 * ((1 + (m2(xB, Q, t) - t) / Q ** 2) ** 2) + 4 * xB * t / Q ** 2) * ETFF_jpsi / (4 * (1 - xB) * (1 - xB * (m2(xB, Q, t) - t) / Q ** 2) - (m2(xB, Q, t) * eps(xB,Q) ** 2 / M_p ** 2))))) + (K(xB, Q, t) ** 2 * ETFF_jpsi * Conjugate(ETFF_jpsi) / 4 / M_p ** 2 / ((1 - xB) * (1 - xB * (m2(xB, Q, t) - t) / Q ** 2) - (m2(xB, Q, t) * eps(xB, Q) ** 2 / 4 / M_p ** 2))))
-
-    #currently with simple Q^2 / M_jpsi^2 for R
-
-@vectorize(["float64(float64,float64,float64,float64,float64,complex128,complex128)"])        
-def dsigma_Jpsi_dt_NLO(y: float, xB: float, t: float, Q: float, phi: float, HTFF_jpsi: complex, ETFF_jpsi: complex):
-    
-    '''
-    unpolarized Jpsi using NLO TFF times LO to avoid NNLO contributions, keeping only H contribution
-    
-    '''
-   # NLO*Conjugate(NLO)
-    return ((1 - y) / (1 - y - y**2 / 2) + M_jpsi**2 / Q**2) * gevtonb * 4 / 9 * 2 * np.pi**2 * alphaEM * ev.AlphaS(2, 2, np.sqrt(Q**2 + M_jpsi**2))**2 * ev.CF**2 * Q**2 * (((1 - (xB / (2 - xB))**2) * ((Real((HTFF_jpsi - (xB**2 / 4 / (1-xB)) * ETFF_jpsi) * Conjugate(HTFF_jpsi - (xB**2 / 4 / (1-xB)) * ETFF_jpsi)) )) / ev.NC**2 / (M_jpsi**2 + Q**2)**2 / ((M_jpsi**2 + Q**2) / xB - Q**2 - M_p**2) / np.sqrt(((M_jpsi**2 + Q**2) / xB - Q**2)**2 + Q**4 + M_p**4 + 2 * ((M_jpsi**2 + Q**2) / xB - Q**2) * Q**2 + 2 * Q**2 * M_p**2 - 2 * ((M_jpsi**2 + Q**2) / xB - Q**2) * M_p**2)) + (((-t - (M_p**2 * xB**2 / (1-xB))) / 2 / M_p) * Real((ETFF_jpsi) * Conjugate(ETFF_jpsi)) / ev.NC**2 / (M_jpsi**2 + Q**2)**2 / ((M_jpsi**2 + Q**2) / xB - Q**2 - M_p**2) / np.sqrt(((M_jpsi**2 + Q**2) / xB - Q**2)**2 + Q**4 + M_p**4 + 2 * ((M_jpsi**2 + Q**2) / xB - Q**2) * Q**2 + 2 * Q**2 * M_p**2 - 2 * ((M_jpsi**2 + Q**2) / xB - Q**2) * M_p**2)))
+    #return ((1 - y) / (1 - y - y**2 / 2) + M_jpsi**2 / Q**2) * gevtonb * 4 / 9 * 2 * np.pi**2 * alphaEM * ev.AlphaS(2, 2, np.sqrt(Q**2 + M_jpsi**2))**2 * ev.CF**2 * Q**2 * (((1 - (xB / (2 - xB))**2) * Real((HTFF_jpsi - (xB**2 / 4 / (1-xB)) * ETFF_jpsi) * Conjugate(HTFF_jpsi - (xB**2 / 4 / (1-xB)) * ETFF_jpsi)) / ev.NC**2 / (M_jpsi**2 + Q**2)**2 / ((M_jpsi**2 + Q**2) / xB - Q**2 - M_p**2) / np.sqrt(((M_jpsi**2 + Q**2) / xB - Q**2)**2 + Q**4 + M_p**4 + 2 * ((M_jpsi**2 + Q**2) / xB - Q**2) * Q**2 + 2 * Q**2 * M_p**2 - 2 * ((M_jpsi**2 + Q**2) / xB - Q**2) * M_p**2)) + (((-t - (M_p**2 * xB**2 / (1-xB))) / 2 / M_p) * Real((ETFF_jpsi) * Conjugate(ETFF_jpsi)) / ev.NC**2 / (M_jpsi**2 + Q**2)**2 / ((M_jpsi**2 + Q**2) / xB - Q**2 - M_p**2) / np.sqrt(((M_jpsi**2 + Q**2) / xB - Q**2)**2 + Q**4 + M_p**4 + 2 * ((M_jpsi**2 + Q**2) / xB - Q**2) * Q**2 + 2 * Q**2 * M_p**2 - 2 * ((M_jpsi**2 + Q**2) / xB - Q**2) * M_p**2)))
