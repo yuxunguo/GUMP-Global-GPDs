@@ -42,68 +42,63 @@ def ParaManager_Unp(Paralst: np.array):
      Norm_EdV,    R_E_Sea,      R_Hu_xi2,    R_Hd_xi2,    R_Hg_xi2,
      R_Eu_xi2,    R_Ed_xi2,     R_Eg_xi2,
      R_Hu_xi4,    R_Hd_xi4,     R_Hg_xi4,
-     R_Eu_xi4,    R_Ed_xi4,     R_Eg_xi4,    bexp_HSea, bexp_Hg] = Paralst
+     R_Eu_xi4,    R_Ed_xi4,     R_Eg_xi4,    bexp_HSea, bexp_Hg, Invm2_Hg] = Paralst
     
     #R_E_Sea = 0
     #R_Hu_xi4 = 0
     #R_Hd_xi4 = 0
-    R_Eu_xi4 = 0
-    R_Ed_xi4 = 0
-
-    #R_Hg_xi2 = 0
-    #R_Eg_xi2 = 0
-    #R_Hg_xi4 = 0
-    #R_Eg_xi4 = 0
+    #R_Eu_xi4 = 0
+    #R_Ed_xi4 = 0
 
     # Initial forward parameters for the H of (uV, ubar, dV, dbar,g) distributions
-    H_uV =   np.array([[Norm_HuV,   alpha_HuV,   beta_HuV,   alphap_HuV,   0]])
-    H_ubar = np.array([[Norm_Hubar, alpha_Hubar, beta_Hubar, alphap_Hqbar, bexp_HSea]])
-    H_dV =   np.array([[Norm_HdV,   alpha_HdV,   beta_HdV,   alphap_HdV,   0]])
-    H_dbar = np.array([[Norm_Hdbar, alpha_Hdbar, beta_Hdbar, alphap_Hqbar, bexp_HSea]])
-    H_g =    np.array([[Norm_Hg,    alpha_Hg,    beta_Hg,    alphap_Hg,    bexp_Hg ]])
+    H_uV =   np.array([[Norm_HuV,   alpha_HuV,   beta_HuV,   alphap_HuV,   0,         0]])
+    H_ubar = np.array([[Norm_Hubar, alpha_Hubar, beta_Hubar, alphap_Hqbar, bexp_HSea, 0]])
+    H_dV =   np.array([[Norm_HdV,   alpha_HdV,   beta_HdV,   alphap_HdV,   0,         0]])
+    H_dbar = np.array([[Norm_Hdbar, alpha_Hdbar, beta_Hdbar, alphap_Hqbar, bexp_HSea, 0]])
+    H_g =    np.array([[Norm_Hg,    alpha_Hg,    beta_Hg,    alphap_Hg,    bexp_Hg,   Invm2_Hg]])
 
     # Initial xi^2 parameters for the H of (uV, ubar, dV, dbar,g) distributions
     """
         One free parameter R_H_xi2 for the ratio to the forward PDF H for u, d ang g
     """
 
-    H_uV_xi2 =   np.einsum('...i,i->...i', H_uV,   [R_Hu_xi2,1,1,1,1])
-    H_ubar_xi2 = np.einsum('...i,i->...i', H_ubar, [R_Hu_xi2,1,1,1,1])
-    H_dV_xi2 =   np.einsum('...i,i->...i', H_dV,   [R_Hd_xi2,1,1,1,1])
-    H_dbar_xi2 = np.einsum('...i,i->...i', H_dbar, [R_Hd_xi2,1,1,1,1])
-    H_g_xi2 =    np.einsum('...i,i->...i', H_g,    [R_Hg_xi2,1,1,1,1])
+    H_uV_xi2 =   np.einsum('...i,i->...i', H_uV,   [R_Hu_xi2,1,1,1,1,1])
+    H_ubar_xi2 = np.einsum('...i,i->...i', H_ubar, [R_Hu_xi2,1,1,1,1,1])
+    H_dV_xi2 =   np.einsum('...i,i->...i', H_dV,   [R_Hd_xi2,1,1,1,1,1])
+    H_dbar_xi2 = np.einsum('...i,i->...i', H_dbar, [R_Hd_xi2,1,1,1,1,1])
+    H_g_xi2 =    np.einsum('...i,i->...i', H_g,    [R_Hg_xi2,1,1,1,1,1])
 
-    H_uV_xi4 =   np.einsum('...i,i->...i', H_uV,   [R_Hu_xi4,1,1,1,1])
-    H_ubar_xi4 = np.einsum('...i,i->...i', H_ubar, [R_Hu_xi4,1,1,1,1])
-    H_dV_xi4 =   np.einsum('...i,i->...i', H_dV,   [R_Hd_xi4,1,1,1,1])
-    H_dbar_xi4 = np.einsum('...i,i->...i', H_dbar, [R_Hd_xi4,1,1,1,1])
-    H_g_xi4 =    np.einsum('...i,i->...i', H_g,    [R_Hg_xi4,1,1,1,1])
+    H_uV_xi4 =   np.einsum('...i,i->...i', H_uV,   [R_Hu_xi4,1,1,1,1,1])
+    H_ubar_xi4 = np.einsum('...i,i->...i', H_ubar, [R_Hu_xi4,1,1,1,1,1])
+    H_dV_xi4 =   np.einsum('...i,i->...i', H_dV,   [R_Hd_xi4,1,1,1,1,1])
+    H_dbar_xi4 = np.einsum('...i,i->...i', H_dbar, [R_Hd_xi4,1,1,1,1,1])
+    H_g_xi4 =    np.einsum('...i,i->...i', H_g,    [R_Hg_xi4,1,1,1,1,1])
 
     # Initial forward parameters for the E of (uV, ubar, dV, dbar,g) distributions
     """
         Three free parameter R_E_u, R_E_d, R_E_g for the E/H ratio 
     """
-    E_uV =   np.array([[Norm_EuV,   alpha_EuV,   beta_EuV,   alphap_EuV, 0]])
-    E_ubar = np.einsum('...i,i->...i', H_ubar,   [R_E_Sea,1,1,1,1])
-    E_dV =   np.array([[Norm_EdV,   alpha_EuV,   beta_EuV,   alphap_EuV, 0]])
-    E_dbar = np.einsum('...i,i->...i', H_dbar,   [R_E_Sea,1,1,1,1])
-    E_g =    np.einsum('...i,i->...i', H_g,      [R_E_Sea,1,1,1,1])
+    E_uV =   np.array([[Norm_EuV,   alpha_EuV,   beta_EuV,   alphap_EuV, 0, 0]])
+    E_ubar = np.einsum('...i,i->...i', H_ubar,   [R_E_Sea,1,1,1,1,1])
+    E_dV =   np.array([[Norm_EdV,   alpha_EuV,   beta_EuV,   alphap_EuV, 0, 0]])
+    E_dbar = np.einsum('...i,i->...i', H_dbar,   [R_E_Sea,1,1,1,1,1])
+    E_g =    np.einsum('...i,i->...i', H_g,      [R_E_Sea,1,1,1,1,1])
 
     # Initial xi^2 parameters for the E of (uV, ubar, dV, dbar,g) distributions
     """
         One free parameter R_E_xi2 for the ratio to the forward PDF E
     """
-    E_uV_xi2 =   np.einsum('...i,i->...i', E_uV,     [R_Eu_xi2,1,1,1,1])
-    E_ubar_xi2 = np.einsum('...i,i->...i', E_ubar,   [R_Eu_xi2,1,1,1,1])
-    E_dV_xi2 =   np.einsum('...i,i->...i', E_dV,     [R_Ed_xi2,1,1,1,1])
-    E_dbar_xi2 = np.einsum('...i,i->...i', E_dbar,   [R_Ed_xi2,1,1,1,1])
-    E_g_xi2 =    np.einsum('...i,i->...i', E_g,      [R_Eg_xi2,1,1,1,1])
+    E_uV_xi2 =   np.einsum('...i,i->...i', E_uV,     [R_Eu_xi2,1,1,1,1,1])
+    E_ubar_xi2 = np.einsum('...i,i->...i', E_ubar,   [R_Eu_xi2,1,1,1,1,1])
+    E_dV_xi2 =   np.einsum('...i,i->...i', E_dV,     [R_Ed_xi2,1,1,1,1,1])
+    E_dbar_xi2 = np.einsum('...i,i->...i', E_dbar,   [R_Ed_xi2,1,1,1,1,1])
+    E_g_xi2 =    np.einsum('...i,i->...i', E_g,      [R_Eg_xi2,1,1,1,1,1])
 
-    E_uV_xi4 =   np.einsum('...i,i->...i', E_uV,     [R_Eu_xi4,1,1,1,1])
-    E_ubar_xi4 = np.einsum('...i,i->...i', E_ubar,   [R_Eu_xi4,1,1,1,1])
-    E_dV_xi4 =   np.einsum('...i,i->...i', E_dV,     [R_Ed_xi4,1,1,1,1])
-    E_dbar_xi4 = np.einsum('...i,i->...i', E_dbar,   [R_Ed_xi4,1,1,1,1])
-    E_g_xi4 =    np.einsum('...i,i->...i', E_g,      [R_Eg_xi4,1,1,1,1])
+    E_uV_xi4 =   np.einsum('...i,i->...i', E_uV,     [R_Eu_xi4,1,1,1,1,1])
+    E_ubar_xi4 = np.einsum('...i,i->...i', E_ubar,   [R_Eu_xi4,1,1,1,1,1])
+    E_dV_xi4 =   np.einsum('...i,i->...i', E_dV,     [R_Ed_xi4,1,1,1,1,1])
+    E_dbar_xi4 = np.einsum('...i,i->...i', E_dbar,   [R_Ed_xi4,1,1,1,1,1])
+    E_g_xi4 =    np.einsum('...i,i->...i', E_g,      [R_Eg_xi4,1,1,1,1,1])
 
     Hlst = np.array([[H_uV,     H_ubar,     H_dV,     H_dbar,     H_g],
                      [H_uV_xi2, H_ubar_xi2, H_dV_xi2, H_dbar_xi2, H_g_xi2],

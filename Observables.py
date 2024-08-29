@@ -143,6 +143,7 @@ def ConfMoment(j: complex, t: float, ParaSets: np.ndarray):
     beta  = ParaSets[..., 2]
     alphap = ParaSets[..., 3]
     bexp = ParaSets[..., 4]
+    invm2 = ParaSets[..., 5]
     
     if np.ndim(norm) < np.ndim(t):
         raise ValueError("Input format is wrong.")
@@ -155,7 +156,7 @@ def ConfMoment(j: complex, t: float, ParaSets: np.ndarray):
 
     # Currently with KM ansatz and dipole residual
 
-    return norm * beta_loggamma (j + 1 - alpha, 1 + beta) * (j + 1  - alpha)/ (j + 1 - alpha - alphap * t) * np.exp(t*bexp)
+    return norm * beta_loggamma (j + 1 - alpha, 1 + beta) * (j + 1  - alpha)/ (j + 1 - alpha - alphap * t) * np.exp(t*bexp) * (1 - t * invm2 ) ** (-3)
     # (N) or (N, m1) or (N, m1, m2) .... depends on usage
     # For the recommended usage, the output is (N, 5, init_NumofAnsatz)
 
