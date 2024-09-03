@@ -1181,7 +1181,7 @@ def cost_dvmp(Norm_HuV,    alpha_HuV,    beta_HuV,    alphap_HuV,
                     R_Eu_xi4,    R_Ed_xi4,     R_Eg_xi4,    bexp_HSea, bexp_Hg, Invm2_Hg, norm, norm2]
 
     jpsinorm = Para_Unp_lst[-2]
-    #xsecnorm = Para_Unp_lst[-1] 
+    jpsinormzeus = Para_Unp_lst[-1] 
     Para_Unp_all = ParaManager_Unp(Para_Unp_lst[:-2])
     
    # cost_DVrhoPZEUS_xBtQ = np.array(list(pool.map(partial(DVrhoPxsec_cost_xBtQ, Para_Unp = Para_Unp_all, xsec_norm = xsecnorm), DVrhoPZEUSxsec_group_data)))
@@ -1205,13 +1205,13 @@ def cost_dvmp(Norm_HuV,    alpha_HuV,    beta_HuV,    alphap_HuV,
    # cost_DVjpsiPZEUS_xBtQ = np.array(list(pool.map(partial(DVjpsiPxsec_cost_xBtQ, Para_Unp = Para_Unp_all), DVJpsiPZEUSxsec_group_data)))
    # cost_DVjpsiPZEUSxsec = np.sum(cost_DVjpsiPZEUS_xBtQ)
     
-   # cost_DVjpsiPZEUS_xBtQ = np.array(list(pool.map(partial(DVjpsiPxsec_NLO_cost_xBtQ, Para_Unp = Para_Unp_all, xsec_norm = xsecnorm), DVJpsiPZEUSxsec_group_data)))
-   # cost_DVjpsiPZEUSxsec = np.sum(cost_DVjpsiPZEUS_xBtQ)
+    #cost_DVjpsiPZEUS_xBtQ = np.array(list(pool.map(partial(DVjpsiPxsec_cost_xBtQ, Para_Unp = Para_Unp_all, xsec_norm = jpsinormzeus, p_order = 2), DVJpsiPZEUSxsec_group_data)))
+    #cost_DVjpsiPZEUSxsec = np.sum(cost_DVjpsiPZEUS_xBtQ)
     
     cost_DVjpsiPH1_xBtQ = np.array(list(pool.map(partial(DVjpsiPxsec_cost_xBtQ, Para_Unp = Para_Unp_all, xsec_norm = jpsinorm, p_order = 2), DVJpsiPH1xsec_group_data)))
     cost_DVjpsiPH1xsec = np.sum(cost_DVjpsiPH1_xBtQ)
 
-    return  cost_DVjpsiPH1xsec + cost_PDF_H_g_smallx
+    return  cost_DVjpsiPH1xsec + cost_PDF_H_g_smallx #+ cost_DVjpsiPZEUSxsec
 
 def dvmp_fit(Paralst_Unp):
 
@@ -1248,9 +1248,10 @@ def dvmp_fit(Paralst_Unp):
     fit_dvmp.fixed['Invm2_Hg'] = True
     fit_dvmp.limits['bexp_Hg']  = (0.1,4)
     
-    fit_dvmp.limits['norm'] = (0.1,1.25)
+    fit_dvmp.limits['norm'] = (0.1,10)
     #fit_dvmp.fixed['norm'] = True
     
+    #fit_dvmp.limits['norm2'] = (0.1,10)
     fit_dvmp.fixed['norm2'] = True
 
     fit_dvmp.fixed['Norm_HuV'] = True
