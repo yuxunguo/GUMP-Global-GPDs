@@ -44,6 +44,14 @@ def rratio_theo_s(xi, t, Q, p, flv, Para, p_order):
     _GPD_theo = GPDobserv(xi, xi, t, Q, p)
     return _GPD_theo.GPD(flv, Para, p_order)/_GPD_theo.tPDF(flv, Para, p_order)
 
+def HTFF_theo_jpsi(xB, t, Q, Para_spe, p_order = 1, muset =1, flv = 'All'):
+    x = 0
+    xi = (1/(2 - xB) - (2*t*(-1 + xB))/((Q**2 + dvmp.M_jpsi**2)*(-2 + xB)**2))*xB
+    H_E = GPDobserv(x, xi, t, np.sqrt(Q**2 + dvmp.M_jpsi**2), 1)
+    HTFF_jpsi = H_E.TFF(Para_spe, 3, p_order, muset, flv)
+    
+    return HTFF_jpsi
+
 def TFF_theo_jpsi(xB, t, Q, Para_Unp, p_order = 1, muset =1, flv = 'All'):
     x = 0
     xi = (1/(2 - xB) - (2*t*(-1 + xB))/((Q**2 + dvmp.M_jpsi**2)*(-2 + xB)**2))*xB
@@ -161,7 +169,7 @@ if __name__ == '__main__':
     pool = Pool()
     
     Para_spe = Para_All[0] 
-    
+    """
     x = np.exp(np.linspace(np.log(0.0001), np.log(0.6), 100, dtype = float))
     
     pdflst = np.array([PDF_theo_s(x_i,0.,2.,1,'g',Para_spe, 2) for x_i in x ])
@@ -194,13 +202,22 @@ if __name__ == '__main__':
     with open("GUMP_Results/Rrat2.csv","w",newline='') as my_csv:
         csvWriter = csv.writer(my_csv,delimiter=',')
         csvWriter.writerows(np.transpose([qlst,rratlst2]))
-
+    """
     DVjpsiPH1_xBtQ_theo = np.array(list(pool.map(partial(DVjpsiPxsec_theo_xBtQ, Para_Unp = Para_Unp, xsec_norm = jpsinorm, p_order = 2, muset = 1, flv = 'All'), DVJpsiPH1xsec_group_data))).flatten()
     
     DVjpsiPH1_xBtQ_theo_mu_1 = np.array(list(pool.map(partial(DVjpsiPxsec_theo_xBtQ, Para_Unp = Para_Unp, xsec_norm = jpsinorm, p_order = 2, muset = 0.5, flv = 'All'), DVJpsiPH1xsec_group_data))).flatten()
     
     DVjpsiPH1_xBtQ_theo_mu_2 = np.array(list(pool.map(partial(DVjpsiPxsec_theo_xBtQ, Para_Unp = Para_Unp, xsec_norm = jpsinorm, p_order = 2, muset = 2., flv = 'All'), DVJpsiPH1xsec_group_data))).flatten()  
-     
+    
+    DVjpsiPH1_xBtQ_theo_mu_3 = np.array(list(pool.map(partial(DVjpsiPxsec_theo_xBtQ, Para_Unp = Para_Unp, xsec_norm = jpsinorm, p_order = 2, muset = np.sqrt(0.5), flv = 'All'), DVJpsiPH1xsec_group_data))).flatten()
+    
+    DVjpsiPH1_xBtQ_theo_mu_4 = np.array(list(pool.map(partial(DVjpsiPxsec_theo_xBtQ, Para_Unp = Para_Unp, xsec_norm = jpsinorm, p_order = 2, muset = np.sqrt(2), flv = 'All'), DVJpsiPH1xsec_group_data))).flatten()  
+
+    DVjpsiPH1_xBtQ_theo_mu_5 = np.array(list(pool.map(partial(DVjpsiPxsec_theo_xBtQ, Para_Unp = Para_Unp, xsec_norm = jpsinorm, p_order = 2, muset = 0.8, flv = 'All'), DVJpsiPH1xsec_group_data))).flatten()
+    
+    DVjpsiPH1_xBtQ_theo_mu_6 = np.array(list(pool.map(partial(DVjpsiPxsec_theo_xBtQ, Para_Unp = Para_Unp, xsec_norm = jpsinorm, p_order = 2, muset = 1.2, flv = 'All'), DVJpsiPH1xsec_group_data))).flatten()  
+
+    
     DVJpsiPH1xsec_group_data_shape = np.array(DVJpsiPH1xsec_group_data).shape
     
     with open("GUMP_Results/dvjpsiph1data.csv","w",newline='') as my_csv:
@@ -209,17 +226,36 @@ if __name__ == '__main__':
     
     with open("GUMP_Results/dvjpsiph1theo.csv","w",newline='') as my_csv:
         csvWriter = csv.writer(my_csv,delimiter=',')
-        csvWriter.writerows(np.transpose([DVjpsiPH1_xBtQ_theo,DVjpsiPH1_xBtQ_theo_mu_1,DVjpsiPH1_xBtQ_theo_mu_2]))
+        csvWriter.writerows(np.transpose([DVjpsiPH1_xBtQ_theo,DVjpsiPH1_xBtQ_theo_mu_1,DVjpsiPH1_xBtQ_theo_mu_2,DVjpsiPH1_xBtQ_theo_mu_3,DVjpsiPH1_xBtQ_theo_mu_4,DVjpsiPH1_xBtQ_theo_mu_5,DVjpsiPH1_xBtQ_theo_mu_6]))
 
-    DVjpsiPH1_xBtQ_q1 = np.array(list(pool.map(partial(DVjpsiPxsec_theo_xBtQ, Para_Unp = Para_Unp, xsec_norm = jpsinorm, p_order = 1, muset = 1, flv = 'q'), DVJpsiPH1xsec_group_data))).flatten()
-    DVjpsiPH1_xBtQ_q2 = np.array(list(pool.map(partial(DVjpsiPxsec_theo_xBtQ, Para_Unp = Para_Unp, xsec_norm = jpsinorm, p_order = 2, muset = 1, flv = 'q'), DVJpsiPH1xsec_group_data))).flatten()
-    DVjpsiPH1_xBtQ_g1 = np.array(list(pool.map(partial(DVjpsiPxsec_theo_xBtQ, Para_Unp = Para_Unp, xsec_norm = jpsinorm, p_order = 1, muset = 1, flv = 'g'), DVJpsiPH1xsec_group_data))).flatten()
-    DVjpsiPH1_xBtQ_g2 = np.array(list(pool.map(partial(DVjpsiPxsec_theo_xBtQ, Para_Unp = Para_Unp, xsec_norm = jpsinorm, p_order = 2, muset = 1, flv = 'g'), DVJpsiPH1xsec_group_data))).flatten()
+
+    """
+    qlst = np.linspace(2,10, 50, dtype = float)
     
-    with open("GUMP_Results/dvjpsiph1theoflv.csv","w",newline='') as my_csv:
+    xb = 0.001
+    TFFq1=np.array([HTFF_theo_jpsi(xb,-0.05,q_i,Para_spe, 1, 1, 'q') for q_i in qlst ]).flatten()
+    TFFq2=np.array([HTFF_theo_jpsi(xb,-0.05,q_i,Para_spe, 2, 1, 'q') for q_i in qlst ]).flatten()
+    TFFg1=np.array([HTFF_theo_jpsi(xb,-0.05,q_i,Para_spe, 1, 1, 'g') for q_i in qlst ]).flatten()
+    TFFg2=np.array([HTFF_theo_jpsi(xb,-0.05,q_i,Para_spe, 2, 1, 'g') for q_i in qlst ]).flatten()
+    
+    TFFfull=np.array([HTFF_theo_jpsi(xb,-0.05,q_i,Para_spe, 2, 1, 'All') for q_i in qlst ]).flatten()
+  
+    with open("GUMP_Results/TFFqg12xb1.csv","w",newline='') as my_csv:
         csvWriter = csv.writer(my_csv,delimiter=',')
-        csvWriter.writerows(np.transpose([DVjpsiPH1_xBtQ_q1,DVjpsiPH1_xBtQ_q2,DVjpsiPH1_xBtQ_g1,DVjpsiPH1_xBtQ_g2]))
+        csvWriter.writerows(np.transpose([qlst,TFFfull,TFFq1,TFFq2,TFFg1,TFFg2]))
         
+    xb = 0.005
+    TFFq1=np.array([HTFF_theo_jpsi(xb,-0.05,q_i,Para_spe, 1, 1, 'q') for q_i in qlst ]).flatten()
+    TFFq2=np.array([HTFF_theo_jpsi(xb,-0.05,q_i,Para_spe, 2, 1, 'q') for q_i in qlst ]).flatten()
+    TFFg1=np.array([HTFF_theo_jpsi(xb,-0.05,q_i,Para_spe, 1, 1, 'g') for q_i in qlst ]).flatten()
+    TFFg2=np.array([HTFF_theo_jpsi(xb,-0.05,q_i,Para_spe, 2, 1, 'g') for q_i in qlst ]).flatten()
+    
+    TFFfull=np.array([HTFF_theo_jpsi(xb,-0.05,q_i,Para_spe, 2, 1, 'All') for q_i in qlst ]).flatten()
+  
+    with open("GUMP_Results/TFFqg12xb2.csv","w",newline='') as my_csv:
+        csvWriter = csv.writer(my_csv,delimiter=',')
+        csvWriter.writerows(np.transpose([qlst,TFFfull,TFFq1,TFFq2,TFFg1,TFFg2]))
+    """
     '''
     _GPD_theo = GPDobserv(0.1,0.001,-1.0,10.0,1)
     ts=time.time()
