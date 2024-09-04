@@ -17,7 +17,6 @@ import numpy as np
 import Observables as obs
 import rundec
 from scipy.special import psi, zeta, gamma, orthogonal, loggamma
-from scipy import absolute
 from math import factorial, log
 from mpmath import mp, hyp2f1
 from scipy.integrate import quad_vec, fixed_quad
