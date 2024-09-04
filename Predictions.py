@@ -172,7 +172,7 @@ def DVCSxsec(y, xB, t, Q, phi, pol):
 
 if __name__ == '__main__':
     pool = Pool()
-    
+    Para_spe = Para_All[0]
     """
     Para_spe = Para_All[0] 
     
@@ -191,7 +191,7 @@ if __name__ == '__main__':
     print(time.time()-ts)
     """
     
-    """
+
     x = np.exp(np.linspace(np.log(0.0001), np.log(0.6), 100, dtype = float))
     
     pdflst = np.array([PDF_theo_s(x_i,0.,2.,1,'g',Para_spe, 2) for x_i in x ])
@@ -211,7 +211,7 @@ if __name__ == '__main__':
 
     x = np.exp(np.linspace(np.log(0.0001), np.log(0.01), 50, dtype = float))
     
-    qlst = np.linspace(2,10, 50, dtype = float)
+    qlst = np.linspace(2,10, 60, dtype = float)
     
     rratlst1 =  np.array([rratio_theo_s(x_i,0.,5.,1,'g',Para_spe, 2) for x_i in x ]).flatten()
     
@@ -224,13 +224,12 @@ if __name__ == '__main__':
     with open("GUMP_Results/Rrat2.csv","w",newline='') as my_csv:
         csvWriter = csv.writer(my_csv,delimiter=',')
         csvWriter.writerows(np.transpose([qlst,rratlst2]))
-    """
-    """
+
     DVjpsiPH1_xBtQ_theo = np.array(list(pool.map(partial(DVjpsiPxsec_theo_xBtQ, Para_Unp = Para_Unp, xsec_norm = jpsinorm, p_order = 2, muset = 1*0.5, flv = 'All'), DVJpsiPH1xsec_group_data))).flatten()
     
     DVjpsiPH1_xBtQ_theo_mu_1 = np.array(list(pool.map(partial(DVjpsiPxsec_theo_xBtQ, Para_Unp = Para_Unp, xsec_norm = jpsinorm, p_order = 2, muset = 0.5*0.5, flv = 'All'), DVJpsiPH1xsec_group_data))).flatten()
     
-    DVjpsiPH1_xBtQ_theo_mu_2 = np.array(list(pool.map(partial(DVjpsiPxsec_theo_xBtQ, Para_Unp = Para_Unp, xsec_norm = jpsinorm, p_order = 2, muset = 2*0.5., flv = 'All'), DVJpsiPH1xsec_group_data))).flatten()  
+    DVjpsiPH1_xBtQ_theo_mu_2 = np.array(list(pool.map(partial(DVjpsiPxsec_theo_xBtQ, Para_Unp = Para_Unp, xsec_norm = jpsinorm, p_order = 2, muset = 2*0.5, flv = 'All'), DVJpsiPH1xsec_group_data))).flatten()  
     
     DVjpsiPH1_xBtQ_theo_mu_3 = np.array(list(pool.map(partial(DVjpsiPxsec_theo_xBtQ, Para_Unp = Para_Unp, xsec_norm = jpsinorm, p_order = 2, muset = np.sqrt(0.5)*0.5, flv = 'All'), DVJpsiPH1xsec_group_data))).flatten()
     
@@ -251,7 +250,33 @@ if __name__ == '__main__':
         csvWriter = csv.writer(my_csv,delimiter=',')
         csvWriter.writerows(np.transpose([DVjpsiPH1_xBtQ_theo,DVjpsiPH1_xBtQ_theo_mu_1,DVjpsiPH1_xBtQ_theo_mu_2,DVjpsiPH1_xBtQ_theo_mu_3,DVjpsiPH1_xBtQ_theo_mu_4,DVjpsiPH1_xBtQ_theo_mu_5,DVjpsiPH1_xBtQ_theo_mu_6]))
 
-    """
+    qlst = np.linspace(0,20, 60, dtype = float)
+    
+    xb = 0.001
+    TFFq1=np.array([HTFF_theo_jpsi(xb,-0.05,q_i,Para_spe, 1, 1*0.5, 'q') for q_i in qlst ]).flatten()
+    TFFq2=np.array([HTFF_theo_jpsi(xb,-0.05,q_i,Para_spe, 2, 1*0.5, 'q') for q_i in qlst ]).flatten()
+    TFFg1=np.array([HTFF_theo_jpsi(xb,-0.05,q_i,Para_spe, 1, 1*0.5, 'g') for q_i in qlst ]).flatten()
+    TFFg2=np.array([HTFF_theo_jpsi(xb,-0.05,q_i,Para_spe, 2, 1*0.5, 'g') for q_i in qlst ]).flatten()
+    
+    TFFfull=np.array([HTFF_theo_jpsi(xb,-0.05,q_i,Para_spe, 2, 1, 'All') for q_i in qlst ]).flatten()
+  
+    with open("GUMP_Results/TFFqg12xb1.csv","w",newline='') as my_csv:
+        csvWriter = csv.writer(my_csv,delimiter=',')
+        csvWriter.writerows(np.transpose([qlst,TFFfull,TFFq1,TFFq2,TFFg1,TFFg2]))
+        
+    xb = 0.005
+    TFFq1=np.array([HTFF_theo_jpsi(xb,-0.05,q_i,Para_spe, 1, 1*0.5, 'q') for q_i in qlst ]).flatten()
+    TFFq2=np.array([HTFF_theo_jpsi(xb,-0.05,q_i,Para_spe, 2, 1*0.5, 'q') for q_i in qlst ]).flatten()
+    TFFg1=np.array([HTFF_theo_jpsi(xb,-0.05,q_i,Para_spe, 1, 1*0.5, 'g') for q_i in qlst ]).flatten()
+    TFFg2=np.array([HTFF_theo_jpsi(xb,-0.05,q_i,Para_spe, 2, 1*0.5, 'g') for q_i in qlst ]).flatten()
+    
+    TFFfull=np.array([HTFF_theo_jpsi(xb,-0.05,q_i,Para_spe, 2, 1, 'All') for q_i in qlst ]).flatten()
+  
+    with open("GUMP_Results/TFFqg12xb2.csv","w",newline='') as my_csv:
+        csvWriter = csv.writer(my_csv,delimiter=',')
+        csvWriter.writerows(np.transpose([qlst,TFFfull,TFFq1,TFFq2,TFFg1,TFFg2]))
+
+    
     """
     Wlst = np.linspace(40,300, 100, dtype = float)
     t = -0.05
@@ -273,6 +298,8 @@ if __name__ == '__main__':
         csvWriter = csv.writer(my_csv,delimiter=',')
         csvWriter.writerows(np.transpose([Wlst,xseclstp1, xseclstp2, xseclstp1n1, xseclstp2n1]))
     """
+
+    '''
     Wlst = 100
     t = np.linspace(-1,0, 20, dtype = float)
     Q = np.sqrt(0.05)
@@ -312,34 +339,7 @@ if __name__ == '__main__':
     with open("GUMP_Results/photoxsectQ2.csv","w",newline='') as my_csv:
         csvWriter = csv.writer(my_csv,delimiter=',')
         csvWriter.writerows(np.transpose([t,xseclstp1, xseclstp2, xseclstp1n1, xseclstp2n1]))
-        
-    """
-    qlst = np.linspace(2,10, 50, dtype = float)
-    
-    xb = 0.001
-    TFFq1=np.array([HTFF_theo_jpsi(xb,-0.05,q_i,Para_spe, 1, 1*0.5, 'q') for q_i in qlst ]).flatten()
-    TFFq2=np.array([HTFF_theo_jpsi(xb,-0.05,q_i,Para_spe, 2, 1*0.5, 'q') for q_i in qlst ]).flatten()
-    TFFg1=np.array([HTFF_theo_jpsi(xb,-0.05,q_i,Para_spe, 1, 1*0.5, 'g') for q_i in qlst ]).flatten()
-    TFFg2=np.array([HTFF_theo_jpsi(xb,-0.05,q_i,Para_spe, 2, 1*0.5, 'g') for q_i in qlst ]).flatten()
-    
-    TFFfull=np.array([HTFF_theo_jpsi(xb,-0.05,q_i,Para_spe, 2, 1, 'All') for q_i in qlst ]).flatten()
-  
-    with open("GUMP_Results/TFFqg12xb1.csv","w",newline='') as my_csv:
-        csvWriter = csv.writer(my_csv,delimiter=',')
-        csvWriter.writerows(np.transpose([qlst,TFFfull,TFFq1,TFFq2,TFFg1,TFFg2]))
-        
-    xb = 0.005
-    TFFq1=np.array([HTFF_theo_jpsi(xb,-0.05,q_i,Para_spe, 1, 1*0.5, 'q') for q_i in qlst ]).flatten()
-    TFFq2=np.array([HTFF_theo_jpsi(xb,-0.05,q_i,Para_spe, 2, 1*0.5, 'q') for q_i in qlst ]).flatten()
-    TFFg1=np.array([HTFF_theo_jpsi(xb,-0.05,q_i,Para_spe, 1, 1*0.5, 'g') for q_i in qlst ]).flatten()
-    TFFg2=np.array([HTFF_theo_jpsi(xb,-0.05,q_i,Para_spe, 2, 1*0.5, 'g') for q_i in qlst ]).flatten()
-    
-    TFFfull=np.array([HTFF_theo_jpsi(xb,-0.05,q_i,Para_spe, 2, 1, 'All') for q_i in qlst ]).flatten()
-  
-    with open("GUMP_Results/TFFqg12xb2.csv","w",newline='') as my_csv:
-        csvWriter = csv.writer(my_csv,delimiter=',')
-        csvWriter.writerows(np.transpose([qlst,TFFfull,TFFq1,TFFq2,TFFg1,TFFg2]))
-    """
+    '''
     '''
     _GPD_theo = GPDobserv(0.1,0.001,-1.0,10.0,1)
     ts=time.time()
