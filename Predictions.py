@@ -189,8 +189,7 @@ if __name__ == '__main__':
     _GPD2 = _GPD_theo.GPD('g',Para_spe)
     print(_GPD2)
     print(time.time()-ts)
-    """
-    
+
 
     x = np.exp(np.linspace(np.log(0.0001), np.log(0.6), 100, dtype = float))
     
@@ -200,19 +199,33 @@ if __name__ == '__main__':
         csvWriter = csv.writer(my_csv,delimiter=',')
         csvWriter.writerows(np.transpose([x,pdflst]))
 
-    x = np.exp(np.linspace(np.log(0.0002), np.log(0.05), 120, dtype = float))
+    x = np.exp(np.linspace(np.log(0.0002), np.log(0.05), 360, dtype = float))
 
     gpdlst = np.array([GPD_theo_s(x_i,0.002,0.,2.,1,'g',Para_spe, 2) for x_i in x ]).flatten()
     
     with open("GUMP_Results/Smallx_GPD.csv","w",newline='') as my_csv:
         csvWriter = csv.writer(my_csv,delimiter=',')
         csvWriter.writerows(np.transpose([x,gpdlst]))
+    """
 
+    x = np.exp(np.linspace(np.log(0.0001), np.log(0.01), 20, dtype = float))
+    
+    qlst = np.linspace(2,10, 20, dtype = float)
+    
+    xmesh, qmesh = np.meshgrid(x,qlst)
+    
+    xmeshflat = xmesh.flatten()
+    
+    qmeshflat = qmesh.flatten()
 
-    x = np.exp(np.linspace(np.log(0.0001), np.log(0.01), 50, dtype = float))
+    rrat2dlst =  np.array([rratio_theo_s(x_i,0.,q_i,1,'g',Para_spe, 2) for x_i,q_i in zip(xmeshflat,qmeshflat) ]).flatten()
     
-    qlst = np.linspace(2,10, 60, dtype = float)
-    
+    with open("GUMP_Results/Rrat2D.csv","w",newline='') as my_csv:
+        csvWriter = csv.writer(my_csv,delimiter=',')
+        csvWriter.writerows(np.transpose([xmeshflat,qmeshflat,rrat2dlst]))
+
+        
+    '''
     rratlst1 =  np.array([rratio_theo_s(x_i,0.,5.,1,'g',Para_spe, 2) for x_i in x ]).flatten()
     
     with open("GUMP_Results/Rrat1.csv","w",newline='') as my_csv:
@@ -224,7 +237,9 @@ if __name__ == '__main__':
     with open("GUMP_Results/Rrat2.csv","w",newline='') as my_csv:
         csvWriter = csv.writer(my_csv,delimiter=',')
         csvWriter.writerows(np.transpose([qlst,rratlst2]))
-
+    '''
+        
+    '''
     DVjpsiPH1_xBtQ_theo = np.array(list(pool.map(partial(DVjpsiPxsec_theo_xBtQ, Para_Unp = Para_Unp, xsec_norm = jpsinorm, p_order = 2, muset = 1*0.5, flv = 'All'), DVJpsiPH1xsec_group_data))).flatten()
     
     DVjpsiPH1_xBtQ_theo_mu_1 = np.array(list(pool.map(partial(DVjpsiPxsec_theo_xBtQ, Para_Unp = Para_Unp, xsec_norm = jpsinorm, p_order = 2, muset = 0.5*0.5, flv = 'All'), DVJpsiPH1xsec_group_data))).flatten()
@@ -249,8 +264,9 @@ if __name__ == '__main__':
     with open("GUMP_Results/dvjpsiph1theo.csv","w",newline='') as my_csv:
         csvWriter = csv.writer(my_csv,delimiter=',')
         csvWriter.writerows(np.transpose([DVjpsiPH1_xBtQ_theo,DVjpsiPH1_xBtQ_theo_mu_1,DVjpsiPH1_xBtQ_theo_mu_2,DVjpsiPH1_xBtQ_theo_mu_3,DVjpsiPH1_xBtQ_theo_mu_4,DVjpsiPH1_xBtQ_theo_mu_5,DVjpsiPH1_xBtQ_theo_mu_6]))
-
-    qlst = np.linspace(0,20, 60, dtype = float)
+    '''
+    """
+    qlst = np.linspace(2.7,20, 60, dtype = float)
     
     xb = 0.001
     TFFq1=np.array([HTFF_theo_jpsi(xb,-0.05,q_i,Para_spe, 1, 1*0.5, 'q') for q_i in qlst ]).flatten()
@@ -258,7 +274,7 @@ if __name__ == '__main__':
     TFFg1=np.array([HTFF_theo_jpsi(xb,-0.05,q_i,Para_spe, 1, 1*0.5, 'g') for q_i in qlst ]).flatten()
     TFFg2=np.array([HTFF_theo_jpsi(xb,-0.05,q_i,Para_spe, 2, 1*0.5, 'g') for q_i in qlst ]).flatten()
     
-    TFFfull=np.array([HTFF_theo_jpsi(xb,-0.05,q_i,Para_spe, 2, 1, 'All') for q_i in qlst ]).flatten()
+    TFFfull=np.array([HTFF_theo_jpsi(xb,-0.05,q_i,Para_spe, 2, 1*0.5, 'All') for q_i in qlst ]).flatten()
   
     with open("GUMP_Results/TFFqg12xb1.csv","w",newline='') as my_csv:
         csvWriter = csv.writer(my_csv,delimiter=',')
@@ -270,12 +286,12 @@ if __name__ == '__main__':
     TFFg1=np.array([HTFF_theo_jpsi(xb,-0.05,q_i,Para_spe, 1, 1*0.5, 'g') for q_i in qlst ]).flatten()
     TFFg2=np.array([HTFF_theo_jpsi(xb,-0.05,q_i,Para_spe, 2, 1*0.5, 'g') for q_i in qlst ]).flatten()
     
-    TFFfull=np.array([HTFF_theo_jpsi(xb,-0.05,q_i,Para_spe, 2, 1, 'All') for q_i in qlst ]).flatten()
+    TFFfull=np.array([HTFF_theo_jpsi(xb,-0.05,q_i,Para_spe, 2, 1*0.5, 'All') for q_i in qlst ]).flatten()
   
     with open("GUMP_Results/TFFqg12xb2.csv","w",newline='') as my_csv:
         csvWriter = csv.writer(my_csv,delimiter=',')
         csvWriter.writerows(np.transpose([qlst,TFFfull,TFFq1,TFFq2,TFFg1,TFFg2]))
-
+    """
     
     """
     Wlst = np.linspace(40,300, 100, dtype = float)
