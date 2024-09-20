@@ -734,7 +734,13 @@ def evolop(j: complex, nf: int, p: int, Q: float):
 # Need Wilson coefficients for evolution. Allows numerical pre-calculation of non-diagonal piece using Mellin-Barnes integral
 
 def CWilson(j: complex) -> complex:
-    return 2 ** (1+j) * gamma(5/2+j) / (gamma(3/2) * gamma(3+j))
+    charge_fact = np.array([0, -1/6, 0, 5/18, 5/18])
+    CWT = np.array([2 ** (1+j) * gamma(5/2+j) / (gamma(3/2) * gamma(3+j)), \
+                    2 ** (1+j) * gamma(5/2+j) / (gamma(3/2) * gamma(3+j)), \
+                    2 ** (1+j) * gamma(5/2+j) / (gamma(3/2) * gamma(3+j)), \
+                    2 ** (1+j) * gamma(5/2+j) / (gamma(3/2) * gamma(3+j)),\
+                    0. * j])
+    return np.einsum('j, j...->j...', charge_fact, CWT)
 
 def CWilsonT(j: complex, nf: int, meson: int) -> complex:
     CWT = np.array([3 * 2 ** (1+j) * gamma(5/2+j) / (gamma(3/2) * gamma(3+j)), \
@@ -744,7 +750,7 @@ def CWilsonT(j: complex, nf: int, meson: int) -> complex:
                      2 /CF/ (j+3) * 3 * 2 ** (1+j) * gamma(5/2+j) / (gamma(3/2) * gamma(3+j))])
                              
     if(meson == 3):
-        return np.einsum('j, j...->j...', [0,0,0,0,1], CWT) * f_jpsi * CF/NC* (2/3)
+        return np.einsum('j, j...->j...', [0,0,0,0,2/3], CWT) * f_jpsi * CF/NC
 
 def WilsonT_NLO(j: complex, k: complex, nf: int, Q: float, meson: int, muset: float):
     'NLO Wilson coefficients for gluons, currently setting factorization scale and renormalization scale equal to Q^2'
@@ -994,20 +1000,18 @@ def CFF_Evo_LO(j: complex, nf: int, p: int, Q: float, ConfFlav: np.array) -> np.
     [evons, evoa] = evolop(j, nf, p, Q) # (N) and (N, 2, 2)
     
     # Combine with the corresponding wilson coefficient in the evolution basis
-    EvoWCNS = np.einsum('i,i...->i...', CWilson(j), evons)
-    EvoWCS = np.einsum('i,i...->i...', CWilson(j), evoa)
+    EvoWCNS = np.einsum('i...,...->...i', CWilson(j)[:3,...], evons) # shape (3,N), (N) -> (N,3)
+    EvoWCS = np.einsum('ik,kij->kij', CWilson(j)[-2:,...], evoa) # Shape (2, N), (N,2,2) ->(N,2,2)
   
     # Non-singlet part evolves multiplicatively
-    EvoConfNS = EvoWCNS[...,np.newaxis] * ConfNS
+    EvoConfNS = np.einsum('...j,...j->...j',EvoWCNS, ConfNS)
     # Singlet part mixes with the gluon
-    EvoConfS = np.einsum('...ij,...j->...i', EvoWCS, ConfS)
+    EvoConfS = np.einsum('kij,kj->ki', EvoWCS, ConfS)
     
     # Recombing the non-singlet and singlet parts
     EvoConf = np.concatenate((EvoConfNS,EvoConfS),axis=-1)
-    # Inverse transform the evolved moments back to the flavor basis
-    EvoConfFlav = np.einsum('...ij,...j->...i', inv_flav_trans, EvoConf)
 
-    return EvoConfFlav
+    return EvoConf
 
 def TFF_Evo_LO(j: complex, nf: int, p: int, Q: float, ConfFlav: np.array, meson: int, muset: float = 1) -> np.array:
     """
@@ -1047,10 +1051,8 @@ def TFF_Evo_LO(j: complex, nf: int, p: int, Q: float, ConfFlav: np.array, meson:
     
     # Recombing the non-singlet and singlet parts
     EvoConf = np.concatenate((EvoConfNS,EvoConfS),axis=-1)
-    # Inverse transform the evolved moments back to the flavor basis
-    EvoConfFlav = np.einsum('...ij,...j->...i', inv_flav_trans, EvoConf)
 
-    return EvoConfFlav
+    return EvoConf
 
 @np_cache
 def WCoef_Evo_NLO(j: complex, nf: int, p: int, Q: float, meson: int, muset: float) -> Tuple[np.ndarray, np.ndarray]:
@@ -1174,10 +1176,8 @@ def TFF_Evo_NLO_evWC(j: complex, nf: int, p: int, Q: float, ConfFlav: np.array, 
 
     # Recombing the non-singlet and singlet parts
     EvoConf = np.concatenate((EvoConfNS, EvoConfSG), axis=-1) # (N, 5)
-    # Inverse transform the evolved moments back to the flavor basis
-    EvoConfFlav = np.einsum('...ij, ...j->...i', inv_flav_trans, EvoConf) #(N, 5)
     
-    return EvoConfFlav
+    return EvoConf
 
 #@np_gpd2_cache
 def Moment_Evo_NLO(j: complex, nf: int, p: int, Q: float, t: float, xi: float, ConfFlav: np.array, Para: np.array, momshift: int, muset: float = 1) -> np.array:
@@ -1337,10 +1337,8 @@ def TFF_Evo_NLO_evMOM(j: complex, nf: int, p: int, Q: float, t: float, xi: float
     
     # Recombing the non-singlet and singlet parts
     EvoConf = np.concatenate((NS_full, S_full), axis=-1) # (N, 5)    
-    # Inverse transform the evolved moments back to the flavor basis
-    EvoConfFlav = np.einsum('...ij, ...j->...i', inv_flav_trans, EvoConf) #(N, 5)
-    
-    return EvoConfFlav
+
+    return EvoConf
 
 '''***********************************************'''
 

@@ -173,6 +173,11 @@ def DVCSxsec(y, xB, t, Q, phi, pol):
 if __name__ == '__main__':
     pool = Pool()
     Para_spe = Para_All[0]
+    _GPD_theo = GPDobserv(0.01,0.01,0.0,2.0,1)
+    ts=time.time()
+    _GPD1 = _GPD_theo.CFF(Para_spe, p_order = 1, muset = 1, flv ='All')
+    print(_GPD1)
+    print(time.time()-ts)
     """
     Para_spe = Para_All[0] 
     
@@ -206,7 +211,6 @@ if __name__ == '__main__':
     with open("GUMP_Results/Smallx_GPD.csv","w",newline='') as my_csv:
         csvWriter = csv.writer(my_csv,delimiter=',')
         csvWriter.writerows(np.transpose([x,gpdlst]))
-    """
 
     x = np.exp(np.linspace(np.log(0.0001), np.log(0.01), 20, dtype = float))
     
@@ -223,21 +227,8 @@ if __name__ == '__main__':
     with open("GUMP_Results/Rrat2D.csv","w",newline='') as my_csv:
         csvWriter = csv.writer(my_csv,delimiter=',')
         csvWriter.writerows(np.transpose([xmeshflat,qmeshflat,rrat2dlst]))
-
         
-    '''
-    rratlst1 =  np.array([rratio_theo_s(x_i,0.,5.,1,'g',Para_spe, 2) for x_i in x ]).flatten()
-    
-    with open("GUMP_Results/Rrat1.csv","w",newline='') as my_csv:
-        csvWriter = csv.writer(my_csv,delimiter=',')
-        csvWriter.writerows(np.transpose([x,rratlst1]))
-        
-    rratlst2 =  np.array([rratio_theo_s(0.001,0.,q_i,1,'g',Para_spe, 2) for q_i in qlst ]).flatten()
-
-    with open("GUMP_Results/Rrat2.csv","w",newline='') as my_csv:
-        csvWriter = csv.writer(my_csv,delimiter=',')
-        csvWriter.writerows(np.transpose([qlst,rratlst2]))
-    '''
+    """
         
     '''
     DVjpsiPH1_xBtQ_theo = np.array(list(pool.map(partial(DVjpsiPxsec_theo_xBtQ, Para_Unp = Para_Unp, xsec_norm = jpsinorm, p_order = 2, muset = 1*0.5, flv = 'All'), DVJpsiPH1xsec_group_data))).flatten()
