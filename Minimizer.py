@@ -1,7 +1,7 @@
 from Parameters import ParaManager_Unp, ParaManager_Pol
 from Observables import GPDobserv
 from DVCS_xsec import dsigma_TOT, dsigma_DVCS_HERA, M
-import DVMP_xsec as dvmp
+from DVMP_xsec import dsigma_Jpsi_dt,dsigma_phi_dt,dsigma_rho_dt, M_jpsi
 from multiprocessing import Pool
 from functools import partial
 from iminuit import Minuit
@@ -259,8 +259,8 @@ def TFF_theo_phi(xB, t, Q, Para_Unp):
 
 def TFF_theo_jpsi(xB, t, Q, Para_Unp, p_order = 1, muset =1, flv = 'All'):
     x = 0
-    xi = (1/(2 - xB) - (2*t*(-1 + xB))/((Q**2 + dvmp.M_jpsi**2)*(-2 + xB)**2))*xB
-    H_E = GPDobserv(x, xi, t, np.sqrt(Q**2 + dvmp.M_jpsi**2), 1)
+    xi = (1/(2 - xB) - (2*t*(-1 + xB))/((Q**2 + M_jpsi**2)*(-2 + xB)**2))*xB
+    H_E = GPDobserv(x, xi, t, np.sqrt(Q**2 + M_jpsi**2), 1)
     HTFF_jpsi = H_E.TFF(Para_Unp[..., 0, :, :, :, :], 3, p_order, muset, flv)
     ETFF_jpsi = H_E.TFF(Para_Unp[..., 1, :, :, :, :],3, p_order, muset, flv)
     
@@ -314,7 +314,7 @@ def DVrhoPxsec_theo(DVrhoPxsec_input: pd.DataFrame, TFF_rho_input: np.array):
     t = DVrhoPxsec_input['t'].to_numpy()
     Q = DVrhoPxsec_input['Q'].to_numpy()    
     [HTFF_rho, ETFF_rho] = TFF_rho_input
-    return 2*np.pi*dvmp.dsigma_rho_dt(y, xB, t, Q, 0, HTFF_rho, ETFF_rho)
+    return 2*np.pi*dsigma_rho_dt(y, xB, t, Q, 0, HTFF_rho, ETFF_rho)
 
 def DVphiPxsec_theo(DVphiPxsec_input: pd.DataFrame, TFF_phi_input: np.array):
     y = DVphiPxsec_input['y'].to_numpy()
@@ -322,7 +322,7 @@ def DVphiPxsec_theo(DVphiPxsec_input: pd.DataFrame, TFF_phi_input: np.array):
     t = DVphiPxsec_input['t'].to_numpy()
     Q = DVphiPxsec_input['Q'].to_numpy()    
     [HTFF_phi, ETFF_phi] = TFF_phi_input
-    return 2*np.pi*dvmp.dsigma_phi_dt(y, xB, t, Q, 0, HTFF_phi, ETFF_phi)
+    return 2*np.pi*dsigma_phi_dt(y, xB, t, Q, 0, HTFF_phi, ETFF_phi)
 
 def DVjpsiPxsec_theo(DVjpsiPxsec_input: pd.DataFrame, TFF_jpsi_input: np.array):
     y = DVjpsiPxsec_input['y'].to_numpy()
@@ -330,7 +330,7 @@ def DVjpsiPxsec_theo(DVjpsiPxsec_input: pd.DataFrame, TFF_jpsi_input: np.array):
     t = DVjpsiPxsec_input['t'].to_numpy()
     Q = DVjpsiPxsec_input['Q'].to_numpy()    
     [HTFF_jpsi, ETFF_jpsi] = TFF_jpsi_input
-    return dvmp.dsigma_Jpsi_dt(y, xB, t, Q, 0, HTFF_jpsi, ETFF_jpsi)
+    return dsigma_Jpsi_dt(y, xB, t, Q, 0, HTFF_jpsi, ETFF_jpsi)
 
 def DVrhoPxsec_cost_xBtQ(DVrhoPxsec_data_xBtQ: pd.DataFrame, Para_Unp, xsec_norm):
     [xB, t, Q] = [DVrhoPxsec_data_xBtQ['xB'].iat[0], DVrhoPxsec_data_xBtQ['t'].iat[0], DVrhoPxsec_data_xBtQ['Q'].iat[0]] 

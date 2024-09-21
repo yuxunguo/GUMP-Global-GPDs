@@ -8,6 +8,7 @@ from mpmath import mp, hyp2f1
 from scipy.integrate import quad_vec, fixed_quad
 from scipy.special import gamma
 from Evolution import Moment_Evo_LO,TFF_Evo_LO, CFF_Evo_LO, TFF_Evo_NLO_evWC, TFF_Evo_NLO_evMOM, GPD_Moment_Evo_NLO,tPDF_Moment_Evo_NLO, fixed_quadvec, inv_flav_trans
+from Parameters import Moment_Sum
 
 """
 ***********************GPD moments***************************************
@@ -94,98 +95,6 @@ def flvmask(flv: str):
     elif (flv == 'q'):
         return np.array([1,1,1,1,0])
     
-# Euler Beta function B(a,b) with complex arguments
-def beta_loggamma(a: complex, b: complex) -> complex:
-    return np.exp(sp.special.loggamma(a) + sp.special.loggamma(b)-sp.special.loggamma(a + b))
-
-# Conformal moment in j space F(j)
-def ConfMoment(j: complex, t: float, ParaSets: np.ndarray):
-    """
-    Conformal moment in j space F(j)
-
-    Args:
-        ParaSet is the array of parameters in the form of (norm, alpha, beta, alphap)
-            norm = ParaSet[0]: overall normalization constant
-            alpha = ParaSet[1], beta = ParaSet[2]: the two parameters corresponding to x ^ (-alpha) * (1 - x) ^ beta
-            alphap = ParaSet[3]: regge trajectory alpha(t) = alpha + alphap * t
-        j: conformal spin j (conformal spin is actually j+2 but anyway)
-        t: momentum transfer squared t
-
-    Originally, ParaSet have shape (5).
-    Output is a scalar
-    
-    After vectorization, there are a few different usages:
-        1. t has shape (N), ParaSet has shape (N, 5). Output have shape (N)
-        2. t has shape (N), ParaSet has shape (N, m1, 5). Output have shape (N, m1)
-        3. t has shape (N), ParaSet has shape (N, m1, m2, 5). Output have shape (N, m1, m2)
-        4. and so on
-        
-    Recommended usage:
-        t has shape (N), ParaSet has shape (N, 5, init_NumofAnsatz, 5)
-        output will be (N, 5, init_NumofAnsatz)
-
-    j should only be a scalar. It cannot be an ndarray before I make more changes
-    Right now, j can be a vector, but if you want to do integration, then better pass j as scalar.
-
-    Returns:
-        Conformal moment in j space F(j,t)
-    """
-    
-    # [norm, alpha, beta, alphap, bexp] = ParaSet
-    norm = ParaSets[..., 0]  # in recommended usage, has shape (N, 5, init_NumofAnsatz)
-    alpha = ParaSets[..., 1] # in general, can have shape (N), (N, m1), (N, m1, m2), ......
-    beta  = ParaSets[..., 2]
-    alphap = ParaSets[..., 3]
-    bexp = ParaSets[..., 4]
-    invm2 = ParaSets[..., 5]
-    
-    if np.ndim(norm) < np.ndim(t):
-        raise ValueError("Input format is wrong.")
-    
-    t_new_shape = list(np.shape(t)) + [1]*(np.ndim(norm) - np.ndim(t))
-    j_new_shape = list(np.shape(j)) + [1]*(np.ndim(norm) - np.ndim(t))  # not a typo, it is np.ndim(norm) - np.ndim(t)
-    t = np.reshape(t, t_new_shape) # to make sure t can be broadcasted with norm, alpha, etc.
-    # t will have shape (N) or (N, m1) or (N, m1, m2)... depends
-    j = np.reshape(j, j_new_shape)
-
-    # Currently with KM ansatz and dipole residual
-
-    return norm * beta_loggamma (j + 1 - alpha, 1 + beta) * (j + 1  - alpha)/ (j + 1 - alpha - alphap * t) * np.exp(t*bexp) * (1 - t * invm2 ) ** (-3)
-    # (N) or (N, m1) or (N, m1, m2) .... depends on usage
-    # For the recommended usage, the output is (N, 5, init_NumofAnsatz)
-
-def Moment_Sum(j: complex, t: float, ParaSets: np.ndarray) -> complex:
-    """
-    Sum of the conformal moments when the ParaSets contain more than just one set of parameters 
-
-    Args:
-        ParaSets : contains [ParaSet1, ParaSet0, ParaSet2,...] with each ParaSet = [norm, alpha, beta ,alphap] for valence and sea distributions repsectively.        
-        j: conformal spin j (or j+2 but anyway)
-        t: momentum transfer squared t
-
-        Originally, ParaSets have shape (init_NumofAnsatz, 4). In practice, it is (1, 4)
-        output is a scalar
-
-        Here, after vectorization, 
-            t has shape (N)
-            ParaSets has (N, 5, init_NumofAnsatz, 5)
-            output will have shape (N, 5)  # here, the 5 means 5 different species [u - ubar, ubar, d - dbar, dbar, g]
-        
-        More generally, 
-            t have shape (N)
-            ParaSets has shape (N, i, 5 ) or (N, m1, i, 5) or (N, m1, m2, i, 5) and so on
-            output will have shape (N) or (N, m1) or (N, m2)...... etc.
-
-    Returns:
-        sum of conformal moments over all the ParaSet
-    """
-
-    #return np.sum(np.array( list(map(lambda paraset: ConfMoment(j, t, paraset), ParaSets)) ))
-
-    # ConfMoment_vec(j, t, ParaSets) should have shape (N, 5, init_NumofAnsatz)
-    return np.sum(ConfMoment(j, t, ParaSets) ,  axis=-1) # (N, 5)
-
-
 # precision for the hypergeometric function
 mp.dps = 25
 
@@ -336,10 +245,6 @@ class GPDobserv (object) :
 
         Para_Forward = ParaAll[..., 0, :, :, :] # (N, 3, 5, 1, 5) 
 
-        # The contour for inverse Meliin transform. Note that S here is the analytically continued n which is j + 1 not j !
-        reS = inv_Mellin_intercept + 1
-        Max_imS = inv_Mellin_cutoff 
-
         def InvMellinWaveConf(s: complex):
             # s is scalar (but it actually can be an ndarray as long as broadcasting rule allows it)
 
@@ -389,8 +294,12 @@ class GPDobserv (object) :
             # the result of np.einsum will be (N, 3)
             # Flv_Intp  result (N)
             return Flv_Intp(np.einsum('...ij,...j->...i', InvMellinWaveConf(s), EvoConfFlav), flv)
-
-        return 1/(2 * np.pi) * np.real(fixed_quadvec(lambda imS : Integrand_inv_Mellin(reS + 1j * imS) + Integrand_inv_Mellin(reS - 1j * imS) ,0, + Max_imS, n=200))
+        
+        # The contour for inverse Meliin transform. Note that S here is the analytically continued n which is j + 1 not j !
+        reS = 0.25 + 1
+        Max_imS = 100 
+        
+        return 1/(2 * np.pi) * np.real(fixed_quadvec(lambda imS : Integrand_inv_Mellin(reS + 1j * imS) + Integrand_inv_Mellin(reS - 1j * imS) ,0, + Max_imS, n=300))
 
     def GPD(self, flv, ParaAll, p_order = 1):
         """
@@ -458,9 +367,9 @@ class GPDobserv (object) :
                 ConfEv_xi4 = Moment_Evo_LO(j+4, NFEFF, self.p, self.Q, ConfFlav_xi4)
                 
             elif (p_order == 2):
-                ConfEv     = GPD_Moment_Evo_NLO(j, NFEFF, self.p, self.Q, self.t, self.xi, ConfFlav, Para_Forward,0)
-                ConfEv_xi2 = GPD_Moment_Evo_NLO(j+2, NFEFF, self.p, self.Q, self.t, self.xi, ConfFlav_xi2, Para_xi2,2)
-                ConfEv_xi4 = GPD_Moment_Evo_NLO(j+4, NFEFF, self.p, self.Q, self.t, self.xi, ConfFlav_xi4, Para_xi4,4)
+                ConfEv     = GPD_Moment_Evo_NLO(j, NFEFF, self.p, self.Q, self.t, self.xi, Para_Forward,0)
+                ConfEv_xi2 = GPD_Moment_Evo_NLO(j+2, NFEFF, self.p, self.Q, self.t, self.xi, Para_xi2,2)
+                ConfEv_xi4 = GPD_Moment_Evo_NLO(j+4, NFEFF, self.p, self.Q, self.t, self.xi, Para_xi4,4)
                 
             # Inverse transform the evolved moments back to the flavor basis
             ConfFlavEv     = np.einsum('...ij, ...j->...i', inv_flav_trans, ConfEv) #(N, 5)
@@ -514,9 +423,9 @@ class GPDobserv (object) :
                     + self.xi ** 2 * np.einsum('...ij,...j->...i', ConfWaveConv(j0+2), ConfFlavEv_xi2) \
                     + self.xi ** 4 * np.einsum('...ij,...j->...i', ConfWaveConv(j0+4), ConfFlavEv_xi4),flv)
        
-        reJ = 2 - 0.15
-        Max_imJ = Mellin_Barnes_cutoff
-        return 1/2*np.real(fixed_quadvec(lambda imJ : Integrand_Mellin_Barnes(reJ + 1j* imJ) / np.sin((reJ + 1j * imJ+1) * np.pi) + Integrand_Mellin_Barnes(reJ - 1j* imJ) / np.sin((reJ - 1j * imJ+1) * np.pi) ,0, Max_imJ, n=200)) + np.real(GPD1())  + np.real(GPD0()) 
+        reJ = 2 - 0.5
+        Max_imJ = 80
+        return 1/2*np.real(fixed_quadvec(lambda imJ : Integrand_Mellin_Barnes(reJ + 1j* imJ) / np.sin((reJ + 1j * imJ+1) * np.pi) + Integrand_Mellin_Barnes(reJ - 1j* imJ) / np.sin((reJ - 1j * imJ+1) * np.pi) ,0, Max_imJ, n=300)) + np.real(GPD1())  + np.real(GPD0()) 
           
     def GFFj0(self, j: int, flv, ParaAll, p_order):
         """
@@ -595,10 +504,6 @@ class GPDobserv (object) :
         Para_xi2     = ParaAll[..., 1, :, :, :]
         Para_xi4     = ParaAll[..., 2, :, :, :]
 
-        # The contour for Mellin-Barnes integral in terms of j not n.
-        reJ = Mellin_Barnes_intercept 
-        Max_imJ = Mellin_Barnes_cutoff 
-
         def Integrand_Mellin_Barnes_CFF(j: complex):
 
             '''
@@ -614,7 +519,7 @@ class GPDobserv (object) :
 
             EvoConf_Wilson = CFF_Evo_LO(j, NFEFF, self.p, self.Q, ConfFlav) \
                                 + CFF_Evo_LO(j+2, NFEFF, self.p, self.Q, ConfFlav_xi2) \
-                                #    + CFF_Evo_LO(j+4, NFEFF, self.p, self.Q, ConfFlav_xi4)
+                                    + CFF_Evo_LO(j+4, NFEFF, self.p, self.Q, ConfFlav_xi4)
             fmask = flvmask(flv)
             return np.einsum('j, ...j', fmask, EvoConf_Wilson)
 
@@ -648,8 +553,12 @@ class GPDobserv (object) :
                 result = np.ones_like(self.p) * self.xi ** (- 1) * Integrand_Mellin_Barnes_CFF(np.array([0.])) *(2)
 
             return result
-
-        return fixed_quadvec(lambda imJ: Integrand_CFF(imJ)+Integrand_CFF(-imJ), 0,  Max_imJ, n=200) + CFFj0()
+        
+        # The contour for Mellin-Barnes integral in terms of j not n.
+        reJ = 0.3 
+        Max_imJ = 150 
+        
+        return fixed_quadvec(lambda imJ: Integrand_CFF(imJ)+Integrand_CFF(-imJ), 0,  Max_imJ, n=500) + CFFj0()
 
         '''
         if (self.p == 1):
@@ -688,10 +597,6 @@ class GPDobserv (object) :
             Para_Forward = ParaAll[..., 0, :, :, :]  # each (N, 5, 1, 5)
             Para_xi2     = ParaAll[..., 1, :, :, :]
             Para_xi4     = ParaAll[..., 2, :, :, :]
-
-            # The contour for Mellin-Barnes integral in terms of j not n.
-            reJ = Mellin_Barnes_intercept 
-            Max_imJ = Mellin_Barnes_cutoff 
 
             def Integrand_Mellin_Barnes_TFF(j: complex):
 
@@ -736,8 +641,14 @@ class GPDobserv (object) :
                     result = np.ones_like(self.p) * self.xi ** (- 1) * Integrand_Mellin_Barnes_TFF(0) *(2)
 
                 return result
-
-            return fixed_quad(Integrand_TFF, - Max_imJ, + Max_imJ, n=1000)[0] + TFFj0()
+            
+            # The contour for Mellin-Barnes integral in terms of j not n.
+            reJ = 0.5 
+            Max_imJ = 120 
+            
+            return fixed_quadvec(lambda imJ: Integrand_TFF(imJ)+Integrand_TFF(-imJ), 0,  Max_imJ, n=500) + TFFj0()
+        
+            #return fixed_quad(Integrand_TFF, - Max_imJ, + Max_imJ, n=1000)[0] + TFFj0()
 
             '''
             if (self.p == 1):
@@ -878,31 +789,11 @@ class GPDobserv (object) :
             Max_imJ = Mellin_Barnes_cutoff
             
             def Integrand_Mellin_Barnes_TFF(j: complex):
-                # j is a scalar
-
-                '''
-                ConfFlav = np.array( list(map(lambda paraset: Moment_Sum(j, self.t, paraset), Para_Forward)) )
-                ConfFlav_xi2 = np.array( list(map(lambda paraset: Moment_Sum(j, self.t, paraset), Para_xi2)) )
-                ConfFlav_xi4 = np.array( list(map(lambda paraset: Moment_Sum(j, self.t, paraset), Para_xi4)) )
-                '''
-                ConfFlav     = Moment_Sum(j, self.t, Para_Forward) #(N, 5)
-                ConfFlav_xi2 = Moment_Sum(j, self.t, Para_xi2)
-                ConfFlav_xi4 = Moment_Sum(j, self.t, Para_xi4)
-                '''
-                # Removing xi^4 terms
-                ConfFlav_xi4 = Moment_Sum(j, self.t, Para_xi4)
-                '''
-
-                # shape (N, 5)
-                """
-                # Removing xi^4 terms
-                EvoConf_Wilson = (CWilson(j) * Moment_Evo(j, NFEFF, self.p, self.Q, ConfFlav) \
-                                    + CWilson(j+2) * Moment_Evo(j+2, NFEFF, self.p, self.Q, ConfFlav_xi2) \
-                                    + CWilson(j+4) * Moment_Evo(j+4, NFEFF, self.p, self.Q, ConfFlav_xi4))
-                """
-                EvoConf_Wilson = (TFF_Evo_NLO_evMOM(j, NFEFF, self.p, self.Q, self.t, self.xi, ConfFlav, Para_Forward, 0, meson, muset) \
-                                          +  TFF_Evo_NLO_evMOM(j+2, NFEFF, self.p, self.Q, self.t, self.xi, ConfFlav_xi2, Para_xi2, 2, meson, muset) \
-                                              +  TFF_Evo_NLO_evMOM(j+4, NFEFF, self.p, self.Q, self.t, self.xi, ConfFlav_xi4, Para_xi4, 4, meson, muset))
+                
+                EvoConf_Wilson = (TFF_Evo_NLO_evMOM(j, NFEFF, self.p, self.Q, self.t, self.xi, Para_Forward, 0, meson, muset) \
+                                          +  TFF_Evo_NLO_evMOM(j+2, NFEFF, self.p, self.Q, self.t, self.xi, Para_xi2, 2, meson, muset) \
+                                              +  TFF_Evo_NLO_evMOM(j+4, NFEFF, self.p, self.Q, self.t, self.xi, Para_xi4, 4, meson, muset))
+                
                 '''
                 if(meson == 1):
                     return np.einsum('j, ...j', TFF_rho_trans, EvoConf_Wilson)                

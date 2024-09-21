@@ -75,7 +75,7 @@ def K(xB: float, Q: float, t: float):
     
     return np.sqrt(-1 * M_p ** 2 * xB ** 2 * ((1 - ((m2(xB, Q, t) - t) / Q ** 2)) ** 2 + 4 * m2(xB, Q, t) * (1 - (t / 4 / (M_p ** 2))) / (Q ** 2)) - (1 - xB) * t * (1 - (xB * (m2(xB, Q, t) - t) / (Q ** 2))))
 
-@vectorize(["float64(float64,float64,float64,float64,float64,complex128,complex128)"])
+@np.vectorize
 def dsigma_rho_dt(y: float, xB: float, t: float, Q: float, phi: float, HTFF_rho: complex, ETFF_rho: complex):
     
     """
@@ -97,7 +97,7 @@ def dsigma_rho_dt(y: float, xB: float, t: float, Q: float, phi: float, HTFF_rho:
     
 
 
-@vectorize(["float64(float64,float64,float64,float64,float64,complex128,complex128)"])    
+@np.vectorize
 def dsigma_phi_dt(y: float, xB: float, t: float, Q: float, phi: float, HTFF_phi: complex, ETFF_phi: complex):
     
     """
@@ -110,7 +110,7 @@ def dsigma_phi_dt(y: float, xB: float, t: float, Q: float, phi: float, HTFF_phi:
     
     
     
-@vectorize(["float64(float64,float64,float64,float64,float64,complex128,complex128)"])    
+@np.vectorize
 def dsigma_Jpsi_dt(y: float, xB: float, t: float, Q: float, phi: float, HTFF_jpsi: complex, ETFF_jpsi: complex):
     
     """
