@@ -9,8 +9,6 @@ from scipy.integrate import quad_vec, fixed_quad
 from scipy.special import gamma
 from Evolution import Moment_Evo_LO,TFF_Evo_LO, CFF_Evo_LO, TFF_Evo_NLO_evWC, TFF_Evo_NLO_evMOM, GPD_Moment_Evo_NLO,tPDF_Moment_Evo_NLO, fixed_quadvec, inv_flav_trans
 
-CFF_trans =np.array([1*(2/3)**2, 2*(2/3)**2, 1*(1/3)**2, 2*(1/3)**2, 0])
-
 """
 ***********************GPD moments***************************************
 """
@@ -32,7 +30,6 @@ NFEFF = 2
 #Relative precision Goal of quad set to be 1e-3
 Prec_Goal = 1e-3
 
-Flavor_Factor = 2 * 2 + 1
 
 def flv_to_indx(flv:str):
     '''
@@ -87,14 +84,11 @@ def Flv_Intp(Flv_array: np.array, flv):
     return np.choose(_flv_index, [Flv_array[...,0], Flv_array[..., 1], Flv_array[..., 2],\
                         Flv_array[..., 0]-Flv_array[..., 1], Flv_array[..., 0]+Flv_array[..., 1]])
     # return np.einsum('...j,...j', Flv_array, _helper) # (N)
-
+    
+# This is in evolution basis!!!
 def flvmask(flv: str):
     if (flv == 'All'):
         return np.array([1,1,1,1,1])
-    elif (flv == 'u'):
-        return np.array([1,1,0,0,0])
-    elif (flv == 'd'):
-        return np.array([0,0,1,1,0])
     elif (flv == 'g'):
         return np.array([0,0,0,0,1])
     elif (flv == 'q'):
@@ -580,7 +574,7 @@ class GPDobserv (object) :
                 
         return result #(N)
     
-    def CFF(self, ParaAll):
+    def CFF(self, ParaAll, p_order = 1, muset = 1, flv = 'All'):
         """
         Charge averged CFF \mathcal{F}(xi, t) (\mathcal{F} = Q_u^2 F_u + Q_d^2 F_d)
         Args:
@@ -599,10 +593,7 @@ class GPDobserv (object) :
         #[Para_Forward, Para_xi2, Para_xi4] = ParaAll  # each (N, 5, 1, 5)
         Para_Forward = ParaAll[..., 0, :, :, :]  # each (N, 5, 1, 5)
         Para_xi2     = ParaAll[..., 1, :, :, :]
-        '''
-        # Removing xi^4 terms
         Para_xi4     = ParaAll[..., 2, :, :, :]
-        '''
 
         # The contour for Mellin-Barnes integral in terms of j not n.
         reJ = Mellin_Barnes_intercept 
@@ -617,22 +608,15 @@ class GPDobserv (object) :
             '''
             ConfFlav     = Moment_Sum(j, self.t, Para_Forward) #(N, 5)
             ConfFlav_xi2 = Moment_Sum(j, self.t, Para_xi2)
-            '''
-            # Removing xi^4 terms
             ConfFlav_xi4 = Moment_Sum(j, self.t, Para_xi4)
-            '''
 
             # shape (N, 5)
-            """
-            # Removing xi^4 terms
-            EvoConf_Wilson = (CWilson(j) * Moment_Evo(j, NFEFF, self.p, self.Q, ConfFlav) \
-                                + CWilson(j+2) * Moment_Evo(j+2, NFEFF, self.p, self.Q, ConfFlav_xi2) \
-                                + CWilson(j+4) * Moment_Evo(j+4, NFEFF, self.p, self.Q, ConfFlav_xi4))
-            """
-            EvoConf_Wilson = (CFF_Evo_LO(j, NFEFF, self.p, self.Q, ConfFlav) \
-                                + CFF_Evo_LO(j+2, NFEFF, self.p, self.Q, ConfFlav_xi2))
-            
-            return np.einsum('j, ...j', CFF_trans, EvoConf_Wilson) # shape (N)
+
+            EvoConf_Wilson = CFF_Evo_LO(j, NFEFF, self.p, self.Q, ConfFlav) \
+                                + CFF_Evo_LO(j+2, NFEFF, self.p, self.Q, ConfFlav_xi2) \
+                                #    + CFF_Evo_LO(j+4, NFEFF, self.p, self.Q, ConfFlav_xi4)
+            fmask = flvmask(flv)
+            return np.einsum('j, ...j', fmask, EvoConf_Wilson)
 
         def Integrand_CFF(imJ: complex):
             # mask = (self.p==1) # assume p can only be either 1 or -1
