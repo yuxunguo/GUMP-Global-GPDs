@@ -307,7 +307,7 @@ def DVCSxsec_HERA_cost_xBtQ(DVCSxsec_HERA_data_xBtQ: pd.DataFrame, Para_Unp, Par
     # DVCS_pred_xBtQ = np.array(list(map(partial(DVCSxsec_theo, CFF_input = [HCFF, ECFF, HtCFF, EtCFF]), np.array(DVCSxsec_data_xBtQ))))
     DVCS_HERA_pred_xBtQ = DVCSxsec_HERA_theo(DVCSxsec_HERA_data_xBtQ, CFF_input = [HCFF, ECFF, HtCFF, EtCFF])
     return np.sum(((DVCS_HERA_pred_xBtQ - DVCSxsec_HERA_data_xBtQ['f'])/ DVCSxsec_HERA_data_xBtQ['delta f']) ** 2 )
-
+'''
 def DVrhoPxsec_theo(DVrhoPxsec_input: pd.DataFrame, TFF_rho_input: np.array):
     y = DVrhoPxsec_input['y'].to_numpy()
     xB = DVrhoPxsec_input['xB'].to_numpy()
@@ -323,7 +323,7 @@ def DVphiPxsec_theo(DVphiPxsec_input: pd.DataFrame, TFF_phi_input: np.array):
     Q = DVphiPxsec_input['Q'].to_numpy()    
     [HTFF_phi, ETFF_phi] = TFF_phi_input
     return 2*np.pi*dsigma_phi_dt(y, xB, t, Q, 0, HTFF_phi, ETFF_phi)
-
+'''
 def DVjpsiPxsec_theo(DVjpsiPxsec_input: pd.DataFrame, TFF_jpsi_input: np.array):
     y = DVjpsiPxsec_input['y'].to_numpy()
     xB = DVjpsiPxsec_input['xB'].to_numpy()
@@ -331,7 +331,7 @@ def DVjpsiPxsec_theo(DVjpsiPxsec_input: pd.DataFrame, TFF_jpsi_input: np.array):
     Q = DVjpsiPxsec_input['Q'].to_numpy()    
     [HTFF_jpsi, ETFF_jpsi] = TFF_jpsi_input
     return dsigma_Jpsi_dt(y, xB, t, Q, 0, HTFF_jpsi, ETFF_jpsi)
-
+'''
 def DVrhoPxsec_cost_xBtQ(DVrhoPxsec_data_xBtQ: pd.DataFrame, Para_Unp, xsec_norm):
     [xB, t, Q] = [DVrhoPxsec_data_xBtQ['xB'].iat[0], DVrhoPxsec_data_xBtQ['t'].iat[0], DVrhoPxsec_data_xBtQ['Q'].iat[0]] 
     [HTFF_rho, ETFF_rho] = TFF_theo_rho(xB, t, Q, Para_Unp) # scalar for each of them
@@ -343,7 +343,7 @@ def DVrhoPxsec_NLO_cost_xBtQ(DVrhoPxsec_data_xBtQ: pd.DataFrame, Para_Unp, xsec_
     [HTFF_rho, ETFF_rho] = TFF_theo_rho_NLO(xB, t, Q, Para_Unp) # scalar for each of them
     DVrhoP_pred_xBtQ = DVrhoPxsec_theo(DVrhoPxsec_data_xBtQ, TFF_rho_input = [HTFF_rho, ETFF_rho]) * xsec_norm
     return np.sum(((DVrhoP_pred_xBtQ - DVrhoPxsec_data_xBtQ['f'])/ DVrhoPxsec_data_xBtQ['delta f']) ** 2 )
-
+'''
 def DVjpsiPxsec_cost_xBtQ(DVjpsiPxsec_data_xBtQ: pd.DataFrame, Para_Unp, xsec_norm, p_order = 2):
     [xB, t, Q] = [DVjpsiPxsec_data_xBtQ['xB'].iat[0], DVjpsiPxsec_data_xBtQ['t'].iat[0], DVjpsiPxsec_data_xBtQ['Q'].iat[0]] 
     [HTFF_jpsi, ETFF_jpsi] = TFF_theo_jpsi(xB, t, Q, Para_Unp, p_order, muset = 0.5)

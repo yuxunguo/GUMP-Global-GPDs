@@ -189,8 +189,6 @@ if __name__ == '__main__':
 
     print(np.pi*(gpd1-gpd2+gpd3-gpd4))
 
-
-
     # Test of LO ImTFF and gluon GPD evolved to mu = 5 GeV
     x=0.0001
     _GPD_theo = GPDobserv(x,x,0.0,5.0,1)
@@ -214,7 +212,6 @@ if __name__ == '__main__':
     print(TFF2)
     print(TFF2-TFF1)
 
-    
     #
     # Plotting results of the paper
     #
