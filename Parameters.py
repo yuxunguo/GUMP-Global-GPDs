@@ -25,6 +25,7 @@ The parameters will form a 5-dimensional matrix such that each para[#1,#2,#3,#4,
 """
 
 import numpy as np
+import scipy as sp
 
 def ParaManager_Unp(Paralst: np.array):
 
@@ -192,3 +193,94 @@ def ParaManager_Pol(Paralst: np.array):
                       [Et_uV_xi4, Et_ubar_xi4, Et_dV_xi4, Et_dbar_xi4, Et_g_xi4]])
 
     return np.array([Htlst, Etlst])
+
+# Euler Beta function B(a,b) with complex arguments
+def beta_loggamma(a: complex, b: complex) -> complex:
+    return np.exp(sp.special.loggamma(a) + sp.special.loggamma(b)-sp.special.loggamma(a + b))
+
+# Conformal moment in j space F(j)
+def ConfMoment(j: complex, t: float, ParaSets: np.ndarray):
+    """
+    Conformal moment in j space F(j)
+
+    Args:
+        ParaSet is the array of parameters in the form of (norm, alpha, beta, alphap)
+            norm = ParaSet[0]: overall normalization constant
+            alpha = ParaSet[1], beta = ParaSet[2]: the two parameters corresponding to x ^ (-alpha) * (1 - x) ^ beta
+            alphap = ParaSet[3]: regge trajectory alpha(t) = alpha + alphap * t
+        j: conformal spin j (conformal spin is actually j+2 but anyway)
+        t: momentum transfer squared t
+
+    Originally, ParaSet have shape (5).
+    Output is a scalar
+    
+    After vectorization, there are a few different usages:
+        1. t has shape (N), ParaSet has shape (N, 5). Output have shape (N)
+        2. t has shape (N), ParaSet has shape (N, m1, 5). Output have shape (N, m1)
+        3. t has shape (N), ParaSet has shape (N, m1, m2, 5). Output have shape (N, m1, m2)
+        4. and so on
+        
+    Recommended usage:
+        t has shape (N), ParaSet has shape (N, 5, init_NumofAnsatz, 5)
+        output will be (N, 5, init_NumofAnsatz)
+
+    j should only be a scalar. It cannot be an ndarray before I make more changes
+    Right now, j can be a vector, but if you want to do integration, then better pass j as scalar.
+
+    Returns:
+        Conformal moment in j space F(j,t)
+    """
+    
+    # [norm, alpha, beta, alphap, bexp] = ParaSet
+    norm = ParaSets[..., 0]  # in recommended usage, has shape (N, 5, init_NumofAnsatz)
+    alpha = ParaSets[..., 1] # in general, can have shape (N), (N, m1), (N, m1, m2), ......
+    beta  = ParaSets[..., 2]
+    alphap = ParaSets[..., 3]
+    bexp = ParaSets[..., 4]
+    invm2 = ParaSets[..., 5]
+    
+    if np.ndim(norm) < np.ndim(t):
+        raise ValueError("Input format is wrong.")
+    
+    t_new_shape = list(np.shape(t)) + [1]*(np.ndim(norm) - np.ndim(t))
+    j_new_shape = list(np.shape(j)) + [1]*(np.ndim(norm) - np.ndim(t))  # not a typo, it is np.ndim(norm) - np.ndim(t)
+    t = np.reshape(t, t_new_shape) # to make sure t can be broadcasted with norm, alpha, etc.
+    # t will have shape (N) or (N, m1) or (N, m1, m2)... depends
+    j = np.reshape(j, j_new_shape)
+
+    # Currently with KM ansatz and dipole residual
+
+    return norm * beta_loggamma (j + 1 - alpha, 1 + beta) * (j + 1  - alpha)/ (j + 1 - alpha - alphap * t) * np.exp(t*bexp) * (1 - t * invm2 ) ** (-3)
+    # (N) or (N, m1) or (N, m1, m2) .... depends on usage
+    # For the recommended usage, the output is (N, 5, init_NumofAnsatz)
+
+def Moment_Sum(j: complex, t: float, ParaSets: np.ndarray) -> complex:
+    """
+    Sum of the conformal moments when the ParaSets contain more than just one set of parameters 
+
+    Args:
+        ParaSets : contains [ParaSet1, ParaSet0, ParaSet2,...] with each ParaSet = [norm, alpha, beta ,alphap] for valence and sea distributions repsectively.        
+        j: conformal spin j (or j+2 but anyway)
+        t: momentum transfer squared t
+
+        Originally, ParaSets have shape (init_NumofAnsatz, 4). In practice, it is (1, 4)
+        output is a scalar
+
+        Here, after vectorization, 
+            t has shape (N)
+            ParaSets has (N, 5, init_NumofAnsatz, 5)
+            output will have shape (N, 5)  # here, the 5 means 5 different species [u - ubar, ubar, d - dbar, dbar, g]
+        
+        More generally, 
+            t have shape (N)
+            ParaSets has shape (N, i, 5 ) or (N, m1, i, 5) or (N, m1, m2, i, 5) and so on
+            output will have shape (N) or (N, m1) or (N, m2)...... etc.
+
+    Returns:
+        sum of conformal moments over all the ParaSet
+    """
+
+    #return np.sum(np.array( list(map(lambda paraset: ConfMoment(j, t, paraset), ParaSets)) ))
+
+    # ConfMoment_vec(j, t, ParaSets) should have shape (N, 5, init_NumofAnsatz)
+    return np.sum(ConfMoment(j, t, ParaSets) ,  axis=-1) # (N, 5)
