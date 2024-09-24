@@ -284,7 +284,7 @@ class GPDobserv (object) :
             if (p_order == 1):
                 ConfEv = Moment_Evo_LO(s - 1, NFEFF, self.p, self.Q, ConfFlav)
             elif (p_order == 2):
-                ConfEv = tPDF_Moment_Evo_NLO(s - 1, NFEFF, self.p, self.Q, ConfFlav, muset = 1)
+                ConfEv = tPDF_Moment_Evo_NLO(s - 1, NFEFF, self.p, self.Q, ConfFlav)
             
             # Inverse transform the evolved moments back to the flavor basis
             EvoConfFlav = np.einsum('...ij, ...j->...i', inv_flav_trans, ConfEv) #(N, 5)
@@ -409,7 +409,7 @@ class GPDobserv (object) :
                 ConfEv     = Moment_Evo_LO(j0, NFEFF, self.p, self.Q, ConfFlav)
                 ConfEv_xi2 = Moment_Evo_LO(j0+2, NFEFF, self.p, self.Q, ConfFlav_xi2)
                 ConfEv_xi4 = Moment_Evo_LO(j0+4, NFEFF, self.p, self.Q, ConfFlav_xi4)
-            # Use tPDF_Moment_Evo_NLO since the off-diagonal piece only contribute for j>=2
+            # Use tPDF_Moment_Evo_NLO since the off-diagonal piece only contribute for non-zero skewness
             elif (p_order == 2):
                 ConfEv     = tPDF_Moment_Evo_NLO(j0, NFEFF, self.p, self.Q, ConfFlav)
                 ConfEv_xi2 = tPDF_Moment_Evo_NLO(j0+2, NFEFF, self.p, self.Q, ConfFlav_xi2)
@@ -483,7 +483,7 @@ class GPDobserv (object) :
                 
         return result #(N)
     
-    def CFF(self, ParaAll, p_order = 1, muset = 1, flv = 'All'):
+    def CFF(self, ParaAll, muset, p_order = 1, flv = 'All'):
         """
         Charge averged CFF \mathcal{F}(xi, t) (\mathcal{F} = Q_u^2 F_u + Q_d^2 F_d)
         Args:
@@ -568,7 +568,7 @@ class GPDobserv (object) :
             return quad_vec(lambda imJ : self.xi ** (-reJ - 1j * imJ - 1) * (1j - 1/np.tan((reJ + 1j * imJ) * np.pi / 2)) *Integrand_Mellin_Barnes_CFF(reJ + 1j * imJ) / 2, - Max_imJ, + Max_imJ, epsrel = Prec_Goal)[0]
         '''
     
-    def TFF(self, ParaAll, meson, p_order = 1, muset = 1, flv = 'All'):
+    def TFF(self, ParaAll, muf , meson, p_order = 1, flv = 'All'):
             """
             TFF \mathcal{F}(xi, t) (\mathcal{F} 
             Args:
@@ -591,7 +591,7 @@ class GPDobserv (object) :
                 TFF \mathcal{F}(xi, t)
             """
             if (p_order == 2):
-                return self.TFFNLO(ParaAll, meson, muset, flv)
+                return self.TFFNLO(ParaAll, muf, meson, flv)
             
             #[Para_Forward, Para_xi2, Para_xi4] = ParaAll  # each (N, 5, 1, 5)
             Para_Forward = ParaAll[..., 0, :, :, :]  # each (N, 5, 1, 5)
@@ -604,9 +604,9 @@ class GPDobserv (object) :
                 ConfFlav_xi2 = Moment_Sum(j, self.t, Para_xi2)
                 ConfFlav_xi4 = Moment_Sum(j, self.t, Para_xi4)
                 
-                EvoConf_Wilson = (TFF_Evo_LO(j, NFEFF, self.p, self.Q, ConfFlav, meson, muset) \
-                                    + TFF_Evo_LO(j+2, NFEFF, self.p, self.Q, ConfFlav_xi2, meson, muset) \
-                                        + TFF_Evo_LO(j+4, NFEFF, self.p, self.Q, ConfFlav_xi4, meson, muset))
+                EvoConf_Wilson = (TFF_Evo_LO(j, NFEFF, self.p, self.Q, ConfFlav, meson) \
+                                    + TFF_Evo_LO(j+2, NFEFF, self.p, self.Q, ConfFlav_xi2, meson) \
+                                        + TFF_Evo_LO(j+4, NFEFF, self.p, self.Q, ConfFlav_xi4, meson))
                 
                 fmask = flvmask(flv)
                 return np.einsum('j, ...j', fmask, EvoConf_Wilson)  
@@ -659,7 +659,7 @@ class GPDobserv (object) :
             '''
 
     # A separate function for next-to-leading order TFF, it can be called directly or with TFF() by setting p_order = 2 
-    def TFFNLO(self, ParaAll, meson, muset: float = 1, flv = 'All'):
+    def TFFNLO(self, ParaAll, muf: float, meson: int, flv = 'All'):
             """
             TFF \mathcal{F}(xi, t) (\mathcal{F} 
             Args:
@@ -717,9 +717,9 @@ class GPDobserv (object) :
                                     + CWilson(j+2) * Moment_Evo(j+2, NFEFF, self.p, self.Q, ConfFlav_xi2) \
                                     + CWilson(j+4) * Moment_Evo(j+4, NFEFF, self.p, self.Q, ConfFlav_xi4))
                 """
-                EvoConf_Wilson = (TFF_Evo_NLO_evWC(j, NFEFF, self.p, self.Q, ConfFlav, meson, muset) \
-                                 +  TFF_Evo_NLO_evWC(j+2, NFEFF, self.p, self.Q, ConfFlav_xi2, meson, muset) \
-                                 +  TFF_Evo_NLO_evWC(j+4, NFEFF, self.p, self.Q, ConfFlav_xi4, meson, muset))
+                EvoConf_Wilson = (TFF_Evo_NLO_evWC(j, NFEFF, self.p, self.Q, ConfFlav, meson, muf) \
+                                 +  TFF_Evo_NLO_evWC(j+2, NFEFF, self.p, self.Q, ConfFlav_xi2, meson, muf) \
+                                 +  TFF_Evo_NLO_evWC(j+4, NFEFF, self.p, self.Q, ConfFlav_xi4, meson, muf))
                 
                 '''
                 if(meson == 1):
@@ -753,7 +753,7 @@ class GPDobserv (object) :
             return 1j*fixed_quadvec(lambda imJ: tan_factor(reJ+1j*imJ)*Integrand_Mellin_Barnes_TFF(reJ+1j*imJ)+tan_factor(reJ-1j*imJ)*Integrand_Mellin_Barnes_TFF(reJ-1j*imJ), 0, Max_imJ,n = 300) + TFFj0()
 
     # A different function for next-to-leading order TFF using evolved moment method, it can be checked that it generate the same results as the evolve Wilson coefficient method
-    def TFFNLO_evMom(self, ParaAll, meson, muset: float = 1, flv = 'All'):
+    def TFFNLO_evMom(self, ParaAll, muf: float, meson: int, flv = 'All'):
             """
             NLOTFF \mathcal{F}(xi, t) (\mathcal{F} 
             Args:
@@ -790,9 +790,9 @@ class GPDobserv (object) :
             
             def Integrand_Mellin_Barnes_TFF(j: complex):
                 
-                EvoConf_Wilson = (TFF_Evo_NLO_evMOM(j, NFEFF, self.p, self.Q, self.t, self.xi, Para_Forward, 0, meson, muset) \
-                                          +  TFF_Evo_NLO_evMOM(j+2, NFEFF, self.p, self.Q, self.t, self.xi, Para_xi2, 2, meson, muset) \
-                                              +  TFF_Evo_NLO_evMOM(j+4, NFEFF, self.p, self.Q, self.t, self.xi, Para_xi4, 4, meson, muset))
+                EvoConf_Wilson = (TFF_Evo_NLO_evMOM(j, NFEFF, self.p, self.Q, self.t, self.xi, Para_Forward, 0, meson, muf) \
+                                          +  TFF_Evo_NLO_evMOM(j+2, NFEFF, self.p, self.Q, self.t, self.xi, Para_xi2, 2, meson, muf) \
+                                              +  TFF_Evo_NLO_evMOM(j+4, NFEFF, self.p, self.Q, self.t, self.xi, Para_xi4, 4, meson, muf))
                 
                 '''
                 if(meson == 1):

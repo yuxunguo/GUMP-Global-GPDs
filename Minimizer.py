@@ -227,7 +227,7 @@ def CFF_quad_theo(xB, t, Q, Para_Unp, Para_Pol):
     EtCFF = Ht_Et.CFF_quad(Para_Pol[..., 1, :, :, :, :])
 
     return [ HCFF, ECFF, HtCFF, EtCFF ]
-    
+''' 
 def TFF_theo_rho(xB, t, Q, Para_Unp):
     x = 0
     xi = (1/(2 - xB) - (2*t*(-1 + xB))/(Q**2*(-2 + xB)**2))*xB
@@ -256,13 +256,13 @@ def TFF_theo_phi(xB, t, Q, Para_Unp):
     ETFF_phi = H_E.TFFLO(Para_Unp[..., 1, :, :, :, :],2)
     
     return [ HTFF_phi, ETFF_phi ]
-
+'''
 def TFF_theo_jpsi(xB, t, Q, Para_Unp, p_order = 1, muset =1, flv = 'All'):
     x = 0
     xi = (1/(2 - xB) - (2*t*(-1 + xB))/((Q**2 + M_jpsi**2)*(-2 + xB)**2))*xB
-    H_E = GPDobserv(x, xi, t, np.sqrt(Q**2 + M_jpsi**2), 1)
-    HTFF_jpsi = H_E.TFF(Para_Unp[..., 0, :, :, :, :], 3, p_order, muset, flv)
-    ETFF_jpsi = H_E.TFF(Para_Unp[..., 1, :, :, :, :],3, p_order, muset, flv)
+    H_E = GPDobserv(x, xi, t, Q, 1)
+    HTFF_jpsi = H_E.TFF(Para_Unp[..., 0, :, :, :, :], muset* np.sqrt(Q**2 + M_jpsi**2), 3, p_order, flv)
+    ETFF_jpsi = H_E.TFF(Para_Unp[..., 1, :, :, :, :], muset* np.sqrt(Q**2 + M_jpsi**2), 3, p_order, flv)
     
     return  [ HTFF_jpsi, ETFF_jpsi ]
 
