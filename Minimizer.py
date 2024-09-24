@@ -257,12 +257,12 @@ def TFF_theo_phi(xB, t, Q, Para_Unp):
     
     return [ HTFF_phi, ETFF_phi ]
 '''
-def TFF_theo_jpsi(xB, t, Q, Para_Unp, p_order = 1, muset =1, flv = 'All'):
+def TFF_theo_jpsi(xB, t, Q, Para_Unp, p_order = 1, muset = 1, flv = 'All'):
     x = 0
     xi = (1/(2 - xB) - (2*t*(-1 + xB))/((Q**2 + M_jpsi**2)*(-2 + xB)**2))*xB
     H_E = GPDobserv(x, xi, t, Q, 1)
-    HTFF_jpsi = H_E.TFF(Para_Unp[..., 0, :, :, :, :], muset* np.sqrt(Q**2 + M_jpsi**2), 3, p_order, flv)
-    ETFF_jpsi = H_E.TFF(Para_Unp[..., 1, :, :, :, :], muset* np.sqrt(Q**2 + M_jpsi**2), 3, p_order, flv)
+    HTFF_jpsi = H_E.TFF(Para_Unp[..., 0, :, :, :, :], muset * Q, 3, p_order, flv)
+    ETFF_jpsi = H_E.TFF(Para_Unp[..., 1, :, :, :, :], muset * Q, 3, p_order, flv)
     
     return  [ HTFF_jpsi, ETFF_jpsi ]
 
@@ -346,7 +346,7 @@ def DVrhoPxsec_NLO_cost_xBtQ(DVrhoPxsec_data_xBtQ: pd.DataFrame, Para_Unp, xsec_
 '''
 def DVjpsiPxsec_cost_xBtQ(DVjpsiPxsec_data_xBtQ: pd.DataFrame, Para_Unp, xsec_norm, p_order = 2):
     [xB, t, Q] = [DVjpsiPxsec_data_xBtQ['xB'].iat[0], DVjpsiPxsec_data_xBtQ['t'].iat[0], DVjpsiPxsec_data_xBtQ['Q'].iat[0]] 
-    [HTFF_jpsi, ETFF_jpsi] = TFF_theo_jpsi(xB, t, Q, Para_Unp, p_order, muset = 0.5)
+    [HTFF_jpsi, ETFF_jpsi] = TFF_theo_jpsi(xB, t, Q, Para_Unp, p_order, muset = 1)
     DVjpsiP_pred_xBtQ = DVjpsiPxsec_theo(DVjpsiPxsec_data_xBtQ, TFF_jpsi_input = [HTFF_jpsi, ETFF_jpsi]) * xsec_norm**2
     return np.sum(((DVjpsiP_pred_xBtQ - DVjpsiPxsec_data_xBtQ['f'])/ DVjpsiPxsec_data_xBtQ['delta f']) ** 2 )
 
