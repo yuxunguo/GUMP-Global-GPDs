@@ -1,7 +1,20 @@
 var searchData=
 [
-  ['paramanager_5funp_0',['ParaManager_Unp',['../namespace_parameters.html#a8c87612bcbd6c92f4a27a9e09e0f61c0',1,'Parameters']]],
-  ['parameters_1',['Parameters',['../namespace_parameters.html',1,'']]],
-  ['pochhammer_2',['pochhammer',['../namespace_evolution.html#a5fde42185a9f4771670b94c216b65b72',1,'Evolution']]],
-  ['projectors_3',['projectors',['../namespace_evolution.html#a321997586b2021f78822204ef0c2c04e',1,'Evolution']]]
+  ['m_0',['M',['../namespace_d_v_c_s__xsec.html#a017973eba26c2cacdfda2361e1bdb84d',1,'DVCS_xsec']]],
+  ['m2_1',['m2',['../namespace_d_v_m_p__xsec.html#aeeb3efdc0c0ea5071f5fa0420a98791a',1,'DVMP_xsec']]],
+  ['m_5fjpsi_2',['M_jpsi',['../namespace_d_v_m_p__xsec.html#ad873265f6b0bca27c01cab1822342b78',1,'DVMP_xsec.M_jpsi'],['../namespace_evolution.html#aab58179b89fc007dc705f5cb43eb1fda',1,'Evolution.M_jpsi']]],
+  ['m_5fn_3',['M_n',['../namespace_d_v_m_p__xsec.html#aa55470fbecdcecaf7855766cdcc68c18',1,'DVMP_xsec']]],
+  ['m_5fp_4',['M_p',['../namespace_d_v_m_p__xsec.html#abed14d149cd1cd0e9f8e4fec5ea139c3',1,'DVMP_xsec']]],
+  ['m_5fphi_5',['M_phi',['../namespace_d_v_m_p__xsec.html#a951e7f59b9d457e43ba33b8549772a86',1,'DVMP_xsec']]],
+  ['m_5frho_6',['M_rho',['../namespace_d_v_m_p__xsec.html#a91a1395c8904662904f05bfaa8da98e8',1,'DVMP_xsec']]],
+  ['mellin_5fbarnes_5fcutoff_7',['Mellin_Barnes_cutoff',['../namespace_observables.html#a50706688672f46fb7ec4a047607a6277',1,'Observables']]],
+  ['mellin_5fbarnes_5fintercept_8',['Mellin_Barnes_intercept',['../namespace_observables.html#af1a561bdca9e88a68216927c7d23e4f3',1,'Observables']]],
+  ['mellinf2_9',['MellinF2',['../namespace_evolution.html#a004b28663a903ebabf3227ef0e4f0420',1,'Evolution']]],
+  ['minimizer_10',['Minimizer',['../namespace_minimizer.html',1,'']]],
+  ['minimizer_2epy_11',['Minimizer.py',['../_minimizer_8py.html',1,'']]],
+  ['minuit_5fcounter_12',['Minuit_Counter',['../namespace_minimizer.html#afca967777e81a3be58436b14759c1a36',1,'Minimizer']]],
+  ['moment_5fevo_5flo_13',['Moment_Evo_LO',['../namespace_evolution.html#aadec7e0e24be5a3deeaf8134680c7058',1,'Evolution']]],
+  ['moment_5fevo_5fnlo_14',['Moment_Evo_NLO',['../namespace_evolution.html#a582608780db4a173d7c261a69a4b5de3',1,'Evolution']]],
+  ['moment_5fsum_15',['Moment_Sum',['../namespace_parameters.html#a4b90531cd2c321376f93648a0bd0dbe6',1,'Parameters']]],
+  ['mz_16',['Mz',['../namespace_evolution.html#afb6dd8e7b6a95941b85e56e0805fdad0',1,'Evolution']]]
 ];

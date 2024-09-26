@@ -1,0 +1,26 @@
+var searchData=
+[
+  ['t_0',['t',['../class_observables_1_1_g_p_dobserv.html#a8383f2ab68698506e0b253f3a83973b6',1,'Observables::GPDobserv']]],
+  ['tf_1',['TF',['../namespace_evolution.html#a0001aaf266ee9cdf934b68c6f7a413c9',1,'Evolution']]],
+  ['tff_2',['TFF',['../class_observables_1_1_g_p_dobserv.html#adc936baa7b3d3ee7d4a2a465a4466014',1,'Observables::GPDobserv']]],
+  ['tff_5fevo_5flo_3',['TFF_Evo_LO',['../namespace_evolution.html#a449401c31f391b97955c365ff42c7c96',1,'Evolution']]],
+  ['tff_5fevo_5fnlo_5fevmom_4',['TFF_Evo_NLO_evMOM',['../namespace_evolution.html#acde93d84ee763d83b5484f954c05f4e9',1,'Evolution']]],
+  ['tff_5fevo_5fnlo_5fevwc_5',['TFF_Evo_NLO_evWC',['../namespace_evolution.html#ae84868467e8691535651a24a8faf6ca3',1,'Evolution']]],
+  ['tff_5ftheo_5fjpsi_6',['TFF_theo_jpsi',['../namespace_minimizer.html#ad44e9abb9026ae926ef8c1a9f2ee9620',1,'Minimizer.TFF_theo_jpsi()'],['../namespace_predictions.html#aadd3a38a2a58a9fd40bcd26ba66f8366',1,'Predictions.TFF_theo_jpsi()']]],
+  ['tffnlo_7',['TFFNLO',['../class_observables_1_1_g_p_dobserv.html#a6c3929d195d98ac4ca46c13bb479209f',1,'Observables::GPDobserv']]],
+  ['tffnlo_5fevmom_8',['TFFNLO_evMom',['../class_observables_1_1_g_p_dobserv.html#a8f5c2b16496701a2f05b852fe4503dc8',1,'Observables::GPDobserv']]],
+  ['time_5fcounter_9',['Time_Counter',['../namespace_minimizer.html#a2ea4bdbf74b565390f922e65fe977c6b',1,'Minimizer']]],
+  ['time_5fstart_10',['time_start',['../namespace_minimizer.html#ae4a464fdc02e8ea1198dfdd8d9bbe515',1,'Minimizer']]],
+  ['tot_5fparam_5fsize_11',['Tot_param_Size',['../namespace_parameters.html#a28d5ce696a48b1e54c68ef89bf17d769',1,'Parameters']]],
+  ['tpdf_12',['tPDF',['../class_observables_1_1_g_p_dobserv.html#a3c7ca20d03c480e83497fc764fed5a61',1,'Observables::GPDobserv']]],
+  ['tpdf_5fdata_13',['tPDF_data',['../namespace_fit_plots.html#adc3f46432082da190bcd0050db06c957',1,'FitPlots.tPDF_data'],['../namespace_minimizer.html#ac706bc89282cc0c5e922a38480ea3644',1,'Minimizer.tPDF_data']]],
+  ['tpdf_5fdata_5fe_14',['tPDF_data_E',['../namespace_fit_plots.html#ae5748b0d69fb18ae8c1d84759b985676',1,'FitPlots.tPDF_data_E'],['../namespace_minimizer.html#a302f1b41ef43e05387077be33a4032c5',1,'Minimizer.tPDF_data_E']]],
+  ['tpdf_5fdata_5fet_15',['tPDF_data_Et',['../namespace_fit_plots.html#a08bb079f498654652297e51c1088569f',1,'FitPlots.tPDF_data_Et'],['../namespace_minimizer.html#a561991923bb2f7bcdf84355fddcad241',1,'Minimizer.tPDF_data_Et']]],
+  ['tpdf_5fdata_5fh_16',['tPDF_data_H',['../namespace_fit_plots.html#a57835bd5d51bac8f11126e15a1dcbe8a',1,'FitPlots.tPDF_data_H'],['../namespace_minimizer.html#a924bb6ac20fd9da21018c57b07334a64',1,'Minimizer.tPDF_data_H']]],
+  ['tpdf_5fdata_5fh_5fg_17',['tPDF_data_H_g',['../namespace_minimizer.html#ab7485fc3750b77a2168ae87d8ed77ac5',1,'Minimizer']]],
+  ['tpdf_5fdata_5fht_18',['tPDF_data_Ht',['../namespace_fit_plots.html#a6b9f46527513a71cf4165205f7ee1f66',1,'FitPlots.tPDF_data_Ht'],['../namespace_minimizer.html#a009c713223f0e908980c6836650e8e1d',1,'Minimizer.tPDF_data_Ht']]],
+  ['tpdf_5fmoment_5fevo_5fnlo_19',['tPDF_Moment_Evo_NLO',['../namespace_evolution.html#afedf7cabeab4c332dfd3569d818af89d',1,'Evolution']]],
+  ['tpdf_5ftheo_20',['tPDF_theo',['../namespace_minimizer.html#ad8c68c57cf25752f010d15dd7357f1a9',1,'Minimizer']]],
+  ['tpdf_5ftheo_5fs_21',['tPDF_theo_s',['../namespace_predictions.html#afdd1881bdec1d99deecb8e0dd3b0e012',1,'Predictions']]],
+  ['ts_22',['ts',['../namespace_predictions.html#af8519eeb028a034f8ec46358e46ebc00',1,'Predictions']]]
+];

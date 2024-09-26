@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['parameters_0',['Parameters',['../namespace_parameters.html',1,'']]]
+  ['fitplots_0',['FitPlots',['../namespace_fit_plots.html',1,'']]]
 ];

@@ -1,4 +1,5 @@
 var searchData=
 [
-  ['rmudep_0',['rmudep',['../namespace_evolution.html#a8b233aca7e98aea9a23d2b86e8d0d6ea',1,'Evolution']]]
+  ['off_5fforward_5ffit_0',['off_forward_fit',['../namespace_minimizer.html#a281cb79d885aa9b0f5627d91252de69f',1,'Minimizer']]],
+  ['outer_5fsubtract_1',['outer_subtract',['../namespace_evolution.html#aabd8da7f2dd90b48593ae55edec09da1',1,'Evolution']]]
 ];

@@ -1,5 +1,6 @@
 var searchData=
 [
-  ['invmellinwavefuncg_0',['InvMellinWaveFuncG',['../namespace_observables.html#aa176adce01a5e7718ff73e7a74d744d8',1,'Observables']]],
-  ['invmellinwavefuncq_1',['InvMellinWaveFuncQ',['../namespace_observables.html#a5d7e82ba6cdfc092e811ebbfc628a90c',1,'Observables']]]
+  ['h_5fpuredvcs_0',['h_pureDVCS',['../namespace_d_v_c_s__xsec.html#ad77150402811ba6a478c8de4a174d87e',1,'DVCS_xsec']]],
+  ['hminus_5fpuredvcs_1',['hminus_pureDVCS',['../namespace_d_v_c_s__xsec.html#afd2bd14e95791e6d92f15f0a3a25c2ff',1,'DVCS_xsec']]],
+  ['htff_5ftheo_5fjpsi_2',['HTFF_theo_jpsi',['../namespace_predictions.html#a55f6d912f413e9991cb3dcea936be56c',1,'Predictions']]]
 ];
