@@ -140,12 +140,12 @@
   <section id="module-Evolution">
 <span id="evolution-module"></span><h1>Evolution module<a class="headerlink" href="#module-Evolution" title="Link to this heading"></a></h1>
 <p>NLO QCD evolution of moment space GPD. Many credits to K. Kumericki at <a class="reference external" href="https://github.com/kkumer/gepard">https://github.com/kkumer/gepard</a>.</p>
-<dl class="simple">
-<dt>Note:</dt><dd><p>Functions in this module have as first argument Mellin moment
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Functions in this module have as first argument Mellin moment
 n = j + 1, where j is conformal moment used everywhere else.
 Thus, they should always be called as f(j+1, …).</p>
-</dd>
-</dl>
+</div>
 <dl class="py function">
 <dt class="sig sig-object py" id="Evolution.AlphaS">
 <span class="sig-prename descclassname"><span class="pre">Evolution.</span></span><span class="sig-name descname"><span class="pre">AlphaS</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">nloop</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nf</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Q</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span><a class="reference internal" href="_modules/Evolution.html#AlphaS"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#Evolution.AlphaS" title="Link to this definition"></a></dt>
@@ -165,19 +165,23 @@ Thus, they should always be called as f(j+1, …).</p>
 <dt class="sig sig-object py" id="Evolution.CFF_Evo_LO">
 <span class="sig-prename descclassname"><span class="pre">Evolution.</span></span><span class="sig-name descname"><span class="pre">CFF_Evo_LO</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">j</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">array</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nf</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mu</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ConfFlav</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">array</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">array</span></span></span><a class="reference internal" href="_modules/Evolution.html#CFF_Evo_LO"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#Evolution.CFF_Evo_LO" title="Link to this definition"></a></dt>
 <dd><p>Leading order evolution of the combination of DVCS Wilson coefficient and conformal moments</p>
-<dl class="simple">
-<dt>Args:</dt><dd><p>j: conformal spin j (conformal spin is actually j+2 but anyway): array (N,)
-nf: number of effective fermions; scalar
-p (int): 1 for vector-like GPD (Ht, Et), -1 for axial-vector-like GPDs (Ht, Et); scalars
-mu: final evolution scale; scalar
-ConfFlav: uneolved conformal moments in flavor space ConfFlav = [ConfMoment_uV, ConfMoment_ubar, ConfMoment_dV, ConfMoment_dbar, ConfMoment_g]; shape (N,5)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>j</strong> – conformal spin j (conformal spin is actually j+2 but anyway): array (N,)</p></li>
+<li><p><strong>nf</strong> – number of effective fermions; scalar</p></li>
+<li><p><strong>p</strong> (<em>int</em>) – 1 for vector-like GPD (Ht, Et), -1 for axial-vector-like GPDs (Ht, Et); scalars</p></li>
+<li><p><strong>mu</strong> – final evolution scale; scalar</p></li>
+<li><p><strong>ConfFlav</strong> – uneolved conformal moments in flavor space ConfFlav = [ConfMoment_uV, ConfMoment_ubar, ConfMoment_dV, ConfMoment_dbar, ConfMoment_g]; shape (N,5)</p></li>
+</ul>
 </dd>
-<dt>Returns:</dt><dd><p>Evolved conformal moments times the DVCS Wilson coefficients in the evolution basis (qVal, q_du_plus, q_du_minus, qSigma, g);
-ingredients for the Mellin-Barnes integral for CFF 
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Evolved conformal moments times the DVCS Wilson coefficients in the evolution basis (qVal, q_du_plus, q_du_minus, qSigma, g);
+ingredients for the Mellin-Barnes integral for CFF
 return shape (N, 5)</p>
 </dd>
 </dl>
-<p>The j here accept array input and preferrably just 1D for the contour integral in j. 
+<p>The j here accept array input and preferrably just 1D for the contour integral in j.
 Therefore, j has shape (N,) where N is the interpolating order of the fixed quad.
 Other quantities must be broadcastable with j and thus they should be preferrably scalar</p>
 </dd></dl>
@@ -186,24 +190,28 @@ Other quantities must be broadcastable with j and thus they should be preferrabl
 <dt class="sig sig-object py" id="Evolution.GPD_Moment_Evo_NLO">
 <span class="sig-prename descclassname"><span class="pre">Evolution.</span></span><span class="sig-name descname"><span class="pre">GPD_Moment_Evo_NLO</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">j</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">array</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nf</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mu</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">t</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xi</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">complex</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Para</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">array</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">momshift</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">array</span></span></span><a class="reference internal" href="_modules/Evolution.html#GPD_Moment_Evo_NLO"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#Evolution.GPD_Moment_Evo_NLO" title="Link to this definition"></a></dt>
 <dd><p>Next-to-leading order evolved conformal moments in the evolution basis (Evolved moment method)</p>
-<dl class="simple">
-<dt>Args:</dt><dd><p>j: conformal spin j (conformal spin is actually j+2 but anyway): array (N,)
-nf: number of effective fermions; 
-p (int): 1 for vector-like GPD (Ht, Et), -1 for axial-vector-like GPDs (Ht, Et): scalar
-Q: final evolution scale: scalar
-t: momentum transfer squared
-xi: skewness
-ConfFlav: unevolved conformal moments
-Para: parameters of the conformal moments
-momshift: shift of moments
-muset: offset in the scale mu to study the scale dependence of the TFF
-More notes in Moment_Evo_NLO() function above</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>j</strong> – conformal spin j (conformal spin is actually j+2 but anyway): array (N,)</p></li>
+<li><p><strong>nf</strong> – number of effective fermions;</p></li>
+<li><p><strong>p</strong> (<em>int</em>) – 1 for vector-like GPD (Ht, Et), -1 for axial-vector-like GPDs (Ht, Et): scalar</p></li>
+<li><p><strong>Q</strong> – final evolution scale: scalar</p></li>
+<li><p><strong>t</strong> – momentum transfer squared</p></li>
+<li><p><strong>xi</strong> – skewness</p></li>
+<li><p><strong>ConfFlav</strong> – unevolved conformal moments</p></li>
+<li><p><strong>Para</strong> – parameters of the conformal moments</p></li>
+<li><p><strong>momshift</strong> – shift of moments</p></li>
+<li><p><strong>muset</strong> – offset in the scale mu to study the scale dependence of the TFF</p></li>
+<li><p><strong>above</strong> (<em>More notes in Moment_Evo_NLO</em><em>(</em><em>) </em><em>function</em>)</p></li>
+</ul>
 </dd>
-<dt>Returns:</dt><dd><p>Next-to-leading order evolved conformal moments in the evolution basis (to be combined with conformal wave function)
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Next-to-leading order evolved conformal moments in the evolution basis (to be combined with conformal wave function)
 return shape (N, 5)</p>
 </dd>
 </dl>
-<p>The j here accept array input and preferrably just 1D for the contour integral in j. 
+<p>The j here accept array input and preferrably just 1D for the contour integral in j.
 Therefore, j has shape (N,) where N is the interpolating order of the fixed quad.
 Other quantities must be broadcastable with j and thus they should be preferrably scalar</p>
 </dd></dl>
@@ -212,10 +220,12 @@ Other quantities must be broadcastable with j and thus they should be preferrabl
 <dt class="sig sig-object py" id="Evolution.MellinF2">
 <span class="sig-prename descclassname"><span class="pre">Evolution.</span></span><span class="sig-name descname"><span class="pre">MellinF2</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">n</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">complex</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">ndarray</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">complex</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">ndarray</span></span></span><a class="reference internal" href="_modules/Evolution.html#MellinF2"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#Evolution.MellinF2" title="Link to this definition"></a></dt>
 <dd><p>Return Mellin transform  i.e. x^(N-1) moment of Li2(x)/(1+x).</p>
-<dl class="simple">
-<dt>Args:</dt><dd><p>n: complex argument</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>n</strong> – complex argument</p>
 </dd>
-<dt>Returns:</dt><dd><p>According to Eq. (33) in Bluemlein and Kurth, hep-ph/9708388</p>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>According to Eq. (33) in Bluemlein and Kurth, hep-ph/9708388</p>
 </dd>
 </dl>
 </dd></dl>
@@ -224,18 +234,22 @@ Other quantities must be broadcastable with j and thus they should be preferrabl
 <dt class="sig sig-object py" id="Evolution.Moment_Evo_LO">
 <span class="sig-prename descclassname"><span class="pre">Evolution.</span></span><span class="sig-name descname"><span class="pre">Moment_Evo_LO</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">j</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">array</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nf</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mu</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ConfFlav</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">array</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">array</span></span></span><a class="reference internal" href="_modules/Evolution.html#Moment_Evo_LO"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#Evolution.Moment_Evo_LO" title="Link to this definition"></a></dt>
 <dd><p>Leading order evolution of moments in the flavor space</p>
-<dl class="simple">
-<dt>Args:</dt><dd><p>j: conformal spin j (conformal spin is actually j+2 but anyway): shape (N,)
-nf: number of effective fermions, scalar
-p (int): 1 for vector-like GPD (Ht, Et), -1 for axial-vector-like GPDs (Ht, Et), scalars
-mu: final evolution scale: array(N,), scalar
-ConfFlav: uneolved conformal moments in flavor space ConfFlav = [ConfMoment_uV, ConfMoment_ubar, ConfMoment_dV, ConfMoment_dbar, ConfMoment_g] shape (N,5)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>j</strong> – conformal spin j (conformal spin is actually j+2 but anyway): shape (N,)</p></li>
+<li><p><strong>nf</strong> – number of effective fermions, scalar</p></li>
+<li><p><strong>p</strong> (<em>int</em>) – 1 for vector-like GPD (Ht, Et), -1 for axial-vector-like GPDs (Ht, Et), scalars</p></li>
+<li><p><strong>mu</strong> – final evolution scale: array(N,), scalar</p></li>
+<li><p><strong>ConfFlav</strong> – uneolved conformal moments in flavor space ConfFlav = [ConfMoment_uV, ConfMoment_ubar, ConfMoment_dV, ConfMoment_dbar, ConfMoment_g] shape (N,5)</p></li>
+</ul>
 </dd>
-<dt>Returns:</dt><dd><p>Evolved conformal moments in the evolution basis (qVal, q_du_plus, q_du_minus, qSigma, g)
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Evolved conformal moments in the evolution basis (qVal, q_du_plus, q_du_minus, qSigma, g)
 return shape (N, 5)</p>
 </dd>
 </dl>
-<p>The j here accept array input and preferrably just 1D for the contour integral in j. 
+<p>The j here accept array input and preferrably just 1D for the contour integral in j.
 Therefore, j has shape (N,) where N is the interpolating order of the fixed quad.
 Other quantities must be broadcastable with j and thus they should be preferrably scalar.</p>
 </dd></dl>
@@ -244,31 +258,32 @@ Other quantities must be broadcastable with j and thus they should be preferrabl
 <dt class="sig sig-object py" id="Evolution.Moment_Evo_NLO">
 <span class="sig-prename descclassname"><span class="pre">Evolution.</span></span><span class="sig-name descname"><span class="pre">Moment_Evo_NLO</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">j</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">array</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nf</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mu</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">t</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xi</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Para</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">array</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">momshift</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">array</span></span></span><a class="reference internal" href="_modules/Evolution.html#Moment_Evo_NLO"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#Evolution.Moment_Evo_NLO" title="Link to this definition"></a></dt>
 <dd><p>Next-to-leading order evolution of the conformal moments (Evolved moment method)</p>
-<dl>
-<dt>Args:</dt><dd><p>j: conformal spin j (conformal spin is actually j+2 but anyway): array (N,)
-nf: number of effective fermions; scalars
-p (int): 1 for vector-like GPD (Ht, Et), -1 for axial-vector-like GPDs (Ht, Et); scalars
-mu: factorization evolution scale; scalar
-t: momentum transfer squared
-xi: skewness
-Para: parameters of the conformal moments
-momshift: shift of moments</p>
-<dl class="simple">
-<dt>Note: xi,t are need when for the evolution of moments:</dt><dd><p>We need Para for the parameters rather than just the unevolved moment ConFlav;
-Because the off-diagonal terms requires shift of moments.</p>
-</dd>
-<dt>momshift (CAUTION!):</dt><dd><p>When we shift the moment by j -&gt; j+2 for xi^2 terms, only the evolution kernel E_{jk} should be shifted into E_{j+2,k+2}, whereas terms like xi^{-j-1} should not be shifted
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>j</strong> – conformal spin j (conformal spin is actually j+2 but anyway): array (N,)</p></li>
+<li><p><strong>nf</strong> – number of effective fermions; scalars</p></li>
+<li><p><strong>p</strong> (<em>int</em>) – 1 for vector-like GPD (Ht, Et), -1 for axial-vector-like GPDs (Ht, Et); scalars</p></li>
+<li><p><strong>mu</strong> – factorization evolution scale; scalar</p></li>
+<li><p><strong>t</strong> – momentum transfer squared</p></li>
+<li><p><strong>xi</strong> – skewness</p></li>
+<li><p><strong>Para</strong> – parameters of the conformal moments</p></li>
+<li><p><strong>momshift</strong> (<em>CAUTION!</em>) – shift of moments</p></li>
+<li><p><strong>Note</strong> – xi,t are need when for the evolution of moments:
+We need Para for the parameters rather than just the unevolved moment ConFlav;
+Because the off-diagonal terms requires shift of moments.</p></li>
+<li><p><strong>momshift</strong> – When we shift the moment by j -&gt; j+2 for xi^2 terms, only the evolution kernel E_{jk} should be shifted into E_{j+2,k+2}, whereas terms like xi^{-j-1} should not be shifted
 therefore, we should write the expression as E_{j,k+momshift} and x^{-j+momshift-1} to compensate/cancel the shift of j when j-&gt;j+2 is performed (momshift=2 in this case)
-Only relevant in the off-diagonal part</p>
+Only relevant in the off-diagonal part</p></li>
+</ul>
 </dd>
-</dl>
-</dd>
-<dt>Returns:</dt><dd><p>Evolved conformal moment in evolution basis (qVal, q_du_plus, q_du_minus, qSigma, g);
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Evolved conformal moment in evolution basis (qVal, q_du_plus, q_du_minus, qSigma, g);
 To be combined with the corresponding Wilson coefficient (for TFF/CFF) or conformal wave function (for GPD)
 return shape (N, 5)</p>
 </dd>
 </dl>
-<p>The j here accept array input and preferrably just 1D for the contour integral in j. 
+<p>The j here accept array input and preferrably just 1D for the contour integral in j.
 Therefore, j has shape (N,) where N is the interpolating order of the fixed quad.
 Other quantities must be broadcastable with j and thus they should be preferrably scalar</p>
 </dd></dl>
@@ -331,20 +346,24 @@ Other quantities must be broadcastable with j and thus they should be preferrabl
 <dt class="sig sig-object py" id="Evolution.TFF_Evo_LO">
 <span class="sig-prename descclassname"><span class="pre">Evolution.</span></span><span class="sig-name descname"><span class="pre">TFF_Evo_LO</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">j</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">array</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nf</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mu</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ConfFlav</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">array</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">meson</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">array</span></span></span><a class="reference internal" href="_modules/Evolution.html#TFF_Evo_LO"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#Evolution.TFF_Evo_LO" title="Link to this definition"></a></dt>
 <dd><p>Leading order evolution of the combination of DVMP Wilson coefficient and conformal moments</p>
-<dl class="simple">
-<dt>Args:</dt><dd><p>j: conformal spin j (conformal spin is actually j+2 but anyway): array (N,)
-nf: number of effective fermions; scalar
-p (int): 1 for vector-like GPD (Ht, Et), -1 for axial-vector-like GPDs (Ht, Et); scalar
-mu: final evolution scale; scalar
-ConfFlav: uneolved conformal moments in flavor space ConfFlav = [ConfMoment_uV, ConfMoment_ubar, ConfMoment_dV, ConfMoment_dbar, ConfMoment_g]; shape (N,5)
-meson (int): 1 for rho, 2 for phi, 3 for Jpsi</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>j</strong> – conformal spin j (conformal spin is actually j+2 but anyway): array (N,)</p></li>
+<li><p><strong>nf</strong> – number of effective fermions; scalar</p></li>
+<li><p><strong>p</strong> (<em>int</em>) – 1 for vector-like GPD (Ht, Et), -1 for axial-vector-like GPDs (Ht, Et); scalar</p></li>
+<li><p><strong>mu</strong> – final evolution scale; scalar</p></li>
+<li><p><strong>ConfFlav</strong> – uneolved conformal moments in flavor space ConfFlav = [ConfMoment_uV, ConfMoment_ubar, ConfMoment_dV, ConfMoment_dbar, ConfMoment_g]; shape (N,5)</p></li>
+<li><p><strong>meson</strong> (<em>int</em>) – 1 for rho, 2 for phi, 3 for Jpsi</p></li>
+</ul>
 </dd>
-<dt>Returns:</dt><dd><p>Evolved conformal moments times the DVMP Wilson coefficients in the evolution basis (qVal, q_du_plus, q_du_minus, qSigma, g);
-Ingredients for the Mellin-Barnes integral for TFF 
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Evolved conformal moments times the DVMP Wilson coefficients in the evolution basis (qVal, q_du_plus, q_du_minus, qSigma, g);
+Ingredients for the Mellin-Barnes integral for TFF
 return shape (N, 5)</p>
 </dd>
 </dl>
-<p>The j here accept array input and preferrably just 1D for the contour integral in j. 
+<p>The j here accept array input and preferrably just 1D for the contour integral in j.
 Therefore, j has shape (N,) where N is the interpolating order of the fixed quad.
 Other quantities must be broadcastable with j and thus they should be preferrably scalar</p>
 </dd></dl>
@@ -353,24 +372,28 @@ Other quantities must be broadcastable with j and thus they should be preferrabl
 <dt class="sig sig-object py" id="Evolution.TFF_Evo_NLO_evMOM">
 <span class="sig-prename descclassname"><span class="pre">Evolution.</span></span><span class="sig-name descname"><span class="pre">TFF_Evo_NLO_evMOM</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">j</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">array</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nf</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Q</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">t</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xi</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Para</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">array</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">momshift</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">meson</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">muf</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">array</span></span></span><a class="reference internal" href="_modules/Evolution.html#TFF_Evo_NLO_evMOM"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#Evolution.TFF_Evo_NLO_evMOM" title="Link to this definition"></a></dt>
 <dd><p>Next-to-leading order evolved conformal moments combined with the DVMP Wilson coefficients in the evolution space (Evolved moment method)</p>
-<dl class="simple">
-<dt>Args:</dt><dd><p>j: conformal spin j (conformal spin is actually j+2 but anyway): array (N,)
-nf: number of effective fermions; 
-p (int): 1 for vector-like GPD (Ht, Et), -1 for axial-vector-like GPDs (Ht, Et): scalar
-Q: final evolution scale: scalar
-t: momentum transfer squared
-xi: skewness
-ConfFlav: unevolved conformal moments
-Para: parameters of the conformal moments
-momshift: shift of moments
-muset: offset in the scale mu to study the scale dependence of the TFF
-More notes in Moment_Evo_NLO() function above</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>j</strong> – conformal spin j (conformal spin is actually j+2 but anyway): array (N,)</p></li>
+<li><p><strong>nf</strong> – number of effective fermions;</p></li>
+<li><p><strong>p</strong> (<em>int</em>) – 1 for vector-like GPD (Ht, Et), -1 for axial-vector-like GPDs (Ht, Et): scalar</p></li>
+<li><p><strong>Q</strong> – final evolution scale: scalar</p></li>
+<li><p><strong>t</strong> – momentum transfer squared</p></li>
+<li><p><strong>xi</strong> – skewness</p></li>
+<li><p><strong>ConfFlav</strong> – unevolved conformal moments</p></li>
+<li><p><strong>Para</strong> – parameters of the conformal moments</p></li>
+<li><p><strong>momshift</strong> – shift of moments</p></li>
+<li><p><strong>muset</strong> – offset in the scale mu to study the scale dependence of the TFF</p></li>
+<li><p><strong>above</strong> (<em>More notes in Moment_Evo_NLO</em><em>(</em><em>) </em><em>function</em>)</p></li>
+</ul>
 </dd>
-<dt>Returns:</dt><dd><p>Next-to-leading order evolved conformal moments combined with the DVMP Wilson coefficients in the evolution basis (qVal, q_du_plus, q_du_minus, qSigma, g);
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Next-to-leading order evolved conformal moments combined with the DVMP Wilson coefficients in the evolution basis (qVal, q_du_plus, q_du_minus, qSigma, g);
 return shape (N, 5)</p>
 </dd>
 </dl>
-<p>The j here accept array input and preferrably just 1D for the contour integral in j. 
+<p>The j here accept array input and preferrably just 1D for the contour integral in j.
 Therefore, j has shape (N,) where N is the interpolating order of the fixed quad.
 Other quantities must be broadcastable with j and thus they should be preferrably scalar</p>
 </dd></dl>
@@ -379,21 +402,25 @@ Other quantities must be broadcastable with j and thus they should be preferrabl
 <dt class="sig sig-object py" id="Evolution.TFF_Evo_NLO_evWC">
 <span class="sig-prename descclassname"><span class="pre">Evolution.</span></span><span class="sig-name descname"><span class="pre">TFF_Evo_NLO_evWC</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">j</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">array</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nf</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Q</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ConfFlav</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">array</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">meson</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">muf</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">array</span></span></span><a class="reference internal" href="_modules/Evolution.html#TFF_Evo_NLO_evWC"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#Evolution.TFF_Evo_NLO_evWC" title="Link to this definition"></a></dt>
 <dd><p>Next-to-leading order evolved DVMP Wilson coefficients in the flavor space combined with the conformal moments (Evolved Wilson coefficient method)</p>
-<dl class="simple">
-<dt>Args:</dt><dd><p>j: conformal spin j (conformal spin is actually j+2 but anyway): array (N,)
-nf: number of effective fermions; scalars
-p (int): 1 for vector-like GPD (Ht, Et), -1 for axial-vector-like GPDs (Ht, Et); scalars
-Q (float): photon virtuality. At NLO the scale Q enters the amplitudes through logs.
-ConfFlav: uneolved conformal moments in flavor space ConfFlav = [ConfMoment_uV, ConfMoment_ubar, ConfMoment_dV, ConfMoment_dbar, ConfMoment_g]; shape (N,5)
-meson (int): 1 for rho, 2 for phi, 3 for Jpsi
-muf: factorization evolution scale; scalar</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>j</strong> – conformal spin j (conformal spin is actually j+2 but anyway): array (N,)</p></li>
+<li><p><strong>nf</strong> – number of effective fermions; scalars</p></li>
+<li><p><strong>p</strong> (<em>int</em>) – 1 for vector-like GPD (Ht, Et), -1 for axial-vector-like GPDs (Ht, Et); scalars</p></li>
+<li><p><strong>Q</strong> (<em>float</em>) – photon virtuality. At NLO the scale Q enters the amplitudes through logs.</p></li>
+<li><p><strong>ConfFlav</strong> – uneolved conformal moments in flavor space ConfFlav = [ConfMoment_uV, ConfMoment_ubar, ConfMoment_dV, ConfMoment_dbar, ConfMoment_g]; shape (N,5)</p></li>
+<li><p><strong>meson</strong> (<em>int</em>) – 1 for rho, 2 for phi, 3 for Jpsi</p></li>
+<li><p><strong>muf</strong> – factorization evolution scale; scalar</p></li>
+</ul>
 </dd>
-<dt>Returns:</dt><dd><p>Evolved conformal moments times the DVMP Wilson coefficients in the evolution basis (qVal, q_du_plus, q_du_minus, qSigma, g);
-Ingredients for the Mellin-Barnes integral for TFF 
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Evolved conformal moments times the DVMP Wilson coefficients in the evolution basis (qVal, q_du_plus, q_du_minus, qSigma, g);
+Ingredients for the Mellin-Barnes integral for TFF
 return shape (N, 5)</p>
 </dd>
 </dl>
-<p>The j here accept array input and preferrably just 1D for the contour integral in j. 
+<p>The j here accept array input and preferrably just 1D for the contour integral in j.
 Therefore, j has shape (N,) where N is the interpolating order of the fixed quad.
 Other quantities must be broadcastable with j and thus they should be preferrably scalar</p>
 </dd></dl>
@@ -402,21 +429,25 @@ Other quantities must be broadcastable with j and thus they should be preferrabl
 <dt class="sig sig-object py" id="Evolution.WCoef_Evo_NLO">
 <span class="sig-prename descclassname"><span class="pre">Evolution.</span></span><span class="sig-name descname"><span class="pre">WCoef_Evo_NLO</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">j</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">array</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nf</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Q</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">meson</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">muf</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">ndarray</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">ndarray</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="_modules/Evolution.html#WCoef_Evo_NLO"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#Evolution.WCoef_Evo_NLO" title="Link to this definition"></a></dt>
 <dd><p>Next-to-leading order evolution of the DVMP Wilson coefficient (Evolved Wilson coefficient method)</p>
-<dl class="simple">
-<dt>Args:</dt><dd><p>j: conformal spin j (conformal spin is actually j+2 but anyway): array (N,)
-nf: number of effective fermions; scalars
-p (int): 1 for vector-like GPD (Ht, Et), -1 for axial-vector-like GPDs (Ht, Et); scalars
-Q (float): photon virtuality. At NLO the scale Q enters the amplitudes through logs.
-ConfFlav: uneolved conformal moments in flavor space ConfFlav = [ConfMoment_uV, ConfMoment_ubar, ConfMoment_dV, ConfMoment_dbar, ConfMoment_g]; shape (N,5)
-meson (int): 1 for rho, 2 for phi, 3 for Jpsi
-muf: factorization evolution scale; scalar</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>j</strong> – conformal spin j (conformal spin is actually j+2 but anyway): array (N,)</p></li>
+<li><p><strong>nf</strong> – number of effective fermions; scalars</p></li>
+<li><p><strong>p</strong> (<em>int</em>) – 1 for vector-like GPD (Ht, Et), -1 for axial-vector-like GPDs (Ht, Et); scalars</p></li>
+<li><p><strong>Q</strong> (<em>float</em>) – photon virtuality. At NLO the scale Q enters the amplitudes through logs.</p></li>
+<li><p><strong>ConfFlav</strong> – uneolved conformal moments in flavor space ConfFlav = [ConfMoment_uV, ConfMoment_ubar, ConfMoment_dV, ConfMoment_dbar, ConfMoment_g]; shape (N,5)</p></li>
+<li><p><strong>meson</strong> (<em>int</em>) – 1 for rho, 2 for phi, 3 for Jpsi</p></li>
+<li><p><strong>muf</strong> – factorization evolution scale; scalar</p></li>
+</ul>
 </dd>
-<dt>Returns:</dt><dd><p>Evolved DVMP Wilson coefficients in the evolution basis;
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Evolved DVMP Wilson coefficients in the evolution basis;
 CWilsonT_ev_NS_tot: Non-singlet evolved Wilson coefficient with shape (N,3)
 CWilsonT_ev_SG_tot Singlet/Gluon evolved Wilson coefficient with shape (N,2)</p>
 </dd>
 </dl>
-<p>The j here accept array input and preferrably just 1D for the contour integral in j. 
+<p>The j here accept array input and preferrably just 1D for the contour integral in j.
 Therefore, j has shape (N,) where N is the interpolating order of the fixed quad.
 Other quantities must be broadcastable with j and thus they should be preferrably scalar</p>
 </dd></dl>
@@ -425,10 +456,12 @@ Other quantities must be broadcastable with j and thus they should be preferrabl
 <dt class="sig sig-object py" id="Evolution.WilsonCoef">
 <span class="sig-prename descclassname"><span class="pre">Evolution.</span></span><span class="sig-name descname"><span class="pre">WilsonCoef</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">j</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">complex</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">complex</span></span></span><a class="reference internal" href="_modules/Evolution.html#WilsonCoef"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#Evolution.WilsonCoef" title="Link to this definition"></a></dt>
 <dd><p>Leading-order Wilson coefficient, elements used in both DVCS and DVMP</p>
-<dl class="simple">
-<dt>Args:</dt><dd><p>j (complex array): shape(N,) conformal spin j</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>j</strong> (<em>complex array</em>) – shape(N,) conformal spin j</p>
 </dd>
-<dt>Returns:</dt><dd><p>Leading-order Wilson coefficient (complex, could be an array)</p>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Leading-order Wilson coefficient (complex, could be an array)</p>
 </dd>
 </dl>
 </dd></dl>
@@ -437,10 +470,12 @@ Other quantities must be broadcastable with j and thus they should be preferrabl
 <dt class="sig sig-object py" id="Evolution.WilsonCoef_DVCS_LO">
 <span class="sig-prename descclassname"><span class="pre">Evolution.</span></span><span class="sig-name descname"><span class="pre">WilsonCoef_DVCS_LO</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">j</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">complex</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">complex</span></span></span><a class="reference internal" href="_modules/Evolution.html#WilsonCoef_DVCS_LO"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#Evolution.WilsonCoef_DVCS_LO" title="Link to this definition"></a></dt>
 <dd><p>LO Wilson coefficient of DVCS in the evolution basis (qVal, q_du_plus, q_du_minus, qSigma, g)</p>
-<dl class="simple">
-<dt>Args:</dt><dd><p>j (complex array): shape(N,) conformal spin j</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>j</strong> (<em>complex array</em>) – shape(N,) conformal spin j</p>
 </dd>
-<dt>Returns:</dt><dd><p>Wilson coefficient of shape (N,5) in the evolution basis (qVal, q_du_plus, q_du_minus, qSigma, g)</p>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Wilson coefficient of shape (N,5) in the evolution basis (qVal, q_du_plus, q_du_minus, qSigma, g)</p>
 </dd>
 </dl>
 <p>Charge factor are calculated such that the sum in the evolution basis are identical to the sum in the flavor basis
@@ -451,12 +486,16 @@ Gluon charge factor is the same as the singlet one, but the LO Wilson coefficien
 <dt class="sig sig-object py" id="Evolution.WilsonCoef_DVMP_LO">
 <span class="sig-prename descclassname"><span class="pre">Evolution.</span></span><span class="sig-name descname"><span class="pre">WilsonCoef_DVMP_LO</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">j</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">complex</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nf</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">meson</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">complex</span></span></span><a class="reference internal" href="_modules/Evolution.html#WilsonCoef_DVMP_LO"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#Evolution.WilsonCoef_DVMP_LO" title="Link to this definition"></a></dt>
 <dd><p>LO Wilson coefficient of DVMP in the evolution basis (qVal, q_du_plus, q_du_minus, qSigma, g)</p>
-<dl class="simple">
-<dt>Args:</dt><dd><p>j (complex array): shape(N,) conformal spin j
-nf (int): number of effective fermions
-meson (int): 1 for rho, 2 for phi, and 3 for Jpsi</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>j</strong> (<em>complex array</em>) – shape(N,) conformal spin j</p></li>
+<li><p><strong>nf</strong> (<em>int</em>) – number of effective fermions</p></li>
+<li><p><strong>meson</strong> (<em>int</em>) – 1 for rho, 2 for phi, and 3 for Jpsi</p></li>
+</ul>
 </dd>
-<dt>Returns:</dt><dd><p>Wilson coefficient of shape (N,5) in the evolution basis (qVal, q_du_plus, q_du_minus, qSigma, g)</p>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Wilson coefficient of shape (N,5) in the evolution basis (qVal, q_du_plus, q_du_minus, qSigma, g)</p>
 </dd>
 </dl>
 <p>Charge factor are calculated such that the sum in the evolution basis are identical to the sum in the flavor basis
@@ -467,18 +506,24 @@ The meson decay constant, CF/NC, and eq are included in the prefactor of Wilson 
 <dl class="py function">
 <dt class="sig sig-object py" id="Evolution.WilsonCoef_DVMP_NLO">
 <span class="sig-prename descclassname"><span class="pre">Evolution.</span></span><span class="sig-name descname"><span class="pre">WilsonCoef_DVMP_NLO</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">j</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">complex</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">k</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">complex</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nf</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Q</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">muf</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">meson</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/Evolution.html#WilsonCoef_DVMP_NLO"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#Evolution.WilsonCoef_DVMP_NLO" title="Link to this definition"></a></dt>
-<dd><p>NLO Wilson coefficient of DVMP in the evolution basis (qVal, q_du_plus, q_du_minus, qSigma, g)
-currently setting factorization scale and renormalization scale to the same as muf
-Only singlet at this point.</p>
-<dl class="simple">
-<dt>Args:</dt><dd><p>j (complex array): shape(N,) conformal spin j of the GPD moment
-k (complex array): shape(N,) conformal spin k of the meson DA
-nf (int): number of effective fermions
-Q (float): the photon virtuality 
-mufact (float): the factorization scale mu_fact
-meson (int): 1 for rho, 2 for phi, and 3 for Jpsi</p>
+<dd><p>NLO Wilson coefficient of DVMP in the evolution basis (qVal, q_du_plus, q_du_minus, qSigma, g)</p>
+<div class="line-block">
+<div class="line">currently setting factorization scale and renormalization scale to the same as muf</div>
+<div class="line">Only singlet at this point.</div>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>j</strong> (<em>complex array</em>) – shape(N,) conformal spin j of the GPD moment</p></li>
+<li><p><strong>k</strong> (<em>complex array</em>) – shape(N,) conformal spin k of the meson DA</p></li>
+<li><p><strong>nf</strong> (<em>int</em>) – number of effective fermions</p></li>
+<li><p><strong>Q</strong> (<em>float</em>) – the photon virtuality</p></li>
+<li><p><strong>mufact</strong> (<em>float</em>) – the factorization scale mu_fact</p></li>
+<li><p><strong>meson</strong> (<em>int</em>) – 1 for rho, 2 for phi, and 3 for Jpsi</p></li>
+</ul>
 </dd>
-<dt>Returns:</dt><dd><p>Wilson coefficient of shape (N,5) in the evolution basis (qVal, q_du_plus, q_du_minus, qSigma, g)</p>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Wilson coefficient of shape (N,5) in the evolution basis (qVal, q_du_plus, q_du_minus, qSigma, g)</p>
 </dd>
 </dl>
 <p>Charge factor are calculated such that the sum in the evolution basis are identical to the sum in the flavor basis
@@ -489,16 +534,22 @@ The meson decay constant, CF/NC, and eq are included in the prefactor of Wilson 
 <dl class="py function">
 <dt class="sig sig-object py" id="Evolution.amuindep">
 <span class="sig-prename descclassname"><span class="pre">Evolution.</span></span><span class="sig-name descname"><span class="pre">amuindep</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">j</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">complex</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nf</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prty</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/Evolution.html#amuindep"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#Evolution.amuindep" title="Link to this definition"></a></dt>
-<dd><p>Result the P [gamma] P part of the diagonal evolution operator A.
-Ref to eq. (124) in hep-ph/0703179 (the A operator are the same in both CSbar and MSbar scheme)
-Here the expression is exactly the same as the ref, UNLIKE the Gepard with has an extra 1/beta_0 to be canceled with rmudep</p>
-<dl class="simple">
-<dt>Args:</dt><dd><p>j (complex): _description_
-nf (int): _description_
-p (int): _description_
-prty (int, optional): _description_. Defaults to 1.</p>
+<dd><p>Result the P [gamma] P part of the diagonal evolution operator A.</p>
+<div class="line-block">
+<div class="line">Ref to eq. (124) in hep-ph/0703179 (the A operator are the same in both CSbar and MSbar scheme)</div>
+<div class="line">Here the expression is exactly the same as the ref, UNLIKE the Gepard with has an extra 1/beta_0 to be canceled with rmudep</div>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>j</strong> (<em>complex</em>) – _description_</p></li>
+<li><p><strong>nf</strong> (<em>int</em>) – _description_</p></li>
+<li><p><strong>p</strong> (<em>int</em>) – _description_</p></li>
+<li><p><strong>prty</strong> (<em>int</em><em>, </em><em>optional</em>) – _description_. Defaults to 1.</p></li>
+</ul>
 </dd>
-<dt>Returns:</dt><dd><p>the P [gamma] P part of the diagonal evolution operator A.</p>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>the P [gamma] P part of the diagonal evolution operator A.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -518,18 +569,22 @@ prty (int, optional): _description_. Defaults to 1.</p>
 <dl class="py function">
 <dt class="sig sig-object py" id="Evolution.bmudep">
 <span class="sig-prename descclassname"><span class="pre">Evolution.</span></span><span class="sig-name descname"><span class="pre">bmudep</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mu</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">zn</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">zk</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nf</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">NS</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prty</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/Evolution.html#bmudep"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#Evolution.bmudep" title="Link to this definition"></a></dt>
-<dd><p>Return the off-diagonal part of the evolution operator B^{jk} combined with (alpha(Q)/alpha(mu_0)) ^ (-b/beta0)
-Check eq. (140) in hep-ph/0703179 for the expression of B^{jk}, and eq. (137) for the following factor</p>
-<dl class="simple">
-<dt>Args:</dt><dd><p>mu (float): scale evolved to from the initial scale Init_Scale_Q
-zn (np.array): shape (N,) moment j
-zk (np.array): shape (N,) moment k that differs from j for off-diagonal term
-nf (int): number of effective fermions
-p (int): parity of the GPDs 
-NS (bool, optional): True for non-singlet. NOT used here so set to default False.
-prty (int, optional): The party of the parton distributions +1 for S/G. Not used for NS so set to default 1.</p>
+<dd><p>Return the off-diagonal part of the evolution operator B^{jk} combined with (alpha(Q)/alpha(mu_0)) ^ (-b/beta0)</p>
+<p>Check eq. (140) in hep-ph/0703179 for the expression of B^{jk}, and eq. (137) for the following factor</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>mu</strong> (<em>float</em>) – scale evolved to from the initial scale Init_Scale_Q</p></li>
+<li><p><strong>zn</strong> (<em>np.array</em>) – shape (N,) moment j</p></li>
+<li><p><strong>zk</strong> (<em>np.array</em>) – shape (N,) moment k that differs from j for off-diagonal term</p></li>
+<li><p><strong>nf</strong> (<em>int</em>) – number of effective fermions</p></li>
+<li><p><strong>p</strong> (<em>int</em>) – parity of the GPDs</p></li>
+<li><p><strong>NS</strong> (<em>bool</em><em>, </em><em>optional</em>) – True for non-singlet. NOT used here so set to default False.</p></li>
+<li><p><strong>prty</strong> (<em>int</em><em>, </em><em>optional</em>) – The party of the parton distributions +1 for S/G. Not used for NS so set to default 1.</p></li>
+</ul>
 </dd>
-<dt>Returns:</dt><dd><p>B^{jk}</p>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>B^{jk}</p>
 </dd>
 </dl>
 </dd></dl>
@@ -538,10 +593,12 @@ prty (int, optional): The party of the parton distributions +1 for S/G. Not used
 <dt class="sig sig-object py" id="Evolution.delS2">
 <span class="sig-prename descclassname"><span class="pre">Evolution.</span></span><span class="sig-name descname"><span class="pre">delS2</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">z</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">complex</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">ndarray</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">complex</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">ndarray</span></span></span><a class="reference internal" href="_modules/Evolution.html#delS2"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#Evolution.delS2" title="Link to this definition"></a></dt>
 <dd><p>Return Harmonic sum S_2 difference.</p>
-<dl class="simple">
-<dt>Args:</dt><dd><p>z: complex argument</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>z</strong> – complex argument</p>
 </dd>
-<dt>Returns:</dt><dd><p>delS2((z+1)/2) From Eq. (4.13) of 1310.5394.
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>delS2((z+1)/2) From Eq. (4.13) of 1310.5394.
 Note halving of the argument.</p>
 </dd>
 </dl>
@@ -551,11 +608,15 @@ Note halving of the argument.</p>
 <dt class="sig sig-object py" id="Evolution.deldelS2">
 <span class="sig-prename descclassname"><span class="pre">Evolution.</span></span><span class="sig-name descname"><span class="pre">deldelS2</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">j</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">complex</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">k</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">complex</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">ndarray</span></span></span><a class="reference internal" href="_modules/Evolution.html#deldelS2"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#Evolution.deldelS2" title="Link to this definition"></a></dt>
 <dd><p>Return diference of harmonic sum S_2 differences.</p>
-<dl class="simple">
-<dt>Args:</dt><dd><p>j: complex argument
-k: integer index</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>j</strong> – complex argument</p></li>
+<li><p><strong>k</strong> – integer index</p></li>
+</ul>
 </dd>
-<dt>Returns:</dt><dd><p>Equal to delS2((j+1)/2, (k+1)/2) From Eq. (4.38) of 1310.5394.
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Equal to delS2((j+1)/2, (k+1)/2) From Eq. (4.38) of 1310.5394.
 Note halving of the argument.</p>
 </dd>
 </dl>
@@ -571,13 +632,17 @@ Note halving of the argument.</p>
 <dt class="sig sig-object py" id="Evolution.evolop">
 <span class="sig-prename descclassname"><span class="pre">Evolution.</span></span><span class="sig-name descname"><span class="pre">evolop</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">j</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">complex</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nf</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mu</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/Evolution.html#evolop"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#Evolution.evolop" title="Link to this definition"></a></dt>
 <dd><p>Leading order GPD evolution operator E(j, nf, mu)[a,b].</p>
-<dl class="simple">
-<dt>Args:</dt><dd><p>j: MB contour points (Note: n = j + 1 !!)
-nf: number of effective fermion
-p (int): 1 for vector-like GPD (Ht, Et), -1 for axial-vector-like GPDs (Ht, Et)
-mu: final scale of evolution</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>j</strong> – MB contour points (Note: n = j + 1 !!)</p></li>
+<li><p><strong>nf</strong> – number of effective fermion</p></li>
+<li><p><strong>p</strong> (<em>int</em>) – 1 for vector-like GPD (Ht, Et), -1 for axial-vector-like GPDs (Ht, Et)</p></li>
+<li><p><strong>mu</strong> – final scale of evolution</p></li>
+</ul>
 </dd>
-<dt>Returns:</dt><dd><p>Evolution operator E(j, nf, mu)[a,b] at given j nf and mu as 3-by-3 matrix
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Evolution operator E(j, nf, mu)[a,b] at given j nf and mu as 3-by-3 matrix
 - a and b are in the flavor space (non-singlet, singlet, gluon)</p>
 </dd>
 </dl>
@@ -603,13 +668,17 @@ TFF_jpsi_trans = np.array([0, 0, 0, 0, 2/3])</p>
 <dt class="sig sig-object py" id="Evolution.lambdaf">
 <span class="sig-prename descclassname"><span class="pre">Evolution.</span></span><span class="sig-name descname"><span class="pre">lambdaf</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">n</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">complex</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nf</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prty</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">ndarray</span></span></span><a class="reference internal" href="_modules/Evolution.html#lambdaf"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#Evolution.lambdaf" title="Link to this definition"></a></dt>
 <dd><p>Eigenvalues of the LO singlet anomalous dimensions matrix.</p>
-<dl class="simple">
-<dt>Args:</dt><dd><p>n (complex): which moment (= Mellin moment for integer n)
-nf (int): number of active quark flavors
-p (int): 1 for vector-like GPD (Ht, Et), -1 for axial-vector-like GPDs (Ht, Et)
-prty (int): 1 for NS^{+}, -1 for NS^{-}, irrelevant at LO</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>n</strong> (<em>complex</em>) – which moment (= Mellin moment for integer n)</p></li>
+<li><p><strong>nf</strong> (<em>int</em>) – number of active quark flavors</p></li>
+<li><p><strong>p</strong> (<em>int</em>) – 1 for vector-like GPD (Ht, Et), -1 for axial-vector-like GPDs (Ht, Et)</p></li>
+<li><p><strong>prty</strong> (<em>int</em>) – 1 for NS^{+}, -1 for NS^{-}, irrelevant at LO</p></li>
+</ul>
 </dd>
-<dt>Returns:</dt><dd><p>lam[a, k]
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>lam[a, k]
 a in [+, -] and k is MB contour point index</p>
 </dd>
 </dl>
@@ -631,13 +700,17 @@ More generally, as long as they can be broadcasted, any shape is OK.</p>
 <dt class="sig sig-object py" id="Evolution.non_singlet_LO">
 <span class="sig-prename descclassname"><span class="pre">Evolution.</span></span><span class="sig-name descname"><span class="pre">non_singlet_LO</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">n</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">complex</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nf</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prty</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">complex</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">ndarray</span></span></span><a class="reference internal" href="_modules/Evolution.html#non_singlet_LO"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#Evolution.non_singlet_LO" title="Link to this definition"></a></dt>
 <dd><p>Non-singlet LO anomalous dimension.</p>
-<dl class="simple">
-<dt>Args:</dt><dd><p>n (complex): which moment (= Mellin moment for integer n)
-nf (int): number of active quark flavors
-p (int): 1 for vector-like GPD (Ht, Et), -1 for axial-vector-like GPDs (Ht, Et)
-prty (int): 1 for NS^{+}, -1 for NS^{-}, irrelevant at LO</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>n</strong> (<em>complex</em>) – which moment (= Mellin moment for integer n)</p></li>
+<li><p><strong>nf</strong> (<em>int</em>) – number of active quark flavors</p></li>
+<li><p><strong>p</strong> (<em>int</em>) – 1 for vector-like GPD (Ht, Et), -1 for axial-vector-like GPDs (Ht, Et)</p></li>
+<li><p><strong>prty</strong> (<em>int</em>) – 1 for NS^{+}, -1 for NS^{-}, irrelevant at LO</p></li>
+</ul>
 </dd>
-<dt>Returns:</dt><dd><p>Non-singlet LO anomalous dimension.</p>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Non-singlet LO anomalous dimension.</p>
 </dd>
 </dl>
 <p>It’s an algebric equation, any shape of n should be fine.</p>
@@ -647,12 +720,16 @@ prty (int): 1 for NS^{+}, -1 for NS^{-}, irrelevant at LO</p>
 <dt class="sig sig-object py" id="Evolution.non_singlet_NLO">
 <span class="sig-prename descclassname"><span class="pre">Evolution.</span></span><span class="sig-name descname"><span class="pre">non_singlet_NLO</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">n</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">complex</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nf</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prty</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">complex</span></span></span><a class="reference internal" href="_modules/Evolution.html#non_singlet_NLO"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#Evolution.non_singlet_NLO" title="Link to this definition"></a></dt>
 <dd><p>Non-singlet anomalous dimension.</p>
-<dl class="simple">
-<dt>Args:</dt><dd><p>n (complex): which moment (= Mellin moment for integer n)
-nf (int): number of active quark flavors
-prty (int): 1 for NS^{+}, -1 for NS^{-}</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>n</strong> (<em>complex</em>) – which moment (= Mellin moment for integer n)</p></li>
+<li><p><strong>nf</strong> (<em>int</em>) – number of active quark flavors</p></li>
+<li><p><strong>prty</strong> (<em>int</em>) – 1 for NS^{+}, -1 for NS^{-}</p></li>
+</ul>
 </dd>
-<dt>Returns:</dt><dd><p>Non-singlet NLO anomalous dimension.</p>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Non-singlet NLO anomalous dimension.</p>
 </dd>
 </dl>
 <p>This will work as long as n, nf, and prty can be broadcasted together.</p>
@@ -671,14 +748,23 @@ prty (int): 1 for NS^{+}, -1 for NS^{-}</p>
 <dl class="py function">
 <dt class="sig sig-object py" id="Evolution.outer_subtract">
 <span class="sig-prename descclassname"><span class="pre">Evolution.</span></span><span class="sig-name descname"><span class="pre">outer_subtract</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">arr1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">arr2</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/Evolution.html#outer_subtract"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#Evolution.outer_subtract" title="Link to this definition"></a></dt>
-<dd><p>Perform the outer product of two array at the last dimension, each has shape (N,…, m), here m = 2 for S/G
-Generate shape (N,m,m)</p>
-<p>result(i,j)=arr1(i)-arr2(j)</p>
-<dl class="simple">
-<dt>Args:</dt><dd><p>arr1 (np.array): 1st array in the outer subtract has shape (N,m)
-arr2 (np.array): 2nd array in the outer subtract has shape (N,m)</p>
+<dd><p>Perform the outer product of two array at the last dimension, each has shape (N,…, m)</p>
+<div class="line-block">
+<div class="line">Generate shape (N,m,m), Here m = 2 for S/G</div>
+<div class="line">result(i,j)=arr1(i)-arr2(j)</div>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>arr1</strong> (<em>np.array</em>) – 1st array in the outer subtract has shape (N,m)</p></li>
+<li><p><strong>arr2</strong> (<em>np.array</em>) – 2nd array in the outer subtract has shape (N,m)</p></li>
+</ul>
 </dd>
-<dt>Returns:</dt><dd><p>result (np.ndarray): shape(N,m,m) given by result(i,j)=arr1(i)-arr2(j)</p>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>shape(N,m,m) given by result(i,j)=arr1(i)-arr2(j)</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>result (np.ndarray)</p>
 </dd>
 </dl>
 </dd></dl>
@@ -687,11 +773,18 @@ arr2 (np.array): 2nd array in the outer subtract has shape (N,m)</p>
 <dt class="sig sig-object py" id="Evolution.poch">
 <span class="sig-prename descclassname"><span class="pre">Evolution.</span></span><span class="sig-name descname"><span class="pre">poch</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">z</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">complex</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">m</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">complex</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">ndarray</span></span></span><a class="headerlink" href="#Evolution.poch" title="Link to this definition"></a></dt>
 <dd><p>Pochhammer symbol.</p>
-<dl class="simple">
-<dt>Args:</dt><dd><p>z: complex argument
-m: integer index</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>z</strong> – complex argument</p></li>
+<li><p><strong>m</strong> – integer index</p></li>
+</ul>
 </dd>
-<dt>Returns:</dt><dd><p>complex: pochhammer(z,m)</p>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>pochhammer(z,m)</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>complex</p>
 </dd>
 </dl>
 </dd></dl>
@@ -700,11 +793,18 @@ m: integer index</p>
 <dt class="sig sig-object py" id="Evolution.pochhammer">
 <span class="sig-prename descclassname"><span class="pre">Evolution.</span></span><span class="sig-name descname"><span class="pre">pochhammer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">z</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">complex</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">m</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">complex</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">ndarray</span></span></span><a class="reference internal" href="_modules/Evolution.html#pochhammer"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#Evolution.pochhammer" title="Link to this definition"></a></dt>
 <dd><p>Pochhammer symbol.</p>
-<dl class="simple">
-<dt>Args:</dt><dd><p>z: complex argument
-m: integer index</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>z</strong> – complex argument</p></li>
+<li><p><strong>m</strong> – integer index</p></li>
+</ul>
 </dd>
-<dt>Returns:</dt><dd><p>complex: pochhammer(z,m)</p>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>pochhammer(z,m)</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>complex</p>
 </dd>
 </dl>
 </dd></dl>
@@ -713,14 +813,18 @@ m: integer index</p>
 <dt class="sig sig-object py" id="Evolution.projectors">
 <span class="sig-prename descclassname"><span class="pre">Evolution.</span></span><span class="sig-name descname"><span class="pre">projectors</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">n</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">complex</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nf</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prty</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">ndarray</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">ndarray</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="_modules/Evolution.html#projectors"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#Evolution.projectors" title="Link to this definition"></a></dt>
 <dd><p>Projectors on evolution quark-gluon singlet eigenaxes.</p>
-<dl class="simple">
-<dt>Args:</dt><dd><p>n (complex): which moment (= Mellin moment for integer n)
-nf (int): number of active quark flavors
-p (int): 1 for vector-like GPD (Ht, Et), -1 for axial-vector-like GPDs (Ht, Et)
-prty (int): 1 for NS^{+}, -1 for NS^{-}, irrelevant at LO</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>n</strong> (<em>complex</em>) – which moment (= Mellin moment for integer n)</p></li>
+<li><p><strong>nf</strong> (<em>int</em>) – number of active quark flavors</p></li>
+<li><p><strong>p</strong> (<em>int</em>) – 1 for vector-like GPD (Ht, Et), -1 for axial-vector-like GPDs (Ht, Et)</p></li>
+<li><p><strong>prty</strong> (<em>int</em>) – 1 for NS^{+}, -1 for NS^{-}, irrelevant at LO</p></li>
+</ul>
 </dd>
-<dt>Returns:</dt><dd><dl class="simple">
-<dt>lam: eigenvalues of LO an. dimm matrix lam[a, k]  # Eq. (123)</dt><dd><dl class="simple">
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><dl class="simple">
+<dt>eigenvalues of LO an. dimm matrix lam[a, k]  # Eq. (123)</dt><dd><dl class="simple">
 <dt>pr: Projector pr[k, a, i, j]  # Eq. (122)</dt><dd><p>k is MB contour point index
 a in [+, -]
 i,j in {Q, G}</p>
@@ -728,6 +832,10 @@ i,j in {Q, G}</p>
 </dl>
 </dd>
 </dl>
+</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>lam</p>
 </dd>
 </dl>
 <p>n and nf will be scalars
@@ -738,16 +846,22 @@ prty should be scalar (but maybe I can make it work with shape N)</p>
 <dl class="py function">
 <dt class="sig sig-object py" id="Evolution.rmudep">
 <span class="sig-prename descclassname"><span class="pre">Evolution.</span></span><span class="sig-name descname"><span class="pre">rmudep</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">nf</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lamj</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lamk</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mu</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/Evolution.html#rmudep"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#Evolution.rmudep" title="Link to this definition"></a></dt>
-<dd><p>Scale dependent part of NLO evolution matrix 
-Ref to the eq. (126) in hep-ph/0703179 
-Here the expression is exactly the same as the ref, UNLIKE the Gepard with has an extra beta_0 to be canceled with amuindep</p>
-<dl class="simple">
-<dt>Args:</dt><dd><p>nf (int): number of effective fermions
-lamj (np.array): shape (N,2,2), each row is 2-by-2 matrix of anomalous dimension in the (S, G) basis
-lamk (np.array): shape (N,2,2), second row anomalous dimension for k
-mu (float): final scale to be evolved from inital scale Init_Scale_Q</p>
+<dd><p>Scale dependent part of NLO evolution matrix</p>
+<div class="line-block">
+<div class="line">Ref to the eq. (126) in hep-ph/0703179</div>
+<div class="line">Here the expression is exactly the same as the ref, UNLIKE the Gepard with has an extra beta_0 to be canceled with amuindep</div>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>nf</strong> (<em>int</em>) – number of effective fermions</p></li>
+<li><p><strong>lamj</strong> (<em>np.array</em>) – shape (N,2,2), each row is 2-by-2 matrix of anomalous dimension in the (S, G) basis</p></li>
+<li><p><strong>lamk</strong> (<em>np.array</em>) – shape (N,2,2), second row anomalous dimension for k</p></li>
+<li><p><strong>mu</strong> (<em>float</em>) – final scale to be evolved from inital scale Init_Scale_Q</p></li>
+</ul>
 </dd>
-<dt>Returns:</dt><dd><p>R_ij^ab(Q}|n=1) according to eq. (126) in hep-ph/0703179</p>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>R_ij^ab(Q}|n=1) according to eq. (126) in hep-ph/0703179</p>
 </dd>
 </dl>
 </dd></dl>
@@ -756,16 +870,21 @@ mu (float): final scale to be evolved from inital scale Init_Scale_Q</p>
 <dt class="sig sig-object py" id="Evolution.singlet_LO">
 <span class="sig-prename descclassname"><span class="pre">Evolution.</span></span><span class="sig-name descname"><span class="pre">singlet_LO</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">n</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">complex</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nf</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prty</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">ndarray</span></span></span><a class="reference internal" href="_modules/Evolution.html#singlet_LO"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#Evolution.singlet_LO" title="Link to this definition"></a></dt>
 <dd><p>Singlet LO anomalous dimensions.</p>
-<dl class="simple">
-<dt>Args:</dt><dd><p>n (complex): which moment (= Mellin moment for integer n)
-nf (int): number of active quark flavors
-p (int): 1 for vector-like GPD (Ht, Et), -1 for axial-vector-like GPDs (Ht, Et)
-prty (int): C parity, irrelevant at LO</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>n</strong> (<em>complex</em>) – which moment (= Mellin moment for integer n)</p></li>
+<li><p><strong>nf</strong> (<em>int</em>) – number of active quark flavors</p></li>
+<li><p><strong>p</strong> (<em>int</em>) – 1 for vector-like GPD (Ht, Et), -1 for axial-vector-like GPDs (Ht, Et)</p></li>
+<li><p><strong>prty</strong> (<em>int</em>) – C parity, irrelevant at LO</p></li>
+</ul>
 </dd>
-<dt>Returns:</dt><dd><dl class="simple">
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><dl class="simple">
 <dt>2x2 complex matrix ((QQ, QG),</dt><dd><p>(GQ, GG))</p>
 </dd>
 </dl>
+</p>
 </dd>
 </dl>
 <p>This will work as long as n, nf, and p can be broadcasted together.</p>
@@ -775,13 +894,17 @@ prty (int): C parity, irrelevant at LO</p>
 <dt class="sig sig-object py" id="Evolution.singlet_NLO">
 <span class="sig-prename descclassname"><span class="pre">Evolution.</span></span><span class="sig-name descname"><span class="pre">singlet_NLO</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">n</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">complex</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nf</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prty</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">ndarray</span></span></span><a class="reference internal" href="_modules/Evolution.html#singlet_NLO"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#Evolution.singlet_NLO" title="Link to this definition"></a></dt>
 <dd><p>Singlet NLO anomalous dimensions matrix.</p>
-<dl class="simple">
-<dt>Args:</dt><dd><p>n (complex): which moment (= Mellin moment for integer n)
-nf (int): number of active quark flavors
-p (int): 1 for vector-like GPD (Ht, Et), -1 for axial-vector-like GPDs (Ht, Et)
-prty (int): C parity</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>n</strong> (<em>complex</em>) – which moment (= Mellin moment for integer n)</p></li>
+<li><p><strong>nf</strong> (<em>int</em>) – number of active quark flavors</p></li>
+<li><p><strong>p</strong> (<em>int</em>) – 1 for vector-like GPD (Ht, Et), -1 for axial-vector-like GPDs (Ht, Et)</p></li>
+<li><p><strong>prty</strong> (<em>int</em>) – C parity</p></li>
+</ul>
 </dd>
-<dt>Returns:</dt><dd><p>Matrix (LO, NLO) where each is in turn
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Matrix (LO, NLO) where each is in turn
 2x2 complex matrix
 ((QQ, QG),
 (GQ, GG))</p>
@@ -792,20 +915,24 @@ prty (int): C parity</p>
 <dl class="py function">
 <dt class="sig sig-object py" id="Evolution.tPDF_Moment_Evo_NLO">
 <span class="sig-prename descclassname"><span class="pre">Evolution.</span></span><span class="sig-name descname"><span class="pre">tPDF_Moment_Evo_NLO</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">j</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">array</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nf</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mu</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ConfFlav</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">array</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">array</span></span></span><a class="reference internal" href="_modules/Evolution.html#tPDF_Moment_Evo_NLO"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#Evolution.tPDF_Moment_Evo_NLO" title="Link to this definition"></a></dt>
-<dd><p>FORWARD Next-to-leading order evolved conformal moments in the evolution basis (Evolved moment method)    
+<dd><p>FORWARD Next-to-leading order evolved conformal moments in the evolution basis (Evolved moment method)
 This function removes the off-diagonal pieces in Moment_Evo_NLO()</p>
-<dl class="simple">
-<dt>Args:</dt><dd><p>j: conformal spin j (conformal spin is actually j+2 but anyway): array (N,)
-nf: number of effective fermions; 
-p (int): 1 for vector-like GPD (Ht, Et), -1 for axial-vector-like GPDs (Ht, Et): scalar
-mu: final evolution scale: scalar
-ConfFlav: unevolved conformal moments</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>j</strong> – conformal spin j (conformal spin is actually j+2 but anyway): array (N,)</p></li>
+<li><p><strong>nf</strong> – number of effective fermions;</p></li>
+<li><p><strong>p</strong> (<em>int</em>) – 1 for vector-like GPD (Ht, Et), -1 for axial-vector-like GPDs (Ht, Et): scalar</p></li>
+<li><p><strong>mu</strong> – final evolution scale: scalar</p></li>
+<li><p><strong>ConfFlav</strong> – unevolved conformal moments</p></li>
+</ul>
 </dd>
-<dt>Returns:</dt><dd><p>Next-to-leading order evolved conformal moments in the evolution basis in the forward limit (to be combined with inverse Mellin transform wave function)
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Next-to-leading order evolved conformal moments in the evolution basis in the forward limit (to be combined with inverse Mellin transform wave function)
 return shape (N, 5)</p>
 </dd>
 </dl>
-<p>The j here accept array input and preferrably just 1D for the contour integral in j. 
+<p>The j here accept array input and preferrably just 1D for the contour integral in j.
 Therefore, j has shape (N,) where N is the interpolating order of the fixed quad.
 Other quantities must be broadcastable with j and thus they should be preferrably scalar</p>
 </dd></dl>

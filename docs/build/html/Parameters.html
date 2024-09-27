@@ -101,15 +101,18 @@ Extra efforts needed to convert the form of the parameters.</p>
 <dt class="sig sig-object py" id="Parameters.ConfMoment">
 <span class="sig-prename descclassname"><span class="pre">Parameters.</span></span><span class="sig-name descname"><span class="pre">ConfMoment</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">j</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">complex</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">t</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ParaSets</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/Parameters.html#ConfMoment"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#Parameters.ConfMoment" title="Link to this definition"></a></dt>
 <dd><p>Conformal moment in j space F(j)</p>
-<dl>
-<dt>Args:</dt><dd><dl class="simple">
-<dt>ParaSet is the array of parameters in the form of (norm, alpha, beta, alphap)</dt><dd><p>norm = ParaSet[0]: overall normalization constant
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>of</strong> (<em>ParaSet is the array</em><em> of </em><em>parameters in the form</em>) – norm = ParaSet[0]: overall normalization constant
 alpha = ParaSet[1], beta = ParaSet[2]: the two parameters corresponding to x ^ (-alpha) * (1 - x) ^ beta
-alphap = ParaSet[3]: regge trajectory alpha(t) = alpha + alphap * t</p>
+alphap = ParaSet[3]: regge trajectory alpha(t) = alpha + alphap * t</p></li>
+<li><p><strong>j</strong> – conformal spin j (conformal spin is actually j+2 but anyway)</p></li>
+<li><p><strong>t</strong> – momentum transfer squared t</p></li>
+</ul>
 </dd>
-</dl>
-<p>j: conformal spin j (conformal spin is actually j+2 but anyway)
-t: momentum transfer squared t</p>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Conformal moment in j space F(j,t)</p>
 </dd>
 </dl>
 <p>Originally, ParaSet have shape (5).
@@ -128,34 +131,50 @@ output will be (N, 5, init_NumofAnsatz)</p>
 </dl>
 <p>j should only be a scalar. It cannot be an ndarray before I make more changes
 Right now, j can be a vector, but if you want to do integration, then better pass j as scalar.</p>
-<dl class="simple">
-<dt>Returns:</dt><dd><p>Conformal moment in j space F(j,t)</p>
-</dd>
-</dl>
 </dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="Parameters.Moment_Sum">
 <span class="sig-prename descclassname"><span class="pre">Parameters.</span></span><span class="sig-name descname"><span class="pre">Moment_Sum</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">j</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">complex</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">t</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ParaSets</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">complex</span></span></span><a class="reference internal" href="_modules/Parameters.html#Moment_Sum"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#Parameters.Moment_Sum" title="Link to this definition"></a></dt>
 <dd><p>Sum of the conformal moments when the ParaSets contain more than just one set of parameters</p>
-<dl>
-<dt>Args:</dt><dd><p>ParaSets : contains [ParaSet1, ParaSet0, ParaSet2,…] with each ParaSet = [norm, alpha, beta ,alphap] for valence and sea distributions repsectively.        
-j: conformal spin j (or j+2 but anyway)
-t: momentum transfer squared t</p>
-<p>Originally, ParaSets have shape (init_NumofAnsatz, 4). In practice, it is (1, 4)
-output is a scalar</p>
-<dl class="simple">
-<dt>Here, after vectorization, </dt><dd><p>t has shape (N)
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>ParaSets</strong> – contains [ParaSet1, ParaSet0, ParaSet2,…] with each ParaSet = [norm, alpha, beta ,alphap] for valence and sea distributions repsectively.</p></li>
+<li><p><strong>j</strong> – conformal spin j (or j+2 but anyway)</p></li>
+<li><p><strong>t</strong> – momentum transfer squared t</p></li>
+<li><p><strong>Originally</strong> (<em>init_NumofAnsatz</em><em>, </em><em>4</em><em>)</em><em>. In practice</em><em>, </em><em>it is</em><em> (</em><em>1</em><em>, </em><em>4</em>)</p></li>
+<li><p><strong>shape</strong> (<em>ParaSets have</em>)</p></li>
+<li><p><strong>scalar</strong> (<em>output is a</em>)</p></li>
+<li><p><strong>Here</strong> – t has shape (N)
 ParaSets has (N, 5, init_NumofAnsatz, 5)
+output will have shape (N, 5)  # here, the 5 means 5 different species [u - ubar, ubar, d - dbar, dbar, g]</p></li>
+<li><p><strong>vectorization</strong> (<em>after</em>) – t has shape (N)
+ParaSets has (N, 5, init_NumofAnsatz, 5)
+output will have shape (N, 5)  # here, the 5 means 5 different species [u - ubar, ubar, d - dbar, dbar, g]</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="simple">
+<dt>:param<span class="classifier">t has shape (N)</span></dt><dd><p>ParaSets has (N, 5, init_NumofAnsatz, 5)
 output will have shape (N, 5)  # here, the 5 means 5 different species [u - ubar, ubar, d - dbar, dbar, g]</p>
 </dd>
-<dt>More generally, </dt><dd><p>t have shape (N)
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>generally</strong> (<em>More</em>) – t have shape (N)
 ParaSets has shape (N, i, 5 ) or (N, m1, i, 5) or (N, m1, m2, i, 5) and so on
 output will have shape (N) or (N, m1) or (N, m2)…… etc.</p>
 </dd>
 </dl>
+<dl class="simple">
+<dt>:param<span class="classifier">t have shape (N)</span></dt><dd><p>ParaSets has shape (N, i, 5 ) or (N, m1, i, 5) or (N, m1, m2, i, 5) and so on
+output will have shape (N) or (N, m1) or (N, m2)…… etc.</p>
 </dd>
-<dt>Returns:</dt><dd><p>sum of conformal moments over all the ParaSet</p>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>sum of conformal moments over all the ParaSet</p>
 </dd>
 </dl>
 </dd></dl>

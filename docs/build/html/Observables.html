@@ -112,13 +112,18 @@ With the GPDs ansatz, observables with LO evolution are calculated</p>
 <dl class="py function">
 <dt class="sig sig-object py" id="Observables.ConfWaveFuncG">
 <span class="sig-prename descclassname"><span class="pre">Observables.</span></span><span class="sig-name descname"><span class="pre">ConfWaveFuncG</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">j</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">complex</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xi</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">complex</span></span></span><a class="reference internal" href="_modules/Observables.html#ConfWaveFuncG"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#Observables.ConfWaveFuncG" title="Link to this definition"></a></dt>
-<dd><p>Gluon conformal wave function p_j(x,xi) check e.g. <a class="reference external" href="https://arxiv.org/pdf/hep-ph/0509204.pdf">https://arxiv.org/pdf/hep-ph/0509204.pdf</a></p>
-<dl class="simple">
-<dt>Args:</dt><dd><p>j: conformal spin j (actually conformal spin is j+2 but anyway)
-x: momentum fraction x
-xi: skewness parameter xi</p>
+<dd><p>Gluon conformal wave function p_j(x,xi)</p>
+<p>Check e.g. <a class="reference external" href="https://arxiv.org/pdf/hep-ph/0509204.pdf">https://arxiv.org/pdf/hep-ph/0509204.pdf</a></p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>j</strong> – conformal spin j (actually conformal spin is j+2 but anyway)</p></li>
+<li><p><strong>x</strong> – momentum fraction x</p></li>
+<li><p><strong>xi</strong> – skewness parameter xi</p></li>
+</ul>
 </dd>
-<dt>Returns:</dt><dd><p>gluon conformal wave function p_j(x,xi)</p>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>gluon conformal wave function p_j(x,xi)</p>
 </dd>
 </dl>
 </dd></dl>
@@ -126,13 +131,18 @@ xi: skewness parameter xi</p>
 <dl class="py function">
 <dt class="sig sig-object py" id="Observables.ConfWaveFuncQ">
 <span class="sig-prename descclassname"><span class="pre">Observables.</span></span><span class="sig-name descname"><span class="pre">ConfWaveFuncQ</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">j</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">complex</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xi</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">complex</span></span></span><a class="reference internal" href="_modules/Observables.html#ConfWaveFuncQ"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#Observables.ConfWaveFuncQ" title="Link to this definition"></a></dt>
-<dd><p>Quark conformal wave function p_j(x,xi) check e.g. <a class="reference external" href="https://arxiv.org/pdf/hep-ph/0509204.pdf">https://arxiv.org/pdf/hep-ph/0509204.pdf</a></p>
-<dl class="simple">
-<dt>Args:</dt><dd><p>j: conformal spin j (conformal spin is actually j+2 but anyway)
-x: momentum fraction x
-xi: skewness parameter xi</p>
+<dd><p>Quark conformal wave function p_j(x,xi)</p>
+<p>Check e.g. <a class="reference external" href="https://arxiv.org/pdf/hep-ph/0509204.pdf">https://arxiv.org/pdf/hep-ph/0509204.pdf</a></p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>j</strong> – conformal spin j (conformal spin is actually j+2 but anyway)</p></li>
+<li><p><strong>x</strong> – momentum fraction x</p></li>
+<li><p><strong>xi</strong> – skewness parameter xi</p></li>
+</ul>
 </dd>
-<dt>Returns:</dt><dd><p>quark conformal wave function p_j(x,xi)</p>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>quark conformal wave function p_j(x,xi)</p>
 </dd>
 </dl>
 </dd></dl>
@@ -152,19 +162,35 @@ flv: (N) str</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="Observables.GPDobserv.CFF">
 <span class="sig-name descname"><span class="pre">CFF</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ParaAll</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">muset</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p_order</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">flv</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'All'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/Observables.html#GPDobserv.CFF"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#Observables.GPDobserv.CFF" title="Link to this definition"></a></dt>
-<dd><p>Charge averged CFF mathcal{F}(xi, t) (mathcal{F} = Q_u^2 F_u + Q_d^2 F_d)
-Args:</p>
-<blockquote>
-<div><p>ParaAll = [Para_Forward, Para_xi2, Para_xi4]</p>
-<p>Para_Forward = [Para_Forward_uV, Para_Forward_ubar, Para_Forward_dV, Para_Forward_dbar, Para_Forward_g]
-Para_Forward_i: forward parameter sets for valence u quark (uV), sea u quark (ubar), valence d quark (dV), sea d quark (dbar) and gluon (g)
-Para_xi2 = [Para_xi2_uV, Para_xi2_ubar, Para_xi2_dV, Para_xi2_dbar, Para_xi2_g]
-Para_xi2_i: xi^2 parameter sets for valence u quark (uV), sea u quark (ubar), valence d quark (dV), sea d quark (dbar) and gluon (g)
-Para_xi4 = [Para_xi4_uV, Para_xi4_ubar, Para_xi4_dV, Para_xi4_dbar, Para_xi4_g]
-Para_xi4_i: xi^4 parameter sets for valence u quark (uV), sea u quark (ubar), valence d quark (dV), sea d quark (dbar) and gluon (g)</p>
-</div></blockquote>
-<dl class="simple">
-<dt>Returns:</dt><dd><p>CFF mathcal{F}(xi, t) = Q_u^2 F_u + Q_d^2 F_d</p>
+<dd><p>Charge averged CFF $mathcal{F}(xi, t) (mathcal{F} = Q_u^2 F_u + Q_d^2 F_d)$</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>[</strong><strong>Para_Forward</strong> (<em>ParaAll =</em>)</p></li>
+<li><p><strong>Para_xi2</strong></p></li>
+<li><p><strong>Para_xi4</strong><strong>]</strong></p></li>
+<li><p><strong>[</strong><strong>Para_Forward_uV</strong> (<em>Para_Forward =</em>)</p></li>
+<li><p><strong>Para_Forward_ubar</strong></p></li>
+<li><p><strong>Para_Forward_dV</strong></p></li>
+<li><p><strong>Para_Forward_dbar</strong></p></li>
+<li><p><strong>Para_Forward_g</strong><strong>]</strong></p></li>
+<li><p><strong>Para_Forward_i</strong> – forward parameter sets for valence u quark (uV), sea u quark (ubar), valence d quark (dV), sea d quark (dbar) and gluon (g)</p></li>
+<li><p><strong>[</strong><strong>Para_xi2_uV</strong> (<em>Para_xi2 =</em>)</p></li>
+<li><p><strong>Para_xi2_ubar</strong></p></li>
+<li><p><strong>Para_xi2_dV</strong></p></li>
+<li><p><strong>Para_xi2_dbar</strong></p></li>
+<li><p><strong>Para_xi2_g</strong><strong>]</strong></p></li>
+<li><p><strong>Para_xi2_i</strong> – xi^2 parameter sets for valence u quark (uV), sea u quark (ubar), valence d quark (dV), sea d quark (dbar) and gluon (g)</p></li>
+<li><p><strong>[</strong><strong>Para_xi4_uV</strong> (<em>Para_xi4 =</em>)</p></li>
+<li><p><strong>Para_xi4_ubar</strong></p></li>
+<li><p><strong>Para_xi4_dV</strong></p></li>
+<li><p><strong>Para_xi4_dbar</strong></p></li>
+<li><p><strong>Para_xi4_g</strong><strong>]</strong></p></li>
+<li><p><strong>Para_xi4_i</strong> – xi^4 parameter sets for valence u quark (uV), sea u quark (ubar), valence d quark (dV), sea d quark (dbar) and gluon (g)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>CFF mathcal{F}(xi, t) = Q_u^2 F_u + Q_d^2 F_d</p>
 </dd>
 </dl>
 </dd></dl>
@@ -172,28 +198,44 @@ Para_xi4_i: xi^4 parameter sets for valence u quark (uV), sea u quark (ubar), va
 <dl class="py method">
 <dt class="sig sig-object py" id="Observables.GPDobserv.GFFj0">
 <span class="sig-name descname"><span class="pre">GFFj0</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">j</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">flv</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ParaAll</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p_order</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/Observables.html#GPDobserv.GFFj0"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#Observables.GPDobserv.GFFj0" title="Link to this definition"></a></dt>
-<dd><p>Generalized Form Factors A_{j0}(t) which is the xi^0 term of the nth (n= j+1) Mellin moment of GPD int dx x^j F(x,xi,t) for quark and int dx x^(j-1) F(x,xi,t) for gluon
-Note for gluon, GPD reduce to x*g(x), not g(x) so the Mellin moment will have a mismatch</p>
-<p>Only leading order implemented yet</p>
+<dd><p>Generalized Form Factors A_{j0}(t) which is the xi^0 term of the nth (n= j+1) Mellin moment of GPD int dx x^j F(x,xi,t) for quark and int dx x^(j-1) F(x,xi,t) for gluon</p>
+<p>Note for gluon, GPD reduce to x*g(x), not g(x) so the Mellin moment will have a mismatch</p>
+<p>Only leading order implemented yet NOT well-maintained (TO BE FIXED)</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="Observables.GPDobserv.GPD">
 <span class="sig-name descname"><span class="pre">GPD</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">flv</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ParaAll</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p_order</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/Observables.html#GPDobserv.GPD"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#Observables.GPDobserv.GPD" title="Link to this definition"></a></dt>
-<dd><p>GPD F(x, xi, t) in flavor space (flv = “u”, “d”, “S”, “NS” or “g”)
-Args:</p>
-<blockquote>
-<div><p>ParaAll = [Para_Forward, Para_xi2, Para_xi4]
-Para_Forward = [Para_Forward_uV, Para_Forward_ubar, Para_Forward_dV, Para_Forward_dbar, Para_Forward_g]
-Para_Forward_i: forward parameter sets for valence u quark (uV), sea u quark (ubar), valence d quark (dV), sea d quark (dbar) and gluon (g)
-Para_xi2 = [Para_xi2_uV, Para_xi2_ubar, Para_xi2_dV, Para_xi2_dbar, Para_xi2_g]
-Para_xi2_i: xi^2 parameter sets for valence u quark (uV), sea u quark (ubar), valence d quark (dV), sea d quark (dbar) and gluon (g)
-Para_xi4 = [Para_xi4_uV, Para_xi4_ubar, Para_xi4_dV, Para_xi4_dbar, Para_xi4_g]
-Para_xi4_i: xi^4 parameter sets for valence u quark (uV), sea u quark (ubar), valence d quark (dV), sea d quark (dbar) and gluon (g)</p>
-<p>p_order: 1 for leading-order evolution (default); 2 for next-to-leading-order evolution ; higher order not implemented yet</p>
-</div></blockquote>
-<dl class="simple">
-<dt>Returns:</dt><dd><p>f(x,xi,t) for given flavor flv</p>
+<dd><p>GPD F(x, xi, t) in flavor space (flv = “u”, “d”, “S”, “NS” or “g”)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>[</strong><strong>Para_Forward</strong> (<em>ParaAll =</em>)</p></li>
+<li><p><strong>Para_xi2</strong></p></li>
+<li><p><strong>Para_xi4</strong><strong>]</strong></p></li>
+<li><p><strong>[</strong><strong>Para_Forward_uV</strong> (<em>Para_Forward =</em>)</p></li>
+<li><p><strong>Para_Forward_ubar</strong></p></li>
+<li><p><strong>Para_Forward_dV</strong></p></li>
+<li><p><strong>Para_Forward_dbar</strong></p></li>
+<li><p><strong>Para_Forward_g</strong><strong>]</strong></p></li>
+<li><p><strong>Para_Forward_i</strong> – forward parameter sets for valence u quark (uV), sea u quark (ubar), valence d quark (dV), sea d quark (dbar) and gluon (g)</p></li>
+<li><p><strong>[</strong><strong>Para_xi2_uV</strong> (<em>Para_xi2 =</em>)</p></li>
+<li><p><strong>Para_xi2_ubar</strong></p></li>
+<li><p><strong>Para_xi2_dV</strong></p></li>
+<li><p><strong>Para_xi2_dbar</strong></p></li>
+<li><p><strong>Para_xi2_g</strong><strong>]</strong></p></li>
+<li><p><strong>Para_xi2_i</strong> – xi^2 parameter sets for valence u quark (uV), sea u quark (ubar), valence d quark (dV), sea d quark (dbar) and gluon (g)</p></li>
+<li><p><strong>[</strong><strong>Para_xi4_uV</strong> (<em>Para_xi4 =</em>)</p></li>
+<li><p><strong>Para_xi4_ubar</strong></p></li>
+<li><p><strong>Para_xi4_dV</strong></p></li>
+<li><p><strong>Para_xi4_dbar</strong></p></li>
+<li><p><strong>Para_xi4_g</strong><strong>]</strong></p></li>
+<li><p><strong>Para_xi4_i</strong> – xi^4 parameter sets for valence u quark (uV), sea u quark (ubar), valence d quark (dV), sea d quark (dbar) and gluon (g)</p></li>
+<li><p><strong>p_order</strong> – 1 for leading-order evolution (default); 2 for next-to-leading-order evolution ; higher order not implemented yet</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>f(x,xi,t) for given flavor flv</p>
 </dd>
 </dl>
 </dd></dl>
@@ -201,22 +243,43 @@ Para_xi4_i: xi^4 parameter sets for valence u quark (uV), sea u quark (ubar), va
 <dl class="py method">
 <dt class="sig sig-object py" id="Observables.GPDobserv.TFF">
 <span class="sig-name descname"><span class="pre">TFF</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ParaAll</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">muf</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">meson</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p_order</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">flv</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'All'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/Observables.html#GPDobserv.TFF"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#Observables.GPDobserv.TFF" title="Link to this definition"></a></dt>
-<dd><p>TFF mathcal{F}(xi, t) (mathcal{F} 
-Args:</p>
-<blockquote>
-<div><p>ParaAll = [Para_Forward, Para_xi2, Para_xi4]</p>
-<p>Para_Forward = [Para_Forward_uV, Para_Forward_ubar, Para_Forward_dV, Para_Forward_dbar, Para_Forward_g]
-Para_Forward_i: forward parameter sets for valence u quark (uV), sea u quark (ubar), valence d quark (dV), sea d quark (dbar) and gluon (g)
-Para_xi2 = [Para_xi2_uV, Para_xi2_ubar, Para_xi2_dV, Para_xi2_dbar, Para_xi2_g]
-Para_xi2_i: xi^2 parameter sets for valence u quark (uV), sea u quark (ubar), valence d quark (dV), sea d quark (dbar) and gluon (g)
-Para_xi4 = [Para_xi4_uV, Para_xi4_ubar, Para_xi4_dV, Para_xi4_dbar, Para_xi4_g]
-Para_xi4_i: xi^4 parameter sets for valence u quark (uV), sea u quark (ubar), valence d quark (dV), sea d quark (dbar) and gluon (g)</p>
-<p>meson = [1 for rho, 2 for phi, 3 for jpsi]</p>
-<p>p_order: 1 for leading-order evolution (default); 2 for next-to-leading-order evolution ; higher order not implemented yet</p>
-<p>(flv = “u”, “d”, “g”, “All” or “q”)</p>
-</div></blockquote>
-<dl class="simple">
-<dt>Returns:</dt><dd><p>TFF mathcal{F}(xi, t)</p>
+<dd><p>TFF $mathcal{F}(xi, t) (mathcal{F}$</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>[</strong><strong>Para_Forward</strong> (<em>ParaAll =</em>)</p></li>
+<li><p><strong>Para_xi2</strong></p></li>
+<li><p><strong>Para_xi4</strong><strong>]</strong></p></li>
+<li><p><strong>[</strong><strong>Para_Forward_uV</strong> (<em>Para_Forward =</em>)</p></li>
+<li><p><strong>Para_Forward_ubar</strong></p></li>
+<li><p><strong>Para_Forward_dV</strong></p></li>
+<li><p><strong>Para_Forward_dbar</strong></p></li>
+<li><p><strong>Para_Forward_g</strong><strong>]</strong></p></li>
+<li><p><strong>Para_Forward_i</strong> – forward parameter sets for valence u quark (uV), sea u quark (ubar), valence d quark (dV), sea d quark (dbar) and gluon (g)</p></li>
+<li><p><strong>[</strong><strong>Para_xi2_uV</strong> (<em>Para_xi2 =</em>)</p></li>
+<li><p><strong>Para_xi2_ubar</strong></p></li>
+<li><p><strong>Para_xi2_dV</strong></p></li>
+<li><p><strong>Para_xi2_dbar</strong></p></li>
+<li><p><strong>Para_xi2_g</strong><strong>]</strong></p></li>
+<li><p><strong>Para_xi2_i</strong> – xi^2 parameter sets for valence u quark (uV), sea u quark (ubar), valence d quark (dV), sea d quark (dbar) and gluon (g)</p></li>
+<li><p><strong>[</strong><strong>Para_xi4_uV</strong> (<em>Para_xi4 =</em>)</p></li>
+<li><p><strong>Para_xi4_ubar</strong></p></li>
+<li><p><strong>Para_xi4_dV</strong></p></li>
+<li><p><strong>Para_xi4_dbar</strong></p></li>
+<li><p><strong>Para_xi4_g</strong><strong>]</strong></p></li>
+<li><p><strong>Para_xi4_i</strong> – xi^4 parameter sets for valence u quark (uV), sea u quark (ubar), valence d quark (dV), sea d quark (dbar) and gluon (g)</p></li>
+<li><p><strong>rho</strong> (<em>meson =</em><em> [</em><em>1 for</em>)</p></li>
+<li><p><strong>phi</strong> (<em>2 for</em>)</p></li>
+<li><p><strong>jpsi</strong><strong>]</strong> (<em>3 for</em>)</p></li>
+<li><p><strong>p_order</strong> – 1 for leading-order evolution (default); 2 for next-to-leading-order evolution ; higher order not implemented yet</p></li>
+<li><p><strong>&quot;u&quot;</strong> (<em>(</em><em>flv =</em>)</p></li>
+<li><p><strong>&quot;d&quot;</strong></p></li>
+<li><p><strong>&quot;g&quot;</strong></p></li>
+<li><p><strong>&quot;q&quot;</strong><strong>)</strong> (<em>&quot;All&quot; or</em>)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>TFF mathcal{F}(xi, t)</p>
 </dd>
 </dl>
 </dd></dl>
@@ -224,22 +287,43 @@ Para_xi4_i: xi^4 parameter sets for valence u quark (uV), sea u quark (ubar), va
 <dl class="py method">
 <dt class="sig sig-object py" id="Observables.GPDobserv.TFFNLO">
 <span class="sig-name descname"><span class="pre">TFFNLO</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ParaAll</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">muf</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">meson</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">flv</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'All'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/Observables.html#GPDobserv.TFFNLO"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#Observables.GPDobserv.TFFNLO" title="Link to this definition"></a></dt>
-<dd><p>TFF mathcal{F}(xi, t) (mathcal{F} 
-Args:</p>
-<blockquote>
-<div><p>ParaAll = [Para_Forward, Para_xi2, Para_xi4]</p>
-<p>Para_Forward = [Para_Forward_uV, Para_Forward_ubar, Para_Forward_dV, Para_Forward_dbar, Para_Forward_g]
-Para_Forward_i: forward parameter sets for valence u quark (uV), sea u quark (ubar), valence d quark (dV), sea d quark (dbar) and gluon (g)
-Para_xi2 = [Para_xi2_uV, Para_xi2_ubar, Para_xi2_dV, Para_xi2_dbar, Para_xi2_g]
-Para_xi2_i: xi^2 parameter sets for valence u quark (uV), sea u quark (ubar), valence d quark (dV), sea d quark (dbar) and gluon (g)
-Para_xi4 = [Para_xi4_uV, Para_xi4_ubar, Para_xi4_dV, Para_xi4_dbar, Para_xi4_g]
-Para_xi4_i: xi^4 parameter sets for valence u quark (uV), sea u quark (ubar), valence d quark (dV), sea d quark (dbar) and gluon (g)</p>
-<p>meson = [1 for rho, 2 for phi, 3 for jpsi]</p>
-<p>muset = offset of scale mu to study the scale dependence of the results</p>
-<p>(flv = “u”, “d”, “g”, “All” or “q”)</p>
-</div></blockquote>
-<dl class="simple">
-<dt>Returns:</dt><dd><p>TFF mathcal{F}(xi, t)</p>
+<dd><p>TFF $mathcal{F}(xi, t) (mathcal{F}$</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>[</strong><strong>Para_Forward</strong> (<em>ParaAll =</em>)</p></li>
+<li><p><strong>Para_xi2</strong></p></li>
+<li><p><strong>Para_xi4</strong><strong>]</strong></p></li>
+<li><p><strong>[</strong><strong>Para_Forward_uV</strong> (<em>Para_Forward =</em>)</p></li>
+<li><p><strong>Para_Forward_ubar</strong></p></li>
+<li><p><strong>Para_Forward_dV</strong></p></li>
+<li><p><strong>Para_Forward_dbar</strong></p></li>
+<li><p><strong>Para_Forward_g</strong><strong>]</strong></p></li>
+<li><p><strong>Para_Forward_i</strong> – forward parameter sets for valence u quark (uV), sea u quark (ubar), valence d quark (dV), sea d quark (dbar) and gluon (g)</p></li>
+<li><p><strong>[</strong><strong>Para_xi2_uV</strong> (<em>Para_xi2 =</em>)</p></li>
+<li><p><strong>Para_xi2_ubar</strong></p></li>
+<li><p><strong>Para_xi2_dV</strong></p></li>
+<li><p><strong>Para_xi2_dbar</strong></p></li>
+<li><p><strong>Para_xi2_g</strong><strong>]</strong></p></li>
+<li><p><strong>Para_xi2_i</strong> – xi^2 parameter sets for valence u quark (uV), sea u quark (ubar), valence d quark (dV), sea d quark (dbar) and gluon (g)</p></li>
+<li><p><strong>[</strong><strong>Para_xi4_uV</strong> (<em>Para_xi4 =</em>)</p></li>
+<li><p><strong>Para_xi4_ubar</strong></p></li>
+<li><p><strong>Para_xi4_dV</strong></p></li>
+<li><p><strong>Para_xi4_dbar</strong></p></li>
+<li><p><strong>Para_xi4_g</strong><strong>]</strong></p></li>
+<li><p><strong>Para_xi4_i</strong> – xi^4 parameter sets for valence u quark (uV), sea u quark (ubar), valence d quark (dV), sea d quark (dbar) and gluon (g)</p></li>
+<li><p><strong>rho</strong> (<em>meson =</em><em> [</em><em>1 for</em>)</p></li>
+<li><p><strong>phi</strong> (<em>2 for</em>)</p></li>
+<li><p><strong>jpsi</strong><strong>]</strong> (<em>3 for</em>)</p></li>
+<li><p><strong>results</strong> (<em>muset = offset</em><em> of </em><em>scale mu to study the scale dependence</em><em> of </em><em>the</em>)</p></li>
+<li><p><strong>&quot;u&quot;</strong> (<em>(</em><em>flv =</em>)</p></li>
+<li><p><strong>&quot;d&quot;</strong></p></li>
+<li><p><strong>&quot;g&quot;</strong></p></li>
+<li><p><strong>&quot;q&quot;</strong><strong>)</strong> (<em>&quot;All&quot; or</em>)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>TFF mathcal{F}(xi, t)</p>
 </dd>
 </dl>
 </dd></dl>
@@ -247,22 +331,43 @@ Para_xi4_i: xi^4 parameter sets for valence u quark (uV), sea u quark (ubar), va
 <dl class="py method">
 <dt class="sig sig-object py" id="Observables.GPDobserv.TFFNLO_evMom">
 <span class="sig-name descname"><span class="pre">TFFNLO_evMom</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ParaAll</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">muf</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">meson</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">flv</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'All'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/Observables.html#GPDobserv.TFFNLO_evMom"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#Observables.GPDobserv.TFFNLO_evMom" title="Link to this definition"></a></dt>
-<dd><p>NLOTFF mathcal{F}(xi, t) (mathcal{F} 
-Args:</p>
-<blockquote>
-<div><p>ParaAll = [Para_Forward, Para_xi2, Para_xi4]</p>
-<p>Para_Forward = [Para_Forward_uV, Para_Forward_ubar, Para_Forward_dV, Para_Forward_dbar, Para_Forward_g]
-Para_Forward_i: forward parameter sets for valence u quark (uV), sea u quark (ubar), valence d quark (dV), sea d quark (dbar) and gluon (g)
-Para_xi2 = [Para_xi2_uV, Para_xi2_ubar, Para_xi2_dV, Para_xi2_dbar, Para_xi2_g]
-Para_xi2_i: xi^2 parameter sets for valence u quark (uV), sea u quark (ubar), valence d quark (dV), sea d quark (dbar) and gluon (g)
-Para_xi4 = [Para_xi4_uV, Para_xi4_ubar, Para_xi4_dV, Para_xi4_dbar, Para_xi4_g]
-Para_xi4_i: xi^4 parameter sets for valence u quark (uV), sea u quark (ubar), valence d quark (dV), sea d quark (dbar) and gluon (g)</p>
-<p>meson = [1 for rho, 2 for phi, 3 for jpsi]</p>
-<p>muset = offset of scale mu to study the scale dependence of the results</p>
-<p>(flv = “u”, “d”, “g”, “All” or “q”)</p>
-</div></blockquote>
-<dl class="simple">
-<dt>Returns:</dt><dd><p>TFF mathcal{F}(xi, t)</p>
+<dd><p>NLOTFF $mathcal{F}(xi, t) (mathcal{F}) $</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>[</strong><strong>Para_Forward</strong> (<em>ParaAll =</em>)</p></li>
+<li><p><strong>Para_xi2</strong></p></li>
+<li><p><strong>Para_xi4</strong><strong>]</strong></p></li>
+<li><p><strong>[</strong><strong>Para_Forward_uV</strong> (<em>Para_Forward =</em>)</p></li>
+<li><p><strong>Para_Forward_ubar</strong></p></li>
+<li><p><strong>Para_Forward_dV</strong></p></li>
+<li><p><strong>Para_Forward_dbar</strong></p></li>
+<li><p><strong>Para_Forward_g</strong><strong>]</strong></p></li>
+<li><p><strong>Para_Forward_i</strong> – forward parameter sets for valence u quark (uV), sea u quark (ubar), valence d quark (dV), sea d quark (dbar) and gluon (g)</p></li>
+<li><p><strong>[</strong><strong>Para_xi2_uV</strong> (<em>Para_xi2 =</em>)</p></li>
+<li><p><strong>Para_xi2_ubar</strong></p></li>
+<li><p><strong>Para_xi2_dV</strong></p></li>
+<li><p><strong>Para_xi2_dbar</strong></p></li>
+<li><p><strong>Para_xi2_g</strong><strong>]</strong></p></li>
+<li><p><strong>Para_xi2_i</strong> – xi^2 parameter sets for valence u quark (uV), sea u quark (ubar), valence d quark (dV), sea d quark (dbar) and gluon (g)</p></li>
+<li><p><strong>[</strong><strong>Para_xi4_uV</strong> (<em>Para_xi4 =</em>)</p></li>
+<li><p><strong>Para_xi4_ubar</strong></p></li>
+<li><p><strong>Para_xi4_dV</strong></p></li>
+<li><p><strong>Para_xi4_dbar</strong></p></li>
+<li><p><strong>Para_xi4_g</strong><strong>]</strong></p></li>
+<li><p><strong>Para_xi4_i</strong> – xi^4 parameter sets for valence u quark (uV), sea u quark (ubar), valence d quark (dV), sea d quark (dbar) and gluon (g)</p></li>
+<li><p><strong>rho</strong> (<em>meson =</em><em> [</em><em>1 for</em>)</p></li>
+<li><p><strong>phi</strong> (<em>2 for</em>)</p></li>
+<li><p><strong>jpsi</strong><strong>]</strong> (<em>3 for</em>)</p></li>
+<li><p><strong>results</strong> (<em>muset = offset</em><em> of </em><em>scale mu to study the scale dependence</em><em> of </em><em>the</em>)</p></li>
+<li><p><strong>&quot;u&quot;</strong> (<em>(</em><em>flv =</em>)</p></li>
+<li><p><strong>&quot;d&quot;</strong></p></li>
+<li><p><strong>&quot;g&quot;</strong></p></li>
+<li><p><strong>&quot;q&quot;</strong><strong>)</strong> (<em>&quot;All&quot; or</em>)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>TFF mathcal{F}(xi, t)</p>
 </dd>
 </dl>
 </dd></dl>
@@ -270,17 +375,24 @@ Para_xi4_i: xi^4 parameter sets for valence u quark (uV), sea u quark (ubar), va
 <dl class="py method">
 <dt class="sig sig-object py" id="Observables.GPDobserv.tPDF">
 <span class="sig-name descname"><span class="pre">tPDF</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">flv</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ParaAll</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p_order</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/Observables.html#GPDobserv.tPDF"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#Observables.GPDobserv.tPDF" title="Link to this definition"></a></dt>
-<dd><p>t-denpendent PDF for given flavor (flv = “u”, “d”, “S”, “NS” or “g”)
-Args:</p>
-<blockquote>
-<div><p>ParaAll = [Para_Forward, Para_xi2]
-Para_Forward = [Para_Forward_uV, Para_Forward_ubar, Para_Forward_dV, Para_Forward_dbar, Para_Forward_g]
-Para_Forward_i: parameter sets for valence u quark (uV), sea u quark (ubar), valence d quark (dV), sea d quark (dbar) and gluon (g)
-Para_xi2: only matter for non-zero xi (NOT needed here but the parameters are passed for consistency with GPDs)</p>
-<p>p_order: 1 for leading-order evolution (default); 2 for next-to-leading-order evolution ; higher order not implemented yet</p>
-</div></blockquote>
-<dl class="simple">
-<dt>Returns:</dt><dd><p>f(x,t) in for the given flavor</p>
+<dd><p>t-denpendent PDF for given flavor (flv = “u”, “d”, “S”, “NS” or “g”)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>[</strong><strong>Para_Forward</strong> (<em>ParaAll =</em>)</p></li>
+<li><p><strong>Para_xi2</strong><strong>]</strong></p></li>
+<li><p><strong>[</strong><strong>Para_Forward_uV</strong> (<em>Para_Forward =</em>)</p></li>
+<li><p><strong>Para_Forward_ubar</strong></p></li>
+<li><p><strong>Para_Forward_dV</strong></p></li>
+<li><p><strong>Para_Forward_dbar</strong></p></li>
+<li><p><strong>Para_Forward_g</strong><strong>]</strong></p></li>
+<li><p><strong>Para_Forward_i</strong> – parameter sets for valence u quark (uV), sea u quark (ubar), valence d quark (dV), sea d quark (dbar) and gluon (g)</p></li>
+<li><p><strong>Para_xi2</strong> – only matter for non-zero xi (NOT needed here but the parameters are passed for consistency with GPDs)</p></li>
+<li><p><strong>p_order</strong> – 1 for leading-order evolution (default); 2 for next-to-leading-order evolution ; higher order not implemented yet</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>f(x,t) in for the given flavor</p>
 </dd>
 </dl>
 </dd></dl>
@@ -291,11 +403,18 @@ Para_xi2: only matter for non-zero xi (NOT needed here but the parameters are pa
 <dt class="sig sig-object py" id="Observables.InvMellinWaveFuncG">
 <span class="sig-prename descclassname"><span class="pre">Observables.</span></span><span class="sig-name descname"><span class="pre">InvMellinWaveFuncG</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">s</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">complex</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">complex</span></span></span><a class="reference internal" href="_modules/Observables.html#InvMellinWaveFuncG"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#Observables.InvMellinWaveFuncG" title="Link to this definition"></a></dt>
 <dd><p>Gluon wave function for inverse Mellin transformation: x^(-s+1) for x&gt;0 and 0 for x&lt;0</p>
-<dl class="simple">
-<dt>Args:</dt><dd><p>s: Mellin moment s (= n)
-x: momentum fraction x</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>s</strong> – Mellin moment s (= n)</p></li>
+<li><p><strong>x</strong> – momentum fraction x</p></li>
+</ul>
 </dd>
-<dt>Returns:</dt><dd><p>Gluon wave function for inverse Mellin transformation: x^(-s+1) for x&gt;0 and 0 for x&lt;0</p>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>x^(-s+1) for x&gt;0 and 0 for x&lt;0</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Gluon wave function for inverse Mellin transformation</p>
 </dd>
 </dl>
 </dd></dl>
@@ -304,11 +423,18 @@ x: momentum fraction x</p>
 <dt class="sig sig-object py" id="Observables.InvMellinWaveFuncQ">
 <span class="sig-prename descclassname"><span class="pre">Observables.</span></span><span class="sig-name descname"><span class="pre">InvMellinWaveFuncQ</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">s</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">complex</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">complex</span></span></span><a class="reference internal" href="_modules/Observables.html#InvMellinWaveFuncQ"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#Observables.InvMellinWaveFuncQ" title="Link to this definition"></a></dt>
 <dd><p>Quark wave function for inverse Mellin transformation: x^(-s) for x&gt;0 and 0 for x&lt;0</p>
-<dl class="simple">
-<dt>Args:</dt><dd><p>s: Mellin moment s (= n)
-x: momentum fraction x</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>s</strong> – Mellin moment s (= n)</p></li>
+<li><p><strong>x</strong> – momentum fraction x</p></li>
+</ul>
 </dd>
-<dt>Returns:</dt><dd><p>Wave function for inverse Mellin transformation: x^(-s) for x&gt;0 and 0 for x&lt;0</p>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>x^(-s) for x&gt;0 and 0 for x&lt;0</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Wave function for inverse Mellin transformation</p>
 </dd>
 </dl>
 <p>vectorized version of InvMellinWaveFuncQ</p>

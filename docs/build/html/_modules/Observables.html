@@ -142,7 +142,6 @@
 <div class="viewcode-block" id="Flv_Intp">
 <a class="viewcode-back" href="../Observables.html#Observables.Flv_Intp">[docs]</a>
 <span class="k">def</span> <span class="nf">Flv_Intp</span><span class="p">(</span><span class="n">Flv_array</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">,</span> <span class="n">flv</span><span class="p">):</span>
-
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Flv_array: (N, 3) complex</span>
 <span class="sd">    flv: (N) str</span>
@@ -188,8 +187,7 @@
 <div class="viewcode-block" id="InvMellinWaveFuncQ">
 <a class="viewcode-back" href="../Observables.html#Observables.InvMellinWaveFuncQ">[docs]</a>
 <span class="k">def</span> <span class="nf">InvMellinWaveFuncQ</span><span class="p">(</span><span class="n">s</span><span class="p">:</span> <span class="nb">complex</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">complex</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot; </span>
-<span class="sd">    Quark wave function for inverse Mellin transformation: x^(-s) for x&gt;0 and 0 for x&lt;0</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; Quark wave function for inverse Mellin transformation: x^(-s) for x&gt;0 and 0 for x&lt;0</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        s: Mellin moment s (= n)</span>
@@ -214,8 +212,7 @@
 <div class="viewcode-block" id="InvMellinWaveFuncG">
 <a class="viewcode-back" href="../Observables.html#Observables.InvMellinWaveFuncG">[docs]</a>
 <span class="k">def</span> <span class="nf">InvMellinWaveFuncG</span><span class="p">(</span><span class="n">s</span><span class="p">:</span> <span class="nb">complex</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">complex</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot; </span>
-<span class="sd">    Gluon wave function for inverse Mellin transformation: x^(-s+1) for x&gt;0 and 0 for x&lt;0</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; Gluon wave function for inverse Mellin transformation: x^(-s+1) for x&gt;0 and 0 for x&lt;0</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        s: Mellin moment s (= n)</span>
@@ -237,8 +234,9 @@
 <div class="viewcode-block" id="ConfWaveFuncQ">
 <a class="viewcode-back" href="../Observables.html#Observables.ConfWaveFuncQ">[docs]</a>
 <span class="k">def</span> <span class="nf">ConfWaveFuncQ</span><span class="p">(</span><span class="n">j</span><span class="p">:</span> <span class="nb">complex</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">xi</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">complex</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot; </span>
-<span class="sd">    Quark conformal wave function p_j(x,xi) check e.g. https://arxiv.org/pdf/hep-ph/0509204.pdf</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Quark conformal wave function p_j(x,xi) </span>
+<span class="sd">    </span>
+<span class="sd">    Check e.g. https://arxiv.org/pdf/hep-ph/0509204.pdf</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        j: conformal spin j (conformal spin is actually j+2 but anyway)</span>
@@ -248,17 +246,6 @@
 <span class="sd">    Returns:</span>
 <span class="sd">        quark conformal wave function p_j(x,xi)</span>
 <span class="sd">    &quot;&quot;&quot;</span>  
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    if(x &gt; xi):</span>
-<span class="sd">        pDGLAP = np.sin(np.pi * (j+1))/ np.pi * x**(-j-1) * complex(hyp2f1( (j+1)/2, (j+2)/2, j+5/2, (xi/x) ** 2)) </span>
-<span class="sd">        return pDGLAP</span>
-
-<span class="sd">    if(x &gt; -xi):</span>
-<span class="sd">        pERBL = 2 ** (1+j) * gamma(5/2+j) / (gamma(1/2) * gamma(1+j)) * xi ** (-j-1) * (1+x/xi) * complex(hyp2f1(-1-j,j+2,2, (x+xi)/(2*xi)))</span>
-<span class="sd">        return pERBL</span>
-<span class="sd">    </span>
-<span class="sd">    return 0</span>
-<span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="n">pDGLAP</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">x</span> <span class="o">&gt;=</span> <span class="n">xi</span><span class="p">,</span>                <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="p">(</span><span class="n">j</span><span class="o">+</span><span class="mi">1</span><span class="p">))</span><span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="n">x</span><span class="o">**</span><span class="p">(</span><span class="o">-</span><span class="n">j</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">hyp2f1_nparray</span><span class="p">(</span> <span class="p">(</span><span class="n">j</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span> <span class="p">(</span><span class="n">j</span><span class="o">+</span><span class="mi">2</span><span class="p">)</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span> <span class="n">j</span><span class="o">+</span><span class="mi">5</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span> <span class="p">(</span><span class="n">xi</span><span class="o">/</span><span class="n">x</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span> <span class="nb">complex</span><span class="p">)</span>                           <span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
 
@@ -271,8 +258,9 @@
 <div class="viewcode-block" id="ConfWaveFuncG">
 <a class="viewcode-back" href="../Observables.html#Observables.ConfWaveFuncG">[docs]</a>
 <span class="k">def</span> <span class="nf">ConfWaveFuncG</span><span class="p">(</span><span class="n">j</span><span class="p">:</span> <span class="nb">complex</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">xi</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">complex</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot; </span>
-<span class="sd">    Gluon conformal wave function p_j(x,xi) check e.g. https://arxiv.org/pdf/hep-ph/0509204.pdf</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Gluon conformal wave function p_j(x,xi) </span>
+<span class="sd">    </span>
+<span class="sd">    Check e.g. https://arxiv.org/pdf/hep-ph/0509204.pdf</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        j: conformal spin j (actually conformal spin is j+2 but anyway)</span>
@@ -323,8 +311,8 @@
 <div class="viewcode-block" id="GPDobserv.tPDF">
 <a class="viewcode-back" href="../Observables.html#Observables.GPDobserv.tPDF">[docs]</a>
     <span class="k">def</span> <span class="nf">tPDF</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">flv</span><span class="p">,</span> <span class="n">ParaAll</span><span class="p">,</span> <span class="n">p_order</span> <span class="o">=</span> <span class="mi">1</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        t-denpendent PDF for given flavor (flv = &quot;u&quot;, &quot;d&quot;, &quot;S&quot;, &quot;NS&quot; or &quot;g&quot;)</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;t-denpendent PDF for given flavor (flv = &quot;u&quot;, &quot;d&quot;, &quot;S&quot;, &quot;NS&quot; or &quot;g&quot;)</span>
+<span class="sd">        </span>
 <span class="sd">        Args:</span>
 <span class="sd">            ParaAll = [Para_Forward, Para_xi2]</span>
 <span class="sd">            Para_Forward = [Para_Forward_uV, Para_Forward_ubar, Para_Forward_dV, Para_Forward_dbar, Para_Forward_g]</span>
@@ -406,8 +394,8 @@
 <div class="viewcode-block" id="GPDobserv.GPD">
 <a class="viewcode-back" href="../Observables.html#Observables.GPDobserv.GPD">[docs]</a>
     <span class="k">def</span> <span class="nf">GPD</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">flv</span><span class="p">,</span> <span class="n">ParaAll</span><span class="p">,</span> <span class="n">p_order</span> <span class="o">=</span> <span class="mi">1</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        GPD F(x, xi, t) in flavor space (flv = &quot;u&quot;, &quot;d&quot;, &quot;S&quot;, &quot;NS&quot; or &quot;g&quot;)</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;GPD F(x, xi, t) in flavor space (flv = &quot;u&quot;, &quot;d&quot;, &quot;S&quot;, &quot;NS&quot; or &quot;g&quot;)</span>
+<span class="sd">        </span>
 <span class="sd">        Args:</span>
 <span class="sd">            ParaAll = [Para_Forward, Para_xi2, Para_xi4]</span>
 <span class="sd">            Para_Forward = [Para_Forward_uV, Para_Forward_ubar, Para_Forward_dV, Para_Forward_dbar, Para_Forward_g]</span>
@@ -535,11 +523,11 @@
 <div class="viewcode-block" id="GPDobserv.GFFj0">
 <a class="viewcode-back" href="../Observables.html#Observables.GPDobserv.GFFj0">[docs]</a>
     <span class="k">def</span> <span class="nf">GFFj0</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">j</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">flv</span><span class="p">,</span> <span class="n">ParaAll</span><span class="p">,</span> <span class="n">p_order</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">            Generalized Form Factors A_{j0}(t) which is the xi^0 term of the nth (n= j+1) Mellin moment of GPD int dx x^j F(x,xi,t) for quark and int dx x^(j-1) F(x,xi,t) for gluon</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Generalized Form Factors A_{j0}(t) which is the xi^0 term of the nth (n= j+1) Mellin moment of GPD int dx x^j F(x,xi,t) for quark and int dx x^(j-1) F(x,xi,t) for gluon</span>
+<span class="sd">            </span>
 <span class="sd">            Note for gluon, GPD reduce to x*g(x), not g(x) so the Mellin moment will have a mismatch</span>
 <span class="sd">            </span>
-<span class="sd">            Only leading order implemented yet</span>
+<span class="sd">            Only leading order implemented yet NOT well-maintained (TO BE FIXED)</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="c1"># j, flv both have shape (N)</span>
@@ -594,8 +582,8 @@
 <div class="viewcode-block" id="GPDobserv.CFF">
 <a class="viewcode-back" href="../Observables.html#Observables.GPDobserv.CFF">[docs]</a>
     <span class="k">def</span> <span class="nf">CFF</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ParaAll</span><span class="p">,</span> <span class="n">muset</span><span class="p">,</span> <span class="n">p_order</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">flv</span> <span class="o">=</span> <span class="s1">&#39;All&#39;</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Charge averged CFF \mathcal{F}(xi, t) (\mathcal{F} = Q_u^2 F_u + Q_d^2 F_d)</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Charge averged CFF $\mathcal{F}(xi, t) (\mathcal{F} = Q_u^2 F_u + Q_d^2 F_d)$</span>
+<span class="sd">        </span>
 <span class="sd">        Args:</span>
 <span class="sd">            ParaAll = [Para_Forward, Para_xi2, Para_xi4]</span>
 
@@ -682,8 +670,8 @@
 <div class="viewcode-block" id="GPDobserv.TFF">
 <a class="viewcode-back" href="../Observables.html#Observables.GPDobserv.TFF">[docs]</a>
     <span class="k">def</span> <span class="nf">TFF</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ParaAll</span><span class="p">,</span> <span class="n">muf</span> <span class="p">,</span> <span class="n">meson</span><span class="p">,</span> <span class="n">p_order</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">flv</span> <span class="o">=</span> <span class="s1">&#39;All&#39;</span><span class="p">):</span>
-<span class="w">            </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">            TFF \mathcal{F}(xi, t) (\mathcal{F} </span>
+<span class="w">            </span><span class="sd">&quot;&quot;&quot;TFF $\mathcal{F}(xi, t) (\mathcal{F}$</span>
+<span class="sd">            </span>
 <span class="sd">            Args:</span>
 <span class="sd">                ParaAll = [Para_Forward, Para_xi2, Para_xi4]</span>
 
@@ -776,8 +764,8 @@
 <div class="viewcode-block" id="GPDobserv.TFFNLO">
 <a class="viewcode-back" href="../Observables.html#Observables.GPDobserv.TFFNLO">[docs]</a>
     <span class="k">def</span> <span class="nf">TFFNLO</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ParaAll</span><span class="p">,</span> <span class="n">muf</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">meson</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">flv</span> <span class="o">=</span> <span class="s1">&#39;All&#39;</span><span class="p">):</span>
-<span class="w">            </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">            TFF \mathcal{F}(xi, t) (\mathcal{F} </span>
+<span class="w">            </span><span class="sd">&quot;&quot;&quot;TFF $\mathcal{F}(xi, t) (\mathcal{F}$</span>
+<span class="sd">            </span>
 <span class="sd">            Args:</span>
 <span class="sd">                ParaAll = [Para_Forward, Para_xi2, Para_xi4]</span>
 
@@ -873,8 +861,8 @@
 <div class="viewcode-block" id="GPDobserv.TFFNLO_evMom">
 <a class="viewcode-back" href="../Observables.html#Observables.GPDobserv.TFFNLO_evMom">[docs]</a>
     <span class="k">def</span> <span class="nf">TFFNLO_evMom</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ParaAll</span><span class="p">,</span> <span class="n">muf</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">meson</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">flv</span> <span class="o">=</span> <span class="s1">&#39;All&#39;</span><span class="p">):</span>
-<span class="w">            </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">            NLOTFF \mathcal{F}(xi, t) (\mathcal{F} </span>
+<span class="w">            </span><span class="sd">&quot;&quot;&quot;NLOTFF $\mathcal{F}(xi, t) (\mathcal{F}) $</span>
+<span class="sd">            </span>
 <span class="sd">            Args:</span>
 <span class="sd">                ParaAll = [Para_Forward, Para_xi2, Para_xi4]</span>
 

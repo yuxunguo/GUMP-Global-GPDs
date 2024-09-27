@@ -284,8 +284,7 @@
 <div class="viewcode-block" id="ConfMoment">
 <a class="viewcode-back" href="../Parameters.html#Parameters.ConfMoment">[docs]</a>
 <span class="k">def</span> <span class="nf">ConfMoment</span><span class="p">(</span><span class="n">j</span><span class="p">:</span> <span class="nb">complex</span><span class="p">,</span> <span class="n">t</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">ParaSets</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Conformal moment in j space F(j)</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Conformal moment in j space F(j)</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        ParaSet is the array of parameters in the form of (norm, alpha, beta, alphap)</span>
@@ -295,6 +294,9 @@
 <span class="sd">        j: conformal spin j (conformal spin is actually j+2 but anyway)</span>
 <span class="sd">        t: momentum transfer squared t</span>
 
+<span class="sd">    Returns:</span>
+<span class="sd">        Conformal moment in j space F(j,t)</span>
+<span class="sd">        </span>
 <span class="sd">    Originally, ParaSet have shape (5).</span>
 <span class="sd">    Output is a scalar</span>
 <span class="sd">    </span>
@@ -310,9 +312,6 @@
 
 <span class="sd">    j should only be a scalar. It cannot be an ndarray before I make more changes</span>
 <span class="sd">    Right now, j can be a vector, but if you want to do integration, then better pass j as scalar.</span>
-
-<span class="sd">    Returns:</span>
-<span class="sd">        Conformal moment in j space F(j,t)</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     
     <span class="c1"># [norm, alpha, beta, alphap, bexp] = ParaSet</span>
@@ -342,8 +341,7 @@
 <div class="viewcode-block" id="Moment_Sum">
 <a class="viewcode-back" href="../Parameters.html#Parameters.Moment_Sum">[docs]</a>
 <span class="k">def</span> <span class="nf">Moment_Sum</span><span class="p">(</span><span class="n">j</span><span class="p">:</span> <span class="nb">complex</span><span class="p">,</span> <span class="n">t</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">ParaSets</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">complex</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Sum of the conformal moments when the ParaSets contain more than just one set of parameters </span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Sum of the conformal moments when the ParaSets contain more than just one set of parameters </span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        ParaSets : contains [ParaSet1, ParaSet0, ParaSet2,...] with each ParaSet = [norm, alpha, beta ,alphap] for valence and sea distributions repsectively.        </span>

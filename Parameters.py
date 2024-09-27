@@ -200,8 +200,7 @@ def beta_loggamma(a: complex, b: complex) -> complex:
 
 # Conformal moment in j space F(j)
 def ConfMoment(j: complex, t: float, ParaSets: np.ndarray):
-    """
-    Conformal moment in j space F(j)
+    """Conformal moment in j space F(j)
 
     Args:
         ParaSet is the array of parameters in the form of (norm, alpha, beta, alphap)
@@ -211,6 +210,9 @@ def ConfMoment(j: complex, t: float, ParaSets: np.ndarray):
         j: conformal spin j (conformal spin is actually j+2 but anyway)
         t: momentum transfer squared t
 
+    Returns:
+        Conformal moment in j space F(j,t)
+        
     Originally, ParaSet have shape (5).
     Output is a scalar
     
@@ -226,9 +228,6 @@ def ConfMoment(j: complex, t: float, ParaSets: np.ndarray):
 
     j should only be a scalar. It cannot be an ndarray before I make more changes
     Right now, j can be a vector, but if you want to do integration, then better pass j as scalar.
-
-    Returns:
-        Conformal moment in j space F(j,t)
     """
     
     # [norm, alpha, beta, alphap, bexp] = ParaSet
@@ -255,8 +254,7 @@ def ConfMoment(j: complex, t: float, ParaSets: np.ndarray):
     # For the recommended usage, the output is (N, 5, init_NumofAnsatz)
 
 def Moment_Sum(j: complex, t: float, ParaSets: np.ndarray) -> complex:
-    """
-    Sum of the conformal moments when the ParaSets contain more than just one set of parameters 
+    """Sum of the conformal moments when the ParaSets contain more than just one set of parameters 
 
     Args:
         ParaSets : contains [ParaSet1, ParaSet0, ParaSet2,...] with each ParaSet = [norm, alpha, beta ,alphap] for valence and sea distributions repsectively.        
