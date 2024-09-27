@@ -10,9 +10,10 @@ from multiprocessing import Pool
 import time
 from DVMP_xsec import dsigma_Jpsi_dt, M_jpsi
 from functools import partial
-
+import os
+dir_path = os.path.dirname(os.path.realpath(__file__))
 '''
-df_Para = pd.read_csv('GUMP_Params/params.csv', index_col=0)
+df_Para = pd.read_csv(os.path.join(dir_path,'GUMP_Params/params.csv'), index_col=0)
 para_list_unp = df_Para['value'][:38].to_numpy()
 para_list_pol = df_Para['value'][38:].to_numpy()
 
@@ -223,7 +224,7 @@ if __name__ == '__main__':
     
     pdflst = np.array([PDF_theo_s(x_i,0.,2.,1,'g',Para_spe, 2) for x_i in x ])
     
-    with open("GUMP_Results/Smallx_PDF.csv","w",newline='') as my_csv:
+    with open(os.path.join(dir_path,"GUMP_Results/Smallx_PDF.csv"),"w",newline='') as my_csv:
         csvWriter = csv.writer(my_csv,delimiter=',')
         csvWriter.writerows(np.transpose([x,pdflst]))
         
@@ -234,7 +235,7 @@ if __name__ == '__main__':
     
     gpdlst = np.array([GPD_theo_s(x_i,0.002,0.,2.,1,'g',Para_spe, 2) for x_i in x ]).flatten()
     
-    with open("GUMP_Results/Smallx_GPD.csv","w",newline='') as my_csv:
+    with open(os.path.join(dir_path,"GUMP_Results/Smallx_GPD.csv"),"w",newline='') as my_csv:
         csvWriter = csv.writer(my_csv,delimiter=',')
         csvWriter.writerows(np.transpose([x,gpdlst]))
     print(time.time()-ts)
@@ -252,7 +253,7 @@ if __name__ == '__main__':
     qmeshflat = qmesh.flatten()
 
     rrat2dlst = np.array([rratio_theo_s(x_i,0.,q_i,1,'g',Para_spe, 2) for x_i,q_i in zip(xmeshflat,qmeshflat) ]).flatten()
-    with open("GUMP_Results/Rrat2D.csv","w",newline='') as my_csv:
+    with open(os.path.join(dir_path,"GUMP_Results/Rrat2D.csv"),"w",newline='') as my_csv:
         csvWriter = csv.writer(my_csv,delimiter=',')
         csvWriter.writerows(np.transpose([xmeshflat,qmeshflat,rrat2dlst]))
 
@@ -275,11 +276,11 @@ if __name__ == '__main__':
 
     DVJpsiPH1xsec_group_data_shape = np.array(DVJpsiPH1xsec_group_data).shape
     
-    with open("GUMP_Results/dvjpsiph1data.csv","w",newline='') as my_csv:
+    with open(os.path.join(dir_path,"GUMP_Results/dvjpsiph1data.csv"),"w",newline='') as my_csv:
         csvWriter = csv.writer(my_csv,delimiter=',')
         csvWriter.writerows(np.array(DVJpsiPH1xsec_group_data).reshape(DVJpsiPH1xsec_group_data_shape[0],-1))
     
-    with open("GUMP_Results/dvjpsiph1theo.csv","w",newline='') as my_csv:
+    with open(os.path.join(dir_path,"GUMP_Results/dvjpsiph1theo.csv"),"w",newline='') as my_csv:
         csvWriter = csv.writer(my_csv,delimiter=',')
         csvWriter.writerows(np.transpose([DVjpsiPH1_xBtQ_theo,DVjpsiPH1_xBtQ_theo_mu_1,DVjpsiPH1_xBtQ_theo_mu_2,DVjpsiPH1_xBtQ_theo_mu_3,DVjpsiPH1_xBtQ_theo_mu_4,DVjpsiPH1_xBtQ_theo_mu_5,DVjpsiPH1_xBtQ_theo_mu_6]))
 
@@ -296,7 +297,7 @@ if __name__ == '__main__':
     
     TFFfull=np.array([HTFF_theo_jpsi(xb,-0.05,q_i,Para_spe, 2, 1, 'All') for q_i in qlst ]).flatten()
   
-    with open("GUMP_Results/TFFqg12xb1.csv","w",newline='') as my_csv:
+    with open(os.path.join(dir_path,"GUMP_Results/TFFqg12xb1.csv"),"w",newline='') as my_csv:
         csvWriter = csv.writer(my_csv,delimiter=',')
         csvWriter.writerows(np.transpose([qlst,TFFfull,TFFq1,TFFq2,TFFg1,TFFg2]))
         
@@ -309,7 +310,7 @@ if __name__ == '__main__':
     
     TFFfull=np.array([HTFF_theo_jpsi(xb,-0.05,q_i,Para_spe, 2, 1, 'All') for q_i in qlst ]).flatten()
   
-    with open("GUMP_Results/TFFqg12xb2.csv","w",newline='') as my_csv:
+    with open(os.path.join(dir_path,"GUMP_Results/TFFqg12xb2.csv"),"w",newline='') as my_csv:
         csvWriter = csv.writer(my_csv,delimiter=',')
         csvWriter.writerows(np.transpose([qlst,TFFfull,TFFq1,TFFq2,TFFg1,TFFg2]))
     '''
@@ -337,7 +338,7 @@ if __name__ == '__main__':
     dhPDF = PDF(x,[0.0],[2.0],['d'],[0])
     dbarhPDF = -PDF(-x,[0.0],[2.0],['d'],[0])
 
-    with open("GUMP_Results/H_PDF.csv","w",newline='') as my_csv:
+    with open(os.path.join(dir_path,"GUMP_Results/H_PDF.csv"),"w",newline='') as my_csv:
         csvWriter = csv.writer(my_csv,delimiter=',')
         csvWriter.writerows(np.transpose([x,uhPDF,ubarhPDF,dhPDF,dbarhPDF]))
 
@@ -346,7 +347,7 @@ if __name__ == '__main__':
     dePDF = PDF(x,[0.0],[2.0],['d'],[1])
     dbarePDF = -PDF(-x,[0.0],[2.0],['d'],[1])
 
-    with open("GUMP_Results/E_PDF.csv","w",newline='') as my_csv:
+    with open(os.path.join(dir_path,"GUMP_Results/E_PDF.csv"),"w",newline='') as my_csv:
         csvWriter = csv.writer(my_csv,delimiter=',')
         csvWriter.writerows(np.transpose([x,uePDF,ubarePDF,dePDF,dbarePDF]))
 
@@ -355,7 +356,7 @@ if __name__ == '__main__':
     dhtPDF = PDF(x,[0.0],[2.0],['d'],[2])
     dbarhtPDF = PDF(-x,[0.0],[2.0],['d'],[2])
 
-    with open("GUMP_Results/Ht_PDF.csv","w",newline='') as my_csv:
+    with open(os.path.join(dir_path,"GUMP_Results/Ht_PDF.csv"),"w",newline='') as my_csv:
         csvWriter = csv.writer(my_csv,delimiter=',')
         csvWriter.writerows(np.transpose([x,uhtPDF,ubarhtPDF,dhtPDF,dbarhtPDF]))
 
@@ -364,7 +365,7 @@ if __name__ == '__main__':
     detPDF = PDF(x,[0.0],[2.0],['d'],[3])
     dbaretPDF = PDF(-x,[0.0],[2.0],['d'],[3])
     
-    with open("GUMP_Results/Et_PDF.csv","w",newline='') as my_csv:
+    with open(os.path.join(dir_path,"GUMP_Results/Et_PDF.csv"),"w",newline='') as my_csv:
         csvWriter = csv.writer(my_csv,delimiter=',')
         csvWriter.writerows(np.transpose([x,uetPDF,ubaretPDF,detPDF,dbaretPDF]))
     '''
@@ -374,28 +375,28 @@ if __name__ == '__main__':
     uhGPD = GPD(xgpd,[0.33],[-0.5],[2.0],['u'],[0])
     dhGPD = GPD(xgpd,[0.33],[-0.5],[2.0],['d'],[0])
 
-    with open("GUMP_Results/H_GPD.csv","w",newline='') as my_csv:
+    with open(os.path.join(dir_path,"GUMP_Results/H_GPD.csv"),"w",newline='') as my_csv:
         csvWriter = csv.writer(my_csv,delimiter=',')
         csvWriter.writerows(np.transpose([xgpd,uhGPD,dhGPD]))
 
     ueGPD = GPD(xgpd,[0.33],[-0.5],[2.0],['u'],[1])
     deGPD = GPD(xgpd,[0.33],[-0.5],[2.0],['d'],[1])
 
-    with open("GUMP_Results/E_GPD.csv","w",newline='') as my_csv:
+    with open(os.path.join(dir_path,"GUMP_Results/E_GPD.csv"),"w",newline='') as my_csv:
         csvWriter = csv.writer(my_csv,delimiter=',')
         csvWriter.writerows(np.transpose([xgpd,ueGPD,deGPD]))
 
     uhtGPD = GPD(xgpd,[0.33],[-0.5],[2.0],['u'],[2])
     dhtGPD = GPD(xgpd,[0.33],[-0.5],[2.0],['d'],[2])
 
-    with open("GUMP_Results/Ht_GPD.csv","w",newline='') as my_csv:
+    with open(os.path.join(dir_path,"GUMP_Results/Ht_GPD.csv"),"w",newline='') as my_csv:
         csvWriter = csv.writer(my_csv,delimiter=',')
         csvWriter.writerows(np.transpose([xgpd,uhtGPD,dhtGPD]))
 
     uetGPD = GPD(xgpd,[0.33],[-0.5],[2.0],['u'],[3])
     detGPD = GPD(xgpd,[0.33],[-0.5],[2.0],['d'],[3])
 
-    with open("GUMP_Results/Et_GPD.csv","w",newline='') as my_csv:
+    with open(os.path.join(dir_path,"GUMP_Results/Et_GPD.csv"),"w",newline='') as my_csv:
         csvWriter = csv.writer(my_csv,delimiter=',')
         csvWriter.writerows(np.transpose([xgpd,uetGPD,detGPD]))
     '''

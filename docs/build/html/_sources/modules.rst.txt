@@ -7,7 +7,6 @@ GUMP-Global-GPDs
    DVCS_xsec
    DVMP_xsec
    Evolution
-   FitPlots
    Minimizer
    Observables
    Parameters

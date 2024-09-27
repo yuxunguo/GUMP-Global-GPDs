@@ -50,12 +50,22 @@
 <li class="toctree-l2"><a class="reference internal" href="DVCS_xsec.html">DVCS_xsec module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="DVMP_xsec.html">DVMP_xsec module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Evolution.html">Evolution module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="FitPlots.html">FitPlots module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Minimizer.html">Minimizer module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Observables.html">Observables module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Parameters.html">Parameters module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Plotting.html">Plotting module</a></li>
-<li class="toctree-l2 current"><a class="current reference internal" href="#">Predictions module</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Predictions module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#Predictions.DVjpsiPxsec_theo"><code class="docutils literal notranslate"><span class="pre">DVjpsiPxsec_theo()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#Predictions.DVjpsiPxsec_theo_xBtQ"><code class="docutils literal notranslate"><span class="pre">DVjpsiPxsec_theo_xBtQ()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#Predictions.GPD_theo_s"><code class="docutils literal notranslate"><span class="pre">GPD_theo_s()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#Predictions.HTFF_theo_jpsi"><code class="docutils literal notranslate"><span class="pre">HTFF_theo_jpsi()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#Predictions.PDF_theo_s"><code class="docutils literal notranslate"><span class="pre">PDF_theo_s()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#Predictions.TFF_theo_jpsi"><code class="docutils literal notranslate"><span class="pre">TFF_theo_jpsi()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#Predictions.dir_path"><code class="docutils literal notranslate"><span class="pre">dir_path</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#Predictions.rratio_theo_s"><code class="docutils literal notranslate"><span class="pre">rratio_theo_s()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#Predictions.tPDF_theo_s"><code class="docutils literal notranslate"><span class="pre">tPDF_theo_s()</span></code></a></li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="config.html">config module</a></li>
 </ul>
 </li>
@@ -86,8 +96,59 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <section id="predictions-module">
-<h1>Predictions module<a class="headerlink" href="#predictions-module" title="Link to this heading"></a></h1>
+  <section id="module-Predictions">
+<span id="predictions-module"></span><h1>Predictions module<a class="headerlink" href="#module-Predictions" title="Link to this heading"></a></h1>
+<dl class="py function">
+<dt class="sig sig-object py" id="Predictions.DVjpsiPxsec_theo">
+<span class="sig-prename descclassname"><span class="pre">Predictions.</span></span><span class="sig-name descname"><span class="pre">DVjpsiPxsec_theo</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">DVjpsiPxsec_input</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">DataFrame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">TFF_jpsi_input</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">array</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/Predictions.html#DVjpsiPxsec_theo"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#Predictions.DVjpsiPxsec_theo" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="Predictions.DVjpsiPxsec_theo_xBtQ">
+<span class="sig-prename descclassname"><span class="pre">Predictions.</span></span><span class="sig-name descname"><span class="pre">DVjpsiPxsec_theo_xBtQ</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">DVjpsiPxsec_data_xBtQ</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">DataFrame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Para_Unp</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xsec_norm</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p_order</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">muset</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">flv</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'All'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/Predictions.html#DVjpsiPxsec_theo_xBtQ"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#Predictions.DVjpsiPxsec_theo_xBtQ" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="Predictions.GPD_theo_s">
+<span class="sig-prename descclassname"><span class="pre">Predictions.</span></span><span class="sig-name descname"><span class="pre">GPD_theo_s</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xi</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">t</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Q</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">flv</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Para</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p_order</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/Predictions.html#GPD_theo_s"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#Predictions.GPD_theo_s" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="Predictions.HTFF_theo_jpsi">
+<span class="sig-prename descclassname"><span class="pre">Predictions.</span></span><span class="sig-name descname"><span class="pre">HTFF_theo_jpsi</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">xB</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">t</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Q</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Para_spe</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p_order</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">muset</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">flv</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'All'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/Predictions.html#HTFF_theo_jpsi"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#Predictions.HTFF_theo_jpsi" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="Predictions.PDF_theo_s">
+<span class="sig-prename descclassname"><span class="pre">Predictions.</span></span><span class="sig-name descname"><span class="pre">PDF_theo_s</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">t</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Q</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">flv</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Para</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p_order</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/Predictions.html#PDF_theo_s"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#Predictions.PDF_theo_s" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="Predictions.TFF_theo_jpsi">
+<span class="sig-prename descclassname"><span class="pre">Predictions.</span></span><span class="sig-name descname"><span class="pre">TFF_theo_jpsi</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">xB</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">t</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Q</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Para_spe</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p_order</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">muset</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">flv</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'All'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/Predictions.html#TFF_theo_jpsi"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#Predictions.TFF_theo_jpsi" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="Predictions.dir_path">
+<span class="sig-prename descclassname"><span class="pre">Predictions.</span></span><span class="sig-name descname"><span class="pre">dir_path</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'C:\\Users\\Yuxun\\Documents\\Workspace\\Github\\GUMP-Global-GPDs'</span></em><a class="headerlink" href="#Predictions.dir_path" title="Link to this definition"></a></dt>
+<dd><p>df_Para = pd.read_csv(os.path.join(dir_path,’GUMP_Params/params.csv’), index_col=0)
+para_list_unp = df_Para[‘value’][:38].to_numpy()
+para_list_pol = df_Para[‘value’][38:].to_numpy()</p>
+<p>Para_Unp = ParaManager_Unp(para_list_unp)
+Para_Pol = ParaManager_Pol(para_list_pol)
+Para_All = np.concatenate([Para_Unp, Para_Pol], axis=0)</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="Predictions.rratio_theo_s">
+<span class="sig-prename descclassname"><span class="pre">Predictions.</span></span><span class="sig-name descname"><span class="pre">rratio_theo_s</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">xi</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">t</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Q</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">flv</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Para</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p_order</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/Predictions.html#rratio_theo_s"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#Predictions.rratio_theo_s" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="Predictions.tPDF_theo_s">
+<span class="sig-prename descclassname"><span class="pre">Predictions.</span></span><span class="sig-name descname"><span class="pre">tPDF_theo_s</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">t</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Q</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">flv</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Para</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p_order</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Predictions.tPDF_theo_s" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
 </section>
 
 

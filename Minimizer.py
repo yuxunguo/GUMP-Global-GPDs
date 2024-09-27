@@ -9,6 +9,8 @@ import numpy as np
 import pandas as pd
 import time
 import csv
+import os
+dir_path = os.path.dirname(os.path.realpath(__file__))
 
 Minuit_Counter = 0
 
@@ -20,7 +22,7 @@ xB_Cut = 0.5
 
 xB_small_Cut = 0.0001
 
-PDF_data = pd.read_csv('GUMPDATA/PDFdata.csv',       header = None, names = ['x', 't', 'Q', 'f', 'delta f', 'spe', 'flv'],        dtype = {'x': float, 't': float, 'Q': float, 'f': float, 'delta f': float,'spe': int, 'flv': str})
+PDF_data = pd.read_csv(os.path.join(dir_path,'GUMPDATA/PDFdata.csv'),       header = None, names = ['x', 't', 'Q', 'f', 'delta f', 'spe', 'flv'],        dtype = {'x': float, 't': float, 'Q': float, 'f': float, 'delta f': float,'spe': int, 'flv': str})
 PDF_data_H  = PDF_data[PDF_data['spe'] == 0]
 PDF_data_H_g = PDF_data_H[PDF_data_H['flv'] == 'g']
 PDF_data_H_g = PDF_data_H_g[PDF_data_H_g['x'] < xB_Cut]
@@ -28,12 +30,12 @@ PDF_data_E  = PDF_data[PDF_data['spe'] == 1]
 PDF_data_Ht = PDF_data[PDF_data['spe'] == 2]
 PDF_data_Et = PDF_data[PDF_data['spe'] == 3]
 
-PDF_smallx_data = pd.read_csv('GUMPDATA/PDFg_smallx.csv',       header = None, names = ['x', 't', 'Q', 'f', 'delta f', 'spe', 'flv'],        dtype = {'x': float, 't': float, 'Q': float, 'f': float, 'delta f': float,'spe': int, 'flv': str})
+PDF_smallx_data = pd.read_csv(os.path.join(dir_path,'GUMPDATA/PDFg_smallx.csv'),       header = None, names = ['x', 't', 'Q', 'f', 'delta f', 'spe', 'flv'],        dtype = {'x': float, 't': float, 'Q': float, 'f': float, 'delta f': float,'spe': int, 'flv': str})
 PDF_H_smallx_data = PDF_smallx_data[PDF_smallx_data['spe']==0]
 PDFg_smallx_data = PDF_H_smallx_data[PDF_H_smallx_data['flv']=='g']
 PDFg_smallx_data = PDF_H_smallx_data[PDF_H_smallx_data['x'] > xB_small_Cut]
 
-tPDF_data = pd.read_csv('GUMPDATA/tPDFdata.csv',     header = None, names = ['x', 't', 'Q', 'f', 'delta f', 'spe', 'flv'],        dtype = {'x': float, 't': float, 'Q': float, 'f': float, 'delta f': float,'spe': int, 'flv': str})
+tPDF_data = pd.read_csv(os.path.join(dir_path,'GUMPDATA/tPDFdata.csv'),     header = None, names = ['x', 't', 'Q', 'f', 'delta f', 'spe', 'flv'],        dtype = {'x': float, 't': float, 'Q': float, 'f': float, 'delta f': float,'spe': int, 'flv': str})
 tPDF_data_H  = tPDF_data[tPDF_data['spe'] == 0]
 tPDF_data_H_g = tPDF_data_H[tPDF_data_H['flv'] == 'g']
 tPDF_data_H_g = tPDF_data_H[tPDF_data_H['x'] < xB_small_Cut]
@@ -41,25 +43,25 @@ tPDF_data_E  = tPDF_data[tPDF_data['spe'] == 1]
 tPDF_data_Ht = tPDF_data[tPDF_data['spe'] == 2]
 tPDF_data_Et = tPDF_data[tPDF_data['spe'] == 3]
 
-GFF_data = pd.read_csv('GUMPDATA/GFFdata_Quark.csv',       header = None, names = ['j', 't', 'Q', 'f', 'delta f', 'spe', 'flv'],        dtype = {'j': int, 't': float, 'Q': float, 'f': float, 'delta f': float,'spe': int, 'flv': str})
+GFF_data = pd.read_csv(os.path.join(dir_path,'GUMPDATA/GFFdata_Quark.csv'),       header = None, names = ['j', 't', 'Q', 'f', 'delta f', 'spe', 'flv'],        dtype = {'j': int, 't': float, 'Q': float, 'f': float, 'delta f': float,'spe': int, 'flv': str})
 GFF_data_H  = GFF_data[GFF_data['spe'] == 0]
 GFF_data_E  = GFF_data[GFF_data['spe'] == 1]
 GFF_data_Ht = GFF_data[GFF_data['spe'] == 2]
 GFF_data_Et = GFF_data[GFF_data['spe'] == 3]
 
-GFF_Gluon_data = pd.read_csv('GUMPDATA/GFFdata_Gluon.csv',       header = None, names = ['j', 't', 'Q', 'f', 'delta f', 'spe', 'flv'],        dtype = {'j': int, 't': float, 'Q': float, 'f': float, 'delta f': float,'spe': int, 'flv': str})
+GFF_Gluon_data = pd.read_csv(os.path.join(dir_path,'GUMPDATA/GFFdata_Gluon.csv'),       header = None, names = ['j', 't', 'Q', 'f', 'delta f', 'spe', 'flv'],        dtype = {'j': int, 't': float, 'Q': float, 'f': float, 'delta f': float,'spe': int, 'flv': str})
 GFF_Gluon_data_H  = GFF_Gluon_data[GFF_Gluon_data['spe'] == 0]
 GFF_Gluon_data_E  = GFF_Gluon_data[GFF_Gluon_data['spe'] == 1]
 GFF_Gluon_data_Ht = GFF_Gluon_data[GFF_Gluon_data['spe'] == 2]
 GFF_Gluon_data_Et = GFF_Gluon_data[GFF_Gluon_data['spe'] == 3]
 
-DVCSxsec_data = pd.read_csv('GUMPDATA/DVCSxsec.csv', header = None, names = ['y', 'xB', 't', 'Q', 'phi', 'f', 'delta f', 'pol'] , dtype = {'y': float, 'xB': float, 't': float, 'Q': float, 'phi': float, 'f': float, 'delta f': float, 'pol': str})
+DVCSxsec_data = pd.read_csv(os.path.join(dir_path,'GUMPDATA/DVCSxsec.csv'), header = None, names = ['y', 'xB', 't', 'Q', 'phi', 'f', 'delta f', 'pol'] , dtype = {'y': float, 'xB': float, 't': float, 'Q': float, 'phi': float, 'f': float, 'delta f': float, 'pol': str})
 DVCSxsec_data_invalid = DVCSxsec_data[DVCSxsec_data['t']*(DVCSxsec_data['xB']-1) - M ** 2 * DVCSxsec_data['xB'] ** 2 < 0]
 DVCSxsec_data = DVCSxsec_data[(DVCSxsec_data['Q'] > Q_threshold) & (DVCSxsec_data['xB'] < xB_Cut) & (DVCSxsec_data['t']*(DVCSxsec_data['xB']-1) - M ** 2 * DVCSxsec_data['xB'] ** 2 > 0)]
 xBtQlst = DVCSxsec_data.drop_duplicates(subset = ['xB', 't', 'Q'], keep = 'first')[['xB','t','Q']].values.tolist()
 DVCSxsec_group_data = list(map(lambda set: DVCSxsec_data[(DVCSxsec_data['xB'] == set[0]) & (DVCSxsec_data['t'] == set[1]) & ((DVCSxsec_data['Q'] == set[2]))], xBtQlst))
 
-DVCSxsec_HERA_data = pd.read_csv('GUMPDATA/DVCSxsec_HERA.csv', header = None, names = ['y', 'xB', 't', 'Q', 'f', 'delta f', 'pol'] , dtype = {'y': float, 'xB': float, 't': float, 'Q': float, 'f': float, 'delta f': float, 'pol': str})
+DVCSxsec_HERA_data = pd.read_csv(os.path.join(dir_path,'GUMPDATA/DVCSxsec_HERA.csv'), header = None, names = ['y', 'xB', 't', 'Q', 'f', 'delta f', 'pol'] , dtype = {'y': float, 'xB': float, 't': float, 'Q': float, 'f': float, 'delta f': float, 'pol': str})
 DVCSxsec_HERA_data_invalid = DVCSxsec_HERA_data[DVCSxsec_HERA_data['t']*(DVCSxsec_HERA_data['xB']-1) - M ** 2 * DVCSxsec_HERA_data['xB'] ** 2 < 0]
 DVCSxsec_HERA_data = DVCSxsec_HERA_data[(DVCSxsec_HERA_data['Q'] > Q_threshold) & (DVCSxsec_HERA_data['xB'] < xB_Cut) & (DVCSxsec_HERA_data['t']*(DVCSxsec_HERA_data['xB']-1) - M ** 2 * DVCSxsec_HERA_data['xB'] ** 2 > 0)]
 xBtQlst_HERA = DVCSxsec_HERA_data.drop_duplicates(subset = ['xB', 't', 'Q'], keep = 'first')[['xB','t','Q']].values.tolist()
@@ -69,28 +71,28 @@ DVCSxsec_HERA_group_data = list(map(lambda set: DVCSxsec_HERA_data[(DVCSxsec_HER
 
 # rho and phi data from HERA, R = sigma_L / sigma_T is currently handled on the theory side for these
 
-DVrhoPZEUSxsec_data = pd.read_csv('GUMPDATA/DVMP_HERA/DVrhoPZEUSdt.csv', header = None, names = ['y', 'xB', 't', 'Q', 'f', 'delta f'] , dtype = {'y': float, 'xB': float, 't': float, 'Q': float, 'f': float, 'delta f': float})
+DVrhoPZEUSxsec_data = pd.read_csv(os.path.join(dir_path,'GUMPDATA/DVMP_HERA/DVrhoPZEUSdt.csv'), header = None, names = ['y', 'xB', 't', 'Q', 'f', 'delta f'] , dtype = {'y': float, 'xB': float, 't': float, 'Q': float, 'f': float, 'delta f': float})
 DVrhoPZEUSxsec_data['Q'] = np.sqrt(DVrhoPZEUSxsec_data['Q'])
 DVrhoPZEUSxsec_data['t'] = -1 * DVrhoPZEUSxsec_data['t']
 DVrhoPZEUSxsec_data = DVrhoPZEUSxsec_data[(DVrhoPZEUSxsec_data['Q']>Q_threshold)]
 xBtQlst_rhoZ = DVrhoPZEUSxsec_data.drop_duplicates(subset = ['xB', 't', 'Q'], keep = 'first')[['xB','t','Q']].values.tolist()
 DVrhoPZEUSxsec_group_data = list(map(lambda set: DVrhoPZEUSxsec_data[(DVrhoPZEUSxsec_data['xB'] == set[0]) & (DVrhoPZEUSxsec_data['t'] == set[1]) & ((DVrhoPZEUSxsec_data['Q'] == set[2]))], xBtQlst_rhoZ))
 
-DVrhoPH1xsec_data = pd.read_csv('GUMPDATA/DVMP_HERA/DVrhoPH1dt.csv', header = None, names = ['y', 'xB', 't', 'Q', 'f', 'delta f'] , dtype = {'y': float, 'xB': float, 't': float, 'Q': float, 'f': float, 'delta f': float})
+DVrhoPH1xsec_data = pd.read_csv(os.path.join(dir_path,'GUMPDATA/DVMP_HERA/DVrhoPH1dt.csv'), header = None, names = ['y', 'xB', 't', 'Q', 'f', 'delta f'] , dtype = {'y': float, 'xB': float, 't': float, 'Q': float, 'f': float, 'delta f': float})
 DVrhoPH1xsec_data['Q'] = np.sqrt(DVrhoPH1xsec_data['Q'])
 DVrhoPH1xsec_data['t'] = -1 * DVrhoPH1xsec_data['t']
 DVrhoPH1xsec_data = DVrhoPH1xsec_data[(DVrhoPH1xsec_data['Q']>Q_threshold)]
 xBtQlst_rhoH = DVrhoPH1xsec_data.drop_duplicates(subset = ['xB', 't', 'Q'], keep = 'first')[['xB','t','Q']].values.tolist()
 DVrhoPH1xsec_group_data = list(map(lambda set: DVrhoPH1xsec_data[(DVrhoPH1xsec_data['xB'] == set[0]) & (DVrhoPH1xsec_data['t'] == set[1]) & ((DVrhoPH1xsec_data['Q'] == set[2]))], xBtQlst_rhoH))
 
-DVphiPZEUSxsec_data = pd.read_csv('GUMPDATA/DVMP_HERA/DVphiPZEUSdt.csv', header = None, names = ['y', 'xB', 't', 'Q', 'f', 'delta f'] , dtype = {'y': float, 'xB': float, 't': float, 'Q': float, 'f': float, 'delta f': float})
+DVphiPZEUSxsec_data = pd.read_csv(os.path.join(dir_path,'GUMPDATA/DVMP_HERA/DVphiPZEUSdt.csv'), header = None, names = ['y', 'xB', 't', 'Q', 'f', 'delta f'] , dtype = {'y': float, 'xB': float, 't': float, 'Q': float, 'f': float, 'delta f': float})
 DVphiPZEUSxsec_data['Q'] = np.sqrt(DVphiPZEUSxsec_data['Q'])
 DVphiPZEUSxsec_data['t'] = -1 * DVphiPZEUSxsec_data['t']
 DVphiPZEUSxsec_data = DVphiPZEUSxsec_data[(DVphiPZEUSxsec_data['Q']>Q_threshold)]
 xBtQlst_phiZ = DVphiPZEUSxsec_data.drop_duplicates(subset = ['xB', 't', 'Q'], keep = 'first')[['xB','t','Q']].values.tolist()
 DVphiPZEUSxsec_group_data = list(map(lambda set: DVphiPZEUSxsec_data[(DVphiPZEUSxsec_data['xB'] == set[0]) & (DVphiPZEUSxsec_data['t'] == set[1]) & ((DVphiPZEUSxsec_data['Q'] == set[2]))], xBtQlst_phiZ))
 
-DVphiPH1xsec_data = pd.read_csv('GUMPDATA/DVMP_HERA/DVphiPH1dt.csv', header = None, names = ['y', 'xB', 't', 'Q', 'f', 'delta f'] , dtype = {'y': float, 'xB': float, 't': float, 'Q': float, 'f': float, 'delta f': float})
+DVphiPH1xsec_data = pd.read_csv(os.path.join(dir_path,'GUMPDATA/DVMP_HERA/DVphiPH1dt.csv'), header = None, names = ['y', 'xB', 't', 'Q', 'f', 'delta f'] , dtype = {'y': float, 'xB': float, 't': float, 'Q': float, 'f': float, 'delta f': float})
 DVphiPH1xsec_data['Q'] = np.sqrt(DVphiPH1xsec_data['Q'])
 DVphiPH1xsec_data['t'] = -1 * DVphiPH1xsec_data['t']
 DVphiPH1xsec_data = DVphiPH1xsec_data[(DVphiPH1xsec_data['Q']>Q_threshold)]
@@ -100,7 +102,7 @@ DVphiPH1xsec_group_data = list(map(lambda set: DVphiPH1xsec_data[(DVphiPH1xsec_d
 
 # Jpsi data from HERA as well as R = sigma_L / sigma_T values hardcoded and used to convert data xsec simga_tot to sigma_L
 
-DVJpsiPH1xsec_data = pd.read_csv('GUMPDATA/DVMP_HERA/DVJpsiPH1dt_w_mass.csv', header = None, names = ['y', 'xB', 't', 'Q', 'f', 'delta f'] , dtype = {'y': float, 'xB': float, 't': float, 'Q': float, 'f': float, 'delta f': float})
+DVJpsiPH1xsec_data = pd.read_csv(os.path.join(dir_path,'GUMPDATA/DVMP_HERA/DVJpsiPH1dt_w_mass.csv'), header = None, names = ['y', 'xB', 't', 'Q', 'f', 'delta f'] , dtype = {'y': float, 'xB': float, 't': float, 'Q': float, 'f': float, 'delta f': float})
 DVJpsiPH1xsec_data['Q'] = np.sqrt(DVJpsiPH1xsec_data['Q'])
 DVJpsiPH1xsec_data['t'] = -1 * DVJpsiPH1xsec_data['t']
 DVJpsiPH1xsec_data = DVJpsiPH1xsec_data[(DVJpsiPH1xsec_data['Q']>Q_threshold)]
@@ -119,7 +121,7 @@ DVJpsiPH1xsec_L_data['delta f'] = np.sqrt((DVJpsiPH1xsec_L_data['delta f'] / ((1
 DVJpsiPH1xsec_group_data = list(map(lambda set: DVJpsiPH1xsec_data[(DVJpsiPH1xsec_data['xB'] == set[0]) & (DVJpsiPH1xsec_data['t'] == set[1]) & ((DVJpsiPH1xsec_data['Q'] == set[2]))], xBtQlst_JpsiH))
 DVJpsiPH1xsec_L_group_data = list(map(lambda set: DVJpsiPH1xsec_L_data[(DVJpsiPH1xsec_data['xB'] == set[0]) & (DVJpsiPH1xsec_L_data['t'] == set[1]) & ((DVJpsiPH1xsec_L_data['Q'] == set[2]))], xBtQlst_JpsiH))
 
-DVJpsiPZEUSxsec_data = pd.read_csv('GUMPDATA/DVMP_HERA/DVJpsiPZEUSdt_w_mass.csv', header = None, names = ['y', 'xB', 't', 'Q', 'f', 'delta f'] , dtype = {'y': float, 'xB': float, 't': float, 'Q': float, 'f': float, 'delta f': float})
+DVJpsiPZEUSxsec_data = pd.read_csv(os.path.join(dir_path,'GUMPDATA/DVMP_HERA/DVJpsiPZEUSdt_w_mass.csv'), header = None, names = ['y', 'xB', 't', 'Q', 'f', 'delta f'] , dtype = {'y': float, 'xB': float, 't': float, 'Q': float, 'f': float, 'delta f': float})
 DVJpsiPZEUSxsec_data['Q'] = np.sqrt(DVJpsiPZEUSxsec_data['Q'])
 DVJpsiPZEUSxsec_data['t'] = -1 * DVJpsiPZEUSxsec_data['t']
 DVJpsiPZEUSxsec_data = DVJpsiPZEUSxsec_data[(DVJpsiPZEUSxsec_data['Q']>Q_threshold)]
@@ -139,7 +141,7 @@ DVJpsiPZEUSxsec_group_data = list(map(lambda set: DVJpsiPZEUSxsec_data[(DVJpsiPZ
 DVJpsiPZEUSxsec_L_group_data = list(map(lambda set: DVJpsiPZEUSxsec_L_data[(DVJpsiPZEUSxsec_data['xB'] == set[0]) & (DVJpsiPZEUSxsec_L_data['t'] == set[1]) & ((DVJpsiPZEUSxsec_L_data['Q'] == set[2]))], xBtQlst_JpsiZ))
 
 '''
-JpsiphotoH1xsec_data = pd.read_csv('GUMPDATA/DVMP_HERA/DVJpsiPZEUSdt_w_mass.csv', header = None, names = ['y', 'xB', 't', 'Q', 'f', 'delta f'] , dtype = {'y': float, 'xB': float, 't': float, 'Q': float, 'f': float, 'delta f': float})
+JpsiphotoH1xsec_data = pd.read_csv(os.path.join(dir_path,'GUMPDATA/DVMP_HERA/DVJpsiPZEUSdt_w_mass.csv'), header = None, names = ['y', 'xB', 't', 'Q', 'f', 'delta f'] , dtype = {'y': float, 'xB': float, 't': float, 'Q': float, 'f': float, 'delta f': float})
 JpsiphotoH1xsec_data['Q'] = np.sqrt(JpsiphotoH1xsec_data['Q'])
 JpsiphotoH1xsec_data['t'] = -1 * JpsiphotoH1xsec_data['t']
 JpsiphotoH1xsec_data = JpsiphotoH1xsec_data[(JpsiphotoH1xsec_data['Q']>Q_threshold)]
@@ -500,7 +502,7 @@ def forward_H_fit(Paralst_Unp):
 
     time_end = time.time() -time_start
 
-    with open('GUMP_Output/H_forward_fit.txt', 'w') as f:
+    with open(os.path.join(dir_path,'GUMP_Output/H_forward_fit.txt'), 'w') as f:
         print('Total running time: %.1f minutes. Total call of cost function: %3d.\n' % ( time_end/60, fit_forw_H.nfcn), file=f)
         print('The chi squared/d.o.f. is: %.2f / %3d ( = %.2f ).\n' % (fit_forw_H.fval, ndof_H, fit_forw_H.fval/ndof_H), file = f)
         print('Below are the final output parameters from iMinuit:', file = f)
@@ -508,7 +510,7 @@ def forward_H_fit(Paralst_Unp):
         print(*fit_forw_H.errors, sep=", ", file = f)
         print(fit_forw_H.params, file = f)
 
-    with open("GUMP_Output/H_forward_cov.csv","w",newline='') as my_csv:
+    with open(os.path.join(dir_path,"GUMP_Output/H_forward_cov.csv"),"w",newline='') as my_csv:
         csvWriter = csv.writer(my_csv,delimiter=',')
         csvWriter.writerows([*fit_forw_H.covariance])
 
@@ -604,7 +606,7 @@ def forward_E_fit(Paralst_Unp):
 
     time_end = time.time() -time_start
 
-    with open('GUMP_Output/E_forward_fit.txt', 'w') as f:
+    with open(os.path.join(dir_path,'GUMP_Output/E_forward_fit.txt'), 'w') as f:
         print('Total running time: %.1f minutes. Total call of cost function: %3d.\n' % ( time_end/60, fit_forw_E.nfcn), file=f)
         print('The chi squared/d.o.f. is: %.2f / %3d ( = %.2f ).\n' % (fit_forw_E.fval, ndof_E, fit_forw_E.fval/ndof_E), file = f)
         print('Below are the final output parameters from iMinuit:', file = f)
@@ -612,7 +614,7 @@ def forward_E_fit(Paralst_Unp):
         print(*fit_forw_E.errors, sep=", ", file = f)
         print(fit_forw_E.params, file = f)
 
-    with open("GUMP_Output/E_forward_cov.csv","w",newline='') as my_csv:
+    with open(os.path.join(dir_path,"GUMP_Output/E_forward_cov.csv"),"w",newline='') as my_csv:
         csvWriter = csv.writer(my_csv,delimiter=',')
         csvWriter.writerows([*fit_forw_E.covariance])
 
@@ -768,7 +770,7 @@ def forward_Ht_fit(Paralst_Pol):
     ndof_Ht = len(PDF_data_Ht.index) + len(tPDF_data_Ht.index) + len(GFF_data_Ht.index)  - fit_forw_Ht.nfit
 
     time_end = time.time() -time_start    
-    with open('GUMP_Output/Ht_forward_fit.txt', 'w') as f:
+    with open(os.path.join(dir_path,'GUMP_Output/Ht_forward_fit.txt'), 'w') as f:
         print('Total running time: %.1f minutes. Total call of cost function: %3d.\n' % ( time_end/60, fit_forw_Ht.nfcn), file=f)
         print('The chi squared/d.o.f. is: %.2f / %3d ( = %.2f ).\n' % (fit_forw_Ht.fval, ndof_Ht, fit_forw_Ht.fval/ndof_Ht), file = f)
         print('Below are the final output parameters from iMinuit:', file = f)
@@ -776,7 +778,7 @@ def forward_Ht_fit(Paralst_Pol):
         print(*fit_forw_Ht.errors, sep=", ", file = f)
         print(fit_forw_Ht.params, file = f)
 
-    with open("GUMP_Output/Ht_forward_cov.csv","w",newline='') as my_csv:
+    with open(os.path.join(dir_path,"GUMP_Output/Ht_forward_cov.csv"),"w",newline='') as my_csv:
         csvWriter = csv.writer(my_csv,delimiter=',')
         csvWriter.writerows([*fit_forw_Ht.covariance])
 
@@ -871,7 +873,7 @@ def forward_Et_fit(Paralst_Pol):
     ndof_Et = len(PDF_data_Et.index) + len(tPDF_data_Et.index) + len(GFF_data_Et.index)  - fit_forw_Et.nfit
 
     time_end = time.time() -time_start    
-    with open('GUMP_Output/Et_forward_fit.txt', 'w') as f:
+    with open(os.path.join(dir_path,'GUMP_Output/Et_forward_fit.txt'), 'w') as f:
         print('Total running time: %.1f minutes. Total call of cost function: %3d.\n' % ( time_end/60, fit_forw_Et.nfcn), file=f)
         print('The chi squared/d.o.f. is: %.2f / %3d ( = %.2f ).\n' % (fit_forw_Et.fval, ndof_Et, fit_forw_Et.fval/ndof_Et), file = f)
         print('Below are the final output parameters from iMinuit:', file = f)
@@ -879,7 +881,7 @@ def forward_Et_fit(Paralst_Pol):
         print(*fit_forw_Et.errors, sep=", ", file = f)
         print(fit_forw_Et.params, file = f)
 
-    with open("GUMP_Output/Et_forward_cov.csv","w",newline='') as my_csv:
+    with open(os.path.join(dir_path,"GUMP_Output/Et_forward_cov.csv"),"w",newline='') as my_csv:
         csvWriter = csv.writer(my_csv,delimiter=',')
         csvWriter.writerows([*fit_forw_Et.covariance])
 
@@ -1134,7 +1136,7 @@ def off_forward_fit(Paralst_Unp, Paralst_Pol):
 
     time_end = time.time() -time_start
 
-    with open('GUMP_Output/off_forward_fit.txt', 'w') as f:
+    with open(os.path.join(dir_path,'GUMP_Output/off_forward_fit.txt'), 'w') as f:
         print('Total running time: %.1f minutes. Total call of cost function: %3d.\n' % ( time_end/60, fit_off_forward.nfcn), file=f)
         print('The chi squared/d.o.f. is: %.2f / %3d ( = %.2f ).\n' % (fit_off_forward.fval, ndof_off_forward, fit_off_forward.fval/ndof_off_forward), file = f)
         print('Below are the final output parameters from iMinuit:', file = f)
@@ -1142,7 +1144,7 @@ def off_forward_fit(Paralst_Unp, Paralst_Pol):
         print(*fit_off_forward.errors, sep=", ", file = f)
         print(fit_off_forward.params, file = f)
 
-    with open("GUMP_Output/Off_forward_cov.csv","w",newline='') as my_csv:
+    with open(os.path.join(dir_path,"GUMP_Output/Off_forward_cov.csv"),"w",newline='') as my_csv:
         csvWriter = csv.writer(my_csv,delimiter=',')
         csvWriter.writerows([*fit_off_forward.covariance])
 
@@ -1336,7 +1338,7 @@ def dvmp_fit(Paralst_Unp):
 
     time_end = time.time() -time_start
 
-    with open('GUMP_Output/dvmp_fit_NLOPDF.txt', 'w', encoding="utf-8") as f:
+    with open(os.path.join(dir_path,'GUMP_Output/dvmp_fit_NLOPDF.txt'), 'w', encoding="utf-8") as f:
         print('Total running time: %.1f minutes. Total call of cost function: %3d.\n' % ( time_end/60, fit_dvmp.nfcn), file=f)
         print('The chi squared/d.o.f. is: %.2f / %3d ( = %.2f ).\n' % (fit_dvmp.fval, ndof_dvmp, fit_dvmp.fval/ndof_dvmp), file = f)
         print('Below are the final output parameters from iMinuit:', file = f)
@@ -1344,7 +1346,7 @@ def dvmp_fit(Paralst_Unp):
         print(*fit_dvmp.errors, sep=", ", file = f)
         print(fit_dvmp.params, file = f)
 
-    with open("GUMP_Output/dvmp_cov.csv","w", newline='', encoding="utf-8") as my_csv:
+    with open(os.path.join(dir_path,"GUMP_Output/dvmp_cov.csv"),"w", newline='', encoding="utf-8") as my_csv:
         csvWriter = csv.writer(my_csv,delimiter=',')
         csvWriter.writerows([*fit_dvmp.covariance])
 
