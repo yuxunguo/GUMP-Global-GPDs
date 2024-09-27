@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Parameters &mdash; GUMP GPD Analysis 0.5.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=19f00094" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../_static/documentation_options.js?v=1dd76d02"></script>
+        <script src="../_static/doctools.js?v=9a2dae69"></script>
+        <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            GUMP GPD Analysis
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../modules.html">GUMP-Global-GPDs</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">GUMP GPD Analysis</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="index.html">Module code</a></li>
+      <li class="breadcrumb-item active">Parameters</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for Parameters</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">The minimizer using iMinuit, which takes 1-D array for the input parameters only.</span>
+<span class="sd">Extra efforts needed to convert the form of the parameters.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="c1"># Number of GPD species, 4 leading-twist GPDs including H, E Ht, Et are needed.</span>
+<span class="n">NumofGPDSpecies</span> <span class="o">=</span> <span class="mi">4</span>
+<span class="c1"># Number of flavor factor, Flavor_Factor = 2 * nf + 1 needed including 2 * nf quark (antiquark) and one gluon</span>
+<span class="n">Flavor_Factor</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">*</span> <span class="mi">2</span> <span class="o">+</span> <span class="mi">1</span>
+<span class="c1"># Number of ansatz, 1 set of (N, alpha, beta, alphap) will be used to start with</span>
+<span class="n">init_NumofAnsatz</span> <span class="o">=</span> <span class="mi">1</span>
+<span class="c1"># Size of one parameter set, a set of parameters (N, alpha, beta, alphap) contain 4 parameters</span>
+<span class="n">Single_Param_Size</span> <span class="o">=</span> <span class="mi">4</span>
+<span class="c1"># A factor of 3 including the xi^0, xi^2, xi^4 terms</span>
+<span class="n">xi2_Factor</span> <span class="o">=</span> <span class="mi">3</span>
+<span class="c1"># Total number of parameters </span>
+<span class="n">Tot_param_Size</span> <span class="o">=</span> <span class="n">NumofGPDSpecies</span> <span class="o">*</span> <span class="n">xi2_Factor</span> <span class="o">*</span> <span class="n">Flavor_Factor</span> <span class="o">*</span>  <span class="n">init_NumofAnsatz</span> <span class="o">*</span> <span class="n">Single_Param_Size</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">The parameters will form a 5-dimensional matrix such that each para[#1,#2,#3,#4,#5] is a real number.</span>
+<span class="sd">#1 = [0,1,2,3] corresponds to [H, E, Ht, Et]</span>
+<span class="sd">#2 = [0,1] corresponds to [xi^0 terms, xi^2 terms]</span>
+<span class="sd">#3 = [0,1,2,3,4] corresponds to [u - ubar, ubar, d - dbar, dbar, g]</span>
+<span class="sd">#4 = [0,1,...,init_NumofAnsatz-1] corresponds to different set of parameters</span>
+<span class="sd">#5 = [0,1,2,3] correspond to [norm, alpha, beta, alphap] as a set of parameters</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">scipy</span> <span class="k">as</span> <span class="nn">sp</span>
+
+<div class="viewcode-block" id="ParaManager_Unp">
+<a class="viewcode-back" href="../Parameters.html#Parameters.ParaManager_Unp">[docs]</a>
+<span class="k">def</span> <span class="nf">ParaManager_Unp</span><span class="p">(</span><span class="n">Paralst</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">):</span>
+
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">     Here is the parameters manager, as there are over 100 free parameters. Therefore not all of them can be set free.</span>
+<span class="sd">     Each element F_{q} is a two-dimensional matrix with init_NumofAnsatz = 1 row and Single_Param_Size = 4 columns</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="p">[</span><span class="n">Norm_HuV</span><span class="p">,</span>    <span class="n">alpha_HuV</span><span class="p">,</span>    <span class="n">beta_HuV</span><span class="p">,</span>    <span class="n">alphap_HuV</span><span class="p">,</span> 
+     <span class="n">Norm_Hubar</span><span class="p">,</span>  <span class="n">alpha_Hubar</span><span class="p">,</span>  <span class="n">beta_Hubar</span><span class="p">,</span>  <span class="n">alphap_Hqbar</span><span class="p">,</span>
+     <span class="n">Norm_HdV</span><span class="p">,</span>    <span class="n">alpha_HdV</span><span class="p">,</span>    <span class="n">beta_HdV</span><span class="p">,</span>    <span class="n">alphap_HdV</span><span class="p">,</span>
+     <span class="n">Norm_Hdbar</span><span class="p">,</span>  <span class="n">alpha_Hdbar</span><span class="p">,</span>  <span class="n">beta_Hdbar</span><span class="p">,</span> 
+     <span class="n">Norm_Hg</span><span class="p">,</span>     <span class="n">alpha_Hg</span><span class="p">,</span>     <span class="n">beta_Hg</span><span class="p">,</span>     <span class="n">alphap_Hg</span><span class="p">,</span>
+     <span class="n">Norm_EuV</span><span class="p">,</span>    <span class="n">alpha_EuV</span><span class="p">,</span>    <span class="n">beta_EuV</span><span class="p">,</span>    <span class="n">alphap_EuV</span><span class="p">,</span>
+     <span class="n">Norm_EdV</span><span class="p">,</span>    <span class="n">R_E_Sea</span><span class="p">,</span>      <span class="n">R_Hu_xi2</span><span class="p">,</span>    <span class="n">R_Hd_xi2</span><span class="p">,</span>    <span class="n">R_Hg_xi2</span><span class="p">,</span>
+     <span class="n">R_Eu_xi2</span><span class="p">,</span>    <span class="n">R_Ed_xi2</span><span class="p">,</span>     <span class="n">R_Eg_xi2</span><span class="p">,</span>
+     <span class="n">R_Hu_xi4</span><span class="p">,</span>    <span class="n">R_Hd_xi4</span><span class="p">,</span>     <span class="n">R_Hg_xi4</span><span class="p">,</span>
+     <span class="n">R_Eu_xi4</span><span class="p">,</span>    <span class="n">R_Ed_xi4</span><span class="p">,</span>     <span class="n">R_Eg_xi4</span><span class="p">,</span>    <span class="n">bexp_HSea</span><span class="p">,</span> <span class="n">bexp_Hg</span><span class="p">,</span> <span class="n">Invm2_Hg</span><span class="p">]</span> <span class="o">=</span> <span class="n">Paralst</span>
+    
+    <span class="c1">#R_E_Sea = 0</span>
+    <span class="c1">#R_Hu_xi4 = 0</span>
+    <span class="c1">#R_Hd_xi4 = 0</span>
+    <span class="c1">#R_Eu_xi4 = 0</span>
+    <span class="c1">#R_Ed_xi4 = 0</span>
+
+    <span class="c1"># Initial forward parameters for the H of (uV, ubar, dV, dbar,g) distributions</span>
+    <span class="n">H_uV</span> <span class="o">=</span>   <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="n">Norm_HuV</span><span class="p">,</span>   <span class="n">alpha_HuV</span><span class="p">,</span>   <span class="n">beta_HuV</span><span class="p">,</span>   <span class="n">alphap_HuV</span><span class="p">,</span>   <span class="mi">0</span><span class="p">,</span>         <span class="mi">0</span><span class="p">]])</span>
+    <span class="n">H_ubar</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="n">Norm_Hubar</span><span class="p">,</span> <span class="n">alpha_Hubar</span><span class="p">,</span> <span class="n">beta_Hubar</span><span class="p">,</span> <span class="n">alphap_Hqbar</span><span class="p">,</span> <span class="n">bexp_HSea</span><span class="p">,</span> <span class="mi">0</span><span class="p">]])</span>
+    <span class="n">H_dV</span> <span class="o">=</span>   <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="n">Norm_HdV</span><span class="p">,</span>   <span class="n">alpha_HdV</span><span class="p">,</span>   <span class="n">beta_HdV</span><span class="p">,</span>   <span class="n">alphap_HdV</span><span class="p">,</span>   <span class="mi">0</span><span class="p">,</span>         <span class="mi">0</span><span class="p">]])</span>
+    <span class="n">H_dbar</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="n">Norm_Hdbar</span><span class="p">,</span> <span class="n">alpha_Hdbar</span><span class="p">,</span> <span class="n">beta_Hdbar</span><span class="p">,</span> <span class="n">alphap_Hqbar</span><span class="p">,</span> <span class="n">bexp_HSea</span><span class="p">,</span> <span class="mi">0</span><span class="p">]])</span>
+    <span class="n">H_g</span> <span class="o">=</span>    <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="n">Norm_Hg</span><span class="p">,</span>    <span class="n">alpha_Hg</span><span class="p">,</span>    <span class="n">beta_Hg</span><span class="p">,</span>    <span class="n">alphap_Hg</span><span class="p">,</span>    <span class="n">bexp_Hg</span><span class="p">,</span>   <span class="n">Invm2_Hg</span><span class="p">]])</span>
+
+    <span class="c1"># Initial xi^2 parameters for the H of (uV, ubar, dV, dbar,g) distributions</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        One free parameter R_H_xi2 for the ratio to the forward PDF H for u, d ang g</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">H_uV_xi2</span> <span class="o">=</span>   <span class="n">np</span><span class="o">.</span><span class="n">einsum</span><span class="p">(</span><span class="s1">&#39;...i,i-&gt;...i&#39;</span><span class="p">,</span> <span class="n">H_uV</span><span class="p">,</span>   <span class="p">[</span><span class="n">R_Hu_xi2</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">])</span>
+    <span class="n">H_ubar_xi2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">einsum</span><span class="p">(</span><span class="s1">&#39;...i,i-&gt;...i&#39;</span><span class="p">,</span> <span class="n">H_ubar</span><span class="p">,</span> <span class="p">[</span><span class="n">R_Hu_xi2</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">])</span>
+    <span class="n">H_dV_xi2</span> <span class="o">=</span>   <span class="n">np</span><span class="o">.</span><span class="n">einsum</span><span class="p">(</span><span class="s1">&#39;...i,i-&gt;...i&#39;</span><span class="p">,</span> <span class="n">H_dV</span><span class="p">,</span>   <span class="p">[</span><span class="n">R_Hd_xi2</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">])</span>
+    <span class="n">H_dbar_xi2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">einsum</span><span class="p">(</span><span class="s1">&#39;...i,i-&gt;...i&#39;</span><span class="p">,</span> <span class="n">H_dbar</span><span class="p">,</span> <span class="p">[</span><span class="n">R_Hd_xi2</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">])</span>
+    <span class="n">H_g_xi2</span> <span class="o">=</span>    <span class="n">np</span><span class="o">.</span><span class="n">einsum</span><span class="p">(</span><span class="s1">&#39;...i,i-&gt;...i&#39;</span><span class="p">,</span> <span class="n">H_g</span><span class="p">,</span>    <span class="p">[</span><span class="n">R_Hg_xi2</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">])</span>
+
+    <span class="n">H_uV_xi4</span> <span class="o">=</span>   <span class="n">np</span><span class="o">.</span><span class="n">einsum</span><span class="p">(</span><span class="s1">&#39;...i,i-&gt;...i&#39;</span><span class="p">,</span> <span class="n">H_uV</span><span class="p">,</span>   <span class="p">[</span><span class="n">R_Hu_xi4</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">])</span>
+    <span class="n">H_ubar_xi4</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">einsum</span><span class="p">(</span><span class="s1">&#39;...i,i-&gt;...i&#39;</span><span class="p">,</span> <span class="n">H_ubar</span><span class="p">,</span> <span class="p">[</span><span class="n">R_Hu_xi4</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">])</span>
+    <span class="n">H_dV_xi4</span> <span class="o">=</span>   <span class="n">np</span><span class="o">.</span><span class="n">einsum</span><span class="p">(</span><span class="s1">&#39;...i,i-&gt;...i&#39;</span><span class="p">,</span> <span class="n">H_dV</span><span class="p">,</span>   <span class="p">[</span><span class="n">R_Hd_xi4</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">])</span>
+    <span class="n">H_dbar_xi4</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">einsum</span><span class="p">(</span><span class="s1">&#39;...i,i-&gt;...i&#39;</span><span class="p">,</span> <span class="n">H_dbar</span><span class="p">,</span> <span class="p">[</span><span class="n">R_Hd_xi4</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">])</span>
+    <span class="n">H_g_xi4</span> <span class="o">=</span>    <span class="n">np</span><span class="o">.</span><span class="n">einsum</span><span class="p">(</span><span class="s1">&#39;...i,i-&gt;...i&#39;</span><span class="p">,</span> <span class="n">H_g</span><span class="p">,</span>    <span class="p">[</span><span class="n">R_Hg_xi4</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">])</span>
+
+    <span class="c1"># Initial forward parameters for the E of (uV, ubar, dV, dbar,g) distributions</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Three free parameter R_E_u, R_E_d, R_E_g for the E/H ratio </span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">E_uV</span> <span class="o">=</span>   <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="n">Norm_EuV</span><span class="p">,</span>   <span class="n">alpha_EuV</span><span class="p">,</span>   <span class="n">beta_EuV</span><span class="p">,</span>   <span class="n">alphap_EuV</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]])</span>
+    <span class="n">E_ubar</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">einsum</span><span class="p">(</span><span class="s1">&#39;...i,i-&gt;...i&#39;</span><span class="p">,</span> <span class="n">H_ubar</span><span class="p">,</span>   <span class="p">[</span><span class="n">R_E_Sea</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">])</span>
+    <span class="n">E_dV</span> <span class="o">=</span>   <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="n">Norm_EdV</span><span class="p">,</span>   <span class="n">alpha_EuV</span><span class="p">,</span>   <span class="n">beta_EuV</span><span class="p">,</span>   <span class="n">alphap_EuV</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]])</span>
+    <span class="n">E_dbar</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">einsum</span><span class="p">(</span><span class="s1">&#39;...i,i-&gt;...i&#39;</span><span class="p">,</span> <span class="n">H_dbar</span><span class="p">,</span>   <span class="p">[</span><span class="n">R_E_Sea</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">])</span>
+    <span class="n">E_g</span> <span class="o">=</span>    <span class="n">np</span><span class="o">.</span><span class="n">einsum</span><span class="p">(</span><span class="s1">&#39;...i,i-&gt;...i&#39;</span><span class="p">,</span> <span class="n">H_g</span><span class="p">,</span>      <span class="p">[</span><span class="n">R_E_Sea</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">])</span>
+
+    <span class="c1"># Initial xi^2 parameters for the E of (uV, ubar, dV, dbar,g) distributions</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        One free parameter R_E_xi2 for the ratio to the forward PDF E</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">E_uV_xi2</span> <span class="o">=</span>   <span class="n">np</span><span class="o">.</span><span class="n">einsum</span><span class="p">(</span><span class="s1">&#39;...i,i-&gt;...i&#39;</span><span class="p">,</span> <span class="n">E_uV</span><span class="p">,</span>     <span class="p">[</span><span class="n">R_Eu_xi2</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">])</span>
+    <span class="n">E_ubar_xi2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">einsum</span><span class="p">(</span><span class="s1">&#39;...i,i-&gt;...i&#39;</span><span class="p">,</span> <span class="n">E_ubar</span><span class="p">,</span>   <span class="p">[</span><span class="n">R_Eu_xi2</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">])</span>
+    <span class="n">E_dV_xi2</span> <span class="o">=</span>   <span class="n">np</span><span class="o">.</span><span class="n">einsum</span><span class="p">(</span><span class="s1">&#39;...i,i-&gt;...i&#39;</span><span class="p">,</span> <span class="n">E_dV</span><span class="p">,</span>     <span class="p">[</span><span class="n">R_Ed_xi2</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">])</span>
+    <span class="n">E_dbar_xi2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">einsum</span><span class="p">(</span><span class="s1">&#39;...i,i-&gt;...i&#39;</span><span class="p">,</span> <span class="n">E_dbar</span><span class="p">,</span>   <span class="p">[</span><span class="n">R_Ed_xi2</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">])</span>
+    <span class="n">E_g_xi2</span> <span class="o">=</span>    <span class="n">np</span><span class="o">.</span><span class="n">einsum</span><span class="p">(</span><span class="s1">&#39;...i,i-&gt;...i&#39;</span><span class="p">,</span> <span class="n">E_g</span><span class="p">,</span>      <span class="p">[</span><span class="n">R_Eg_xi2</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">])</span>
+
+    <span class="n">E_uV_xi4</span> <span class="o">=</span>   <span class="n">np</span><span class="o">.</span><span class="n">einsum</span><span class="p">(</span><span class="s1">&#39;...i,i-&gt;...i&#39;</span><span class="p">,</span> <span class="n">E_uV</span><span class="p">,</span>     <span class="p">[</span><span class="n">R_Eu_xi4</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">])</span>
+    <span class="n">E_ubar_xi4</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">einsum</span><span class="p">(</span><span class="s1">&#39;...i,i-&gt;...i&#39;</span><span class="p">,</span> <span class="n">E_ubar</span><span class="p">,</span>   <span class="p">[</span><span class="n">R_Eu_xi4</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">])</span>
+    <span class="n">E_dV_xi4</span> <span class="o">=</span>   <span class="n">np</span><span class="o">.</span><span class="n">einsum</span><span class="p">(</span><span class="s1">&#39;...i,i-&gt;...i&#39;</span><span class="p">,</span> <span class="n">E_dV</span><span class="p">,</span>     <span class="p">[</span><span class="n">R_Ed_xi4</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">])</span>
+    <span class="n">E_dbar_xi4</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">einsum</span><span class="p">(</span><span class="s1">&#39;...i,i-&gt;...i&#39;</span><span class="p">,</span> <span class="n">E_dbar</span><span class="p">,</span>   <span class="p">[</span><span class="n">R_Ed_xi4</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">])</span>
+    <span class="n">E_g_xi4</span> <span class="o">=</span>    <span class="n">np</span><span class="o">.</span><span class="n">einsum</span><span class="p">(</span><span class="s1">&#39;...i,i-&gt;...i&#39;</span><span class="p">,</span> <span class="n">E_g</span><span class="p">,</span>      <span class="p">[</span><span class="n">R_Eg_xi4</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">])</span>
+
+    <span class="n">Hlst</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="n">H_uV</span><span class="p">,</span>     <span class="n">H_ubar</span><span class="p">,</span>     <span class="n">H_dV</span><span class="p">,</span>     <span class="n">H_dbar</span><span class="p">,</span>     <span class="n">H_g</span><span class="p">],</span>
+                     <span class="p">[</span><span class="n">H_uV_xi2</span><span class="p">,</span> <span class="n">H_ubar_xi2</span><span class="p">,</span> <span class="n">H_dV_xi2</span><span class="p">,</span> <span class="n">H_dbar_xi2</span><span class="p">,</span> <span class="n">H_g_xi2</span><span class="p">],</span>
+                     <span class="p">[</span><span class="n">H_uV_xi4</span><span class="p">,</span> <span class="n">H_ubar_xi4</span><span class="p">,</span> <span class="n">H_dV_xi4</span><span class="p">,</span> <span class="n">H_dbar_xi4</span><span class="p">,</span> <span class="n">H_g_xi4</span><span class="p">]])</span>
+    
+    <span class="n">Elst</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="n">E_uV</span><span class="p">,</span>     <span class="n">E_ubar</span><span class="p">,</span>     <span class="n">E_dV</span><span class="p">,</span>     <span class="n">E_dbar</span><span class="p">,</span>     <span class="n">E_g</span><span class="p">],</span>
+                     <span class="p">[</span><span class="n">E_uV_xi2</span><span class="p">,</span> <span class="n">E_ubar_xi2</span><span class="p">,</span> <span class="n">E_dV_xi2</span><span class="p">,</span> <span class="n">E_dbar_xi2</span><span class="p">,</span> <span class="n">E_g_xi2</span><span class="p">],</span>
+                     <span class="p">[</span><span class="n">E_uV_xi4</span><span class="p">,</span> <span class="n">E_ubar_xi4</span><span class="p">,</span> <span class="n">E_dV_xi4</span><span class="p">,</span> <span class="n">E_dbar_xi4</span><span class="p">,</span> <span class="n">E_g_xi4</span><span class="p">]])</span>
+
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">Hlst</span><span class="p">,</span> <span class="n">Elst</span><span class="p">])</span></div>
+
+
+<div class="viewcode-block" id="ParaManager_Pol">
+<a class="viewcode-back" href="../Parameters.html#Parameters.ParaManager_Pol">[docs]</a>
+<span class="k">def</span> <span class="nf">ParaManager_Pol</span><span class="p">(</span><span class="n">Paralst</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">):</span>
+
+    <span class="p">[</span><span class="n">Norm_HtuV</span><span class="p">,</span>   <span class="n">alpha_HtuV</span><span class="p">,</span>   <span class="n">beta_HtuV</span><span class="p">,</span>   <span class="n">alphap_HtuV</span><span class="p">,</span> 
+     <span class="n">Norm_Htubar</span><span class="p">,</span> <span class="n">alpha_Htubar</span><span class="p">,</span> <span class="n">beta_Htubar</span><span class="p">,</span> <span class="n">alphap_Htqbar</span><span class="p">,</span>
+     <span class="n">Norm_HtdV</span><span class="p">,</span>   <span class="n">alpha_HtdV</span><span class="p">,</span>   <span class="n">beta_HtdV</span><span class="p">,</span>   <span class="n">alphap_HtdV</span><span class="p">,</span>
+     <span class="n">Norm_Htdbar</span><span class="p">,</span> <span class="n">alpha_Htdbar</span><span class="p">,</span> <span class="n">beta_Htdbar</span><span class="p">,</span> 
+     <span class="n">Norm_Htg</span><span class="p">,</span>    <span class="n">alpha_Htg</span><span class="p">,</span>    <span class="n">beta_Htg</span><span class="p">,</span>    <span class="n">alphap_Htg</span><span class="p">,</span>
+     <span class="n">Norm_EtuV</span><span class="p">,</span>   <span class="n">alpha_EtuV</span><span class="p">,</span>   <span class="n">beta_EtuV</span><span class="p">,</span>   <span class="n">alphap_EtuV</span><span class="p">,</span>
+     <span class="n">Norm_EtdV</span><span class="p">,</span>   <span class="n">R_Et_Sea</span><span class="p">,</span>     <span class="n">R_Htu_xi2</span><span class="p">,</span>   <span class="n">R_Htd_xi2</span><span class="p">,</span>    <span class="n">R_Htg_xi2</span><span class="p">,</span>
+     <span class="n">R_Etu_xi2</span><span class="p">,</span>   <span class="n">R_Etd_xi2</span><span class="p">,</span>    <span class="n">R_Etg_xi2</span><span class="p">,</span>
+     <span class="n">R_Htu_xi4</span><span class="p">,</span>   <span class="n">R_Htd_xi4</span><span class="p">,</span>    <span class="n">R_Htg_xi4</span><span class="p">,</span>
+     <span class="n">R_Etu_xi4</span><span class="p">,</span>   <span class="n">R_Etd_xi4</span><span class="p">,</span>    <span class="n">R_Etg_xi4</span><span class="p">,</span>   <span class="n">bexp_HtSea</span><span class="p">]</span> <span class="o">=</span> <span class="n">Paralst</span>
+
+    <span class="n">R_Htu_xi4</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">R_Htd_xi4</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">R_Etu_xi4</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">R_Etd_xi4</span> <span class="o">=</span> <span class="mi">0</span>
+    
+    <span class="n">R_Htg_xi2</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">R_Etg_xi2</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">R_Htg_xi4</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">R_Etg_xi4</span> <span class="o">=</span> <span class="mi">0</span>
+
+    <span class="c1"># Initial forward parameters for the Ht of (uV, ubar, dV, dbar,g) distributions</span>
+
+    <span class="n">Ht_uV</span> <span class="o">=</span>   <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="n">Norm_HtuV</span><span class="p">,</span>   <span class="n">alpha_HtuV</span><span class="p">,</span>   <span class="n">beta_HtuV</span><span class="p">,</span>   <span class="n">alphap_HtuV</span><span class="p">,</span>   <span class="mi">0</span><span class="p">,</span>          <span class="mi">0</span><span class="p">]])</span>
+    <span class="n">Ht_ubar</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="n">Norm_Htubar</span><span class="p">,</span> <span class="n">alpha_Htubar</span><span class="p">,</span> <span class="n">beta_Htubar</span><span class="p">,</span> <span class="n">alphap_Htqbar</span><span class="p">,</span> <span class="n">bexp_HtSea</span><span class="p">,</span> <span class="mi">0</span><span class="p">]])</span>
+    <span class="n">Ht_dV</span> <span class="o">=</span>   <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="n">Norm_HtdV</span><span class="p">,</span>   <span class="n">alpha_HtdV</span><span class="p">,</span>   <span class="n">beta_HtdV</span><span class="p">,</span>   <span class="n">alphap_HtdV</span><span class="p">,</span>   <span class="mi">0</span><span class="p">,</span>          <span class="mi">0</span><span class="p">]])</span>
+    <span class="n">Ht_dbar</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="n">Norm_Htdbar</span><span class="p">,</span> <span class="n">alpha_Htdbar</span><span class="p">,</span> <span class="n">beta_Htdbar</span><span class="p">,</span> <span class="n">alphap_Htqbar</span><span class="p">,</span> <span class="n">bexp_HtSea</span><span class="p">,</span> <span class="mi">0</span><span class="p">]])</span>
+    <span class="n">Ht_g</span> <span class="o">=</span>    <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="n">Norm_Htg</span><span class="p">,</span>    <span class="n">alpha_Htg</span><span class="p">,</span>    <span class="n">beta_Htg</span><span class="p">,</span>    <span class="n">alphap_Htg</span><span class="p">,</span>    <span class="n">bexp_HtSea</span><span class="p">,</span> <span class="mi">0</span><span class="p">]])</span>
+
+    <span class="c1"># Initial xi^2 parameters for the Ht of (uV, ubar, dV, dbar,g) distributions</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        One free parameter R_Ht_xi2 for the ratio to the forward PDF H for u, d ang g</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">Ht_uV_xi2</span> <span class="o">=</span>   <span class="n">np</span><span class="o">.</span><span class="n">einsum</span><span class="p">(</span><span class="s1">&#39;...i,i-&gt;...i&#39;</span><span class="p">,</span> <span class="n">Ht_uV</span><span class="p">,</span>   <span class="p">[</span><span class="n">R_Htu_xi2</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">])</span>
+    <span class="n">Ht_ubar_xi2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">einsum</span><span class="p">(</span><span class="s1">&#39;...i,i-&gt;...i&#39;</span><span class="p">,</span> <span class="n">Ht_ubar</span><span class="p">,</span> <span class="p">[</span><span class="n">R_Htu_xi2</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">])</span>
+    <span class="n">Ht_dV_xi2</span> <span class="o">=</span>   <span class="n">np</span><span class="o">.</span><span class="n">einsum</span><span class="p">(</span><span class="s1">&#39;...i,i-&gt;...i&#39;</span><span class="p">,</span> <span class="n">Ht_dV</span><span class="p">,</span>   <span class="p">[</span><span class="n">R_Htd_xi2</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">])</span>
+    <span class="n">Ht_dbar_xi2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">einsum</span><span class="p">(</span><span class="s1">&#39;...i,i-&gt;...i&#39;</span><span class="p">,</span> <span class="n">Ht_dbar</span><span class="p">,</span> <span class="p">[</span><span class="n">R_Htd_xi2</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">])</span>
+    <span class="n">Ht_g_xi2</span> <span class="o">=</span>    <span class="n">np</span><span class="o">.</span><span class="n">einsum</span><span class="p">(</span><span class="s1">&#39;...i,i-&gt;...i&#39;</span><span class="p">,</span> <span class="n">Ht_g</span><span class="p">,</span>    <span class="p">[</span><span class="n">R_Htg_xi2</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">])</span>
+
+    <span class="n">Ht_uV_xi4</span> <span class="o">=</span>   <span class="n">np</span><span class="o">.</span><span class="n">einsum</span><span class="p">(</span><span class="s1">&#39;...i,i-&gt;...i&#39;</span><span class="p">,</span> <span class="n">Ht_uV</span><span class="p">,</span>   <span class="p">[</span><span class="n">R_Htu_xi4</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">])</span>
+    <span class="n">Ht_ubar_xi4</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">einsum</span><span class="p">(</span><span class="s1">&#39;...i,i-&gt;...i&#39;</span><span class="p">,</span> <span class="n">Ht_ubar</span><span class="p">,</span> <span class="p">[</span><span class="n">R_Htu_xi4</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">])</span>
+    <span class="n">Ht_dV_xi4</span> <span class="o">=</span>   <span class="n">np</span><span class="o">.</span><span class="n">einsum</span><span class="p">(</span><span class="s1">&#39;...i,i-&gt;...i&#39;</span><span class="p">,</span> <span class="n">Ht_dV</span><span class="p">,</span>   <span class="p">[</span><span class="n">R_Htd_xi4</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">])</span>
+    <span class="n">Ht_dbar_xi4</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">einsum</span><span class="p">(</span><span class="s1">&#39;...i,i-&gt;...i&#39;</span><span class="p">,</span> <span class="n">Ht_dbar</span><span class="p">,</span> <span class="p">[</span><span class="n">R_Htd_xi4</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">])</span>
+    <span class="n">Ht_g_xi4</span> <span class="o">=</span>    <span class="n">np</span><span class="o">.</span><span class="n">einsum</span><span class="p">(</span><span class="s1">&#39;...i,i-&gt;...i&#39;</span><span class="p">,</span> <span class="n">Ht_g</span><span class="p">,</span>    <span class="p">[</span><span class="n">R_Htg_xi4</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">])</span>
+
+    <span class="c1"># Initial forward parameters for the Et of (uV, ubar, dV, dbar,g) distributions</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Three free parameter R_Et_u, R_Et_d, R_E_g for the Et/Ht ratio </span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">Et_uV</span> <span class="o">=</span>   <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="n">Norm_EtuV</span><span class="p">,</span>   <span class="n">alpha_EtuV</span><span class="p">,</span>   <span class="n">beta_EtuV</span><span class="p">,</span>   <span class="n">alphap_EtuV</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]])</span>
+    <span class="n">Et_ubar</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">einsum</span><span class="p">(</span><span class="s1">&#39;...i,i-&gt;...i&#39;</span><span class="p">,</span> <span class="n">Ht_ubar</span><span class="p">,</span> <span class="p">[</span><span class="n">R_Et_Sea</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">])</span>
+    <span class="n">Et_dV</span> <span class="o">=</span>   <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="n">Norm_EtdV</span><span class="p">,</span>   <span class="n">alpha_EtuV</span><span class="p">,</span>   <span class="n">beta_EtuV</span><span class="p">,</span>   <span class="n">alphap_EtuV</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]])</span>
+    <span class="n">Et_dbar</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">einsum</span><span class="p">(</span><span class="s1">&#39;...i,i-&gt;...i&#39;</span><span class="p">,</span> <span class="n">Ht_dbar</span><span class="p">,</span> <span class="p">[</span><span class="n">R_Et_Sea</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">])</span>
+    <span class="n">Et_g</span> <span class="o">=</span>    <span class="n">np</span><span class="o">.</span><span class="n">einsum</span><span class="p">(</span><span class="s1">&#39;...i,i-&gt;...i&#39;</span><span class="p">,</span> <span class="n">Ht_g</span><span class="p">,</span>    <span class="p">[</span><span class="n">R_Et_Sea</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">])</span>
+
+    <span class="c1"># Initial xi^2 parameters for the Et of (uV, ubar, dV, dbar,g) distributions</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        One free parameter R_Et_xi2 for the ratio to the forward PDF Et for u, d ang g</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">Et_uV_xi2</span> <span class="o">=</span>   <span class="n">np</span><span class="o">.</span><span class="n">einsum</span><span class="p">(</span><span class="s1">&#39;...i,i-&gt;...i&#39;</span><span class="p">,</span> <span class="n">Et_uV</span><span class="p">,</span>   <span class="p">[</span><span class="n">R_Etu_xi2</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">])</span>
+    <span class="n">Et_ubar_xi2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">einsum</span><span class="p">(</span><span class="s1">&#39;...i,i-&gt;...i&#39;</span><span class="p">,</span> <span class="n">Et_ubar</span><span class="p">,</span> <span class="p">[</span><span class="n">R_Etu_xi2</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">])</span>
+    <span class="n">Et_dV_xi2</span> <span class="o">=</span>   <span class="n">np</span><span class="o">.</span><span class="n">einsum</span><span class="p">(</span><span class="s1">&#39;...i,i-&gt;...i&#39;</span><span class="p">,</span> <span class="n">Et_dV</span><span class="p">,</span>   <span class="p">[</span><span class="n">R_Etd_xi2</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">])</span>
+    <span class="n">Et_dbar_xi2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">einsum</span><span class="p">(</span><span class="s1">&#39;...i,i-&gt;...i&#39;</span><span class="p">,</span> <span class="n">Et_dbar</span><span class="p">,</span> <span class="p">[</span><span class="n">R_Etd_xi2</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">])</span>
+    <span class="n">Et_g_xi2</span> <span class="o">=</span>    <span class="n">np</span><span class="o">.</span><span class="n">einsum</span><span class="p">(</span><span class="s1">&#39;...i,i-&gt;...i&#39;</span><span class="p">,</span> <span class="n">Et_g</span><span class="p">,</span>    <span class="p">[</span><span class="n">R_Etg_xi2</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">])</span>
+
+    <span class="n">Et_uV_xi4</span> <span class="o">=</span>   <span class="n">np</span><span class="o">.</span><span class="n">einsum</span><span class="p">(</span><span class="s1">&#39;...i,i-&gt;...i&#39;</span><span class="p">,</span> <span class="n">Et_uV</span><span class="p">,</span>   <span class="p">[</span><span class="n">R_Etu_xi4</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">])</span>
+    <span class="n">Et_ubar_xi4</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">einsum</span><span class="p">(</span><span class="s1">&#39;...i,i-&gt;...i&#39;</span><span class="p">,</span> <span class="n">Et_ubar</span><span class="p">,</span> <span class="p">[</span><span class="n">R_Etu_xi4</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">])</span>
+    <span class="n">Et_dV_xi4</span> <span class="o">=</span>   <span class="n">np</span><span class="o">.</span><span class="n">einsum</span><span class="p">(</span><span class="s1">&#39;...i,i-&gt;...i&#39;</span><span class="p">,</span> <span class="n">Et_dV</span><span class="p">,</span>   <span class="p">[</span><span class="n">R_Etd_xi4</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">])</span>
+    <span class="n">Et_dbar_xi4</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">einsum</span><span class="p">(</span><span class="s1">&#39;...i,i-&gt;...i&#39;</span><span class="p">,</span> <span class="n">Et_dbar</span><span class="p">,</span> <span class="p">[</span><span class="n">R_Etd_xi4</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">])</span>
+    <span class="n">Et_g_xi4</span> <span class="o">=</span>    <span class="n">np</span><span class="o">.</span><span class="n">einsum</span><span class="p">(</span><span class="s1">&#39;...i,i-&gt;...i&#39;</span><span class="p">,</span> <span class="n">Et_g</span><span class="p">,</span>    <span class="p">[</span><span class="n">R_Etg_xi4</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">])</span>
+
+    <span class="n">Htlst</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="n">Ht_uV</span><span class="p">,</span>     <span class="n">Ht_ubar</span><span class="p">,</span>     <span class="n">Ht_dV</span><span class="p">,</span>     <span class="n">Ht_dbar</span><span class="p">,</span>     <span class="n">Ht_g</span><span class="p">],</span>
+                      <span class="p">[</span><span class="n">Ht_uV_xi2</span><span class="p">,</span> <span class="n">Ht_ubar_xi2</span><span class="p">,</span> <span class="n">Ht_dV_xi2</span><span class="p">,</span> <span class="n">Ht_dbar_xi2</span><span class="p">,</span> <span class="n">Ht_g_xi2</span><span class="p">],</span>
+                      <span class="p">[</span><span class="n">Ht_uV_xi4</span><span class="p">,</span> <span class="n">Ht_ubar_xi4</span><span class="p">,</span> <span class="n">Ht_dV_xi4</span><span class="p">,</span> <span class="n">Ht_dbar_xi4</span><span class="p">,</span> <span class="n">Ht_g_xi4</span><span class="p">]])</span>
+    
+    <span class="n">Etlst</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="n">Et_uV</span><span class="p">,</span>     <span class="n">Et_ubar</span><span class="p">,</span>     <span class="n">Et_dV</span><span class="p">,</span>     <span class="n">Et_dbar</span><span class="p">,</span>     <span class="n">Et_g</span><span class="p">],</span>
+                      <span class="p">[</span><span class="n">Et_uV_xi2</span><span class="p">,</span> <span class="n">Et_ubar_xi2</span><span class="p">,</span> <span class="n">Et_dV_xi2</span><span class="p">,</span> <span class="n">Et_dbar_xi2</span><span class="p">,</span> <span class="n">Et_g_xi2</span><span class="p">],</span>
+                      <span class="p">[</span><span class="n">Et_uV_xi4</span><span class="p">,</span> <span class="n">Et_ubar_xi4</span><span class="p">,</span> <span class="n">Et_dV_xi4</span><span class="p">,</span> <span class="n">Et_dbar_xi4</span><span class="p">,</span> <span class="n">Et_g_xi4</span><span class="p">]])</span>
+
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">Htlst</span><span class="p">,</span> <span class="n">Etlst</span><span class="p">])</span></div>
+
+
+<span class="c1"># Euler Beta function B(a,b) with complex arguments</span>
+<div class="viewcode-block" id="beta_loggamma">
+<a class="viewcode-back" href="../Parameters.html#Parameters.beta_loggamma">[docs]</a>
+<span class="k">def</span> <span class="nf">beta_loggamma</span><span class="p">(</span><span class="n">a</span><span class="p">:</span> <span class="nb">complex</span><span class="p">,</span> <span class="n">b</span><span class="p">:</span> <span class="nb">complex</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">complex</span><span class="p">:</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">sp</span><span class="o">.</span><span class="n">special</span><span class="o">.</span><span class="n">loggamma</span><span class="p">(</span><span class="n">a</span><span class="p">)</span> <span class="o">+</span> <span class="n">sp</span><span class="o">.</span><span class="n">special</span><span class="o">.</span><span class="n">loggamma</span><span class="p">(</span><span class="n">b</span><span class="p">)</span><span class="o">-</span><span class="n">sp</span><span class="o">.</span><span class="n">special</span><span class="o">.</span><span class="n">loggamma</span><span class="p">(</span><span class="n">a</span> <span class="o">+</span> <span class="n">b</span><span class="p">))</span></div>
+
+
+<span class="c1"># Conformal moment in j space F(j)</span>
+<div class="viewcode-block" id="ConfMoment">
+<a class="viewcode-back" href="../Parameters.html#Parameters.ConfMoment">[docs]</a>
+<span class="k">def</span> <span class="nf">ConfMoment</span><span class="p">(</span><span class="n">j</span><span class="p">:</span> <span class="nb">complex</span><span class="p">,</span> <span class="n">t</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">ParaSets</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Conformal moment in j space F(j)</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        ParaSet is the array of parameters in the form of (norm, alpha, beta, alphap)</span>
+<span class="sd">            norm = ParaSet[0]: overall normalization constant</span>
+<span class="sd">            alpha = ParaSet[1], beta = ParaSet[2]: the two parameters corresponding to x ^ (-alpha) * (1 - x) ^ beta</span>
+<span class="sd">            alphap = ParaSet[3]: regge trajectory alpha(t) = alpha + alphap * t</span>
+<span class="sd">        j: conformal spin j (conformal spin is actually j+2 but anyway)</span>
+<span class="sd">        t: momentum transfer squared t</span>
+
+<span class="sd">    Originally, ParaSet have shape (5).</span>
+<span class="sd">    Output is a scalar</span>
+<span class="sd">    </span>
+<span class="sd">    After vectorization, there are a few different usages:</span>
+<span class="sd">        1. t has shape (N), ParaSet has shape (N, 5). Output have shape (N)</span>
+<span class="sd">        2. t has shape (N), ParaSet has shape (N, m1, 5). Output have shape (N, m1)</span>
+<span class="sd">        3. t has shape (N), ParaSet has shape (N, m1, m2, 5). Output have shape (N, m1, m2)</span>
+<span class="sd">        4. and so on</span>
+<span class="sd">        </span>
+<span class="sd">    Recommended usage:</span>
+<span class="sd">        t has shape (N), ParaSet has shape (N, 5, init_NumofAnsatz, 5)</span>
+<span class="sd">        output will be (N, 5, init_NumofAnsatz)</span>
+
+<span class="sd">    j should only be a scalar. It cannot be an ndarray before I make more changes</span>
+<span class="sd">    Right now, j can be a vector, but if you want to do integration, then better pass j as scalar.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        Conformal moment in j space F(j,t)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    
+    <span class="c1"># [norm, alpha, beta, alphap, bexp] = ParaSet</span>
+    <span class="n">norm</span> <span class="o">=</span> <span class="n">ParaSets</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>  <span class="c1"># in recommended usage, has shape (N, 5, init_NumofAnsatz)</span>
+    <span class="n">alpha</span> <span class="o">=</span> <span class="n">ParaSets</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span> <span class="c1"># in general, can have shape (N), (N, m1), (N, m1, m2), ......</span>
+    <span class="n">beta</span>  <span class="o">=</span> <span class="n">ParaSets</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span>
+    <span class="n">alphap</span> <span class="o">=</span> <span class="n">ParaSets</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="mi">3</span><span class="p">]</span>
+    <span class="n">bexp</span> <span class="o">=</span> <span class="n">ParaSets</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="mi">4</span><span class="p">]</span>
+    <span class="n">invm2</span> <span class="o">=</span> <span class="n">ParaSets</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="mi">5</span><span class="p">]</span>
+    
+    <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">ndim</span><span class="p">(</span><span class="n">norm</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndim</span><span class="p">(</span><span class="n">t</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Input format is wrong.&quot;</span><span class="p">)</span>
+    
+    <span class="n">t_new_shape</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">t</span><span class="p">))</span> <span class="o">+</span> <span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">*</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ndim</span><span class="p">(</span><span class="n">norm</span><span class="p">)</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">ndim</span><span class="p">(</span><span class="n">t</span><span class="p">))</span>
+    <span class="n">j_new_shape</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">j</span><span class="p">))</span> <span class="o">+</span> <span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">*</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ndim</span><span class="p">(</span><span class="n">norm</span><span class="p">)</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">ndim</span><span class="p">(</span><span class="n">t</span><span class="p">))</span>  <span class="c1"># not a typo, it is np.ndim(norm) - np.ndim(t)</span>
+    <span class="n">t</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">t_new_shape</span><span class="p">)</span> <span class="c1"># to make sure t can be broadcasted with norm, alpha, etc.</span>
+    <span class="c1"># t will have shape (N) or (N, m1) or (N, m1, m2)... depends</span>
+    <span class="n">j</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">j</span><span class="p">,</span> <span class="n">j_new_shape</span><span class="p">)</span>
+
+    <span class="c1"># Currently with KM ansatz and dipole residual</span>
+
+    <span class="k">return</span> <span class="n">norm</span> <span class="o">*</span> <span class="n">beta_loggamma</span> <span class="p">(</span><span class="n">j</span> <span class="o">+</span> <span class="mi">1</span> <span class="o">-</span> <span class="n">alpha</span><span class="p">,</span> <span class="mi">1</span> <span class="o">+</span> <span class="n">beta</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">j</span> <span class="o">+</span> <span class="mi">1</span>  <span class="o">-</span> <span class="n">alpha</span><span class="p">)</span><span class="o">/</span> <span class="p">(</span><span class="n">j</span> <span class="o">+</span> <span class="mi">1</span> <span class="o">-</span> <span class="n">alpha</span> <span class="o">-</span> <span class="n">alphap</span> <span class="o">*</span> <span class="n">t</span><span class="p">)</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">t</span><span class="o">*</span><span class="n">bexp</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">t</span> <span class="o">*</span> <span class="n">invm2</span> <span class="p">)</span> <span class="o">**</span> <span class="p">(</span><span class="o">-</span><span class="mi">3</span><span class="p">)</span></div>
+
+    <span class="c1"># (N) or (N, m1) or (N, m1, m2) .... depends on usage</span>
+    <span class="c1"># For the recommended usage, the output is (N, 5, init_NumofAnsatz)</span>
+
+<div class="viewcode-block" id="Moment_Sum">
+<a class="viewcode-back" href="../Parameters.html#Parameters.Moment_Sum">[docs]</a>
+<span class="k">def</span> <span class="nf">Moment_Sum</span><span class="p">(</span><span class="n">j</span><span class="p">:</span> <span class="nb">complex</span><span class="p">,</span> <span class="n">t</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">ParaSets</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">complex</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Sum of the conformal moments when the ParaSets contain more than just one set of parameters </span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        ParaSets : contains [ParaSet1, ParaSet0, ParaSet2,...] with each ParaSet = [norm, alpha, beta ,alphap] for valence and sea distributions repsectively.        </span>
+<span class="sd">        j: conformal spin j (or j+2 but anyway)</span>
+<span class="sd">        t: momentum transfer squared t</span>
+
+<span class="sd">        Originally, ParaSets have shape (init_NumofAnsatz, 4). In practice, it is (1, 4)</span>
+<span class="sd">        output is a scalar</span>
+
+<span class="sd">        Here, after vectorization, </span>
+<span class="sd">            t has shape (N)</span>
+<span class="sd">            ParaSets has (N, 5, init_NumofAnsatz, 5)</span>
+<span class="sd">            output will have shape (N, 5)  # here, the 5 means 5 different species [u - ubar, ubar, d - dbar, dbar, g]</span>
+<span class="sd">        </span>
+<span class="sd">        More generally, </span>
+<span class="sd">            t have shape (N)</span>
+<span class="sd">            ParaSets has shape (N, i, 5 ) or (N, m1, i, 5) or (N, m1, m2, i, 5) and so on</span>
+<span class="sd">            output will have shape (N) or (N, m1) or (N, m2)...... etc.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        sum of conformal moments over all the ParaSet</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1">#return np.sum(np.array( list(map(lambda paraset: ConfMoment(j, t, paraset), ParaSets)) ))</span>
+
+    <span class="c1"># ConfMoment_vec(j, t, ParaSets) should have shape (N, 5, init_NumofAnsatz)</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">ConfMoment</span><span class="p">(</span><span class="n">j</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="n">ParaSets</span><span class="p">)</span> <span class="p">,</span>  <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span> <span class="c1"># (N, 5)</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, Yuxun Guo. et. al..</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
