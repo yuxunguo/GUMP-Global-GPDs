@@ -589,15 +589,93 @@ def amuindep(j: complex, nf: int, p: int, prty: int = 1):
    
     return A
 
-'''
 def amuindepNS(j: complex, nf: int, p: int, prty: int = 1):
+    """Result the [gamma] part of the diagonal evolution operator A.
     
+    Ref to eq. (124) in https://arxiv.org/pdf/hep-ph/07031799 (the A operator are the same in both CSbar and MSbar scheme)
+
+    Args:
+        j (complex): _description_
+        nf (int): _description_
+        p (int): _description_
+        prty (int, optional): _description_. Defaults to 1.
+
+    Returns:
+        the [gamma]  part of the diagonal evolution operator A.
+    """
     gam0NS = non_singlet_LO(j+1,nf,p)
     gam1NS = non_singlet_NLO(j+1,nf,p)
     a1 = - gam1NS + 0.5 * beta1(nf) * gam0NS / beta0(nf) 
     return a1
+
+def rmudepNS(nf, lamj, lamk, mu):
+    """Scale dependent part of NLO evolution matrix 
+    
+    Ref to eq. (124) in https://arxiv.org/pdf/hep-ph/07031799 (the A operator are the same in both CSbar and MSbar scheme)
+    
+    Args:
+        nf (int): number of effective fermions
+        lamj (np.array): shape (N,), each row is 2-by-2 matrix of anomalous dimension in the (S, G) basis
+        lamk (np.array): shape (N,), second row anomalous dimension for k
+        mu (float): final scale to be evolved from inital scale Init_Scale_Q
+
+    Returns:
+        R_ij^ab(Q}|n=1) according to eq. (126) in hep-ph/0703179 
+    """
+
+    lamdif=lamj-lamk
+        
+    b0 = beta0(nf) # scalar
+    b11 = b0 * np.ones_like(lamdif) + lamdif # shape (N)
+    #print(b11)
+    R = AlphaS(nloop_alphaS, nf, mu)/AlphaS(nloop_alphaS, nf, Init_Scale_Q) # shape N
+    R = np.array(R)
+    #print(R)
+    Rpow = (1/R)**(b11/b0) # shape (N)
+    #print((np.ones_like(Rpow) - Rpow) / b11)
+    return (np.ones_like(Rpow) - Rpow) / b11 # shape (N,2,2)
 #print(amuindepNS(np.array([0.1,0.2]),2,1,1))
-'''
+
+def bmudepNS(mu, zn, zk, nf: int, p: int, prty: int = 1):
+    """Return the off-diagonal part of the evolution operator B^{jk} combined with (alpha(Q)/alpha(mu_0)) ^ (-b/beta0)
+    
+    Check eq. (140) in hep-ph/0703179 for the expression of B^{jk}, and eq. (137) for the following factor
+
+    Args:
+        mu (float): scale evolved to from the initial scale Init_Scale_Q
+        zn (np.array): shape (N,) moment j
+        zk (np.array): shape (N,) moment k that differs from j for off-diagonal term
+        nf (int): number of effective fermions
+        p (int): parity of the GPDs 
+        prty (int, optional): The party of the parton distributions +1 for + basis and -1 for - and valence basis.
+
+    Returns:
+       B^{jk}
+    """
+    R = AlphaS(nloop_alphaS, nf, mu)/AlphaS(nloop_alphaS, nf, Init_Scale_Q) # shape N
+    R = np.array(R)
+    b0 = beta0(nf)
+    
+    AAA = (S1((zn+zk+2)/2) -
+           S1((zn-zk-2)/2) +
+           2*S1(zn-zk-1) -
+           S1(zn+1))
+    god = 2 * CF * (
+            2*AAA + (AAA - S1(zn+1))*(zn-zk)*(
+                zn+zk + 3)/(zk+1)/(zk+2))
+    dm = np.ones_like(zn)
+    
+    fac = 2**(zk-zn)*gamma(1+zn)/gamma(zn+3/2)*gamma(zk+3/2)/gamma(1+zk)*(2*zk+3)/(zn-zk)/(zn+zk+3) 
+    
+    lamn = non_singlet_LO(zn + 1, nf, p, prty)
+    lamk = non_singlet_LO(zk + 1, nf, p, prty)
+    lamdif = lamn-lamk 
+    
+    er1 = rmudepNS(nf, lamn, lamk, mu)
+
+    Bjk = - fac * er1 * lamdif* ((b0-lamk)*dm + god) * R**(-lamk/b0)
+    
+    return Bjk
 
 def bmudep(mu, zn, zk, nf: int, p: int, NS: bool = False, prty: int = 1):
     """Return the off-diagonal part of the evolution operator B^{jk} combined with (alpha(Q)/alpha(mu_0)) ^ (-b/beta0)
