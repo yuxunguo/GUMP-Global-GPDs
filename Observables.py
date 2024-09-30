@@ -61,7 +61,6 @@ def flvs_to_indx(flvs):
 
 #The flavor interpreter to return the corresponding flavor combination 
 def Flv_Intp(Flv_array: np.array, flv):
-
     """
     Flv_array: (N, 3) complex
     flv: (N) str
@@ -101,8 +100,7 @@ mp.dps = 25
 hyp2f1_nparray = np.frompyfunc(hyp2f1,4,1)
 
 def InvMellinWaveFuncQ(s: complex, x: float) -> complex:
-    """ 
-    Quark wave function for inverse Mellin transformation: x^(-s) for x>0 and 0 for x<0
+    """ Quark wave function for inverse Mellin transformation: x^(-s) for x>0 and 0 for x<0
 
     Args:
         s: Mellin moment s (= n)
@@ -124,8 +122,7 @@ def InvMellinWaveFuncQ(s: complex, x: float) -> complex:
 
 
 def InvMellinWaveFuncG(s: complex, x: float) -> complex:
-    """ 
-    Gluon wave function for inverse Mellin transformation: x^(-s+1) for x>0 and 0 for x<0
+    """ Gluon wave function for inverse Mellin transformation: x^(-s+1) for x>0 and 0 for x<0
 
     Args:
         s: Mellin moment s (= n)
@@ -144,8 +141,9 @@ def InvMellinWaveFuncG(s: complex, x: float) -> complex:
     return np.where(x>0, x**(-s+1), 0)
 
 def ConfWaveFuncQ(j: complex, x: float, xi: float) -> complex:
-    """ 
-    Quark conformal wave function p_j(x,xi) check e.g. https://arxiv.org/pdf/hep-ph/0509204.pdf
+    """Quark conformal wave function p_j(x,xi) 
+    
+    Check e.g. https://arxiv.org/pdf/hep-ph/0509204.pdf
 
     Args:
         j: conformal spin j (conformal spin is actually j+2 but anyway)
@@ -155,17 +153,6 @@ def ConfWaveFuncQ(j: complex, x: float, xi: float) -> complex:
     Returns:
         quark conformal wave function p_j(x,xi)
     """  
-    """
-    if(x > xi):
-        pDGLAP = np.sin(np.pi * (j+1))/ np.pi * x**(-j-1) * complex(hyp2f1( (j+1)/2, (j+2)/2, j+5/2, (xi/x) ** 2)) 
-        return pDGLAP
-
-    if(x > -xi):
-        pERBL = 2 ** (1+j) * gamma(5/2+j) / (gamma(1/2) * gamma(1+j)) * xi ** (-j-1) * (1+x/xi) * complex(hyp2f1(-1-j,j+2,2, (x+xi)/(2*xi)))
-        return pERBL
-    
-    return 0
-    """
 
     pDGLAP = np.where(x >= xi,                np.sin(np.pi * (j+1))/ np.pi * x**(-j-1) * np.array(hyp2f1_nparray( (j+1)/2, (j+2)/2, j+5/2, (xi/x) ** 2), dtype= complex)                           , 0)
 
@@ -175,8 +162,9 @@ def ConfWaveFuncQ(j: complex, x: float, xi: float) -> complex:
 
 
 def ConfWaveFuncG(j: complex, x: float, xi: float) -> complex:
-    """ 
-    Gluon conformal wave function p_j(x,xi) check e.g. https://arxiv.org/pdf/hep-ph/0509204.pdf
+    """Gluon conformal wave function p_j(x,xi) 
+    
+    Check e.g. https://arxiv.org/pdf/hep-ph/0509204.pdf
 
     Args:
         j: conformal spin j (actually conformal spin is j+2 but anyway)
@@ -222,8 +210,8 @@ class GPDobserv (object) :
         self.p = p
 
     def tPDF(self, flv, ParaAll, p_order = 1):
-        """
-        t-denpendent PDF for given flavor (flv = "u", "d", "S", "NS" or "g")
+        """t-denpendent PDF for given flavor (flv = "u", "d", "S", "NS" or "g")
+        
         Args:
             ParaAll = [Para_Forward, Para_xi2]
             Para_Forward = [Para_Forward_uV, Para_Forward_ubar, Para_Forward_dV, Para_Forward_dbar, Para_Forward_g]
@@ -302,8 +290,8 @@ class GPDobserv (object) :
         return 1/(2 * np.pi) * np.real(fixed_quadvec(lambda imS : Integrand_inv_Mellin(reS + 1j * imS) + Integrand_inv_Mellin(reS - 1j * imS) ,0, + Max_imS, n=300))
 
     def GPD(self, flv, ParaAll, p_order = 1):
-        """
-        GPD F(x, xi, t) in flavor space (flv = "u", "d", "S", "NS" or "g")
+        """GPD F(x, xi, t) in flavor space (flv = "u", "d", "S", "NS" or "g")
+        
         Args:
             ParaAll = [Para_Forward, Para_xi2, Para_xi4]
             Para_Forward = [Para_Forward_uV, Para_Forward_ubar, Para_Forward_dV, Para_Forward_dbar, Para_Forward_g]
@@ -428,11 +416,11 @@ class GPDobserv (object) :
         return 1/2*np.real(fixed_quadvec(lambda imJ : Integrand_Mellin_Barnes(reJ + 1j* imJ) / np.sin((reJ + 1j * imJ+1) * np.pi) + Integrand_Mellin_Barnes(reJ - 1j* imJ) / np.sin((reJ - 1j * imJ+1) * np.pi) ,0, Max_imJ, n=300)) + np.real(GPD1())  + np.real(GPD0()) 
           
     def GFFj0(self, j: int, flv, ParaAll, p_order):
-        """
-            Generalized Form Factors A_{j0}(t) which is the xi^0 term of the nth (n= j+1) Mellin moment of GPD int dx x^j F(x,xi,t) for quark and int dx x^(j-1) F(x,xi,t) for gluon
+        """Generalized Form Factors A_{j0}(t) which is the xi^0 term of the nth (n= j+1) Mellin moment of GPD int dx x^j F(x,xi,t) for quark and int dx x^(j-1) F(x,xi,t) for gluon
+            
             Note for gluon, GPD reduce to x*g(x), not g(x) so the Mellin moment will have a mismatch
             
-            Only leading order implemented yet
+            Only leading order implemented yet NOT well-maintained (TO BE FIXED)
         """
 
         # j, flv both have shape (N)
@@ -484,8 +472,8 @@ class GPDobserv (object) :
         return result #(N)
     
     def CFF(self, ParaAll, muset, p_order = 1, flv = 'All'):
-        """
-        Charge averged CFF \mathcal{F}(xi, t) (\mathcal{F} = Q_u^2 F_u + Q_d^2 F_d)
+        """Charge averged CFF $\mathcal{F}(xi, t) (\mathcal{F} = Q_u^2 F_u + Q_d^2 F_d)$
+        
         Args:
             ParaAll = [Para_Forward, Para_xi2, Para_xi4]
 
@@ -569,8 +557,8 @@ class GPDobserv (object) :
         '''
     
     def TFF(self, ParaAll, muf , meson, p_order = 1, flv = 'All'):
-            """
-            TFF \mathcal{F}(xi, t) (\mathcal{F} 
+            """TFF $\mathcal{F}(xi, t) (\mathcal{F}$
+            
             Args:
                 ParaAll = [Para_Forward, Para_xi2, Para_xi4]
 
@@ -660,8 +648,8 @@ class GPDobserv (object) :
 
     # A separate function for next-to-leading order TFF, it can be called directly or with TFF() by setting p_order = 2 
     def TFFNLO(self, ParaAll, muf: float, meson: int, flv = 'All'):
-            """
-            TFF \mathcal{F}(xi, t) (\mathcal{F} 
+            """TFF $\mathcal{F}(xi, t) (\mathcal{F}$
+            
             Args:
                 ParaAll = [Para_Forward, Para_xi2, Para_xi4]
 
@@ -754,8 +742,8 @@ class GPDobserv (object) :
 
     # A different function for next-to-leading order TFF using evolved moment method, it can be checked that it generate the same results as the evolve Wilson coefficient method
     def TFFNLO_evMom(self, ParaAll, muf: float, meson: int, flv = 'All'):
-            """
-            NLOTFF \mathcal{F}(xi, t) (\mathcal{F} 
+            """NLOTFF $\mathcal{F}(xi, t) (\mathcal{F}) $
+            
             Args:
                 ParaAll = [Para_Forward, Para_xi2, Para_xi4]
 
