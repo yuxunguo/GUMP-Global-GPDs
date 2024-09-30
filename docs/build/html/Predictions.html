@@ -7,6 +7,7 @@
   <title>Predictions module &mdash; GUMP GPD Analysis 0.5.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=80d5e7a1" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="_static/copybutton.css?v=76b2166b" />
 
   
   <!--[if lt IE 9]>
@@ -18,6 +19,8 @@
         <script src="_static/documentation_options.js?v=1dd76d02"></script>
         <script src="_static/doctools.js?v=9a2dae69"></script>
         <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script src="_static/clipboard.min.js?v=a7894cd8"></script>
+        <script src="_static/copybutton.js?v=f281be69"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
@@ -46,7 +49,14 @@
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
 <ul class="current">
-<li class="toctree-l1 current"><a class="reference internal" href="modules.html">GUMP-Global-GPDs</a><ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="QuickStart.html">Quick start</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ParametersIntro.html">Parameters Intro</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ObservablesIntro.html">Observables Intro</a></li>
+<li class="toctree-l1"><a class="reference internal" href="EvolutionIntro.html">Evolution Intro</a></li>
+<li class="toctree-l1"><a class="reference internal" href="MinimizerIntro.html">Minimizer Intro</a></li>
+<li class="toctree-l1"><a class="reference internal" href="DVCSIntro.html">DVCS Intro</a></li>
+<li class="toctree-l1"><a class="reference internal" href="DVMPIntro.html">DVMP Intro</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="modules.html">List of all modules</a><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="DVCS_xsec.html">DVCS_xsec module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="DVMP_xsec.html">DVMP_xsec module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Evolution.html">Evolution module</a></li>
@@ -61,7 +71,6 @@
 <li class="toctree-l3"><a class="reference internal" href="#Predictions.HTFF_theo_jpsi"><code class="docutils literal notranslate"><span class="pre">HTFF_theo_jpsi()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#Predictions.PDF_theo_s"><code class="docutils literal notranslate"><span class="pre">PDF_theo_s()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#Predictions.TFF_theo_jpsi"><code class="docutils literal notranslate"><span class="pre">TFF_theo_jpsi()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#Predictions.dir_path"><code class="docutils literal notranslate"><span class="pre">dir_path</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#Predictions.rratio_theo_s"><code class="docutils literal notranslate"><span class="pre">rratio_theo_s()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#Predictions.tPDF_theo_s"><code class="docutils literal notranslate"><span class="pre">tPDF_theo_s()</span></code></a></li>
 </ul>
@@ -85,7 +94,7 @@
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
       <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
-          <li class="breadcrumb-item"><a href="modules.html">GUMP-Global-GPDs</a></li>
+          <li class="breadcrumb-item"><a href="modules.html">List of all modules</a></li>
       <li class="breadcrumb-item active">Predictions module</li>
       <li class="wy-breadcrumbs-aside">
             <a href="_sources/Predictions.rst.txt" rel="nofollow"> View page source</a>
@@ -127,17 +136,6 @@
 <dt class="sig sig-object py" id="Predictions.TFF_theo_jpsi">
 <span class="sig-prename descclassname"><span class="pre">Predictions.</span></span><span class="sig-name descname"><span class="pre">TFF_theo_jpsi</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">xB</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">t</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Q</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Para_spe</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p_order</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">muset</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">flv</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'All'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/Predictions.html#TFF_theo_jpsi"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#Predictions.TFF_theo_jpsi" title="Link to this definition"></a></dt>
 <dd></dd></dl>
-
-<dl class="py data">
-<dt class="sig sig-object py" id="Predictions.dir_path">
-<span class="sig-prename descclassname"><span class="pre">Predictions.</span></span><span class="sig-name descname"><span class="pre">dir_path</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'C:\\Users\\Yuxun\\Documents\\Workspace\\Github\\GUMP-Global-GPDs'</span></em><a class="headerlink" href="#Predictions.dir_path" title="Link to this definition"></a></dt>
-<dd><p>df_Para = pd.read_csv(os.path.join(dir_path,’GUMP_Params/params.csv’), index_col=0)
-para_list_unp = df_Para[‘value’][:38].to_numpy()
-para_list_pol = df_Para[‘value’][38:].to_numpy()</p>
-<p>Para_Unp = ParaManager_Unp(para_list_unp)
-Para_Pol = ParaManager_Pol(para_list_pol)
-Para_All = np.concatenate([Para_Unp, Para_Pol], axis=0)</p>
-</dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="Predictions.rratio_theo_s">

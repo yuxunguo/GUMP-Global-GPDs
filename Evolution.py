@@ -736,8 +736,8 @@ def WilsonCoef_DVCS_LO(j: complex) -> complex:
     Returns:
         Wilson coefficient of shape (N,5) in the evolution basis (qVal, q_du_plus, q_du_minus, qSigma, g)
         
-    Charge factor are calculated such that the sum in the evolution basis are identical to the sum in the flavor basis
-    Gluon charge factor is the same as the singlet one, but the LO Wilson coefficient is zero in DVCS.
+    | Charge factor are calculated such that the sum in the evolution basis are identical to the sum in the flavor basis
+    | Gluon charge factor is the same as the singlet one, but the LO Wilson coefficient is zero in DVCS.
     """
     charge_fact = np.array([0, -1/6, 0, 5/18, 5/18])
     CWT = np.array([WilsonCoef(j), \
@@ -758,9 +758,9 @@ def WilsonCoef_DVMP_LO(j: complex, nf: int, meson: int) -> complex:
     Returns:
         Wilson coefficient of shape (N,5) in the evolution basis (qVal, q_du_plus, q_du_minus, qSigma, g)
         
-    Charge factor are calculated such that the sum in the evolution basis are identical to the sum in the flavor basis
-    Gluon charge factor is the same as the singlet one.
-    The meson decay constant, CF/NC, and eq are included in the prefactor of Wilson coefficient. 
+    | Charge factor are calculated such that the sum in the evolution basis are identical to the sum in the flavor basis
+    | Gluon charge factor is the same as the singlet one.
+    | The meson decay constant, CF/NC, and eq are included in the prefactor of Wilson coefficient. 
     """
     # A factor of 3 coming from the asymptotic DA. The factors for S/G can be found in eq. (22b) of 2310.13837
     CWT = 3* np.array([WilsonCoef(j), \
@@ -789,9 +789,9 @@ def WilsonCoef_DVMP_NLO(j: complex, k: complex, nf: int, Q: float, muf: float, m
     Returns:
         Wilson coefficient of shape (N,5) in the evolution basis (qVal, q_du_plus, q_du_minus, qSigma, g)
     
-    Charge factor are calculated such that the sum in the evolution basis are identical to the sum in the flavor basis
-    Gluon charge factor is the same as the singlet one.
-    The meson decay constant, CF/NC, and eq are included in the prefactor of Wilson coefficient. 
+    | Charge factor are calculated such that the sum in the evolution basis are identical to the sum in the flavor basis
+    | Gluon charge factor is the same as the singlet one.
+    | The meson decay constant, CF/NC, and eq are included in the prefactor of Wilson coefficient. 
     """
     
     mufact2 = muf ** 2
@@ -953,9 +953,9 @@ def Moment_Evo_LO(j: np.array, nf: int, p: int, mu: float, ConfFlav: np.array) -
         Evolved conformal moments in the evolution basis (qVal, q_du_plus, q_du_minus, qSigma, g)
         return shape (N, 5)
         
-    The j here accept array input and preferrably just 1D for the contour integral in j. 
-    Therefore, j has shape (N,) where N is the interpolating order of the fixed quad.
-    Other quantities must be broadcastable with j and thus they should be preferrably scalar.
+    | The j here accept array input and preferrably just 1D for the contour integral in j. 
+    | Therefore, j has shape (N,) where N is the interpolating order of the fixed quad.
+    | Other quantities must be broadcastable with j and thus they should be preferrably scalar.
     """
     assert j.ndim == 1, "Check dimension of j, must be 1D array" # shape (N,)
     
@@ -997,9 +997,9 @@ def CFF_Evo_LO(j: np.array, nf: int, p: int, mu: float, ConfFlav: np.array) -> n
         ingredients for the Mellin-Barnes integral for CFF 
         return shape (N, 5)
         
-    The j here accept array input and preferrably just 1D for the contour integral in j. 
-    Therefore, j has shape (N,) where N is the interpolating order of the fixed quad.
-    Other quantities must be broadcastable with j and thus they should be preferrably scalar
+    | The j here accept array input and preferrably just 1D for the contour integral in j. 
+    | Therefore, j has shape (N,) where N is the interpolating order of the fixed quad.
+    | Other quantities must be broadcastable with j and thus they should be preferrably scalar
     """
     assert j.ndim == 1, "Check dimension of j, must be 1D array" # shape (N,)
     # flavor_trans (5, 5) ConfFlav (N, 5)
@@ -1045,9 +1045,9 @@ def TFF_Evo_LO(j: np.array, nf: int, p: int, mu: float, ConfFlav: np.array, meso
         Ingredients for the Mellin-Barnes integral for TFF 
         return shape (N, 5)
         
-    The j here accept array input and preferrably just 1D for the contour integral in j. 
-    Therefore, j has shape (N,) where N is the interpolating order of the fixed quad.
-    Other quantities must be broadcastable with j and thus they should be preferrably scalar
+    | The j here accept array input and preferrably just 1D for the contour integral in j. 
+    | Therefore, j has shape (N,) where N is the interpolating order of the fixed quad.
+    | Other quantities must be broadcastable with j and thus they should be preferrably scalar
     """
     
     assert j.ndim == 1, "Check dimension of j, must be 1D array" # shape (N,)
@@ -1095,9 +1095,9 @@ def WCoef_Evo_NLO(j: np.array, nf: int, p: int, Q: float, meson: int, muf: float
         CWilsonT_ev_NS_tot: Non-singlet evolved Wilson coefficient with shape (N,3)
         CWilsonT_ev_SG_tot Singlet/Gluon evolved Wilson coefficient with shape (N,2)
 
-    The j here accept array input and preferrably just 1D for the contour integral in j. 
-    Therefore, j has shape (N,) where N is the interpolating order of the fixed quad.
-    Other quantities must be broadcastable with j and thus they should be preferrably scalar
+    | The j here accept array input and preferrably just 1D for the contour integral in j. 
+    | Therefore, j has shape (N,) where N is the interpolating order of the fixed quad.
+    | Other quantities must be broadcastable with j and thus they should be preferrably scalar
     """
     
     assert j.ndim == 1, "Check dimension of j, must be 1D array" # shape (N,)
@@ -1192,9 +1192,9 @@ def TFF_Evo_NLO_evWC(j: np.array, nf: int, p: int, Q: float, ConfFlav: np.array,
         Ingredients for the Mellin-Barnes integral for TFF 
         return shape (N, 5)
         
-    The j here accept array input and preferrably just 1D for the contour integral in j. 
-    Therefore, j has shape (N,) where N is the interpolating order of the fixed quad.
-    Other quantities must be broadcastable with j and thus they should be preferrably scalar
+    | The j here accept array input and preferrably just 1D for the contour integral in j. 
+    | Therefore, j has shape (N,) where N is the interpolating order of the fixed quad.
+    | Other quantities must be broadcastable with j and thus they should be preferrably scalar
     """
     
     assert j.ndim == 1, "Check dimension of j, must be 1D array" # shape (N,)
@@ -1247,9 +1247,9 @@ def Moment_Evo_NLO(j: np.array, nf: int, p: int, mu: float, t: float, xi: float,
         To be combined with the corresponding Wilson coefficient (for TFF/CFF) or conformal wave function (for GPD)
         return shape (N, 5)
         
-    The j here accept array input and preferrably just 1D for the contour integral in j. 
-    Therefore, j has shape (N,) where N is the interpolating order of the fixed quad.
-    Other quantities must be broadcastable with j and thus they should be preferrably scalar
+    | The j here accept array input and preferrably just 1D for the contour integral in j. 
+    | Therefore, j has shape (N,) where N is the interpolating order of the fixed quad.
+    | Other quantities must be broadcastable with j and thus they should be preferrably scalar
     """
     
     assert j.ndim == 1, "Check dimension of j, must be 1D array" # shape (N,)
@@ -1362,9 +1362,9 @@ def TFF_Evo_NLO_evMOM(j: np.array, nf: int, p: int, Q: float, t: float, xi: floa
         Next-to-leading order evolved conformal moments combined with the DVMP Wilson coefficients in the evolution basis (qVal, q_du_plus, q_du_minus, qSigma, g);
         return shape (N, 5)
     
-    The j here accept array input and preferrably just 1D for the contour integral in j. 
-    Therefore, j has shape (N,) where N is the interpolating order of the fixed quad.
-    Other quantities must be broadcastable with j and thus they should be preferrably scalar
+    | The j here accept array input and preferrably just 1D for the contour integral in j. 
+    | Therefore, j has shape (N,) where N is the interpolating order of the fixed quad.
+    | Other quantities must be broadcastable with j and thus they should be preferrably scalar
     """
     
     assert j.ndim == 1, "Check dimension of j, must be 1D array" # shape (N,)
@@ -1414,9 +1414,9 @@ def GPD_Moment_Evo_NLO(j: np.array, nf: int, p: int, mu: float, t: float, xi: co
         Next-to-leading order evolved conformal moments in the evolution basis (to be combined with conformal wave function)
         return shape (N, 5)
     
-    The j here accept array input and preferrably just 1D for the contour integral in j. 
-    Therefore, j has shape (N,) where N is the interpolating order of the fixed quad.
-    Other quantities must be broadcastable with j and thus they should be preferrably scalar
+    | The j here accept array input and preferrably just 1D for the contour integral in j. 
+    | Therefore, j has shape (N,) where N is the interpolating order of the fixed quad.
+    | Other quantities must be broadcastable with j and thus they should be preferrably scalar
     """
     
     assert j.ndim == 1, "Check dimension of j, must be 1D array" # shape (N,)
@@ -1430,8 +1430,8 @@ def GPD_Moment_Evo_NLO(j: np.array, nf: int, p: int, mu: float, t: float, xi: co
     return EvoConf
 
 def tPDF_Moment_Evo_NLO(j: np.array, nf: int, p: int, mu: float, ConfFlav: np.array) -> np.array:
-    """
-    FORWARD Next-to-leading order evolved conformal moments in the evolution basis (Evolved moment method)    
+    """FORWARD Next-to-leading order evolved conformal moments in the evolution basis (Evolved moment method)    
+    
     This function removes the off-diagonal pieces in Moment_Evo_NLO()
     
     Args:
@@ -1445,9 +1445,9 @@ def tPDF_Moment_Evo_NLO(j: np.array, nf: int, p: int, mu: float, ConfFlav: np.ar
         Next-to-leading order evolved conformal moments in the evolution basis in the forward limit (to be combined with inverse Mellin transform wave function)
         return shape (N, 5)
         
-    The j here accept array input and preferrably just 1D for the contour integral in j. 
-    Therefore, j has shape (N,) where N is the interpolating order of the fixed quad.
-    Other quantities must be broadcastable with j and thus they should be preferrably scalar
+    | The j here accept array input and preferrably just 1D for the contour integral in j. 
+    | Therefore, j has shape (N,) where N is the interpolating order of the fixed quad.
+    | Other quantities must be broadcastable with j and thus they should be preferrably scalar
     """
     
     assert j.ndim == 1, "Check dimension of j, must be 1D array" # shape (N,)

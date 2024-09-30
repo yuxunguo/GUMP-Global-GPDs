@@ -15,23 +15,27 @@ xi2_Factor = 3
 # Total number of parameters 
 Tot_param_Size = NumofGPDSpecies * xi2_Factor * Flavor_Factor *  init_NumofAnsatz * Single_Param_Size
 
-"""
-The parameters will form a 5-dimensional matrix such that each para[#1,#2,#3,#4,#5] is a real number.
-#1 = [0,1,2,3] corresponds to [H, E, Ht, Et]
-#2 = [0,1] corresponds to [xi^0 terms, xi^2 terms]
-#3 = [0,1,2,3,4] corresponds to [u - ubar, ubar, d - dbar, dbar, g]
-#4 = [0,1,...,init_NumofAnsatz-1] corresponds to different set of parameters
-#5 = [0,1,2,3] correspond to [norm, alpha, beta, alphap] as a set of parameters
-"""
-
 import numpy as np
 import scipy as sp
 
 def ParaManager_Unp(Paralst: np.array):
+    """Unpolairzed parameters manager that turns all parameters as a list to the wanted form.
+    
+    | Most minimizer take regular form of inputs (list or tuple).
+    | However, it's better if we convert these input parameters to given shape.
+    | Here we convert the function to a 5-dimensional array with shape (2,3,5,n1,n2)
+    | Each rows means:
+    |        #1 = [0,1] corresponds to [H, E]
+    |        #2 = [0,1,2,...] corresponds to [xi^0 terms, xi^2 terms, xi^4 terms, ...]
+    |        #3 = [0,1,2,3,4] corresponds to [u - ubar, ubar, d - dbar, dbar, g]
+    |        #4 = [0,1,...,init_NumofAnsatz-1] corresponds to different set of parameters
+    |        #5 = [0,1,2,3,...] correspond to [norm, alpha, beta, alphap,...] as a set of parameters
+        
+    Args:
+        Paralst (np.array): list of all parameters
 
-    """
-     Here is the parameters manager, as there are over 100 free parameters. Therefore not all of them can be set free.
-     Each element F_{q} is a two-dimensional matrix with init_NumofAnsatz = 1 row and Single_Param_Size = 4 columns
+    Returns:
+        Paralunp (np.ndrray): shape (2,3,5,n1,n2) 
     """
 
     [Norm_HuV,    alpha_HuV,    beta_HuV,    alphap_HuV, 
@@ -112,7 +116,24 @@ def ParaManager_Unp(Paralst: np.array):
     return np.array([Hlst, Elst])
 
 def ParaManager_Pol(Paralst: np.array):
+    """Polarized parameters manager that turns all parameters as a list to the wanted form.
+    
+    | Most minimizer take regular form of inputs (list or tuple).
+    | However, it's better if we convert these input parameters to given shape.
+    | Here we convert the function to a 5-dimensional array with shape (2,3,5,n1,n2)
+    | Each rows means:
+    |        #1 = [0,1] corresponds to [Ht, Et]
+    |        #2 = [0,1,2,...] corresponds to [xi^0 terms, xi^2 terms, xi^4 terms, ...]
+    |        #3 = [0,1,2,3,4] corresponds to [u - ubar, ubar, d - dbar, dbar, g]
+    |        #4 = [0,1,...,init_NumofAnsatz-1] corresponds to different set of parameters
+    |        #5 = [0,1,2,3,...] correspond to [norm, alpha, beta, alphap,...] as a set of parameters
+        
+    Args:
+        Paralst (np.array): list of all parameters
 
+    Returns:
+        Paralunp (np.ndrray): shape (2,3,5,n1,n2) 
+    """
     [Norm_HtuV,   alpha_HtuV,   beta_HtuV,   alphap_HtuV, 
      Norm_Htubar, alpha_Htubar, beta_Htubar, alphap_Htqbar,
      Norm_HtdV,   alpha_HtdV,   beta_HtdV,   alphap_HtdV,
@@ -203,41 +224,40 @@ def ConfMoment(j: complex, t: float, ParaSets: np.ndarray):
     """Conformal moment in j space F(j)
 
     Args:
-        ParaSet is the array of parameters in the form of (norm, alpha, beta, alphap)
-            norm = ParaSet[0]: overall normalization constant
-            alpha = ParaSet[1], beta = ParaSet[2]: the two parameters corresponding to x ^ (-alpha) * (1 - x) ^ beta
-            alphap = ParaSet[3]: regge trajectory alpha(t) = alpha + alphap * t
         j: conformal spin j (conformal spin is actually j+2 but anyway)
         t: momentum transfer squared t
-
-    Returns:
-        Conformal moment in j space F(j,t)
+        ParaSets: the array of parameters, explained below
         
-    Originally, ParaSet have shape (5).
-    Output is a scalar
+    ParaSets: in the form of (norm, alpha, beta, alphap, bexp, invm, ....), 
+        * norm: ParaSets[0], overall normalization constant
+        * alpha & beta: ParaSets[1] & ParaSet[2], the two parameters corresponding to x ^ (-alpha) * (1 - x) ^ beta
+        * alphap: ParaSets[3], regge trajectory alpha(t) = alpha + alphap * t
+        * bexp: ParaSets[4], the residual term modeled with exp(bexp*t)
+        * invm: ParaSets[5], the residual term modeled with (1 - t * invm2 ) ** (-3), alternative option of bexp
     
-    After vectorization, there are a few different usages:
-        1. t has shape (N), ParaSet has shape (N, 5). Output have shape (N)
-        2. t has shape (N), ParaSet has shape (N, m1, 5). Output have shape (N, m1)
-        3. t has shape (N), ParaSet has shape (N, m1, m2, 5). Output have shape (N, m1, m2)
-        4. and so on
+    Returns:
+        Conformal moment in j space F(j,t) (...,5,init_NumofAnsatz)
+    
+    Note:
+     |    ParaSets is a set of parameters having (...,5, init_NumofAnsatz, 6).
+     |    So each parameter has shape (...,5,init_NumofAnsatz)
+     |    We assume that the first few dimension of j and t and each parameter are broadcastable.
+     |    So the return shape should be (...,5,init_NumofAnsatz)
         
     Recommended usage:
-        t has shape (N), ParaSet has shape (N, 5, init_NumofAnsatz, 5)
-        output will be (N, 5, init_NumofAnsatz)
-
-    j should only be a scalar. It cannot be an ndarray before I make more changes
-    Right now, j can be a vector, but if you want to do integration, then better pass j as scalar.
+     |    j has shape (N), t has shape (), ParaSet has shape ( 5, init_NumofAnsatz, 6)
+     |    or j has shape (N), t has shape (N), ParaSet has shape (N, 5, init_NumofAnsatz, 6)
+     |    The first line is more common when integrate over j
     """
     
-    # [norm, alpha, beta, alphap, bexp] = ParaSet
+    # [norm, alpha, beta, alphap, bexp, invm2] = ParaSet
     norm = ParaSets[..., 0]  # in recommended usage, has shape (N, 5, init_NumofAnsatz)
     alpha = ParaSets[..., 1] # in general, can have shape (N), (N, m1), (N, m1, m2), ......
     beta  = ParaSets[..., 2]
     alphap = ParaSets[..., 3]
     bexp = ParaSets[..., 4]
     invm2 = ParaSets[..., 5]
-    
+
     if np.ndim(norm) < np.ndim(t):
         raise ValueError("Input format is wrong.")
     
@@ -257,28 +277,17 @@ def Moment_Sum(j: complex, t: float, ParaSets: np.ndarray) -> complex:
     """Sum of the conformal moments when the ParaSets contain more than just one set of parameters 
 
     Args:
-        ParaSets : contains [ParaSet1, ParaSet0, ParaSet2,...] with each ParaSet = [norm, alpha, beta ,alphap] for valence and sea distributions repsectively.        
+        ParaSets : contains [ParaSet1, ParaSet0, ParaSet2,...] with each ParaSet = [norm, alpha, beta ,alphap,...] for valence and sea distributions repsectively.        
         j: conformal spin j (or j+2 but anyway)
         t: momentum transfer squared t
 
-        Originally, ParaSets have shape (init_NumofAnsatz, 4). In practice, it is (1, 4)
-        output is a scalar
-
-        Here, after vectorization, 
-            t has shape (N)
-            ParaSets has (N, 5, init_NumofAnsatz, 5)
-            output will have shape (N, 5)  # here, the 5 means 5 different species [u - ubar, ubar, d - dbar, dbar, g]
-        
-        More generally, 
-            t have shape (N)
-            ParaSets has shape (N, i, 5 ) or (N, m1, i, 5) or (N, m1, m2, i, 5) and so on
-            output will have shape (N) or (N, m1) or (N, m2)...... etc.
-
     Returns:
         sum of conformal moments over all the ParaSet
+        
+    Read more about this in the comments of ConfMoment():
+    |    It will return shape (...,5,init_NumofAnsatz)
+    |    This function simply sums over the last dimension init_NumofAnsatz.
     """
-
-    #return np.sum(np.array( list(map(lambda paraset: ConfMoment(j, t, paraset), ParaSets)) ))
-
+    
     # ConfMoment_vec(j, t, ParaSets) should have shape (N, 5, init_NumofAnsatz)
     return np.sum(ConfMoment(j, t, ParaSets) ,  axis=-1) # (N, 5)

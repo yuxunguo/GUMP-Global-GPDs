@@ -1147,7 +1147,7 @@ def off_forward_fit(Paralst_Unp, Paralst_Pol):
     with open(os.path.join(dir_path,"GUMP_Output/Off_forward_cov.csv"),"w",newline='') as my_csv:
         csvWriter = csv.writer(my_csv,delimiter=',')
         csvWriter.writerows([*fit_off_forward.covariance])
-
+          
     print("off forward fit finished...")
     return fit_off_forward
 
@@ -1213,7 +1213,7 @@ def cost_dvmp(Norm_HuV,    alpha_HuV,    beta_HuV,    alphap_HuV,
     cost_DVjpsiPH1_xBtQ = np.array(list(pool.map(partial(DVjpsiPxsec_cost_xBtQ, Para_Unp = Para_Unp_all, xsec_norm = jpsinorm, p_order = 2), DVJpsiPH1xsec_group_data)))
     cost_DVjpsiPH1xsec = np.sum(cost_DVjpsiPH1_xBtQ)
 
-    return  cost_DVjpsiPH1xsec + cost_PDF_H_g_smallx #+ cost_DVjpsiPZEUSxsec
+    return cost_PDF_H_g_smallx + cost_DVjpsiPH1xsec #+ cost_DVjpsiPZEUSxsec
 
 def dvmp_fit(Paralst_Unp):
 
@@ -1349,7 +1349,12 @@ def dvmp_fit(Paralst_Unp):
     with open(os.path.join(dir_path,"GUMP_Output/dvmp_cov.csv"),"w", newline='', encoding="utf-8") as my_csv:
         csvWriter = csv.writer(my_csv,delimiter=',')
         csvWriter.writerows([*fit_dvmp.covariance])
-
+        
+    with open(os.path.join(dir_path,"GUMP_Params/Para_Unp.csv"),"w",newline='') as my_csv:
+        csvWriter = csv.writer(my_csv,delimiter=',')
+        csvWriter.writerow(list([*fit_dvmp.values]))
+        csvWriter.writerow(list([*fit_dvmp.errors]))
+  
     print("dvmp fit finished...")
     return fit_dvmp
 

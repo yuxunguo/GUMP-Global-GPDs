@@ -1,5 +1,5 @@
-GUMP-Global-GPDs
-================
+List of all modules
+===================
 
 .. toctree::
    :maxdepth: 4

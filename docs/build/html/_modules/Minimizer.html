@@ -6,6 +6,7 @@
   <title>Minimizer &mdash; GUMP GPD Analysis 0.5.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=80d5e7a1" />
       <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
 
   
   <!--[if lt IE 9]>
@@ -17,6 +18,8 @@
         <script src="../_static/documentation_options.js?v=1dd76d02"></script>
         <script src="../_static/doctools.js?v=9a2dae69"></script>
         <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
+        <script src="../_static/copybutton.js?v=f281be69"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" /> 
@@ -43,7 +46,14 @@
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../modules.html">GUMP-Global-GPDs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../QuickStart.html">Quick start</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../ParametersIntro.html">Parameters Intro</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../ObservablesIntro.html">Observables Intro</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../EvolutionIntro.html">Evolution Intro</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../MinimizerIntro.html">Minimizer Intro</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../DVCSIntro.html">DVCS Intro</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../DVMPIntro.html">DVMP Intro</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../modules.html">List of all modules</a></li>
 </ul>
 
         </div>
@@ -1282,7 +1292,7 @@
     <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">dir_path</span><span class="p">,</span><span class="s2">&quot;GUMP_Output/Off_forward_cov.csv&quot;</span><span class="p">),</span><span class="s2">&quot;w&quot;</span><span class="p">,</span><span class="n">newline</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">my_csv</span><span class="p">:</span>
         <span class="n">csvWriter</span> <span class="o">=</span> <span class="n">csv</span><span class="o">.</span><span class="n">writer</span><span class="p">(</span><span class="n">my_csv</span><span class="p">,</span><span class="n">delimiter</span><span class="o">=</span><span class="s1">&#39;,&#39;</span><span class="p">)</span>
         <span class="n">csvWriter</span><span class="o">.</span><span class="n">writerows</span><span class="p">([</span><span class="o">*</span><span class="n">fit_off_forward</span><span class="o">.</span><span class="n">covariance</span><span class="p">])</span>
-
+          
     <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;off forward fit finished...&quot;</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">fit_off_forward</span></div>
 
@@ -1351,7 +1361,7 @@
     <span class="n">cost_DVjpsiPH1_xBtQ</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">pool</span><span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="n">partial</span><span class="p">(</span><span class="n">DVjpsiPxsec_cost_xBtQ</span><span class="p">,</span> <span class="n">Para_Unp</span> <span class="o">=</span> <span class="n">Para_Unp_all</span><span class="p">,</span> <span class="n">xsec_norm</span> <span class="o">=</span> <span class="n">jpsinorm</span><span class="p">,</span> <span class="n">p_order</span> <span class="o">=</span> <span class="mi">2</span><span class="p">),</span> <span class="n">DVJpsiPH1xsec_group_data</span><span class="p">)))</span>
     <span class="n">cost_DVjpsiPH1xsec</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">cost_DVjpsiPH1_xBtQ</span><span class="p">)</span>
 
-    <span class="k">return</span>  <span class="n">cost_DVjpsiPH1xsec</span> <span class="o">+</span> <span class="n">cost_PDF_H_g_smallx</span> <span class="c1">#+ cost_DVjpsiPZEUSxsec</span></div>
+    <span class="k">return</span> <span class="n">cost_PDF_H_g_smallx</span> <span class="o">+</span> <span class="n">cost_DVjpsiPH1xsec</span> <span class="c1">#+ cost_DVjpsiPZEUSxsec</span></div>
 
 
 <div class="viewcode-block" id="dvmp_fit">
@@ -1490,7 +1500,12 @@
     <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">dir_path</span><span class="p">,</span><span class="s2">&quot;GUMP_Output/dvmp_cov.csv&quot;</span><span class="p">),</span><span class="s2">&quot;w&quot;</span><span class="p">,</span> <span class="n">newline</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s2">&quot;utf-8&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">my_csv</span><span class="p">:</span>
         <span class="n">csvWriter</span> <span class="o">=</span> <span class="n">csv</span><span class="o">.</span><span class="n">writer</span><span class="p">(</span><span class="n">my_csv</span><span class="p">,</span><span class="n">delimiter</span><span class="o">=</span><span class="s1">&#39;,&#39;</span><span class="p">)</span>
         <span class="n">csvWriter</span><span class="o">.</span><span class="n">writerows</span><span class="p">([</span><span class="o">*</span><span class="n">fit_dvmp</span><span class="o">.</span><span class="n">covariance</span><span class="p">])</span>
-
+        
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">dir_path</span><span class="p">,</span><span class="s2">&quot;GUMP_Params/Para_Unp.csv&quot;</span><span class="p">),</span><span class="s2">&quot;w&quot;</span><span class="p">,</span><span class="n">newline</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">my_csv</span><span class="p">:</span>
+        <span class="n">csvWriter</span> <span class="o">=</span> <span class="n">csv</span><span class="o">.</span><span class="n">writer</span><span class="p">(</span><span class="n">my_csv</span><span class="p">,</span><span class="n">delimiter</span><span class="o">=</span><span class="s1">&#39;,&#39;</span><span class="p">)</span>
+        <span class="n">csvWriter</span><span class="o">.</span><span class="n">writerow</span><span class="p">(</span><span class="nb">list</span><span class="p">([</span><span class="o">*</span><span class="n">fit_dvmp</span><span class="o">.</span><span class="n">values</span><span class="p">]))</span>
+        <span class="n">csvWriter</span><span class="o">.</span><span class="n">writerow</span><span class="p">(</span><span class="nb">list</span><span class="p">([</span><span class="o">*</span><span class="n">fit_dvmp</span><span class="o">.</span><span class="n">errors</span><span class="p">]))</span>
+  
     <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;dvmp fit finished...&quot;</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">fit_dvmp</span></div>
 

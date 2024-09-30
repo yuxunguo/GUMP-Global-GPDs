@@ -7,6 +7,7 @@
   <title>Evolution module &mdash; GUMP GPD Analysis 0.5.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=80d5e7a1" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="_static/copybutton.css?v=76b2166b" />
 
   
   <!--[if lt IE 9]>
@@ -18,6 +19,8 @@
         <script src="_static/documentation_options.js?v=1dd76d02"></script>
         <script src="_static/doctools.js?v=9a2dae69"></script>
         <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script src="_static/clipboard.min.js?v=a7894cd8"></script>
+        <script src="_static/copybutton.js?v=f281be69"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
@@ -46,7 +49,14 @@
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
 <ul class="current">
-<li class="toctree-l1 current"><a class="reference internal" href="modules.html">GUMP-Global-GPDs</a><ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="QuickStart.html">Quick start</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ParametersIntro.html">Parameters Intro</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ObservablesIntro.html">Observables Intro</a></li>
+<li class="toctree-l1"><a class="reference internal" href="EvolutionIntro.html">Evolution Intro</a></li>
+<li class="toctree-l1"><a class="reference internal" href="MinimizerIntro.html">Minimizer Intro</a></li>
+<li class="toctree-l1"><a class="reference internal" href="DVCSIntro.html">DVCS Intro</a></li>
+<li class="toctree-l1"><a class="reference internal" href="DVMPIntro.html">DVMP Intro</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="modules.html">List of all modules</a><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="DVCS_xsec.html">DVCS_xsec module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="DVMP_xsec.html">DVMP_xsec module</a></li>
 <li class="toctree-l2 current"><a class="current reference internal" href="#">Evolution module</a><ul>
@@ -126,7 +136,7 @@
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
       <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
-          <li class="breadcrumb-item"><a href="modules.html">GUMP-Global-GPDs</a></li>
+          <li class="breadcrumb-item"><a href="modules.html">List of all modules</a></li>
       <li class="breadcrumb-item active">Evolution module</li>
       <li class="wy-breadcrumbs-aside">
             <a href="_sources/Evolution.rst.txt" rel="nofollow"> View page source</a>
@@ -181,9 +191,11 @@ ingredients for the Mellin-Barnes integral for CFF
 return shape (N, 5)</p>
 </dd>
 </dl>
-<p>The j here accept array input and preferrably just 1D for the contour integral in j.
-Therefore, j has shape (N,) where N is the interpolating order of the fixed quad.
-Other quantities must be broadcastable with j and thus they should be preferrably scalar</p>
+<div class="line-block">
+<div class="line">The j here accept array input and preferrably just 1D for the contour integral in j.</div>
+<div class="line">Therefore, j has shape (N,) where N is the interpolating order of the fixed quad.</div>
+<div class="line">Other quantities must be broadcastable with j and thus they should be preferrably scalar</div>
+</div>
 </dd></dl>
 
 <dl class="py function">
@@ -211,9 +223,11 @@ Other quantities must be broadcastable with j and thus they should be preferrabl
 return shape (N, 5)</p>
 </dd>
 </dl>
-<p>The j here accept array input and preferrably just 1D for the contour integral in j.
-Therefore, j has shape (N,) where N is the interpolating order of the fixed quad.
-Other quantities must be broadcastable with j and thus they should be preferrably scalar</p>
+<div class="line-block">
+<div class="line">The j here accept array input and preferrably just 1D for the contour integral in j.</div>
+<div class="line">Therefore, j has shape (N,) where N is the interpolating order of the fixed quad.</div>
+<div class="line">Other quantities must be broadcastable with j and thus they should be preferrably scalar</div>
+</div>
 </dd></dl>
 
 <dl class="py function">
@@ -249,9 +263,11 @@ Other quantities must be broadcastable with j and thus they should be preferrabl
 return shape (N, 5)</p>
 </dd>
 </dl>
-<p>The j here accept array input and preferrably just 1D for the contour integral in j.
-Therefore, j has shape (N,) where N is the interpolating order of the fixed quad.
-Other quantities must be broadcastable with j and thus they should be preferrably scalar.</p>
+<div class="line-block">
+<div class="line">The j here accept array input and preferrably just 1D for the contour integral in j.</div>
+<div class="line">Therefore, j has shape (N,) where N is the interpolating order of the fixed quad.</div>
+<div class="line">Other quantities must be broadcastable with j and thus they should be preferrably scalar.</div>
+</div>
 </dd></dl>
 
 <dl class="py function">
@@ -283,9 +299,11 @@ To be combined with the corresponding Wilson coefficient (for TFF/CFF) or confor
 return shape (N, 5)</p>
 </dd>
 </dl>
-<p>The j here accept array input and preferrably just 1D for the contour integral in j.
-Therefore, j has shape (N,) where N is the interpolating order of the fixed quad.
-Other quantities must be broadcastable with j and thus they should be preferrably scalar</p>
+<div class="line-block">
+<div class="line">The j here accept array input and preferrably just 1D for the contour integral in j.</div>
+<div class="line">Therefore, j has shape (N,) where N is the interpolating order of the fixed quad.</div>
+<div class="line">Other quantities must be broadcastable with j and thus they should be preferrably scalar</div>
+</div>
 </dd></dl>
 
 <dl class="py function">
@@ -363,9 +381,11 @@ Ingredients for the Mellin-Barnes integral for TFF
 return shape (N, 5)</p>
 </dd>
 </dl>
-<p>The j here accept array input and preferrably just 1D for the contour integral in j.
-Therefore, j has shape (N,) where N is the interpolating order of the fixed quad.
-Other quantities must be broadcastable with j and thus they should be preferrably scalar</p>
+<div class="line-block">
+<div class="line">The j here accept array input and preferrably just 1D for the contour integral in j.</div>
+<div class="line">Therefore, j has shape (N,) where N is the interpolating order of the fixed quad.</div>
+<div class="line">Other quantities must be broadcastable with j and thus they should be preferrably scalar</div>
+</div>
 </dd></dl>
 
 <dl class="py function">
@@ -393,9 +413,11 @@ Other quantities must be broadcastable with j and thus they should be preferrabl
 return shape (N, 5)</p>
 </dd>
 </dl>
-<p>The j here accept array input and preferrably just 1D for the contour integral in j.
-Therefore, j has shape (N,) where N is the interpolating order of the fixed quad.
-Other quantities must be broadcastable with j and thus they should be preferrably scalar</p>
+<div class="line-block">
+<div class="line">The j here accept array input and preferrably just 1D for the contour integral in j.</div>
+<div class="line">Therefore, j has shape (N,) where N is the interpolating order of the fixed quad.</div>
+<div class="line">Other quantities must be broadcastable with j and thus they should be preferrably scalar</div>
+</div>
 </dd></dl>
 
 <dl class="py function">
@@ -420,9 +442,11 @@ Ingredients for the Mellin-Barnes integral for TFF
 return shape (N, 5)</p>
 </dd>
 </dl>
-<p>The j here accept array input and preferrably just 1D for the contour integral in j.
-Therefore, j has shape (N,) where N is the interpolating order of the fixed quad.
-Other quantities must be broadcastable with j and thus they should be preferrably scalar</p>
+<div class="line-block">
+<div class="line">The j here accept array input and preferrably just 1D for the contour integral in j.</div>
+<div class="line">Therefore, j has shape (N,) where N is the interpolating order of the fixed quad.</div>
+<div class="line">Other quantities must be broadcastable with j and thus they should be preferrably scalar</div>
+</div>
 </dd></dl>
 
 <dl class="py function">
@@ -447,9 +471,11 @@ CWilsonT_ev_NS_tot: Non-singlet evolved Wilson coefficient with shape (N,3)
 CWilsonT_ev_SG_tot Singlet/Gluon evolved Wilson coefficient with shape (N,2)</p>
 </dd>
 </dl>
-<p>The j here accept array input and preferrably just 1D for the contour integral in j.
-Therefore, j has shape (N,) where N is the interpolating order of the fixed quad.
-Other quantities must be broadcastable with j and thus they should be preferrably scalar</p>
+<div class="line-block">
+<div class="line">The j here accept array input and preferrably just 1D for the contour integral in j.</div>
+<div class="line">Therefore, j has shape (N,) where N is the interpolating order of the fixed quad.</div>
+<div class="line">Other quantities must be broadcastable with j and thus they should be preferrably scalar</div>
+</div>
 </dd></dl>
 
 <dl class="py function">
@@ -478,8 +504,10 @@ Other quantities must be broadcastable with j and thus they should be preferrabl
 <dd class="field-even"><p>Wilson coefficient of shape (N,5) in the evolution basis (qVal, q_du_plus, q_du_minus, qSigma, g)</p>
 </dd>
 </dl>
-<p>Charge factor are calculated such that the sum in the evolution basis are identical to the sum in the flavor basis
-Gluon charge factor is the same as the singlet one, but the LO Wilson coefficient is zero in DVCS.</p>
+<div class="line-block">
+<div class="line">Charge factor are calculated such that the sum in the evolution basis are identical to the sum in the flavor basis</div>
+<div class="line">Gluon charge factor is the same as the singlet one, but the LO Wilson coefficient is zero in DVCS.</div>
+</div>
 </dd></dl>
 
 <dl class="py function">
@@ -498,9 +526,11 @@ Gluon charge factor is the same as the singlet one, but the LO Wilson coefficien
 <dd class="field-even"><p>Wilson coefficient of shape (N,5) in the evolution basis (qVal, q_du_plus, q_du_minus, qSigma, g)</p>
 </dd>
 </dl>
-<p>Charge factor are calculated such that the sum in the evolution basis are identical to the sum in the flavor basis
-Gluon charge factor is the same as the singlet one.
-The meson decay constant, CF/NC, and eq are included in the prefactor of Wilson coefficient.</p>
+<div class="line-block">
+<div class="line">Charge factor are calculated such that the sum in the evolution basis are identical to the sum in the flavor basis</div>
+<div class="line">Gluon charge factor is the same as the singlet one.</div>
+<div class="line">The meson decay constant, CF/NC, and eq are included in the prefactor of Wilson coefficient.</div>
+</div>
 </dd></dl>
 
 <dl class="py function">
@@ -526,9 +556,11 @@ The meson decay constant, CF/NC, and eq are included in the prefactor of Wilson 
 <dd class="field-even"><p>Wilson coefficient of shape (N,5) in the evolution basis (qVal, q_du_plus, q_du_minus, qSigma, g)</p>
 </dd>
 </dl>
-<p>Charge factor are calculated such that the sum in the evolution basis are identical to the sum in the flavor basis
-Gluon charge factor is the same as the singlet one.
-The meson decay constant, CF/NC, and eq are included in the prefactor of Wilson coefficient.</p>
+<div class="line-block">
+<div class="line">Charge factor are calculated such that the sum in the evolution basis are identical to the sum in the flavor basis</div>
+<div class="line">Gluon charge factor is the same as the singlet one.</div>
+<div class="line">The meson decay constant, CF/NC, and eq are included in the prefactor of Wilson coefficient.</div>
+</div>
 </dd></dl>
 
 <dl class="py function">
@@ -915,8 +947,8 @@ prty should be scalar (but maybe I can make it work with shape N)</p>
 <dl class="py function">
 <dt class="sig sig-object py" id="Evolution.tPDF_Moment_Evo_NLO">
 <span class="sig-prename descclassname"><span class="pre">Evolution.</span></span><span class="sig-name descname"><span class="pre">tPDF_Moment_Evo_NLO</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">j</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">array</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nf</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mu</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ConfFlav</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">array</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">array</span></span></span><a class="reference internal" href="_modules/Evolution.html#tPDF_Moment_Evo_NLO"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#Evolution.tPDF_Moment_Evo_NLO" title="Link to this definition"></a></dt>
-<dd><p>FORWARD Next-to-leading order evolved conformal moments in the evolution basis (Evolved moment method)
-This function removes the off-diagonal pieces in Moment_Evo_NLO()</p>
+<dd><p>FORWARD Next-to-leading order evolved conformal moments in the evolution basis (Evolved moment method)</p>
+<p>This function removes the off-diagonal pieces in Moment_Evo_NLO()</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
@@ -932,9 +964,11 @@ This function removes the off-diagonal pieces in Moment_Evo_NLO()</p>
 return shape (N, 5)</p>
 </dd>
 </dl>
-<p>The j here accept array input and preferrably just 1D for the contour integral in j.
-Therefore, j has shape (N,) where N is the interpolating order of the fixed quad.
-Other quantities must be broadcastable with j and thus they should be preferrably scalar</p>
+<div class="line-block">
+<div class="line">The j here accept array input and preferrably just 1D for the contour integral in j.</div>
+<div class="line">Therefore, j has shape (N,) where N is the interpolating order of the fixed quad.</div>
+<div class="line">Other quantities must be broadcastable with j and thus they should be preferrably scalar</div>
+</div>
 </dd></dl>
 
 </section>
