@@ -747,6 +747,45 @@ def WilsonCoef_DVCS_LO(j: complex) -> complex:
                     0 * j])
     return np.einsum('j, j...->j...', charge_fact, CWT)
 
+def WilsonCoef_DVCS_NLO(j: complex, nf: int, Q: float, mu: float, p:int) -> complex:
+    """NLO Wilson coefficient of DVCS in the evolution basis (qVal, q_du_plus, q_du_minus, qSigma, g)
+
+    Check eqs. (127)-(130) of https://arxiv.org/pdf/hep-ph/0703179 
+    
+    Args:
+        j (complex array): shape(N,) conformal spin j
+        nf (int): number of effective fermions
+        Q (float): the photon virtuality 
+        mu (float): the factorization scale mu_fact
+        p (int): 1 for vector-like GPD (Ht, Et), -1 for axial-vector-like GPDs (Ht, Et), scalars
+        
+    Returns:
+        Wilson coefficient of shape (N,5) in the evolution basis (qVal, q_du_plus, q_du_minus, qSigma, g)
+        
+    | Charge factor are calculated such that the sum in the evolution basis are identical to the sum in the flavor basis
+    | Gluon charge factor is the same as the singlet one, but the LO Wilson coefficient is zero in DVCS.
+    """
+    charge_fact = np.array([0, -1/6, 0, 5/18, 5/18])
+    gam0 = singlet_LO(j+1, nf, p)
+    qq0 = gam0[...,0,0]
+    qg0 = gam0[...,0,1]
+    
+    if(p == 1):
+        CWT = np.array([WilsonCoef(j) * (CF * (2 * (S1(1+j)) ** 2 - 9/2 + (5 - 4* S1(j+1))/2/(j+1)/(j+2) + 1/(j+1)**2/(j+2)**2)+ np.log(mu**2/Q**2)/2*qq0), \
+                        WilsonCoef(j) * (CF * (2 * (S1(1+j)) ** 2 - 9/2 + (5 - 4* S1(j+1))/2/(j+1)/(j+2) + 1/(j+1)**2/(j+2)**2)+ np.log(mu**2/Q**2)/2*qq0), \
+                        WilsonCoef(j) * (CF * (2 * (S1(1+j)) ** 2 - 9/2 + (5 - 4* S1(j+1))/2/(j+1)/(j+2) + 1/(j+1)**2/(j+2)**2)+ np.log(mu**2/Q**2)/2*qq0), \
+                        WilsonCoef(j) * (CF * (2 * (S1(1+j)) ** 2 - 9/2 + (5 - 4* S1(j+1))/2/(j+1)/(j+2) + 1/(j+1)**2/(j+2)**2)+ np.log(mu**2/Q**2)/2*qq0),\
+                        WilsonCoef(j) * (-nf *((4 + 3*j + j**2) * (S1(j)+S1(j+2)) + 2+3*j+j**2)/(j+1)/(j+2)/(j+3) + np.log(mu**2/Q**2)/2*qg0)])
+
+    else:
+        CWT = np.array([WilsonCoef(j) * (CF * (2 * (S1(1+j)) ** 2 - 9/2 + (3 - 4* S1(j+1))/2/(j+1)/(j+2) + 1/(j+1)**2/(j+2)**2)+ np.log(mu**2/Q**2)/2*qq0), \
+                        WilsonCoef(j) * (CF * (2 * (S1(1+j)) ** 2 - 9/2 + (3 - 4* S1(j+1))/2/(j+1)/(j+2) + 1/(j+1)**2/(j+2)**2)+ np.log(mu**2/Q**2)/2*qq0), \
+                        WilsonCoef(j) * (CF * (2 * (S1(1+j)) ** 2 - 9/2 + (3 - 4* S1(j+1))/2/(j+1)/(j+2) + 1/(j+1)**2/(j+2)**2)+ np.log(mu**2/Q**2)/2*qq0), \
+                        WilsonCoef(j) * (CF * (2 * (S1(1+j)) ** 2 - 9/2 + (3 - 4* S1(j+1))/2/(j+1)/(j+2) + 1/(j+1)**2/(j+2)**2)+ np.log(mu**2/Q**2)/2*qq0),\
+                        WilsonCoef(j) * (-nf * j * (1 + S1(j) + S1(j+2))/(j+1)/(j+2) + np.log(mu**2/Q**2)/2*qg0)])
+        
+    return np.einsum('j, j...->j...', charge_fact, CWT)
+
 def WilsonCoef_DVMP_LO(j: complex, nf: int, meson: int) -> complex:
     """LO Wilson coefficient of DVMP in the evolution basis (qVal, q_du_plus, q_du_minus, qSigma, g)
 
