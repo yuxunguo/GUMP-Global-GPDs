@@ -582,8 +582,8 @@ def amuindep(j: complex, nf: int, p: int, prty: int = 1):
     """
     lam, pr = projectors(j+1, nf, p, prty)
     
-    gam0 = singlet_LO(j+1,nf,p)
-    gam1 = singlet_NLO(j+1,nf,p)
+    gam0 = singlet_LO(j+1,nf,p, prty)
+    gam1 = singlet_NLO(j+1,nf,p, prty)
     a1 = - gam1 + 0.5 * beta1(nf) * gam0 / beta0(nf)
     A = np.einsum('...aic,...cd,...bdj->...abij', pr, a1, pr)
    
@@ -603,8 +603,8 @@ def amuindepNS(j: complex, nf: int, p: int, prty: int = 1):
     Returns:
         the [gamma]  part of the diagonal evolution operator A.
     """
-    gam0NS = non_singlet_LO(j+1,nf,p)
-    gam1NS = non_singlet_NLO(j+1,nf,p)
+    gam0NS = non_singlet_LO(j+1,nf,p, prty)
+    gam1NS = non_singlet_NLO(j+1,nf, prty)
     a1 = - gam1NS + 0.5 * beta1(nf) * gam0NS / beta0(nf) 
     return a1
 
@@ -633,8 +633,7 @@ def rmudepNS(nf, lamj, lamk, mu):
     #print(R)
     Rpow = (1/R)**(b11/b0) # shape (N)
     #print((np.ones_like(Rpow) - Rpow) / b11)
-    return (np.ones_like(Rpow) - Rpow) / b11 # shape (N,2,2)
-#print(amuindepNS(np.array([0.1,0.2]),2,1,1))
+    return (np.ones_like(Rpow) - Rpow) / b11 # shape (N,)
 
 def bmudepNS(mu, zn, zk, nf: int, p: int, prty: int = 1):
     """Return the off-diagonal part of the evolution operator B^{jk} combined with (alpha(Q)/alpha(mu_0)) ^ (-b/beta0)
@@ -812,7 +811,7 @@ def WilsonCoef_DVCS_LO(j: complex) -> complex:
         j (complex array): shape(N,) conformal spin j
         
     Returns:
-        Wilson coefficient of shape (N,5) in the evolution basis (qVal, q_du_plus, q_du_minus, qSigma, g)
+        Wilson coefficient of shape (5,N) in the evolution basis (qVal, q_du_plus, q_du_minus, qSigma, g)
         
     | Charge factor are calculated such that the sum in the evolution basis are identical to the sum in the flavor basis
     | Gluon charge factor is the same as the singlet one, but the LO Wilson coefficient is zero in DVCS.
@@ -838,7 +837,7 @@ def WilsonCoef_DVCS_NLO(j: complex, nf: int, Q: float, mu: float, p:int) -> comp
         p (int): 1 for vector-like GPD (Ht, Et), -1 for axial-vector-like GPDs (Ht, Et), scalars
         
     Returns:
-        Wilson coefficient of shape (N,5) in the evolution basis (qVal, q_du_plus, q_du_minus, qSigma, g)
+        Wilson coefficient of shape (5,N) in the evolution basis (qVal, q_du_plus, q_du_minus, qSigma, g)
         
     | Charge factor are calculated such that the sum in the evolution basis are identical to the sum in the flavor basis
     | Gluon charge factor is the same as the singlet one, but the LO Wilson coefficient is zero in DVCS.
@@ -873,7 +872,7 @@ def WilsonCoef_DVMP_LO(j: complex, nf: int, meson: int) -> complex:
         meson (int): 1 for rho, 2 for phi, and 3 for Jpsi
         
     Returns:
-        Wilson coefficient of shape (N,5) in the evolution basis (qVal, q_du_plus, q_du_minus, qSigma, g)
+        Wilson coefficient of shape (5,N) in the evolution basis (qVal, q_du_plus, q_du_minus, qSigma, g)
         
     | Charge factor are calculated such that the sum in the evolution basis are identical to the sum in the flavor basis
     | Gluon charge factor is the same as the singlet one.
@@ -904,7 +903,7 @@ def WilsonCoef_DVMP_NLO(j: complex, k: complex, nf: int, Q: float, muf: float, m
         meson (int): 1 for rho, 2 for phi, and 3 for Jpsi
         
     Returns:
-        Wilson coefficient of shape (N,5) in the evolution basis (qVal, q_du_plus, q_du_minus, qSigma, g)
+        Wilson coefficient of shape (5,N) in the evolution basis (qVal, q_du_plus, q_du_minus, qSigma, g)
     
     | Charge factor are calculated such that the sum in the evolution basis are identical to the sum in the flavor basis
     | Gluon charge factor is the same as the singlet one.
@@ -1245,14 +1244,21 @@ def WCoef_Evo_NLO(j: np.array, nf: int, p: int, Q: float, meson: int, muf: float
     CWNS_ev0 = np.einsum('...,i...->...i',evola0NS,CWNS)
     CWSG_ev0 = np.einsum('...ij,i...->...ij',evola0,CWSG)
     
-    # S/G diagonal NLO evolution operator     
+    # S/G diagonal NLO evolution operator
     evola1_diag_ab = np.einsum('kab,kabij->kabij', rmu1, pproj)
     evola1_diag = np.einsum('...abij,...b,...->...ij', evola1_diag_ab, Rfact,Alphafact)
-
-    # NLO NS evolutioon set to zero
-    CWNS_ev1 = np.zeros_like(CWNS_ev0)
+    
+    # NS diagonal NLO evolution operator, note in evolution basis (qVal, q_du_plus, q_du_minus) has parity (-1,1,-1)
+    amuindepNS_stack = np.stack((amuindepNS(j,nf,p,-1),\
+                                 amuindepNS(j,nf,p,1), \
+                                 amuindepNS(j,nf,p,-1)), axis=-1)
+    
+    evola1NS_diag_plus = np.einsum('...,...i->...i',Alphafact * evola0NS * rmudepNS(nf, gam0NS, gam0NS, muf),amuindepNS_stack ) # shape (N,) and (N,3) to (N,3)
+    
+    # NLO NS diagonal evolutioon 
+    CWNS_ev1_diag = np.einsum('...i,i...->...i',evola1NS_diag_plus,CWNS) # shape (N,3) and (3,N) to (N,3)
     # S/G diagonal NLO evolution operator
-    CWSG_ev1_diag = np.einsum('...ij,i...->...ij',evola1_diag,CWSG)
+    CWSG_ev1_diag = np.einsum('...ij,i...->...ij',evola1_diag,CWSG) # shape (N,2,2) and (2,N) to (N,2,2)
         
     # Following are the second integral resumming the off diagonal pieces, note that (j,k) meshgrid is used for vectorized j and k input. Check the paper for expression
     reK = -0.8
@@ -1275,13 +1281,37 @@ def WCoef_Evo_NLO(j: np.array, nf: int, p: int, Q: float, meson: int, muf: float
 
         return out
     
-    intd_non_diag_ev1_vec=fixed_quadvec(lambda imK:non_diag_integrand_mesh(reK+1j*imK)+non_diag_integrand_mesh(reK-1j*imK),0,Max_imK,300)
-    
     # Off-diagonal piece for the NS evolution
-    CWSG_ev1_non_diag = intd_non_diag_ev1_vec     
+    CWSG_ev1_non_diag=fixed_quadvec(lambda imK:non_diag_integrand_mesh(reK+1j*imK)+non_diag_integrand_mesh(reK-1j*imK),0,Max_imK,300)
+       
     # Combine the diagonal and off-diagonal pieces
     CWSG_ev1 = CWSG_ev1_diag + CWSG_ev1_non_diag
-     
+    
+    reK = -0.8
+    Max_imK = 150
+    
+    def non_diag_integrand_mesh_NS(k):
+        
+        jmesh, kmesh= np.meshgrid(j,k)        
+        meshshape=jmesh.shape
+
+        jmesh=jmesh.reshape(-1)
+        kmesh=kmesh.reshape(-1)
+        
+        CWk = WilsonCoef_DVMP_LO(jmesh+kmesh+1, nf, meson)[3:]        
+        # prty of NS are not the same but Bjk only concern leading order anomalous dimension there for we take prty=1
+        BjkNS = np.array(bmudepNS(muf, np.array(jmesh+kmesh+1,dtype=complex), np.array(jmesh,dtype=complex), nf,p))*Alphafact
+        out = np.einsum('...i,...->...i',np.einsum('...,i...->...i',BjkNS,CWk), 1/4*np.tan(np.pi * kmesh / 2))  #first shape (N,) and (3,N) to (N,3), then (N,3) and (N,) to (N,3)
+
+        outorishape=out.shape
+        out=out.reshape(meshshape[0],meshshape[1],*outorishape[1:])
+
+        return out
+    
+    CWNS_ev1_non_diag=fixed_quadvec(lambda imK:non_diag_integrand_mesh_NS(reK+1j*imK)+non_diag_integrand_mesh_NS(reK-1j*imK),0,Max_imK,300)
+    
+    CWNS_ev1 = CWNS_ev1_diag + CWNS_ev1_non_diag
+    
     # NLO Wilson coefficient combined with leading-order evolved conformal moment
     CWilsonT_1_SG = WilsonCoef_DVMP_NLO(j,0,nf,Q, muf, meson)[-2:]     
     CWilsonT_1_SG_ev0 = np.einsum('i...,...ij->...ij',CWilsonT_1_SG,evola0)
