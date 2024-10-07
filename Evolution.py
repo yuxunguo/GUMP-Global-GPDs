@@ -1298,7 +1298,7 @@ def WCoef_Evo_NLO(j: np.array, nf: int, p: int, Q: float, meson: int, muf: float
         jmesh=jmesh.reshape(-1)
         kmesh=kmesh.reshape(-1)
         
-        CWk = WilsonCoef_DVMP_LO(jmesh+kmesh+1, nf, meson)[3:]        
+        CWk = WilsonCoef_DVMP_LO(jmesh+kmesh+1, nf, meson)[:3]        
         # prty of NS are not the same but Bjk only concern leading order anomalous dimension there for we take prty=1
         BjkNS = np.array(bmudepNS(muf, np.array(jmesh+kmesh+1,dtype=complex), np.array(jmesh,dtype=complex), nf,p))*Alphafact
         out = np.einsum('...i,...->...i',np.einsum('...,i...->...i',BjkNS,CWk), 1/4*np.tan(np.pi * kmesh / 2))  #first shape (N,) and (3,N) to (N,3), then (N,3) and (N,) to (N,3)
