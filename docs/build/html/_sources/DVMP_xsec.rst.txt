@@ -1,3 +1,5 @@
+.. _dvmp_xsec_module:
+
 DVMP\_xsec module
 =================
 
