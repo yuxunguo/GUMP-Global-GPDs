@@ -21,6 +21,7 @@
         <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
         <script src="_static/clipboard.min.js?v=a7894cd8"></script>
         <script src="_static/copybutton.js?v=f281be69"></script>
+        <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
@@ -50,7 +51,11 @@
               <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="QuickStart.html">Quick start</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">Parameters Quickguide</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Parameters Quickguide</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#parameter-managers">Parameter Managers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#gpd-moment-calculation">GPD Moment Calculation</a></li>
+</ul>
+</li>
 <li class="toctree-l1"><a class="reference internal" href="ObservablesIntro.html">Observables Quickguide</a></li>
 <li class="toctree-l1"><a class="reference internal" href="EvolutionIntro.html">Evolution Quickguide</a></li>
 <li class="toctree-l1"><a class="reference internal" href="MinimizerIntro.html">Minimizer Quickguide</a></li>
@@ -86,7 +91,40 @@
              
   <section id="parameters-quickguide">
 <h1>Parameters Quickguide<a class="headerlink" href="#parameters-quickguide" title="Link to this heading"></a></h1>
-<p>Here we briefly introduce the <a class="reference internal" href="Parameters.html#module-Parameters"><span class="std std-ref">Parameters module</span></a>.</p>
+<p>Here we briefly introduce the <a class="reference internal" href="Parameters.html#module-Parameters"><span class="std std-ref">Parameters module</span></a>, the details can be found therein.
+This submodules provide the GPDs in the moment space in terms of given parameter sets,
+which can be devided into two parts: the parameters managers and the GPD moments.</p>
+<section id="parameter-managers">
+<h2>Parameter Managers<a class="headerlink" href="#parameter-managers" title="Link to this heading"></a></h2>
+<p>This part consists of two function <code class="docutils literal notranslate"><span class="pre">Parameters.ParaManager_Unp()</span></code> and <code class="docutils literal notranslate"><span class="pre">Parameters.ParaManager_Pol()</span></code>.
+They are highly alike but defined separately for the vector-like GPDs <span class="math notranslate nohighlight">\(H,E\)</span> and the axial-vector-like GPDs <span class="math notranslate nohighlight">\(\tilde{H},\tilde{E}\)</span>.
+Here we take the vector-like GPDs as an example.</p>
+<p>The function <code class="docutils literal notranslate"><span class="pre">Parameters.ParaManager_Unp()</span></code> convert a list of all the phenomenological parameters into a set of parameters
+in the standard shape of (2,3,5,n1,n2)</p>
+<dl>
+<dt>Each rows means:</dt><dd><div class="line-block">
+<div class="line">#1 = [0,1] corresponds to [H, E]</div>
+<div class="line">#2 = [0,1,2,…] corresponds to [xi^0 terms, xi^2 terms, xi^4 terms, …]</div>
+<div class="line">#3 = [0,1,2,3,4] corresponds to [u - ubar, ubar, d - dbar, dbar, g]</div>
+<div class="line">#4 = [0,1,…,init_NumofAnsatz-1] corresponds to different set of parameters</div>
+<div class="line">#5 = [0,1,2,3,…] correspond to [norm, alpha, beta, alphap,…] as a set of parameters</div>
+</div>
+</dd>
+</dl>
+<p>This standard shape will be handled by the remaining functions into the GPD moments.</p>
+</section>
+<section id="gpd-moment-calculation">
+<h2>GPD Moment Calculation<a class="headerlink" href="#gpd-moment-calculation" title="Link to this heading"></a></h2>
+<p>There are two more function that convert the output from the previous subsection into GPD moments.</p>
+<p>The function <code class="docutils literal notranslate"><span class="pre">Parameters.ConfMoment()</span></code> take input in the form of (5,n1,n2),
+which correspond to the last three dimension in the output of <code class="docutils literal notranslate"><span class="pre">Parameters.ParaManager_Unp()</span></code> and <code class="docutils literal notranslate"><span class="pre">Parameters.ParaManager_Pol()</span></code>.
+The last dimension contains a set of parameters that parameterize the moment of GPDs.
+Therefore, the output moment will be in the shape of (5,n1)</p>
+<p>The last function <code class="docutils literal notranslate"><span class="pre">Parameters.Moment_Sum()</span></code> essentially sums over the last dimension of <code class="docutils literal notranslate"><span class="pre">Parameters.ConfMoment()</span></code>
+— it takes shape (5,n1) as introduced above and output shape (5,) by summing over the last dimension.</p>
+<p>The two functions in this subsection also take vector input of j in shape (N,),
+and thus output will be (N,5,n1) and (N,5), respectively.</p>
+</section>
 </section>
 
 
