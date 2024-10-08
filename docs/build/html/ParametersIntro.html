@@ -99,14 +99,14 @@ They are highly alike but defined separately for the vector-like GPDs <span clas
 Here we take the vector-like GPDs as an example.</p>
 <p>The function <code class="docutils literal notranslate"><span class="pre">Parameters.ParaManager_Unp()</span></code> convert a list of all the phenomenological parameters into a set of parameters
 in the standard shape of (2,3,5,n1,n2)</p>
-<dl>
-<dt>Each rows means:</dt><dd><div class="line-block">
-<div class="line">#1 = [0,1] corresponds to [H, E]</div>
-<div class="line">#2 = [0,1,2,…] corresponds to [xi^0 terms, xi^2 terms, xi^4 terms, …]</div>
-<div class="line">#3 = [0,1,2,3,4] corresponds to [u - ubar, ubar, d - dbar, dbar, g]</div>
-<div class="line">#4 = [0,1,…,init_NumofAnsatz-1] corresponds to different set of parameters</div>
-<div class="line">#5 = [0,1,2,3,…] correspond to [norm, alpha, beta, alphap,…] as a set of parameters</div>
-</div>
+<dl class="simple">
+<dt>Each rows means:</dt><dd><ul class="simple">
+<li><p>#1 = [0,1] corresponds to [H, E]</p></li>
+<li><p>#2 = [0,1,2,…] corresponds to [xi^0 terms, xi^2 terms, xi^4 terms, …]</p></li>
+<li><p>#3 = [0,1,2,3,4] corresponds to [u - ubar, ubar, d - dbar, dbar, g]</p></li>
+<li><p>#4 = [0,1,…,init_NumofAnsatz-1] corresponds to different set of parameters</p></li>
+<li><p>#5 = [0,1,2,3,…] correspond to [norm, alpha, beta, alphap,…] as a set of parameters</p></li>
+</ul>
 </dd>
 </dl>
 <p>This standard shape will be handled by the remaining functions into the GPD moments.</p>

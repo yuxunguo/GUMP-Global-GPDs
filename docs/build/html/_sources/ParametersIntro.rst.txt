@@ -15,11 +15,11 @@ The function ``Parameters.ParaManager_Unp()`` convert a list of all the phenomen
 in the standard shape of (2,3,5,n1,n2)
 
 Each rows means:
- |   #1 = [0,1] corresponds to [H, E]
- |   #2 = [0,1,2,…] corresponds to [xi^0 terms, xi^2 terms, xi^4 terms, …]
- |   #3 = [0,1,2,3,4] corresponds to [u - ubar, ubar, d - dbar, dbar, g]
- |   #4 = [0,1,…,init_NumofAnsatz-1] corresponds to different set of parameters
- |   #5 = [0,1,2,3,…] correspond to [norm, alpha, beta, alphap,…] as a set of parameters
+ *   #1 = [0,1] corresponds to [H, E]
+ *   #2 = [0,1,2,…] corresponds to [xi^0 terms, xi^2 terms, xi^4 terms, …]
+ *   #3 = [0,1,2,3,4] corresponds to [u - ubar, ubar, d - dbar, dbar, g]
+ *   #4 = [0,1,…,init_NumofAnsatz-1] corresponds to different set of parameters
+ *   #5 = [0,1,2,3,…] correspond to [norm, alpha, beta, alphap,…] as a set of parameters
 
 This standard shape will be handled by the remaining functions into the GPD moments.
 
