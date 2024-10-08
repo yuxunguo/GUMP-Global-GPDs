@@ -1,3 +1,5 @@
+
+
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" data-content_root="./">
 <head>
@@ -6,21 +8,18 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>DVCS Quickguide &mdash; GUMP GPD Analysis 0.5.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=80d5e7a1" />
-      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=7ab3649f" />
       <link rel="stylesheet" type="text/css" href="_static/copybutton.css?v=76b2166b" />
 
   
-  <!--[if lt IE 9]>
-    <script src="_static/js/html5shiv.min.js"></script>
-  <![endif]-->
-  
-        <script src="_static/jquery.js?v=5d32c60e"></script>
-        <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="_static/documentation_options.js?v=1dd76d02"></script>
-        <script src="_static/doctools.js?v=9a2dae69"></script>
-        <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
-        <script src="_static/clipboard.min.js?v=a7894cd8"></script>
-        <script src="_static/copybutton.js?v=f281be69"></script>
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=1dd76d02"></script>
+      <script src="_static/doctools.js?v=9a2dae69"></script>
+      <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="_static/clipboard.min.js?v=a7894cd8"></script>
+      <script src="_static/copybutton.js?v=f281be69"></script>
+      <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
@@ -86,7 +85,32 @@
              
   <section id="dvcs-quickguide">
 <h1>DVCS Quickguide<a class="headerlink" href="#dvcs-quickguide" title="Link to this heading"></a></h1>
-<p>Here we briefly introduce the <a class="reference internal" href="DVCS_xsec.html#dvcs-xsec-module"><span class="std std-ref">DVCS_xsec module</span></a>.</p>
+<p>Here we briefly introduce the <a class="reference internal" href="DVCS_xsec.html#dvcs-xsec-module"><span class="std std-ref">DVCS_xsec module</span></a>.
+This can be used as a stand-alone module for calculating the deeply virtual Compton scattering(DVCS) cross-section
+where the formulae are given in <a class="reference external" href="https://inspirehep.net/literature/1925449">our publication</a>.</p>
+<p>The codes are generated from the Mathematica master code, and numerically checked.</p>
+<p>We have three main callables: <code class="docutils literal notranslate"><span class="pre">DVCS_xsec.dsigma_DVCS()</span></code>, <code class="docutils literal notranslate"><span class="pre">DVCS_xsec.dsigma_INT()</span></code> and <code class="docutils literal notranslate"><span class="pre">DVCS_xsec.dsigma_BH()</span></code>,
+that calcualte the pure DVCS cross-sections, the interference cross-sections, and the Bethe-Heitler (BH) cross-sections, respectively.</p>
+<dl class="simple">
+<dt>Each function has the following arguments:</dt><dd><ul class="simple">
+<li><p>y (float): Beam energy lost parameter</p></li>
+<li><p>xB (float): x_bjorken</p></li>
+<li><p>t (float): _description_</p></li>
+<li><p>Q (float): momentum transfer squared</p></li>
+<li><p>phi (float): azimuthal angel</p></li>
+<li><p>pol (string): polarization configuration</p></li>
+<li><p>HCFF (complex): Compton form factor H</p></li>
+<li><p>ECFF (complex): Compton form factor E</p></li>
+<li><p>HtCFF (complex): Compton form factor Ht</p></li>
+<li><p>EtCFF (complex): Compton form factor Et</p></li>
+</ul>
+</dd>
+</dl>
+<p>The pol should be a string in the form of <span class="math notranslate nohighlight">\(P_BP_T\)</span>
+such that <span class="math notranslate nohighlight">\(P_B = \{U,L\}\)</span> and <span class="math notranslate nohighlight">\(P_T=\{U,L,T_{\rm{in}},T_{\rm{out}}\}\)</span> for the beam and target polarization,
+e.g. <code class="docutils literal notranslate"><span class="pre">pol</span> <span class="pre">=</span> <span class="pre">'UTout'</span></code>.</p>
+<p>Besides the three main callables, there is also <code class="docutils literal notranslate"><span class="pre">DVCS_xsec.dsigma_TOT()</span></code> that takes the same input and returns the sum of the three functions above.
+And the <code class="docutils literal notranslate"><span class="pre">DVCS_xsec.dsigma_DVCS_HERA()</span></code> that return the virtual-photon-proton cross-sections and integrate over <span class="math notranslate nohighlight">\(\phi\)</span>, as measured by HERA. The input <span class="math notranslate nohighlight">\(\phi\)</span> will not be needed in this case.</p>
 </section>
 
 
