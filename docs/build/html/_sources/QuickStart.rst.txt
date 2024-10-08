@@ -51,7 +51,7 @@ In the following, we present some simple examples that calculate the obserbales 
 Leading-order Compton Form factors
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-For instance, we can use ``Observables.GPDobserv.CFF()`` to calculate the Compton form factors (CFFs) 
+For instance, we can use :meth:`Observables.GPDobserv.CFF` to calculate the Compton form factors (CFFs) 
 at leading order (next-to-leading order working in progress). 
 And we can test that the imaginary part of the leading order CFF agree with the GPD at :math:`x=\xi` as shown in the following:
 
@@ -81,7 +81,7 @@ And we can test that the imaginary part of the leading order CFF agree with the 
 Leading-order Transition Form factors
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-The same for the LO Transition form factors (TFFs) with ``Observables.GPDobserv.TFF()``. 
+The same for the LO Transition form factors (TFFs) with :meth:`Observables.GPDobserv.TFF`. 
 Note that in our definition, the TFFs absorp many prefactors like the :math:`1/N_c` color factor and the meson decay constant
 :math:`f_{\phi}` and the charge factor :math:`e_c=2/3` for charm quark, and so on. 
 
@@ -108,8 +108,8 @@ Note that in our definition, the TFFs absorp many prefactors like the :math:`1/N
 NLO Transition Form factors
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 We can also calculate TFF at next-to-leading order (NLO) where we currently only has singlet and gluon contributions (non-singlet working in progress).
-Three functions can do this ``Observables.GPDobserv.TFF()`` with ``p_order =2`` is equivalent to ``Observables.GPDobserv.TFFNLO()`` .
-Whereas the ``Observables.GPDobserv.TFF_evMom()`` uses the eolved moment method that provides a cross-check. 
+Three functions can do this :meth:`Observables.GPDobserv.TFF` with ``p_order =2`` is equivalent to :meth:`Observables.GPDobserv.TFFNLO` .
+Whereas the :meth:`Observables.GPDobserv.TFFNLO_evMom` uses the eolved moment method that provides a cross-check. 
 
 The results are virtually the same:
 

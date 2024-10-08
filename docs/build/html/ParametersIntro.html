@@ -94,10 +94,10 @@ This submodules provide the GPDs in the moment space in terms of given parameter
 which can be devided into two parts: the parameters managers and the GPD moments.</p>
 <section id="parameter-managers">
 <h2>Parameter Managers<a class="headerlink" href="#parameter-managers" title="Link to this heading"></a></h2>
-<p>This part consists of two function <code class="docutils literal notranslate"><span class="pre">Parameters.ParaManager_Unp()</span></code> and <code class="docutils literal notranslate"><span class="pre">Parameters.ParaManager_Pol()</span></code>.
+<p>This part consists of two function <a class="reference internal" href="Parameters.html#Parameters.ParaManager_Unp" title="Parameters.ParaManager_Unp"><code class="xref py py-func docutils literal notranslate"><span class="pre">Parameters.ParaManager_Unp()</span></code></a> and <a class="reference internal" href="Parameters.html#Parameters.ParaManager_Pol" title="Parameters.ParaManager_Pol"><code class="xref py py-func docutils literal notranslate"><span class="pre">Parameters.ParaManager_Pol()</span></code></a>.
 They are highly alike but defined separately for the vector-like GPDs <span class="math notranslate nohighlight">\(H,E\)</span> and the axial-vector-like GPDs <span class="math notranslate nohighlight">\(\tilde{H},\tilde{E}\)</span>.
 Here we take the vector-like GPDs as an example.</p>
-<p>The function <code class="docutils literal notranslate"><span class="pre">Parameters.ParaManager_Unp()</span></code> convert a list of all the phenomenological parameters into a set of parameters
+<p>The function <a class="reference internal" href="Parameters.html#Parameters.ParaManager_Unp" title="Parameters.ParaManager_Unp"><code class="xref py py-func docutils literal notranslate"><span class="pre">Parameters.ParaManager_Unp()</span></code></a> convert a list of all the phenomenological parameters into a set of parameters
 in the standard shape of (2,3,5,n1,n2)</p>
 <dl class="simple">
 <dt>Each rows means:</dt><dd><ul class="simple">
@@ -114,11 +114,11 @@ in the standard shape of (2,3,5,n1,n2)</p>
 <section id="gpd-moment-calculation">
 <h2>GPD Moment Calculation<a class="headerlink" href="#gpd-moment-calculation" title="Link to this heading"></a></h2>
 <p>There are two more function that convert the output from the previous subsection into GPD moments.</p>
-<p>The function <code class="docutils literal notranslate"><span class="pre">Parameters.ConfMoment()</span></code> take input in the form of (5,n1,n2),
-which correspond to the last three dimension in the output of <code class="docutils literal notranslate"><span class="pre">Parameters.ParaManager_Unp()</span></code> and <code class="docutils literal notranslate"><span class="pre">Parameters.ParaManager_Pol()</span></code>.
+<p>The function <a class="reference internal" href="Parameters.html#Parameters.ConfMoment" title="Parameters.ConfMoment"><code class="xref py py-func docutils literal notranslate"><span class="pre">Parameters.ConfMoment()</span></code></a> take input in the form of (5,n1,n2),
+which correspond to the last three dimension in the output of <a class="reference internal" href="Parameters.html#Parameters.ParaManager_Unp" title="Parameters.ParaManager_Unp"><code class="xref py py-func docutils literal notranslate"><span class="pre">Parameters.ParaManager_Unp()</span></code></a> and <a class="reference internal" href="Parameters.html#Parameters.ParaManager_Pol" title="Parameters.ParaManager_Pol"><code class="xref py py-func docutils literal notranslate"><span class="pre">Parameters.ParaManager_Pol()</span></code></a>.
 The last dimension contains a set of parameters that parameterize the moment of GPDs.
 Therefore, the output moment will be in the shape of (5,n1)</p>
-<p>The last function <code class="docutils literal notranslate"><span class="pre">Parameters.Moment_Sum()</span></code> essentially sums over the last dimension of <code class="docutils literal notranslate"><span class="pre">Parameters.ConfMoment()</span></code>
+<p>The last function <a class="reference internal" href="Parameters.html#Parameters.Moment_Sum" title="Parameters.Moment_Sum"><code class="xref py py-func docutils literal notranslate"><span class="pre">Parameters.Moment_Sum()</span></code></a> essentially sums over the last dimension of <a class="reference internal" href="Parameters.html#Parameters.ConfMoment" title="Parameters.ConfMoment"><code class="xref py py-func docutils literal notranslate"><span class="pre">Parameters.ConfMoment()</span></code></a>
 — it takes shape (5,n1) as introduced above and output shape (5,) by summing over the last dimension.</p>
 <p>The two functions in this subsection also take vector input of j in shape (N,),
 and thus output will be (N,5,n1) and (N,5), respectively.</p>

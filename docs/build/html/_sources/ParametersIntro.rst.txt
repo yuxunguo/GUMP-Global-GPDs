@@ -7,11 +7,11 @@ which can be devided into two parts: the parameters managers and the GPD moments
 
 Parameter Managers
 ------------------
-This part consists of two function ``Parameters.ParaManager_Unp()`` and ``Parameters.ParaManager_Pol()``.
+This part consists of two function :func:`Parameters.ParaManager_Unp()` and :func:`Parameters.ParaManager_Pol()`.
 They are highly alike but defined separately for the vector-like GPDs :math:`H,E` and the axial-vector-like GPDs :math:`\tilde{H},\tilde{E}`.
 Here we take the vector-like GPDs as an example.
 
-The function ``Parameters.ParaManager_Unp()`` convert a list of all the phenomenological parameters into a set of parameters
+The function :func:`Parameters.ParaManager_Unp()` convert a list of all the phenomenological parameters into a set of parameters
 in the standard shape of (2,3,5,n1,n2)
 
 Each rows means:
@@ -28,12 +28,12 @@ GPD Moment Calculation
 
 There are two more function that convert the output from the previous subsection into GPD moments.
 
-The function ``Parameters.ConfMoment()`` take input in the form of (5,n1,n2), 
-which correspond to the last three dimension in the output of ``Parameters.ParaManager_Unp()`` and ``Parameters.ParaManager_Pol()``.
+The function :func:`Parameters.ConfMoment()` take input in the form of (5,n1,n2), 
+which correspond to the last three dimension in the output of :func:`Parameters.ParaManager_Unp()` and :func:`Parameters.ParaManager_Pol()`.
 The last dimension contains a set of parameters that parameterize the moment of GPDs.
 Therefore, the output moment will be in the shape of (5,n1)
 
-The last function ``Parameters.Moment_Sum()`` essentially sums over the last dimension of ``Parameters.ConfMoment()``
+The last function :func:`Parameters.Moment_Sum()` essentially sums over the last dimension of :func:`Parameters.ConfMoment()`
 --- it takes shape (5,n1) as introduced above and output shape (5,) by summing over the last dimension.
 
 The two functions in this subsection also take vector input of j in shape (N,),

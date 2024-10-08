@@ -19,6 +19,7 @@
       <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
       <script src="_static/clipboard.min.js?v=a7894cd8"></script>
       <script src="_static/copybutton.js?v=f281be69"></script>
+      <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
@@ -51,7 +52,11 @@
 <li class="toctree-l1"><a class="reference internal" href="ParametersIntro.html">Parameters Quickguide</a></li>
 <li class="toctree-l1"><a class="reference internal" href="ObservablesIntro.html">Observables Quickguide</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Evolution Quickguide</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#evolution-operators">Evolution Operators</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#evolution-operators">Evolution Operators</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#anomalous-dimensions-and-evolution-basis">Anomalous dimensions and evolution basis</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#evolution-operator">Evolution operator</a></li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="#wilson-coefficients">Wilson Coefficients</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#moment-evolution">Moment Evolution</a></li>
 </ul>
@@ -94,6 +99,31 @@ This can also be used as a stand-alone module that provide the evolution operato
 <p>We roughly devide this submodules into three parts, the evolution operators, the Wilson coefficients, and GPD moment evolution.</p>
 <section id="evolution-operators">
 <h2>Evolution Operators<a class="headerlink" href="#evolution-operators" title="Link to this heading"></a></h2>
+<section id="anomalous-dimensions-and-evolution-basis">
+<h3>Anomalous dimensions and evolution basis<a class="headerlink" href="#anomalous-dimensions-and-evolution-basis" title="Link to this heading"></a></h3>
+<p>The callables <a class="reference internal" href="Evolution.html#Evolution.singlet_LO" title="Evolution.singlet_LO"><code class="xref py py-func docutils literal notranslate"><span class="pre">Evolution.singlet_LO()</span></code></a>, <a class="reference internal" href="Evolution.html#Evolution.singlet_NLO" title="Evolution.singlet_NLO"><code class="xref py py-func docutils literal notranslate"><span class="pre">Evolution.singlet_NLO()</span></code></a>, <a class="reference internal" href="Evolution.html#Evolution.non_singlet_LO" title="Evolution.non_singlet_LO"><code class="xref py py-func docutils literal notranslate"><span class="pre">Evolution.non_singlet_LO()</span></code></a> and <a class="reference internal" href="Evolution.html#Evolution.non_singlet_NLO" title="Evolution.non_singlet_NLO"><code class="xref py py-func docutils literal notranslate"><span class="pre">Evolution.non_singlet_NLO()</span></code></a>
+return the anomalous dimensions of the non-singlet and singlet/gluon anomalous dimensions in the evolution basis at leading-order (LO) and next-to-leading order (NLO),
+for given vector (p=1) and axial-vector (p=-1) GPDs with certain charge parity (+1 for sinlget/gluon and non-singlet plus, and -1 for valence and non-singlet minus).</p>
+<p>In most of the time, we work in the evolution basis similarly to the forward PDFs, the basis of this work is currently
+<span class="math notranslate nohighlight">\((q_{\rm{Val}},q^{(+)}_{du},q^{(-)}_{du},\Sigma,G)\)</span> with two active quark flavor.
+The following evolution basis of quarks are defined:</p>
+<div class="math notranslate nohighlight">
+\[\begin{align}
+q_{\rm{Val}} \equiv \sum_{i=u,d} q_i-\bar q_i\ , \quad
+q^{(\pm)}_{ij} \equiv q_i\pm\bar {q}_i - (q_j\pm \bar {q}_j) \ , \quad
+\Sigma \equiv \sum_{i=u,d} q_i+\bar q_i\ ,
+\end{align}\]</div>
+<p>where it’s well-known that only the singlet quark (<span class="math notranslate nohighlight">\(\Sigma\)</span>) mixes with the gluon under evolution,
+and the charge parity is given explicitly by the relative sign between <span class="math notranslate nohighlight">\(q\)</span> and <span class="math notranslate nohighlight">\(\bar q\)</span>.</p>
+</section>
+<section id="evolution-operator">
+<h3>Evolution operator<a class="headerlink" href="#evolution-operator" title="Link to this heading"></a></h3>
+<p>The evolution operator will be a scalar (<span class="math notranslate nohighlight">\(\mathcal{E}_j\)</span>) for non-singlet and 2-by-2 matrix (<span class="math notranslate nohighlight">\(\boldsymbol{\mathcal{E}}_j\)</span>) for singlet/gluons at each conformal spin j.
+In reality, we can’t output the evolution operator directly starting at NLO, because it will have off-diagonal entries <span class="math notranslate nohighlight">\(\mathcal{E}_{jk}\)</span> for <span class="math notranslate nohighlight">\(j-k=2,4,\cdots\)</span>.</p>
+<p>The implementation of this works follows the gepard package, which has been discussed in the <a class="reference external" href="https://arxiv.org/pdf/hep-ph/0703179">reference</a>,
+where the evolution operators are devided into the diagonal part (<span class="math notranslate nohighlight">\(\mathcal{A}_j\)</span>) and off-diagonal part (<span class="math notranslate nohighlight">\(\mathcal{B}_{jk}\)</span>).
+If any details of the implementation are interested, check for instance the <a class="reference internal" href="Evolution.html#Evolution.Moment_Evo_NLO" title="Evolution.Moment_Evo_NLO"><code class="xref py py-func docutils literal notranslate"><span class="pre">Evolution.Moment_Evo_NLO()</span></code></a> where all the different pieces are added together.</p>
+</section>
 </section>
 <section id="wilson-coefficients">
 <h2>Wilson Coefficients<a class="headerlink" href="#wilson-coefficients" title="Link to this heading"></a></h2>

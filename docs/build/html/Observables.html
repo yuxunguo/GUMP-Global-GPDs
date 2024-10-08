@@ -159,7 +159,8 @@ With the GPDs ansatz, observables with LO evolution are calculated</p>
 <dl class="py function">
 <dt class="sig sig-object py" id="Observables.Flv_Intp">
 <span class="sig-prename descclassname"><span class="pre">Observables.</span></span><span class="sig-name descname"><span class="pre">Flv_Intp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">Flv_array</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">array</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">flv</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/Observables.html#Flv_Intp"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#Observables.Flv_Intp" title="Link to this definition"></a></dt>
-<dd><p>Flv_array: (N, 3) complex
+<dd><p>Return the wave function for each flavor</p>
+<p>Flv_array: (N, 3) complex, the wave function of u,d,g
 flv: (N) str</p>
 <p>return result: (N) complex</p>
 </dd></dl>
@@ -170,32 +171,24 @@ flv: (N) str</p>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <dl class="py method">
 <dt class="sig sig-object py" id="Observables.GPDobserv.CFF">
-<span class="sig-name descname"><span class="pre">CFF</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ParaAll</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">muset</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p_order</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">flv</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'All'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/Observables.html#GPDobserv.CFF"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#Observables.GPDobserv.CFF" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">CFF</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ParaAll</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">muf</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p_order</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">flv</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'All'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/Observables.html#GPDobserv.CFF"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#Observables.GPDobserv.CFF" title="Link to this definition"></a></dt>
 <dd><p>Charge averged CFF $mathcal{F}(xi, t) (mathcal{F} = Q_u^2 F_u + Q_d^2 F_d)$</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>[</strong><strong>Para_Forward</strong> (<em>ParaAll =</em>)</p></li>
-<li><p><strong>Para_xi2</strong></p></li>
-<li><p><strong>Para_xi4</strong><strong>]</strong></p></li>
-<li><p><strong>[</strong><strong>Para_Forward_uV</strong> (<em>Para_Forward =</em>)</p></li>
-<li><p><strong>Para_Forward_ubar</strong></p></li>
-<li><p><strong>Para_Forward_dV</strong></p></li>
-<li><p><strong>Para_Forward_dbar</strong></p></li>
-<li><p><strong>Para_Forward_g</strong><strong>]</strong></p></li>
-<li><p><strong>Para_Forward_i</strong> – forward parameter sets for valence u quark (uV), sea u quark (ubar), valence d quark (dV), sea d quark (dbar) and gluon (g)</p></li>
-<li><p><strong>[</strong><strong>Para_xi2_uV</strong> (<em>Para_xi2 =</em>)</p></li>
-<li><p><strong>Para_xi2_ubar</strong></p></li>
-<li><p><strong>Para_xi2_dV</strong></p></li>
-<li><p><strong>Para_xi2_dbar</strong></p></li>
-<li><p><strong>Para_xi2_g</strong><strong>]</strong></p></li>
-<li><p><strong>Para_xi2_i</strong> – xi^2 parameter sets for valence u quark (uV), sea u quark (ubar), valence d quark (dV), sea d quark (dbar) and gluon (g)</p></li>
-<li><p><strong>[</strong><strong>Para_xi4_uV</strong> (<em>Para_xi4 =</em>)</p></li>
-<li><p><strong>Para_xi4_ubar</strong></p></li>
-<li><p><strong>Para_xi4_dV</strong></p></li>
-<li><p><strong>Para_xi4_dbar</strong></p></li>
-<li><p><strong>Para_xi4_g</strong><strong>]</strong></p></li>
-<li><p><strong>Para_xi4_i</strong> – xi^4 parameter sets for valence u quark (uV), sea u quark (ubar), valence d quark (dV), sea d quark (dbar) and gluon (g)</p></li>
+<li><p><strong>ParaAll</strong> – <p>array as [Para_Forward, Para_xi2, Para_xi4]</p>
+<ul>
+<li><p>Para_Forward = array as [Para_Forward_uV, Para_Forward_ubar, Para_Forward_dV, Para_Forward_dbar, Para_Forward_g]
+where Para_Forward_i is forward parameter sets for valence u quark (uV), sea u quark (ubar), valence d quark (dV), sea d quark (dbar) and gluon (g)</p></li>
+<li><p>Para_xi2 = array as [Para_xi2_uV, Para_xi2_ubar, Para_xi2_dV, Para_xi2_dbar, Para_xi2_g]
+where Para_xi2_i is xi^2 parameter sets for valence u quark (uV), sea u quark (ubar), valence d quark (dV), sea d quark (dbar) and gluon (g)</p></li>
+<li><p>Para_xi4 = array as [Para_xi4_uV, Para_xi4_ubar, Para_xi4_dV, Para_xi4_dbar, Para_xi4_g]
+where Para_xi4_i is xi^4 parameter sets for valence u quark (uV), sea u quark (ubar), valence d quark (dV), sea d quark (dbar) and gluon (g)</p></li>
+</ul>
+</p></li>
+<li><p><strong>muf</strong> – factorization scale</p></li>
+<li><p><strong>p_order</strong> – 1 for leading-order evolution (default); 2 for next-to-leading-order evolution ; higher order not implemented yet</p></li>
+<li><p><strong>flv</strong> – “q”, “g”, or “All”</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
@@ -219,27 +212,17 @@ flv: (N) str</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>[</strong><strong>Para_Forward</strong> (<em>ParaAll =</em>)</p></li>
-<li><p><strong>Para_xi2</strong></p></li>
-<li><p><strong>Para_xi4</strong><strong>]</strong></p></li>
-<li><p><strong>[</strong><strong>Para_Forward_uV</strong> (<em>Para_Forward =</em>)</p></li>
-<li><p><strong>Para_Forward_ubar</strong></p></li>
-<li><p><strong>Para_Forward_dV</strong></p></li>
-<li><p><strong>Para_Forward_dbar</strong></p></li>
-<li><p><strong>Para_Forward_g</strong><strong>]</strong></p></li>
-<li><p><strong>Para_Forward_i</strong> – forward parameter sets for valence u quark (uV), sea u quark (ubar), valence d quark (dV), sea d quark (dbar) and gluon (g)</p></li>
-<li><p><strong>[</strong><strong>Para_xi2_uV</strong> (<em>Para_xi2 =</em>)</p></li>
-<li><p><strong>Para_xi2_ubar</strong></p></li>
-<li><p><strong>Para_xi2_dV</strong></p></li>
-<li><p><strong>Para_xi2_dbar</strong></p></li>
-<li><p><strong>Para_xi2_g</strong><strong>]</strong></p></li>
-<li><p><strong>Para_xi2_i</strong> – xi^2 parameter sets for valence u quark (uV), sea u quark (ubar), valence d quark (dV), sea d quark (dbar) and gluon (g)</p></li>
-<li><p><strong>[</strong><strong>Para_xi4_uV</strong> (<em>Para_xi4 =</em>)</p></li>
-<li><p><strong>Para_xi4_ubar</strong></p></li>
-<li><p><strong>Para_xi4_dV</strong></p></li>
-<li><p><strong>Para_xi4_dbar</strong></p></li>
-<li><p><strong>Para_xi4_g</strong><strong>]</strong></p></li>
-<li><p><strong>Para_xi4_i</strong> – xi^4 parameter sets for valence u quark (uV), sea u quark (ubar), valence d quark (dV), sea d quark (dbar) and gluon (g)</p></li>
+<li><p><strong>flv</strong> (<em>str</em>) – “u”, “d”, “S”, “NS” or “g”</p></li>
+<li><p><strong>ParaAll</strong> – <p>array as [Para_Forward, Para_xi2, Para_xi4]</p>
+<ul>
+<li><p>Para_Forward = array as [Para_Forward_uV, Para_Forward_ubar, Para_Forward_dV, Para_Forward_dbar, Para_Forward_g]
+where Para_Forward_i is forward parameter sets for valence u quark (uV), sea u quark (ubar), valence d quark (dV), sea d quark (dbar) and gluon (g)</p></li>
+<li><p>Para_xi2 = array as [Para_xi2_uV, Para_xi2_ubar, Para_xi2_dV, Para_xi2_dbar, Para_xi2_g]
+where Para_xi2_i is xi^2 parameter sets for valence u quark (uV), sea u quark (ubar), valence d quark (dV), sea d quark (dbar) and gluon (g)</p></li>
+<li><p>Para_xi4 = array as [Para_xi4_uV, Para_xi4_ubar, Para_xi4_dV, Para_xi4_dbar, Para_xi4_g]
+where Para_xi4_i is xi^4 parameter sets for valence u quark (uV), sea u quark (ubar), valence d quark (dV), sea d quark (dbar) and gluon (g)</p></li>
+</ul>
+</p></li>
 <li><p><strong>p_order</strong> – 1 for leading-order evolution (default); 2 for next-to-leading-order evolution ; higher order not implemented yet</p></li>
 </ul>
 </dd>
@@ -256,35 +239,20 @@ flv: (N) str</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>[</strong><strong>Para_Forward</strong> (<em>ParaAll =</em>)</p></li>
-<li><p><strong>Para_xi2</strong></p></li>
-<li><p><strong>Para_xi4</strong><strong>]</strong></p></li>
-<li><p><strong>[</strong><strong>Para_Forward_uV</strong> (<em>Para_Forward =</em>)</p></li>
-<li><p><strong>Para_Forward_ubar</strong></p></li>
-<li><p><strong>Para_Forward_dV</strong></p></li>
-<li><p><strong>Para_Forward_dbar</strong></p></li>
-<li><p><strong>Para_Forward_g</strong><strong>]</strong></p></li>
-<li><p><strong>Para_Forward_i</strong> – forward parameter sets for valence u quark (uV), sea u quark (ubar), valence d quark (dV), sea d quark (dbar) and gluon (g)</p></li>
-<li><p><strong>[</strong><strong>Para_xi2_uV</strong> (<em>Para_xi2 =</em>)</p></li>
-<li><p><strong>Para_xi2_ubar</strong></p></li>
-<li><p><strong>Para_xi2_dV</strong></p></li>
-<li><p><strong>Para_xi2_dbar</strong></p></li>
-<li><p><strong>Para_xi2_g</strong><strong>]</strong></p></li>
-<li><p><strong>Para_xi2_i</strong> – xi^2 parameter sets for valence u quark (uV), sea u quark (ubar), valence d quark (dV), sea d quark (dbar) and gluon (g)</p></li>
-<li><p><strong>[</strong><strong>Para_xi4_uV</strong> (<em>Para_xi4 =</em>)</p></li>
-<li><p><strong>Para_xi4_ubar</strong></p></li>
-<li><p><strong>Para_xi4_dV</strong></p></li>
-<li><p><strong>Para_xi4_dbar</strong></p></li>
-<li><p><strong>Para_xi4_g</strong><strong>]</strong></p></li>
-<li><p><strong>Para_xi4_i</strong> – xi^4 parameter sets for valence u quark (uV), sea u quark (ubar), valence d quark (dV), sea d quark (dbar) and gluon (g)</p></li>
-<li><p><strong>rho</strong> (<em>meson =</em><em> [</em><em>1 for</em>)</p></li>
-<li><p><strong>phi</strong> (<em>2 for</em>)</p></li>
-<li><p><strong>jpsi</strong><strong>]</strong> (<em>3 for</em>)</p></li>
+<li><p><strong>ParaAll</strong> – <p>array as [Para_Forward, Para_xi2, Para_xi4]</p>
+<ul>
+<li><p>Para_Forward = array as [Para_Forward_uV, Para_Forward_ubar, Para_Forward_dV, Para_Forward_dbar, Para_Forward_g]
+where Para_Forward_i is forward parameter sets for valence u quark (uV), sea u quark (ubar), valence d quark (dV), sea d quark (dbar) and gluon (g)</p></li>
+<li><p>Para_xi2 = array as [Para_xi2_uV, Para_xi2_ubar, Para_xi2_dV, Para_xi2_dbar, Para_xi2_g]
+where Para_xi2_i is xi^2 parameter sets for valence u quark (uV), sea u quark (ubar), valence d quark (dV), sea d quark (dbar) and gluon (g)</p></li>
+<li><p>Para_xi4 = array as [Para_xi4_uV, Para_xi4_ubar, Para_xi4_dV, Para_xi4_dbar, Para_xi4_g]
+where Para_xi4_i is xi^4 parameter sets for valence u quark (uV), sea u quark (ubar), valence d quark (dV), sea d quark (dbar) and gluon (g)</p></li>
+</ul>
+</p></li>
+<li><p><strong>muf</strong> – factorization scale</p></li>
+<li><p><strong>meson</strong> – [1 for rho, 2 for phi, 3 for jpsi]</p></li>
 <li><p><strong>p_order</strong> – 1 for leading-order evolution (default); 2 for next-to-leading-order evolution ; higher order not implemented yet</p></li>
-<li><p><strong>&quot;u&quot;</strong> (<em>(</em><em>flv =</em>)</p></li>
-<li><p><strong>&quot;d&quot;</strong></p></li>
-<li><p><strong>&quot;g&quot;</strong></p></li>
-<li><p><strong>&quot;q&quot;</strong><strong>)</strong> (<em>&quot;All&quot; or</em>)</p></li>
+<li><p><strong>flv</strong> – “q”, “g”, or “All”</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
@@ -300,35 +268,19 @@ flv: (N) str</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>[</strong><strong>Para_Forward</strong> (<em>ParaAll =</em>)</p></li>
-<li><p><strong>Para_xi2</strong></p></li>
-<li><p><strong>Para_xi4</strong><strong>]</strong></p></li>
-<li><p><strong>[</strong><strong>Para_Forward_uV</strong> (<em>Para_Forward =</em>)</p></li>
-<li><p><strong>Para_Forward_ubar</strong></p></li>
-<li><p><strong>Para_Forward_dV</strong></p></li>
-<li><p><strong>Para_Forward_dbar</strong></p></li>
-<li><p><strong>Para_Forward_g</strong><strong>]</strong></p></li>
-<li><p><strong>Para_Forward_i</strong> – forward parameter sets for valence u quark (uV), sea u quark (ubar), valence d quark (dV), sea d quark (dbar) and gluon (g)</p></li>
-<li><p><strong>[</strong><strong>Para_xi2_uV</strong> (<em>Para_xi2 =</em>)</p></li>
-<li><p><strong>Para_xi2_ubar</strong></p></li>
-<li><p><strong>Para_xi2_dV</strong></p></li>
-<li><p><strong>Para_xi2_dbar</strong></p></li>
-<li><p><strong>Para_xi2_g</strong><strong>]</strong></p></li>
-<li><p><strong>Para_xi2_i</strong> – xi^2 parameter sets for valence u quark (uV), sea u quark (ubar), valence d quark (dV), sea d quark (dbar) and gluon (g)</p></li>
-<li><p><strong>[</strong><strong>Para_xi4_uV</strong> (<em>Para_xi4 =</em>)</p></li>
-<li><p><strong>Para_xi4_ubar</strong></p></li>
-<li><p><strong>Para_xi4_dV</strong></p></li>
-<li><p><strong>Para_xi4_dbar</strong></p></li>
-<li><p><strong>Para_xi4_g</strong><strong>]</strong></p></li>
-<li><p><strong>Para_xi4_i</strong> – xi^4 parameter sets for valence u quark (uV), sea u quark (ubar), valence d quark (dV), sea d quark (dbar) and gluon (g)</p></li>
-<li><p><strong>rho</strong> (<em>meson =</em><em> [</em><em>1 for</em>)</p></li>
-<li><p><strong>phi</strong> (<em>2 for</em>)</p></li>
-<li><p><strong>jpsi</strong><strong>]</strong> (<em>3 for</em>)</p></li>
-<li><p><strong>results</strong> (<em>muset = offset</em><em> of </em><em>scale mu to study the scale dependence</em><em> of </em><em>the</em>)</p></li>
-<li><p><strong>&quot;u&quot;</strong> (<em>(</em><em>flv =</em>)</p></li>
-<li><p><strong>&quot;d&quot;</strong></p></li>
-<li><p><strong>&quot;g&quot;</strong></p></li>
-<li><p><strong>&quot;q&quot;</strong><strong>)</strong> (<em>&quot;All&quot; or</em>)</p></li>
+<li><p><strong>ParaAll</strong> – <p>array as [Para_Forward, Para_xi2, Para_xi4]</p>
+<ul>
+<li><p>Para_Forward = array as [Para_Forward_uV, Para_Forward_ubar, Para_Forward_dV, Para_Forward_dbar, Para_Forward_g]
+where Para_Forward_i is forward parameter sets for valence u quark (uV), sea u quark (ubar), valence d quark (dV), sea d quark (dbar) and gluon (g)</p></li>
+<li><p>Para_xi2 = array as [Para_xi2_uV, Para_xi2_ubar, Para_xi2_dV, Para_xi2_dbar, Para_xi2_g]
+where Para_xi2_i is xi^2 parameter sets for valence u quark (uV), sea u quark (ubar), valence d quark (dV), sea d quark (dbar) and gluon (g)</p></li>
+<li><p>Para_xi4 = array as [Para_xi4_uV, Para_xi4_ubar, Para_xi4_dV, Para_xi4_dbar, Para_xi4_g]
+where Para_xi4_i is xi^4 parameter sets for valence u quark (uV), sea u quark (ubar), valence d quark (dV), sea d quark (dbar) and gluon (g)</p></li>
+</ul>
+</p></li>
+<li><p><strong>muf</strong> – factorization scale</p></li>
+<li><p><strong>meson</strong> – [1 for rho, 2 for phi, 3 for jpsi]</p></li>
+<li><p><strong>flv</strong> – “q”, “g”, or “All”</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
@@ -344,35 +296,19 @@ flv: (N) str</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>[</strong><strong>Para_Forward</strong> (<em>ParaAll =</em>)</p></li>
-<li><p><strong>Para_xi2</strong></p></li>
-<li><p><strong>Para_xi4</strong><strong>]</strong></p></li>
-<li><p><strong>[</strong><strong>Para_Forward_uV</strong> (<em>Para_Forward =</em>)</p></li>
-<li><p><strong>Para_Forward_ubar</strong></p></li>
-<li><p><strong>Para_Forward_dV</strong></p></li>
-<li><p><strong>Para_Forward_dbar</strong></p></li>
-<li><p><strong>Para_Forward_g</strong><strong>]</strong></p></li>
-<li><p><strong>Para_Forward_i</strong> – forward parameter sets for valence u quark (uV), sea u quark (ubar), valence d quark (dV), sea d quark (dbar) and gluon (g)</p></li>
-<li><p><strong>[</strong><strong>Para_xi2_uV</strong> (<em>Para_xi2 =</em>)</p></li>
-<li><p><strong>Para_xi2_ubar</strong></p></li>
-<li><p><strong>Para_xi2_dV</strong></p></li>
-<li><p><strong>Para_xi2_dbar</strong></p></li>
-<li><p><strong>Para_xi2_g</strong><strong>]</strong></p></li>
-<li><p><strong>Para_xi2_i</strong> – xi^2 parameter sets for valence u quark (uV), sea u quark (ubar), valence d quark (dV), sea d quark (dbar) and gluon (g)</p></li>
-<li><p><strong>[</strong><strong>Para_xi4_uV</strong> (<em>Para_xi4 =</em>)</p></li>
-<li><p><strong>Para_xi4_ubar</strong></p></li>
-<li><p><strong>Para_xi4_dV</strong></p></li>
-<li><p><strong>Para_xi4_dbar</strong></p></li>
-<li><p><strong>Para_xi4_g</strong><strong>]</strong></p></li>
-<li><p><strong>Para_xi4_i</strong> – xi^4 parameter sets for valence u quark (uV), sea u quark (ubar), valence d quark (dV), sea d quark (dbar) and gluon (g)</p></li>
-<li><p><strong>rho</strong> (<em>meson =</em><em> [</em><em>1 for</em>)</p></li>
-<li><p><strong>phi</strong> (<em>2 for</em>)</p></li>
-<li><p><strong>jpsi</strong><strong>]</strong> (<em>3 for</em>)</p></li>
-<li><p><strong>results</strong> (<em>muset = offset</em><em> of </em><em>scale mu to study the scale dependence</em><em> of </em><em>the</em>)</p></li>
-<li><p><strong>&quot;u&quot;</strong> (<em>(</em><em>flv =</em>)</p></li>
-<li><p><strong>&quot;d&quot;</strong></p></li>
-<li><p><strong>&quot;g&quot;</strong></p></li>
-<li><p><strong>&quot;q&quot;</strong><strong>)</strong> (<em>&quot;All&quot; or</em>)</p></li>
+<li><p><strong>ParaAll</strong> – <p>array as [Para_Forward, Para_xi2, Para_xi4]</p>
+<ul>
+<li><p>Para_Forward = array as [Para_Forward_uV, Para_Forward_ubar, Para_Forward_dV, Para_Forward_dbar, Para_Forward_g]
+where Para_Forward_i is forward parameter sets for valence u quark (uV), sea u quark (ubar), valence d quark (dV), sea d quark (dbar) and gluon (g)</p></li>
+<li><p>Para_xi2 = array as [Para_xi2_uV, Para_xi2_ubar, Para_xi2_dV, Para_xi2_dbar, Para_xi2_g]
+where Para_xi2_i is xi^2 parameter sets for valence u quark (uV), sea u quark (ubar), valence d quark (dV), sea d quark (dbar) and gluon (g)</p></li>
+<li><p>Para_xi4 = array as [Para_xi4_uV, Para_xi4_ubar, Para_xi4_dV, Para_xi4_dbar, Para_xi4_g]
+where Para_xi4_i is xi^4 parameter sets for valence u quark (uV), sea u quark (ubar), valence d quark (dV), sea d quark (dbar) and gluon (g)</p></li>
+</ul>
+</p></li>
+<li><p><strong>muf</strong> – factorization scale</p></li>
+<li><p><strong>meson</strong> – [1 for rho, 2 for phi, 3 for jpsi]</p></li>
+<li><p><strong>flv</strong> – “q”, “g”, or “All”</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
@@ -384,19 +320,19 @@ flv: (N) str</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="Observables.GPDobserv.tPDF">
 <span class="sig-name descname"><span class="pre">tPDF</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">flv</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ParaAll</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p_order</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/Observables.html#GPDobserv.tPDF"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#Observables.GPDobserv.tPDF" title="Link to this definition"></a></dt>
-<dd><p>t-denpendent PDF for given flavor (flv = “u”, “d”, “S”, “NS” or “g”)</p>
+<dd><p>t-denpendent PDF for given flavor</p>
+<p>Cross-ref: <a class="reference internal" href="Evolution.html#Evolution.Moment_Evo_LO" title="Evolution.Moment_Evo_LO"><code class="xref py py-func docutils literal notranslate"><span class="pre">Evolution.Moment_Evo_LO()</span></code></a> and <a class="reference internal" href="Evolution.html#Evolution.tPDF_Moment_Evo_NLO" title="Evolution.tPDF_Moment_Evo_NLO"><code class="xref py py-func docutils literal notranslate"><span class="pre">Evolution.tPDF_Moment_Evo_NLO()</span></code></a></p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>[</strong><strong>Para_Forward</strong> (<em>ParaAll =</em>)</p></li>
-<li><p><strong>Para_xi2</strong><strong>]</strong></p></li>
-<li><p><strong>[</strong><strong>Para_Forward_uV</strong> (<em>Para_Forward =</em>)</p></li>
-<li><p><strong>Para_Forward_ubar</strong></p></li>
-<li><p><strong>Para_Forward_dV</strong></p></li>
-<li><p><strong>Para_Forward_dbar</strong></p></li>
-<li><p><strong>Para_Forward_g</strong><strong>]</strong></p></li>
-<li><p><strong>Para_Forward_i</strong> – parameter sets for valence u quark (uV), sea u quark (ubar), valence d quark (dV), sea d quark (dbar) and gluon (g)</p></li>
-<li><p><strong>Para_xi2</strong> – only matter for non-zero xi (NOT needed here but the parameters are passed for consistency with GPDs)</p></li>
+<li><p><strong>flv</strong> (<em>str</em>) – “u”, “d”, “S”, “NS” or “g”</p></li>
+<li><p><strong>ParaAll</strong> – <p>array as [Para_Forward, Para_xi2,…]</p>
+<ul>
+<li><p>Para_Forward: array as [Para_Forward_uV, Para_Forward_ubar, Para_Forward_dV, Para_Forward_dbar, Para_Forward_g],
+where Para_Forward_i is parameter sets for valence u quark (uV), sea u quark (ubar), valence d quark (dV), sea d quark (dbar) and gluon (g)</p></li>
+<li><p>Para_xi2: only matter for non-zero xi (NOT needed here but the parameters are passed for consistency with GPDs)</p></li>
+</ul>
+</p></li>
 <li><p><strong>p_order</strong> – 1 for leading-order evolution (default); 2 for next-to-leading-order evolution ; higher order not implemented yet</p></li>
 </ul>
 </dd>
@@ -453,8 +389,17 @@ flv: (N) str</p>
 <dt class="sig sig-object py" id="Observables.flv_to_indx">
 <span class="sig-prename descclassname"><span class="pre">Observables.</span></span><span class="sig-name descname"><span class="pre">flv_to_indx</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">flv</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/Observables.html#flv_to_indx"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#Observables.flv_to_indx" title="Link to this definition"></a></dt>
 <dd><p>flv is the flavor. It is a string</p>
-<p>This function will cast each flavor to an auxiliary length 3 array</p>
-<p>Output shape: scalar int</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>flv</strong> (<em>str</em>) – the flavor in string, e.g., ‘u’, ‘d’ , ‘g’</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>flavor converted to scalar</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>flv (scalar)</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py function">
@@ -465,8 +410,18 @@ flv: (N) str</p>
 <dl class="py function">
 <dt class="sig sig-object py" id="Observables.flvs_to_indx">
 <span class="sig-prename descclassname"><span class="pre">Observables.</span></span><span class="sig-name descname"><span class="pre">flvs_to_indx</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">flvs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/Observables.html#flvs_to_indx"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#Observables.flvs_to_indx" title="Link to this definition"></a></dt>
-<dd><p>flvs is an array of strings (N)
-Output: (N)</p>
+<dd><p>Cast <a class="reference internal" href="#Observables.flv_to_indx" title="Observables.flv_to_indx"><code class="xref py py-func docutils literal notranslate"><span class="pre">flv_to_indx()</span></code></a> for each flv in the list flvs</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>flvs</strong> (<em>list</em><em> of </em><em>str</em>) – list of flavors</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>flavors converted to scalar</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>flvs (list of scalar)</p>
+</dd>
+</dl>
 </dd></dl>
 
 </section>

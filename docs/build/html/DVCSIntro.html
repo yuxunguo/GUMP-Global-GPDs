@@ -86,10 +86,10 @@
   <section id="dvcs-quickguide">
 <h1>DVCS Quickguide<a class="headerlink" href="#dvcs-quickguide" title="Link to this heading"></a></h1>
 <p>Here we briefly introduce the <a class="reference internal" href="DVCS_xsec.html#dvcs-xsec-module"><span class="std std-ref">DVCS_xsec module</span></a>.
-This can be used as a stand-alone module for calculating the deeply virtual Compton scattering(DVCS) cross-section
+This can be used as a stand-alone module for calculating the deeply virtual Compton scattering (DVCS) cross-section
 where the formulae are given in <a class="reference external" href="https://inspirehep.net/literature/1925449">our publication</a>.</p>
 <p>The codes are generated from the Mathematica master code, and numerically checked.</p>
-<p>We have three main callables: <code class="docutils literal notranslate"><span class="pre">DVCS_xsec.dsigma_DVCS()</span></code>, <code class="docutils literal notranslate"><span class="pre">DVCS_xsec.dsigma_INT()</span></code> and <code class="docutils literal notranslate"><span class="pre">DVCS_xsec.dsigma_BH()</span></code>,
+<p>We have three main callables: <a class="reference internal" href="DVCS_xsec.html#DVCS_xsec.dsigma_DVCS" title="DVCS_xsec.dsigma_DVCS"><code class="xref py py-func docutils literal notranslate"><span class="pre">DVCS_xsec.dsigma_DVCS()</span></code></a>, <a class="reference internal" href="DVCS_xsec.html#DVCS_xsec.dsigma_INT" title="DVCS_xsec.dsigma_INT"><code class="xref py py-func docutils literal notranslate"><span class="pre">DVCS_xsec.dsigma_INT()</span></code></a> and <a class="reference internal" href="DVCS_xsec.html#DVCS_xsec.dsigma_BH" title="DVCS_xsec.dsigma_BH"><code class="xref py py-func docutils literal notranslate"><span class="pre">DVCS_xsec.dsigma_BH()</span></code></a>,
 that calcualte the pure DVCS cross-sections, the interference cross-sections, and the Bethe-Heitler (BH) cross-sections, respectively.</p>
 <dl class="simple">
 <dt>Each function has the following arguments:</dt><dd><ul class="simple">
@@ -109,8 +109,8 @@ that calcualte the pure DVCS cross-sections, the interference cross-sections, an
 <p>The pol should be a string in the form of <span class="math notranslate nohighlight">\(P_BP_T\)</span>
 such that <span class="math notranslate nohighlight">\(P_B = \{U,L\}\)</span> and <span class="math notranslate nohighlight">\(P_T=\{U,L,T_{\rm{in}},T_{\rm{out}}\}\)</span> for the beam and target polarization,
 e.g. <code class="docutils literal notranslate"><span class="pre">pol</span> <span class="pre">=</span> <span class="pre">'UTout'</span></code>.</p>
-<p>Besides the three main callables, there is also <code class="docutils literal notranslate"><span class="pre">DVCS_xsec.dsigma_TOT()</span></code> that takes the same input and returns the sum of the three functions above.
-And the <code class="docutils literal notranslate"><span class="pre">DVCS_xsec.dsigma_DVCS_HERA()</span></code> that return the virtual-photon-proton cross-sections and integrate over <span class="math notranslate nohighlight">\(\phi\)</span>, as measured by HERA. The input <span class="math notranslate nohighlight">\(\phi\)</span> will not be needed in this case.</p>
+<p>Besides the three main callables, there is also <a class="reference internal" href="DVCS_xsec.html#DVCS_xsec.dsigma_TOT" title="DVCS_xsec.dsigma_TOT"><code class="xref py py-func docutils literal notranslate"><span class="pre">DVCS_xsec.dsigma_TOT()</span></code></a> that takes the same input and returns the sum of the three functions above.
+And the <a class="reference internal" href="DVCS_xsec.html#DVCS_xsec.dsigma_DVCS_HERA" title="DVCS_xsec.dsigma_DVCS_HERA"><code class="xref py py-func docutils literal notranslate"><span class="pre">DVCS_xsec.dsigma_DVCS_HERA()</span></code></a> that return the virtual-photon-proton cross-sections and integrate over <span class="math notranslate nohighlight">\(\phi\)</span>, as measured by HERA. The input <span class="math notranslate nohighlight">\(\phi\)</span> will not be needed in this case.</p>
 </section>
 
 

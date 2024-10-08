@@ -135,7 +135,7 @@ You can make your own model and modfies the parameter managers correspondingly.<
 In the following, we present some simple examples that calculate the obserbales of interestes.</p>
 <section id="leading-order-compton-form-factors">
 <h3>Leading-order Compton Form factors<a class="headerlink" href="#leading-order-compton-form-factors" title="Link to this heading"></a></h3>
-<p>For instance, we can use <code class="docutils literal notranslate"><span class="pre">Observables.GPDobserv.CFF()</span></code> to calculate the Compton form factors (CFFs)
+<p>For instance, we can use <a class="reference internal" href="Observables.html#Observables.GPDobserv.CFF" title="Observables.GPDobserv.CFF"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Observables.GPDobserv.CFF()</span></code></a> to calculate the Compton form factors (CFFs)
 at leading order (next-to-leading order working in progress).
 And we can test that the imaginary part of the leading order CFF agree with the GPD at <span class="math notranslate nohighlight">\(x=\xi\)</span> as shown in the following:</p>
 <div class="highlight-py notranslate" id="cff-lo"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">Observables</span> <span class="kn">import</span> <span class="n">GPDobserv</span>
@@ -162,7 +162,7 @@ And we can test that the imaginary part of the leading order CFF agree with the 
 </section>
 <section id="leading-order-transition-form-factors">
 <h3>Leading-order Transition Form factors<a class="headerlink" href="#leading-order-transition-form-factors" title="Link to this heading"></a></h3>
-<p>The same for the LO Transition form factors (TFFs) with <code class="docutils literal notranslate"><span class="pre">Observables.GPDobserv.TFF()</span></code>.
+<p>The same for the LO Transition form factors (TFFs) with <a class="reference internal" href="Observables.html#Observables.GPDobserv.TFF" title="Observables.GPDobserv.TFF"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Observables.GPDobserv.TFF()</span></code></a>.
 Note that in our definition, the TFFs absorp many prefactors like the <span class="math notranslate nohighlight">\(1/N_c\)</span> color factor and the meson decay constant
 <span class="math notranslate nohighlight">\(f_{\phi}\)</span> and the charge factor <span class="math notranslate nohighlight">\(e_c=2/3\)</span> for charm quark, and so on.</p>
 <div class="highlight-py notranslate" id="tff-lo"><div class="highlight"><pre><span></span><span class="c1"># Test of LO ImTFF and gluon GPD evolved to mu = 5 GeV</span>
@@ -187,8 +187,8 @@ Note that in our definition, the TFFs absorp many prefactors like the <span clas
 <section id="nlo-transition-form-factors">
 <h3>NLO Transition Form factors<a class="headerlink" href="#nlo-transition-form-factors" title="Link to this heading"></a></h3>
 <p>We can also calculate TFF at next-to-leading order (NLO) where we currently only has singlet and gluon contributions (non-singlet working in progress).
-Three functions can do this <code class="docutils literal notranslate"><span class="pre">Observables.GPDobserv.TFF()</span></code> with <code class="docutils literal notranslate"><span class="pre">p_order</span> <span class="pre">=2</span></code> is equivalent to <code class="docutils literal notranslate"><span class="pre">Observables.GPDobserv.TFFNLO()</span></code> .
-Whereas the <code class="docutils literal notranslate"><span class="pre">Observables.GPDobserv.TFF_evMom()</span></code> uses the eolved moment method that provides a cross-check.</p>
+Three functions can do this <a class="reference internal" href="Observables.html#Observables.GPDobserv.TFF" title="Observables.GPDobserv.TFF"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Observables.GPDobserv.TFF()</span></code></a> with <code class="docutils literal notranslate"><span class="pre">p_order</span> <span class="pre">=2</span></code> is equivalent to <a class="reference internal" href="Observables.html#Observables.GPDobserv.TFFNLO" title="Observables.GPDobserv.TFFNLO"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Observables.GPDobserv.TFFNLO()</span></code></a> .
+Whereas the <a class="reference internal" href="Observables.html#Observables.GPDobserv.TFFNLO_evMom" title="Observables.GPDobserv.TFFNLO_evMom"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Observables.GPDobserv.TFFNLO_evMom()</span></code></a> uses the eolved moment method that provides a cross-check.</p>
 <p>The results are virtually the same:</p>
 <div class="highlight-py notranslate" id="tff-nlo"><div class="highlight"><pre><span></span><span class="c1"># Test of two methods of calculating TFF evolved to mu =5 GeV</span>
 
