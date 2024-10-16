@@ -1,3 +1,5 @@
+
+
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" data-content_root="./">
 <head>
@@ -6,25 +8,22 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Quick start &mdash; GUMP GPD Analysis 0.5.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=80d5e7a1" />
-      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=7ab3649f" />
       <link rel="stylesheet" type="text/css" href="_static/copybutton.css?v=76b2166b" />
 
   
-  <!--[if lt IE 9]>
-    <script src="_static/js/html5shiv.min.js"></script>
-  <![endif]-->
-  
-        <script src="_static/jquery.js?v=5d32c60e"></script>
-        <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="_static/documentation_options.js?v=1dd76d02"></script>
-        <script src="_static/doctools.js?v=9a2dae69"></script>
-        <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
-        <script src="_static/clipboard.min.js?v=a7894cd8"></script>
-        <script src="_static/copybutton.js?v=f281be69"></script>
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=1dd76d02"></script>
+      <script src="_static/doctools.js?v=9a2dae69"></script>
+      <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="_static/clipboard.min.js?v=a7894cd8"></script>
+      <script src="_static/copybutton.js?v=f281be69"></script>
+      <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="Parameters Intro" href="ParametersIntro.html" />
+    <link rel="next" title="Parameters Quickguide" href="ParametersIntro.html" />
     <link rel="prev" title="GUMP GPD Analysis documentation" href="index.html" /> 
 </head>
 
@@ -51,22 +50,24 @@
 <ul class="current">
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Quick start</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#installation">Installation</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#paramters-and-model-setting">Paramters and model setting</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#calculation-of-gpds-and-obserbales">Calculation of GPDs and obserbales</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#lo-compton-form-factors">LO Compton Form factors</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#lo-transition-form-factors">LO Transition Form factors</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#parameters-and-model-setting">Parameters and model setting</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#calculation-of-gpds-and-observables">Calculation of GPDs and observables</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#leading-order-compton-form-factors">Leading-order Compton Form factors</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#leading-order-transition-form-factors">Leading-order Transition Form factors</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#nlo-transition-form-factors">NLO Transition Form factors</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#some-notes-on-genearl-observables">Some notes on genearl observables</a></li>
 </ul>
 </li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="ParametersIntro.html">Parameters Intro</a></li>
-<li class="toctree-l1"><a class="reference internal" href="ObservablesIntro.html">Observables Intro</a></li>
-<li class="toctree-l1"><a class="reference internal" href="EvolutionIntro.html">Evolution Intro</a></li>
-<li class="toctree-l1"><a class="reference internal" href="MinimizerIntro.html">Minimizer Intro</a></li>
-<li class="toctree-l1"><a class="reference internal" href="DVCSIntro.html">DVCS Intro</a></li>
-<li class="toctree-l1"><a class="reference internal" href="DVMPIntro.html">DVMP Intro</a></li>
-<li class="toctree-l1"><a class="reference internal" href="modules.html">List of all modules</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ParametersIntro.html">Parameters Quickguide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ObservablesIntro.html">Observables Quickguide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="EvolutionIntro.html">Evolution Quickguide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="MinimizerIntro.html">Minimizer Quickguide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="DVCSIntro.html">DVCS Quickguide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="DVMPIntro.html">DVMP Quickguide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="modules.html">Documentation of submodules</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Citation.html">Citation/Acknowledgement</a></li>
 </ul>
 
         </div>
@@ -97,15 +98,19 @@
 <h1>Quick start<a class="headerlink" href="#quick-start" title="Link to this heading"></a></h1>
 <section id="installation">
 <h2>Installation<a class="headerlink" href="#installation" title="Link to this heading"></a></h2>
-<p>We will work on delivering this program as a python package.
-At this point the recommended installation method is to download the source file directly at <a class="reference external" href="https://github.com/yuxunguo/GUMP-Global-GPDs">GUMP GitHub Page</a>.</p>
+<p>We are working to deliver this program as a python package once all the submodules are settled.
+At this point the recommended installation method is to download the source file directly at <a class="reference external" href="https://github.com/yuxunguo/GUMP-Global-GPDs">GUMP GitHub Page</a>,
+and work in the root folder.</p>
 </section>
-<section id="paramters-and-model-setting">
-<h2>Paramters and model setting<a class="headerlink" href="#paramters-and-model-setting" title="Link to this heading"></a></h2>
+<section id="parameters-and-model-setting">
+<h2>Parameters and model setting<a class="headerlink" href="#parameters-and-model-setting" title="Link to this heading"></a></h2>
 <p>To start with, you will need a set of parameter as well as models for the GPDs.
 In the GUMP framework, we consider modeling in the conformal moment space which have many benefits.
-The details are documented in the <a class="reference internal" href="Parameters.html#module-Parameters"><span class="std std-ref">Parameters module</span></a>.</p>
-<p>For a quick start, consider use the ones we obtain from the <a class="reference external" href="https://inspirehep.net/literature/2833822">recent GUMP works</a></p>
+The details are documented in the <a class="reference internal" href="Parameters.html#module-Parameters"><span class="std std-ref">Parameters module</span></a>.
+In genearl, a GPD model should take a set of parameter and generate moments in the conformal spin j space for all flavors, since they will be mixed under evolutions.</p>
+<p>For a quick start, we suggest using the GUMP parameterization and the best-fit parameters we obtained in previous work from
+<a class="reference external" href="https://inspirehep.net/literature/2833822">DVMP</a> and <a class="reference external" href="https://inspirehep.net/literature/2632776">DVCS</a> analyses.
+These parameters are stored within the package:</p>
 <div class="highlight-py notranslate" id="parameters-input"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
 <span class="kn">import</span> <span class="nn">os</span>
 <span class="n">dir_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">realpath</span><span class="p">(</span><span class="vm">__file__</span><span class="p">))</span>
@@ -124,12 +129,15 @@ The details are documented in the <a class="reference internal" href="Parameters
 So they shall not be fed to the parameter manager.
 You can make your own model and modfies the parameter managers correspondingly.</p>
 </section>
-<section id="calculation-of-gpds-and-obserbales">
-<h2>Calculation of GPDs and obserbales<a class="headerlink" href="#calculation-of-gpds-and-obserbales" title="Link to this heading"></a></h2>
-<p>With the above model we can calcualte anythings utlizing the <a class="reference internal" href="Observables.html#module-Observables"><span class="std std-ref">Observables module</span></a> in principle.</p>
-<section id="lo-compton-form-factors">
-<h3>LO Compton Form factors<a class="headerlink" href="#lo-compton-form-factors" title="Link to this heading"></a></h3>
-<p>For instance, we can test that the imaginary part of the leading order Compton form factors (CFFs) agree with the GPD at x=xi.</p>
+<section id="calculation-of-gpds-and-observables">
+<h2>Calculation of GPDs and observables<a class="headerlink" href="#calculation-of-gpds-and-observables" title="Link to this heading"></a></h2>
+<p>With the above model we can in principle calcualte anythings that the <a class="reference internal" href="Observables.html#module-Observables"><span class="std std-ref">Observables module</span></a> allow to do.
+In the following, we present some simple examples that calculate the obserbales of interestes.</p>
+<section id="leading-order-compton-form-factors">
+<h3>Leading-order Compton Form factors<a class="headerlink" href="#leading-order-compton-form-factors" title="Link to this heading"></a></h3>
+<p>For instance, we can use <a class="reference internal" href="Observables.html#Observables.GPDobserv.CFF" title="Observables.GPDobserv.CFF"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Observables.GPDobserv.CFF()</span></code></a> to calculate the Compton form factors (CFFs)
+at leading order (next-to-leading order working in progress).
+And we can test that the imaginary part of the leading order CFF agree with the GPD at <span class="math notranslate nohighlight">\(x=\xi\)</span> as shown in the following:</p>
 <div class="highlight-py notranslate" id="cff-lo"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">Observables</span> <span class="kn">import</span> <span class="n">GPDobserv</span>
 
 <span class="c1"># Test of LO ImCFF and quark GPD evolved to mu =5 GeV</span>
@@ -152,9 +160,11 @@ You can make your own model and modfies the parameter managers correspondingly.<
 </pre></div>
 </div>
 </section>
-<section id="lo-transition-form-factors">
-<h3>LO Transition Form factors<a class="headerlink" href="#lo-transition-form-factors" title="Link to this heading"></a></h3>
-<p>The same of the Leading-order Transition form factors (TFFs):</p>
+<section id="leading-order-transition-form-factors">
+<h3>Leading-order Transition Form factors<a class="headerlink" href="#leading-order-transition-form-factors" title="Link to this heading"></a></h3>
+<p>The same for the LO Transition form factors (TFFs) with <a class="reference internal" href="Observables.html#Observables.GPDobserv.TFF" title="Observables.GPDobserv.TFF"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Observables.GPDobserv.TFF()</span></code></a>.
+Note that in our definition, the TFFs absorp many prefactors like the <span class="math notranslate nohighlight">\(1/N_c\)</span> color factor and the meson decay constant
+<span class="math notranslate nohighlight">\(f_{\phi}\)</span> and the charge factor <span class="math notranslate nohighlight">\(e_c=2/3\)</span> for charm quark, and so on.</p>
 <div class="highlight-py notranslate" id="tff-lo"><div class="highlight"><pre><span></span><span class="c1"># Test of LO ImTFF and gluon GPD evolved to mu = 5 GeV</span>
 
 <span class="n">Para_H</span> <span class="o">=</span> <span class="n">Para_Unp</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
@@ -176,7 +186,10 @@ You can make your own model and modfies the parameter managers correspondingly.<
 </section>
 <section id="nlo-transition-form-factors">
 <h3>NLO Transition Form factors<a class="headerlink" href="#nlo-transition-form-factors" title="Link to this heading"></a></h3>
-<p>We can also calculate TFF at next-to-leading order (NLO).</p>
+<p>We can also calculate TFF at next-to-leading order (NLO) where we currently only has singlet and gluon contributions (non-singlet working in progress).
+Three functions can do this <a class="reference internal" href="Observables.html#Observables.GPDobserv.TFF" title="Observables.GPDobserv.TFF"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Observables.GPDobserv.TFF()</span></code></a> with <code class="docutils literal notranslate"><span class="pre">p_order</span> <span class="pre">=2</span></code> is equivalent to <a class="reference internal" href="Observables.html#Observables.GPDobserv.TFFNLO" title="Observables.GPDobserv.TFFNLO"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Observables.GPDobserv.TFFNLO()</span></code></a> .
+Whereas the <a class="reference internal" href="Observables.html#Observables.GPDobserv.TFFNLO_evMom" title="Observables.GPDobserv.TFFNLO_evMom"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Observables.GPDobserv.TFFNLO_evMom()</span></code></a> uses the eolved moment method that provides a cross-check.</p>
+<p>The results are virtually the same:</p>
 <div class="highlight-py notranslate" id="tff-nlo"><div class="highlight"><pre><span></span><span class="c1"># Test of two methods of calculating TFF evolved to mu =5 GeV</span>
 
 <span class="n">Para_H</span> <span class="o">=</span> <span class="n">Para_Unp</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
@@ -189,6 +202,13 @@ You can make your own model and modfies the parameter managers correspondingly.<
 </pre></div>
 </div>
 </section>
+<section id="some-notes-on-genearl-observables">
+<h3>Some notes on genearl observables<a class="headerlink" href="#some-notes-on-genearl-observables" title="Link to this heading"></a></h3>
+<p>It will be numerically demanding to generate GPDs at different x to calculate TFF/CFFs or other amplitudes,
+since each point would requires an inverse transform to x-space that’s essentially one or two (if NLO evolutions are used) layers of integral.
+But this might be the only options if the Wilson coefficients in the conformal spin space are not known.</p>
+<p>Be cautious!</p>
+</section>
 </section>
 </section>
 
@@ -197,7 +217,7 @@ You can make your own model and modfies the parameter managers correspondingly.<
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
         <a href="index.html" class="btn btn-neutral float-left" title="GUMP GPD Analysis documentation" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="ParametersIntro.html" class="btn btn-neutral float-right" title="Parameters Intro" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="ParametersIntro.html" class="btn btn-neutral float-right" title="Parameters Quickguide" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

@@ -166,7 +166,7 @@ def DVCSxsec(y, xB, t, Q, phi, pol):
 if __name__ == '__main__':
     pool = Pool()
     Para_spe = Para_All[0]
-
+    '''
     # Test of LO ImCFF and quark GPD evolved to mu =5 GeV
     x=0.0001
     _GPD_theo = GPDobserv(x,x,0.0,5.0,1)
@@ -204,12 +204,12 @@ if __name__ == '__main__':
     TFF2 = _GPD_theo.TFFNLO_evMom(Para_spe,5.0, meson = 3, flv ='All')
     print(TFF2)
     print(TFF2-TFF1)
-
+    '''
     #
     # Plotting results of the paper
     #
     
-    '''
+
     # Comparing PDF with the global extraction of PDF
 
     x = np.exp(np.linspace(np.log(0.0001), np.log(0.05), 100, dtype = float))
@@ -248,7 +248,7 @@ if __name__ == '__main__':
     with open(os.path.join(dir_path,"GUMP_Results/Rrat2D.csv"),"w",newline='') as my_csv:
         csvWriter = csv.writer(my_csv,delimiter=',')
         csvWriter.writerows(np.transpose([xmeshflat,qmeshflat,rrat2dlst]))
-    '''
+
     '''
     # Comparing the cross-sections
     
@@ -307,21 +307,6 @@ if __name__ == '__main__':
         csvWriter.writerows(np.transpose([qlst,TFFfull,TFFq1,TFFq2,TFFg1,TFFg2]))
     '''
     
-    '''
-    _GPD_theo = GPDobserv(0.1,0.001,-1.0,10.0,1)
-    ts=time.time()
-    _GPD1 = _GPD_theo.TFF(Para_spe, meson = 3, p_order = 2, muset = 1, flv ='All')
-    print(_GPD1)
-    print(time.time()-ts)
-    ts=time.time()    
-    _GPD2 = _GPD_theo.TFFNLO_evMom(Para_spe, meson = 3, muset = 1, flv ='All')
-    print(_GPD2)
-    print(time.time()-ts)
-    #ts=time.time()    
-    #_GPD2 = _GPD_theo.TFFNLO_evMom(Para_spe, meson = 3, muset = 1, flv ='All')
-    #print(_GPD2)
-    #print(time.time()-ts)
-    '''
     '''
     x = np.exp(np.linspace(np.log(0.005), np.log(0.6), 100, dtype = float))
 

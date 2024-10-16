@@ -1,3 +1,5 @@
+
+
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" data-content_root="../">
 <head>
@@ -5,21 +7,17 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Observables &mdash; GUMP GPD Analysis 0.5.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=80d5e7a1" />
-      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=7ab3649f" />
       <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
 
   
-  <!--[if lt IE 9]>
-    <script src="../_static/js/html5shiv.min.js"></script>
-  <![endif]-->
-  
-        <script src="../_static/jquery.js?v=5d32c60e"></script>
-        <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="../_static/documentation_options.js?v=1dd76d02"></script>
-        <script src="../_static/doctools.js?v=9a2dae69"></script>
-        <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
-        <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
-        <script src="../_static/copybutton.js?v=f281be69"></script>
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=1dd76d02"></script>
+      <script src="../_static/doctools.js?v=9a2dae69"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
+      <script src="../_static/copybutton.js?v=f281be69"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" /> 
@@ -47,13 +45,14 @@
               <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../QuickStart.html">Quick start</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../ParametersIntro.html">Parameters Intro</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../ObservablesIntro.html">Observables Intro</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../EvolutionIntro.html">Evolution Intro</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../MinimizerIntro.html">Minimizer Intro</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../DVCSIntro.html">DVCS Intro</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../DVMPIntro.html">DVMP Intro</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../modules.html">List of all modules</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../ParametersIntro.html">Parameters Quickguide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../ObservablesIntro.html">Observables Quickguide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../EvolutionIntro.html">Evolution Quickguide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../MinimizerIntro.html">Minimizer Quickguide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../DVCSIntro.html">DVCS Quickguide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../DVMPIntro.html">DVMP Quickguide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../modules.html">Documentation of submodules</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Citation.html">Citation/Acknowledgement</a></li>
 </ul>
 
         </div>
@@ -113,19 +112,19 @@
 
 <span class="c1">#Relative precision Goal of quad set to be 1e-3</span>
 <span class="n">Prec_Goal</span> <span class="o">=</span> <span class="mf">1e-3</span>
-
+   
 
 <div class="viewcode-block" id="flv_to_indx">
 <a class="viewcode-back" href="../Observables.html#Observables.flv_to_indx">[docs]</a>
 <span class="k">def</span> <span class="nf">flv_to_indx</span><span class="p">(</span><span class="n">flv</span><span class="p">:</span><span class="nb">str</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&#39;&#39;&#39;</span>
-<span class="sd">    flv is the flavor. It is a string</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;flv is the flavor. It is a string</span>
+<span class="sd">    </span>
+<span class="sd">    Args:</span>
+<span class="sd">        flv (str): the flavor in string, e.g., &#39;u&#39;, &#39;d&#39; , &#39;g&#39;</span>
 
-<span class="sd">    This function will cast each flavor to an auxiliary length 3 array</span>
-
-<span class="sd">    Output shape: scalar int    </span>
-
-<span class="sd">    &#39;&#39;&#39;</span>
+<span class="sd">    Returns:</span>
+<span class="sd">        flv (scalar): flavor converted to scalar </span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">if</span><span class="p">(</span><span class="n">flv</span><span class="o">==</span><span class="s2">&quot;u&quot;</span><span class="p">):</span>
         <span class="k">return</span> <span class="mi">0</span>
     <span class="k">if</span><span class="p">(</span><span class="n">flv</span><span class="o">==</span><span class="s2">&quot;d&quot;</span><span class="p">):</span>
@@ -141,9 +140,14 @@
 <div class="viewcode-block" id="flvs_to_indx">
 <a class="viewcode-back" href="../Observables.html#Observables.flvs_to_indx">[docs]</a>
 <span class="k">def</span> <span class="nf">flvs_to_indx</span><span class="p">(</span><span class="n">flvs</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&#39;&#39;&#39;flvs is an array of strings (N)</span>
-<span class="sd">    Output: (N)</span>
-<span class="sd">    &#39;&#39;&#39;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; Cast :func:`flv_to_indx` for each flv in the list flvs</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        flvs (list of str): list of flavors</span>
+<span class="sd">    Returns:</span>
+<span class="sd">        flvs (list of scalar): flavors converted to scalar </span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
     <span class="n">output</span> <span class="o">=</span> <span class="p">[</span><span class="n">flv_to_indx</span><span class="p">(</span><span class="n">flv</span><span class="p">)</span> <span class="k">for</span> <span class="n">flv</span> <span class="ow">in</span> <span class="n">flvs</span><span class="p">]</span>
     <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">output</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int32</span><span class="p">)</span></div>
 
@@ -152,25 +156,13 @@
 <div class="viewcode-block" id="Flv_Intp">
 <a class="viewcode-back" href="../Observables.html#Observables.Flv_Intp">[docs]</a>
 <span class="k">def</span> <span class="nf">Flv_Intp</span><span class="p">(</span><span class="n">Flv_array</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">,</span> <span class="n">flv</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Flv_array: (N, 3) complex</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Return the wave function for each flavor</span>
+<span class="sd">    </span>
+<span class="sd">    Flv_array: (N, 3) complex, the wave function of u,d,g</span>
 <span class="sd">    flv: (N) str</span>
 
 <span class="sd">    return result: (N) complex</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-<span class="w">    </span>
-<span class="w">    </span><span class="sd">&#39;&#39;&#39;</span>
-<span class="sd">    if(flv == &quot;u&quot;):</span>
-<span class="sd">        return Flv_array[0]</span>
-<span class="sd">    if(flv == &quot;d&quot;):</span>
-<span class="sd">        return Flv_array[1]</span>
-<span class="sd">    if(flv == &quot;g&quot;):</span>
-<span class="sd">        return Flv_array[2]</span>
-<span class="sd">    if(flv == &quot;NS&quot;):</span>
-<span class="sd">        return Flv_array[0] - Flv_array[1]</span>
-<span class="sd">    if(flv == &quot;S&quot;):</span>
-<span class="sd">        return Flv_array[0] + Flv_array[1]</span>
-<span class="sd">    &#39;&#39;&#39;</span>
     <span class="n">_flv_index</span> <span class="o">=</span> <span class="n">flvs_to_indx</span><span class="p">(</span><span class="n">flv</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">choose</span><span class="p">(</span><span class="n">_flv_index</span><span class="p">,</span> <span class="p">[</span><span class="n">Flv_array</span><span class="p">[</span><span class="o">...</span><span class="p">,</span><span class="mi">0</span><span class="p">],</span> <span class="n">Flv_array</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="n">Flv_array</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="mi">2</span><span class="p">],</span>\
                         <span class="n">Flv_array</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span><span class="o">-</span><span class="n">Flv_array</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="n">Flv_array</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span><span class="o">+</span><span class="n">Flv_array</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="mi">1</span><span class="p">]])</span></div>
@@ -312,6 +304,15 @@
 <span class="k">class</span> <span class="nc">GPDobserv</span> <span class="p">(</span><span class="nb">object</span><span class="p">)</span> <span class="p">:</span>
     <span class="c1">#Initialization of observables. Each is a function of (x, xi ,t, Q), p for parity: p = 1 for vector GPDs (H, E) and p = -1 for axial-vector GPDs (Ht, Et)</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">init_x</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">init_xi</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">init_t</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">init_Q</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">p</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Initialization of GPD-related observables</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            init_x (float): the momentum fraction x</span>
+<span class="sd">            init_xi (float): the skewness parameter xi</span>
+<span class="sd">            init_t (float): the momentum transfer square t</span>
+<span class="sd">            init_Q (float): photon virtuality/the scale of this observables</span>
+<span class="sd">            p (int): p=1 for vector-like GPDs and p=-1 for axial-vector ones</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">x</span> <span class="o">=</span> <span class="n">init_x</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">xi</span> <span class="o">=</span> <span class="n">init_xi</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">t</span> <span class="o">=</span> <span class="n">init_t</span>
@@ -321,14 +322,18 @@
 <div class="viewcode-block" id="GPDobserv.tPDF">
 <a class="viewcode-back" href="../Observables.html#Observables.GPDobserv.tPDF">[docs]</a>
     <span class="k">def</span> <span class="nf">tPDF</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">flv</span><span class="p">,</span> <span class="n">ParaAll</span><span class="p">,</span> <span class="n">p_order</span> <span class="o">=</span> <span class="mi">1</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;t-denpendent PDF for given flavor (flv = &quot;u&quot;, &quot;d&quot;, &quot;S&quot;, &quot;NS&quot; or &quot;g&quot;)</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;t-denpendent PDF for given flavor </span>
+<span class="sd">        </span>
+<span class="sd">        Cross-ref: :func:`Evolution.Moment_Evo_LO` and :func:`Evolution.tPDF_Moment_Evo_NLO`</span>
 <span class="sd">        </span>
 <span class="sd">        Args:</span>
-<span class="sd">            ParaAll = [Para_Forward, Para_xi2]</span>
-<span class="sd">            Para_Forward = [Para_Forward_uV, Para_Forward_ubar, Para_Forward_dV, Para_Forward_dbar, Para_Forward_g]</span>
-<span class="sd">            Para_Forward_i: parameter sets for valence u quark (uV), sea u quark (ubar), valence d quark (dV), sea d quark (dbar) and gluon (g)</span>
-<span class="sd">            Para_xi2: only matter for non-zero xi (NOT needed here but the parameters are passed for consistency with GPDs)</span>
+<span class="sd">            flv (str): &quot;u&quot;, &quot;d&quot;, &quot;S&quot;, &quot;NS&quot; or &quot;g&quot;</span>
+<span class="sd">            ParaAll: array as [Para_Forward, Para_xi2,...] </span>
 <span class="sd">            </span>
+<span class="sd">                - Para_Forward: array as [Para_Forward_uV, Para_Forward_ubar, Para_Forward_dV, Para_Forward_dbar, Para_Forward_g],</span>
+<span class="sd">                  where Para_Forward_i is parameter sets for valence u quark (uV), sea u quark (ubar), valence d quark (dV), sea d quark (dbar) and gluon (g)</span>
+<span class="sd">                - Para_xi2: only matter for non-zero xi (NOT needed here but the parameters are passed for consistency with GPDs)</span>
+<span class="sd">                 </span>
 <span class="sd">            p_order: 1 for leading-order evolution (default); 2 for next-to-leading-order evolution ; higher order not implemented yet</span>
 
 <span class="sd">        Returns:</span>
@@ -407,14 +412,15 @@
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;GPD F(x, xi, t) in flavor space (flv = &quot;u&quot;, &quot;d&quot;, &quot;S&quot;, &quot;NS&quot; or &quot;g&quot;)</span>
 <span class="sd">        </span>
 <span class="sd">        Args:</span>
-<span class="sd">            ParaAll = [Para_Forward, Para_xi2, Para_xi4]</span>
-<span class="sd">            Para_Forward = [Para_Forward_uV, Para_Forward_ubar, Para_Forward_dV, Para_Forward_dbar, Para_Forward_g]</span>
-<span class="sd">            Para_Forward_i: forward parameter sets for valence u quark (uV), sea u quark (ubar), valence d quark (dV), sea d quark (dbar) and gluon (g)</span>
-<span class="sd">            Para_xi2 = [Para_xi2_uV, Para_xi2_ubar, Para_xi2_dV, Para_xi2_dbar, Para_xi2_g]</span>
-<span class="sd">            Para_xi2_i: xi^2 parameter sets for valence u quark (uV), sea u quark (ubar), valence d quark (dV), sea d quark (dbar) and gluon (g)</span>
-<span class="sd">            Para_xi4 = [Para_xi4_uV, Para_xi4_ubar, Para_xi4_dV, Para_xi4_dbar, Para_xi4_g]</span>
-<span class="sd">            Para_xi4_i: xi^4 parameter sets for valence u quark (uV), sea u quark (ubar), valence d quark (dV), sea d quark (dbar) and gluon (g)</span>
+<span class="sd">            flv (str): &quot;u&quot;, &quot;d&quot;, &quot;S&quot;, &quot;NS&quot; or &quot;g&quot;</span>
+<span class="sd">            ParaAll: array as [Para_Forward, Para_xi2, Para_xi4]</span>
 <span class="sd">            </span>
+<span class="sd">                - Para_Forward = array as [Para_Forward_uV, Para_Forward_ubar, Para_Forward_dV, Para_Forward_dbar, Para_Forward_g]</span>
+<span class="sd">                  where Para_Forward_i is forward parameter sets for valence u quark (uV), sea u quark (ubar), valence d quark (dV), sea d quark (dbar) and gluon (g)</span>
+<span class="sd">                - Para_xi2 = array as [Para_xi2_uV, Para_xi2_ubar, Para_xi2_dV, Para_xi2_dbar, Para_xi2_g]</span>
+<span class="sd">                  where Para_xi2_i is xi^2 parameter sets for valence u quark (uV), sea u quark (ubar), valence d quark (dV), sea d quark (dbar) and gluon (g)</span>
+<span class="sd">                - Para_xi4 = array as [Para_xi4_uV, Para_xi4_ubar, Para_xi4_dV, Para_xi4_dbar, Para_xi4_g]</span>
+<span class="sd">                  where Para_xi4_i is xi^4 parameter sets for valence u quark (uV), sea u quark (ubar), valence d quark (dV), sea d quark (dbar) and gluon (g)</span>
 <span class="sd">            p_order: 1 for leading-order evolution (default); 2 for next-to-leading-order evolution ; higher order not implemented yet</span>
 
 <span class="sd">        Returns:</span>
@@ -591,18 +597,21 @@
     
 <div class="viewcode-block" id="GPDobserv.CFF">
 <a class="viewcode-back" href="../Observables.html#Observables.GPDobserv.CFF">[docs]</a>
-    <span class="k">def</span> <span class="nf">CFF</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ParaAll</span><span class="p">,</span> <span class="n">muset</span><span class="p">,</span> <span class="n">p_order</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">flv</span> <span class="o">=</span> <span class="s1">&#39;All&#39;</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">CFF</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ParaAll</span><span class="p">,</span> <span class="n">muf</span><span class="p">,</span> <span class="n">p_order</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">flv</span> <span class="o">=</span> <span class="s1">&#39;All&#39;</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Charge averged CFF $\mathcal{F}(xi, t) (\mathcal{F} = Q_u^2 F_u + Q_d^2 F_d)$</span>
 <span class="sd">        </span>
 <span class="sd">        Args:</span>
-<span class="sd">            ParaAll = [Para_Forward, Para_xi2, Para_xi4]</span>
-
-<span class="sd">            Para_Forward = [Para_Forward_uV, Para_Forward_ubar, Para_Forward_dV, Para_Forward_dbar, Para_Forward_g]</span>
-<span class="sd">            Para_Forward_i: forward parameter sets for valence u quark (uV), sea u quark (ubar), valence d quark (dV), sea d quark (dbar) and gluon (g)</span>
-<span class="sd">            Para_xi2 = [Para_xi2_uV, Para_xi2_ubar, Para_xi2_dV, Para_xi2_dbar, Para_xi2_g]</span>
-<span class="sd">            Para_xi2_i: xi^2 parameter sets for valence u quark (uV), sea u quark (ubar), valence d quark (dV), sea d quark (dbar) and gluon (g)</span>
-<span class="sd">            Para_xi4 = [Para_xi4_uV, Para_xi4_ubar, Para_xi4_dV, Para_xi4_dbar, Para_xi4_g]</span>
-<span class="sd">            Para_xi4_i: xi^4 parameter sets for valence u quark (uV), sea u quark (ubar), valence d quark (dV), sea d quark (dbar) and gluon (g)</span>
+<span class="sd">            ParaAll: array as [Para_Forward, Para_xi2, Para_xi4]</span>
+<span class="sd">            </span>
+<span class="sd">                - Para_Forward = array as [Para_Forward_uV, Para_Forward_ubar, Para_Forward_dV, Para_Forward_dbar, Para_Forward_g]</span>
+<span class="sd">                  where Para_Forward_i is forward parameter sets for valence u quark (uV), sea u quark (ubar), valence d quark (dV), sea d quark (dbar) and gluon (g)</span>
+<span class="sd">                - Para_xi2 = array as [Para_xi2_uV, Para_xi2_ubar, Para_xi2_dV, Para_xi2_dbar, Para_xi2_g]</span>
+<span class="sd">                  where Para_xi2_i is xi^2 parameter sets for valence u quark (uV), sea u quark (ubar), valence d quark (dV), sea d quark (dbar) and gluon (g)</span>
+<span class="sd">                - Para_xi4 = array as [Para_xi4_uV, Para_xi4_ubar, Para_xi4_dV, Para_xi4_dbar, Para_xi4_g]</span>
+<span class="sd">                  where Para_xi4_i is xi^4 parameter sets for valence u quark (uV), sea u quark (ubar), valence d quark (dV), sea d quark (dbar) and gluon (g)</span>
+<span class="sd">            muf: factorization scale</span>
+<span class="sd">            p_order: 1 for leading-order evolution (default); 2 for next-to-leading-order evolution ; higher order not implemented yet</span>
+<span class="sd">            flv: &quot;q&quot;, &quot;g&quot;, or &quot;All&quot;</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            CFF \mathcal{F}(xi, t) = Q_u^2 F_u + Q_d^2 F_d</span>
@@ -683,20 +692,18 @@
 <span class="w">            </span><span class="sd">&quot;&quot;&quot;TFF $\mathcal{F}(xi, t) (\mathcal{F}$</span>
 <span class="sd">            </span>
 <span class="sd">            Args:</span>
-<span class="sd">                ParaAll = [Para_Forward, Para_xi2, Para_xi4]</span>
-
-<span class="sd">                Para_Forward = [Para_Forward_uV, Para_Forward_ubar, Para_Forward_dV, Para_Forward_dbar, Para_Forward_g]</span>
-<span class="sd">                Para_Forward_i: forward parameter sets for valence u quark (uV), sea u quark (ubar), valence d quark (dV), sea d quark (dbar) and gluon (g)</span>
-<span class="sd">                Para_xi2 = [Para_xi2_uV, Para_xi2_ubar, Para_xi2_dV, Para_xi2_dbar, Para_xi2_g]</span>
-<span class="sd">                Para_xi2_i: xi^2 parameter sets for valence u quark (uV), sea u quark (ubar), valence d quark (dV), sea d quark (dbar) and gluon (g)</span>
-<span class="sd">                Para_xi4 = [Para_xi4_uV, Para_xi4_ubar, Para_xi4_dV, Para_xi4_dbar, Para_xi4_g]</span>
-<span class="sd">                Para_xi4_i: xi^4 parameter sets for valence u quark (uV), sea u quark (ubar), valence d quark (dV), sea d quark (dbar) and gluon (g)</span>
-<span class="sd">                </span>
-<span class="sd">                meson = [1 for rho, 2 for phi, 3 for jpsi]</span>
-<span class="sd">                </span>
+<span class="sd">                ParaAll: array as [Para_Forward, Para_xi2, Para_xi4]</span>
+<span class="sd">            </span>
+<span class="sd">                    - Para_Forward = array as [Para_Forward_uV, Para_Forward_ubar, Para_Forward_dV, Para_Forward_dbar, Para_Forward_g]</span>
+<span class="sd">                      where Para_Forward_i is forward parameter sets for valence u quark (uV), sea u quark (ubar), valence d quark (dV), sea d quark (dbar) and gluon (g)</span>
+<span class="sd">                    - Para_xi2 = array as [Para_xi2_uV, Para_xi2_ubar, Para_xi2_dV, Para_xi2_dbar, Para_xi2_g]</span>
+<span class="sd">                      where Para_xi2_i is xi^2 parameter sets for valence u quark (uV), sea u quark (ubar), valence d quark (dV), sea d quark (dbar) and gluon (g)</span>
+<span class="sd">                    - Para_xi4 = array as [Para_xi4_uV, Para_xi4_ubar, Para_xi4_dV, Para_xi4_dbar, Para_xi4_g]</span>
+<span class="sd">                      where Para_xi4_i is xi^4 parameter sets for valence u quark (uV), sea u quark (ubar), valence d quark (dV), sea d quark (dbar) and gluon (g)</span>
+<span class="sd">                muf: factorization scale</span>
+<span class="sd">                meson: [1 for rho, 2 for phi, 3 for jpsi]</span>
 <span class="sd">                p_order: 1 for leading-order evolution (default); 2 for next-to-leading-order evolution ; higher order not implemented yet</span>
-<span class="sd">                </span>
-<span class="sd">                (flv = &quot;u&quot;, &quot;d&quot;, &quot;g&quot;, &quot;All&quot; or &quot;q&quot;)</span>
+<span class="sd">                flv: &quot;q&quot;, &quot;g&quot;, or &quot;All&quot;</span>
 <span class="sd">                </span>
 <span class="sd">            Returns:</span>
 <span class="sd">                TFF \mathcal{F}(xi, t)</span>
@@ -777,20 +784,17 @@
 <span class="w">            </span><span class="sd">&quot;&quot;&quot;TFF $\mathcal{F}(xi, t) (\mathcal{F}$</span>
 <span class="sd">            </span>
 <span class="sd">            Args:</span>
-<span class="sd">                ParaAll = [Para_Forward, Para_xi2, Para_xi4]</span>
-
-<span class="sd">                Para_Forward = [Para_Forward_uV, Para_Forward_ubar, Para_Forward_dV, Para_Forward_dbar, Para_Forward_g]</span>
-<span class="sd">                Para_Forward_i: forward parameter sets for valence u quark (uV), sea u quark (ubar), valence d quark (dV), sea d quark (dbar) and gluon (g)</span>
-<span class="sd">                Para_xi2 = [Para_xi2_uV, Para_xi2_ubar, Para_xi2_dV, Para_xi2_dbar, Para_xi2_g]</span>
-<span class="sd">                Para_xi2_i: xi^2 parameter sets for valence u quark (uV), sea u quark (ubar), valence d quark (dV), sea d quark (dbar) and gluon (g)</span>
-<span class="sd">                Para_xi4 = [Para_xi4_uV, Para_xi4_ubar, Para_xi4_dV, Para_xi4_dbar, Para_xi4_g]</span>
-<span class="sd">                Para_xi4_i: xi^4 parameter sets for valence u quark (uV), sea u quark (ubar), valence d quark (dV), sea d quark (dbar) and gluon (g)</span>
-<span class="sd">                </span>
-<span class="sd">                meson = [1 for rho, 2 for phi, 3 for jpsi]</span>
-<span class="sd">                                </span>
-<span class="sd">                muset = offset of scale mu to study the scale dependence of the results</span>
-<span class="sd">                </span>
-<span class="sd">                (flv = &quot;u&quot;, &quot;d&quot;, &quot;g&quot;, &quot;All&quot; or &quot;q&quot;)</span>
+<span class="sd">                ParaAll: array as [Para_Forward, Para_xi2, Para_xi4]</span>
+<span class="sd">            </span>
+<span class="sd">                    - Para_Forward = array as [Para_Forward_uV, Para_Forward_ubar, Para_Forward_dV, Para_Forward_dbar, Para_Forward_g]</span>
+<span class="sd">                      where Para_Forward_i is forward parameter sets for valence u quark (uV), sea u quark (ubar), valence d quark (dV), sea d quark (dbar) and gluon (g)</span>
+<span class="sd">                    - Para_xi2 = array as [Para_xi2_uV, Para_xi2_ubar, Para_xi2_dV, Para_xi2_dbar, Para_xi2_g]</span>
+<span class="sd">                      where Para_xi2_i is xi^2 parameter sets for valence u quark (uV), sea u quark (ubar), valence d quark (dV), sea d quark (dbar) and gluon (g)</span>
+<span class="sd">                    - Para_xi4 = array as [Para_xi4_uV, Para_xi4_ubar, Para_xi4_dV, Para_xi4_dbar, Para_xi4_g]</span>
+<span class="sd">                      where Para_xi4_i is xi^4 parameter sets for valence u quark (uV), sea u quark (ubar), valence d quark (dV), sea d quark (dbar) and gluon (g)</span>
+<span class="sd">                muf: factorization scale</span>
+<span class="sd">                meson: [1 for rho, 2 for phi, 3 for jpsi]</span>
+<span class="sd">                flv: &quot;q&quot;, &quot;g&quot;, or &quot;All&quot;</span>
 <span class="sd">                </span>
 <span class="sd">            Returns:</span>
 <span class="sd">                TFF \mathcal{F}(xi, t)</span>
@@ -874,20 +878,17 @@
 <span class="w">            </span><span class="sd">&quot;&quot;&quot;NLOTFF $\mathcal{F}(xi, t) (\mathcal{F}) $</span>
 <span class="sd">            </span>
 <span class="sd">            Args:</span>
-<span class="sd">                ParaAll = [Para_Forward, Para_xi2, Para_xi4]</span>
-
-<span class="sd">                Para_Forward = [Para_Forward_uV, Para_Forward_ubar, Para_Forward_dV, Para_Forward_dbar, Para_Forward_g]</span>
-<span class="sd">                Para_Forward_i: forward parameter sets for valence u quark (uV), sea u quark (ubar), valence d quark (dV), sea d quark (dbar) and gluon (g)</span>
-<span class="sd">                Para_xi2 = [Para_xi2_uV, Para_xi2_ubar, Para_xi2_dV, Para_xi2_dbar, Para_xi2_g]</span>
-<span class="sd">                Para_xi2_i: xi^2 parameter sets for valence u quark (uV), sea u quark (ubar), valence d quark (dV), sea d quark (dbar) and gluon (g)</span>
-<span class="sd">                Para_xi4 = [Para_xi4_uV, Para_xi4_ubar, Para_xi4_dV, Para_xi4_dbar, Para_xi4_g]</span>
-<span class="sd">                Para_xi4_i: xi^4 parameter sets for valence u quark (uV), sea u quark (ubar), valence d quark (dV), sea d quark (dbar) and gluon (g)</span>
-<span class="sd">                </span>
-<span class="sd">                meson = [1 for rho, 2 for phi, 3 for jpsi]</span>
-<span class="sd">                </span>
-<span class="sd">                muset = offset of scale mu to study the scale dependence of the results</span>
-<span class="sd">                </span>
-<span class="sd">                (flv = &quot;u&quot;, &quot;d&quot;, &quot;g&quot;, &quot;All&quot; or &quot;q&quot;)</span>
+<span class="sd">                ParaAll: array as [Para_Forward, Para_xi2, Para_xi4]</span>
+<span class="sd">            </span>
+<span class="sd">                    - Para_Forward = array as [Para_Forward_uV, Para_Forward_ubar, Para_Forward_dV, Para_Forward_dbar, Para_Forward_g]</span>
+<span class="sd">                      where Para_Forward_i is forward parameter sets for valence u quark (uV), sea u quark (ubar), valence d quark (dV), sea d quark (dbar) and gluon (g)</span>
+<span class="sd">                    - Para_xi2 = array as [Para_xi2_uV, Para_xi2_ubar, Para_xi2_dV, Para_xi2_dbar, Para_xi2_g]</span>
+<span class="sd">                      where Para_xi2_i is xi^2 parameter sets for valence u quark (uV), sea u quark (ubar), valence d quark (dV), sea d quark (dbar) and gluon (g)</span>
+<span class="sd">                    - Para_xi4 = array as [Para_xi4_uV, Para_xi4_ubar, Para_xi4_dV, Para_xi4_dbar, Para_xi4_g]</span>
+<span class="sd">                      where Para_xi4_i is xi^4 parameter sets for valence u quark (uV), sea u quark (ubar), valence d quark (dV), sea d quark (dbar) and gluon (g)</span>
+<span class="sd">                muf: factorization scale</span>
+<span class="sd">                meson: [1 for rho, 2 for phi, 3 for jpsi]</span>
+<span class="sd">                flv: &quot;q&quot;, &quot;g&quot;, or &quot;All&quot;</span>
 <span class="sd">                </span>
 <span class="sd">            Returns:</span>
 <span class="sd">                TFF \mathcal{F}(xi, t)</span>

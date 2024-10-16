@@ -1,3 +1,5 @@
+
+
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" data-content_root="../">
 <head>
@@ -5,21 +7,17 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Minimizer &mdash; GUMP GPD Analysis 0.5.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=80d5e7a1" />
-      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=7ab3649f" />
       <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
 
   
-  <!--[if lt IE 9]>
-    <script src="../_static/js/html5shiv.min.js"></script>
-  <![endif]-->
-  
-        <script src="../_static/jquery.js?v=5d32c60e"></script>
-        <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="../_static/documentation_options.js?v=1dd76d02"></script>
-        <script src="../_static/doctools.js?v=9a2dae69"></script>
-        <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
-        <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
-        <script src="../_static/copybutton.js?v=f281be69"></script>
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=1dd76d02"></script>
+      <script src="../_static/doctools.js?v=9a2dae69"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
+      <script src="../_static/copybutton.js?v=f281be69"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" /> 
@@ -47,13 +45,14 @@
               <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../QuickStart.html">Quick start</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../ParametersIntro.html">Parameters Intro</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../ObservablesIntro.html">Observables Intro</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../EvolutionIntro.html">Evolution Intro</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../MinimizerIntro.html">Minimizer Intro</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../DVCSIntro.html">DVCS Intro</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../DVMPIntro.html">DVMP Intro</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../modules.html">List of all modules</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../ParametersIntro.html">Parameters Quickguide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../ObservablesIntro.html">Observables Quickguide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../EvolutionIntro.html">Evolution Quickguide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../MinimizerIntro.html">Minimizer Quickguide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../DVCSIntro.html">DVCS Quickguide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../DVMPIntro.html">DVMP Quickguide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../modules.html">Documentation of submodules</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../Citation.html">Citation/Acknowledgement</a></li>
 </ul>
 
         </div>
@@ -1514,23 +1513,11 @@
     <span class="n">pool</span> <span class="o">=</span> <span class="n">Pool</span><span class="p">()</span>
     <span class="n">time_start</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
        
-   <span class="c1"># Paralst_Unp     = [0*4.92252245341075, 0.21632833928300776, 3.228525762889928, 2.347470994624827, 0.16344460105600744, 1.135739437288775, 6.893895640954224, 0.15, 0*3.358767931921898, 0.1842893653407356, 4.417802345266761, 3.4816671934041685, 0.2491737223289409, 1.0519258916411531, 6.553873836594824, 2.8642810381756982, 1.0523058580968585, 7.412779706371915, 0.15, 0*0.1813228421702434, 0.9068471909677753, 1.1018931174030364, 0.4607676086634599, -0*0.22341404954304522, 0*0.7683213780361391, 0.22948701913308733, -2.638627981453611, 0.0, 0.7985103392773935, 3.404262017724412, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 3.86/2, 3.86/2, 1.0]</span>
-   
-    <span class="c1"># from everything through DVCS</span>
-   <span class="c1"># Paralst_Unp     = [4.92252245341075, 0.21632833928300776, 3.228525762889928, 2.347470994624827, 0.16344460105600744, 1.135739437288775, 6.893895640954224, 0.15, 3.358767931921898, 0.1842893653407356, 4.417802345266761, 3.4816671934041685, 0.2491737223289409, 1.0519258916411531, 6.553873836594824, 2.8642810381756982, 1.0523058580968585, 7.412779706371915, 0.15, 0.1813228421702434, 0.9068471909677753, 1.1018931174030364, 0.4607676086634599, -0.22341404954304522, 0.7683213780361391, 0.22948701913308733, -2.638627981453611, -0.2, 0.7985103392773935, 3.404262017724412, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 3.44764738950069, 3.86/2, 1.0]</span>
-    <span class="n">Paralst_Pol</span>     <span class="o">=</span> <span class="p">[</span><span class="mf">4.833430384423373</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.26355746727810136</span><span class="p">,</span> <span class="mf">3.1855567245326317</span><span class="p">,</span> <span class="mf">2.1817250267982997</span><span class="p">,</span> <span class="mf">0.06994083000560514</span><span class="p">,</span> <span class="mf">0.5376473088622284</span><span class="p">,</span> <span class="mf">4.22898219488582</span><span class="p">,</span> <span class="mf">0.15</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.663583721889865</span><span class="p">,</span> <span class="mf">0.24767388786943867</span><span class="p">,</span> <span class="mf">3.5722668493718626</span><span class="p">,</span> <span class="mf">0.5420415127277624</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.08640413690298866</span><span class="p">,</span> <span class="mf">0.4946733452347538</span><span class="p">,</span> <span class="mf">2.553713733867575</span><span class="p">,</span> <span class="mf">0.24307061469378405</span><span class="p">,</span> <span class="mf">0.6309890923077655</span><span class="p">,</span> <span class="mf">2.716624295877619</span><span class="p">,</span> <span class="mf">0.15</span><span class="p">,</span> <span class="mf">7.99299605623125</span><span class="p">,</span> <span class="mf">0.799997370438831</span><span class="p">,</span> <span class="mf">6.415448025778247</span><span class="p">,</span> <span class="mf">2.0758963463111515</span><span class="p">,</span> <span class="o">-</span><span class="mf">2.407059919688728</span><span class="p">,</span> <span class="mf">37.65971219196447</span><span class="p">,</span> <span class="mf">0.24589373380232807</span><span class="p">,</span> <span class="mf">1.6561364171210822</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">2.6840962695831894</span><span class="p">,</span> <span class="mf">37.58453653636456</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">9.852441955678458</span><span class="p">]</span>
+    <span class="n">Paralst_Unp</span><span class="o">=</span><span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">dir_path</span><span class="p">,</span><span class="s1">&#39;GUMP_Params/Para_Unp.csv&#39;</span><span class="p">),</span> <span class="n">header</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">Paralst_Pol</span><span class="o">=</span><span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">dir_path</span><span class="p">,</span><span class="s1">&#39;GUMP_Params/Para_Pol.csv&#39;</span><span class="p">),</span> <span class="n">header</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span>
     
-     <span class="c1">#from J/psi and gluon PDF using everything through DVCS as input except gluon PDF</span>
-    <span class="n">Paralst_Unp</span> <span class="o">=</span> <span class="p">[</span><span class="mf">4.92252245341075</span><span class="p">,</span> <span class="mf">0.21632833928300776</span><span class="p">,</span> <span class="mf">3.228525762889928</span><span class="p">,</span> <span class="mf">2.347470994624827</span><span class="p">,</span> <span class="mf">0.16344460105600744</span><span class="p">,</span> <span class="mf">1.135739437288775</span><span class="p">,</span> <span class="mf">6.893895640954224</span><span class="p">,</span> <span class="mf">0.15</span><span class="p">,</span> <span class="mf">3.358767931921898</span><span class="p">,</span> <span class="mf">0.1842893653407356</span><span class="p">,</span> <span class="mf">4.417802345266761</span><span class="p">,</span> <span class="mf">3.4816671934041685</span><span class="p">,</span> <span class="mf">0.2491737223289409</span><span class="p">,</span> <span class="mf">1.0519258916411531</span><span class="p">,</span> <span class="mf">6.553873836594824</span><span class="p">,</span> <span class="mf">1.8318696701278339</span><span class="p">,</span> <span class="mf">1.0965234601821583</span><span class="p">,</span> <span class="mf">7.0</span><span class="p">,</span> <span class="mf">0.15</span><span class="p">,</span> <span class="mf">0.1813228421702434</span><span class="p">,</span> <span class="mf">0.9068471909677753</span><span class="p">,</span> <span class="mf">1.1018931174030364</span><span class="p">,</span> <span class="mf">0.4607676086634599</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.22341404954304522</span><span class="p">,</span> <span class="mf">0.7683213780361391</span><span class="p">,</span> <span class="mf">0.22948701913308733</span><span class="p">,</span> <span class="o">-</span><span class="mf">2.638627981453611</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.13980648369003512</span><span class="p">,</span> <span class="mf">0.7985103392773935</span><span class="p">,</span> <span class="mf">3.404262017724412</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">3.44764738950069</span><span class="p">,</span> <span class="mf">1.7955307337138424</span><span class="p">,</span><span class="mi">1</span> <span class="p">,</span> <span class="mf">1.0849192935931364</span><span class="p">,</span> <span class="mf">0.6</span><span class="p">]</span>
-
     <span class="n">fit_dvmp</span> <span class="o">=</span> <span class="n">dvmp_fit</span><span class="p">(</span><span class="n">Paralst_Unp</span><span class="p">)</span>
-    
-   <span class="c1"># fit_off_forward = off_forward_fit(Paralst_Unp, Paralst_Pol)</span>
-   
-    <span class="c1">#print(cost_dvmp(4.922551238,0.21635596,3.228702555,2.349193947,0.163440601,1.135738688,6.896742038,0.15,3.358541913,0.184196049,4.41726899,3.475742056,0.249183402,1.051922382,6.548676693,2.864281106,1.052305853,7.412779844,0.15,0.161159704,0.916012032,1.02239598,0.41423421,-0.198595321,0.0,0.18394307,-2.260952723,0,1.159322377,2.569800357,0,0,0,0,0,0,0,3.296968216))</span>
-
-    <span class="c1"># 0*4.922551238,0.21635596,3.228702555,2.349193947,0.414,1.022,7.737,0.15,0*3.358541913,0.184196049,4.41726899,3.475742056,0.414,1.022,7.737,2.690, 0.469, 3.148, 0.15</span>
-
+<span class="w">    </span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    </span>
 <span class="sd">    Paralst_Unp     = [4.922551238,0.21635596,3.228702555,2.349193947,0.163440601,1.135738688,6.896742038,0.15,3.358541913,0.184196049,4.41726899,3.475742056,0.249183402,1.051922382,6.548676693,2.864281106,1.052305853,7.412779844,0.15,0.161159704,0.916012032,1.02239598,0.41423421,-0.198595321,0.0,0.18394307,-2.260952723,0,1.159322377,2.569800357,0,0,0,0,0,0,0,3.296968216]</span>
