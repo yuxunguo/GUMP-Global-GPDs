@@ -31,9 +31,9 @@ CF = (NC**2 - 1) / (2 * NC)
 CA = NC
 CG = CF - CA/2
 TF = 0.5
-Alpha_Mz = 0.1181
+Alpha_Ref = 0.305
 # All unit in GeV for dimensional quantities.
-Mz = 91.1876
+Ref_Scale = 2. 
 # One loop accuracy for running strong coupling constant. 
 nloop_alphaS = 2
 # Initial scale of distribution functions at 2 GeV.
@@ -50,10 +50,16 @@ flav_trans =np.array([[1, 0, 1, 0, 0],
 
 inv_flav_trans = np.linalg.inv(flav_trans)
 
-f_rho= 0.209 
+f_rho_u = 0.209 # Change to 0.222
+f_rho_d = 0.209 # Change to 0.210
+f_rho_g = 0.209 # Change to 0.216
 f_phi = 0.221 # Change to 0.233
 f_jpsi = 0.406
-
+'''
+TFF_rho_trans = np.array([f_rho_u * 2 / 3 / np.sqrt(2), f_rho_u * 4 / 3 / np.sqrt(2), f_rho_d * 1 / 3 / np.sqrt(2), f_rho_d * 2 / 3 / np.sqrt(2), f_rho_g * 3 / 4 / np.sqrt(2)])#np.array([f_rho_u * 2 / 3 / np.sqrt(2), f_rho_u * 4 / 3 / np.sqrt(2), f_rho_d / 3 / np.sqrt(2), f_rho_d * 2 / 3 / np.sqrt(2), f_rho_g * 3 / 4 / np.sqrt(2)])
+TFF_phi_trans = np.array([0, 0, 0, 0, -1/3]) # strange contribution should be included but doesn't exist in current 2 quark framework
+TFF_jpsi_trans = np.array([0, 0, 0, 0, 2/3])
+'''
 """
 ***********************pQCD running coupling constant***********************
 Here rundec is used instead.
@@ -80,15 +86,15 @@ def _fbeta1(a: float, nf: int) -> float:
 
 @njit(["float64[:](int32, float64[:])", "float64(int32, float64)"])
 def AlphaS0(nf: int, Q: float) -> float:
-    return Alpha_Mz / (1 - Alpha_Mz/2/np.pi * beta0(nf) * np.log(Q/Mz))
+    return Alpha_Ref / (1 - Alpha_Ref/2/np.pi * beta0(nf) * np.log(Q/Ref_Scale))
 
 @njit(["float64[:](int32, float64[:])", "float64(int32, float64)"])
 def AlphaS1(nf: int, Q: float) -> float:
     NASTPS = 20
     
     # a below is as defined in 1/4pi expansion
-    a = np.ones_like(Q) * Alpha_Mz / 4 / np.pi
-    lrrat = 2 * np.log(Q/Mz)
+    a = np.ones_like(Q) * Alpha_Ref / 4 / np.pi
+    lrrat = 2 * np.log(Q/Ref_Scale)
     dlr = lrrat / NASTPS
 
    
@@ -111,14 +117,6 @@ def AlphaS(nloop: int, nf: int, Q: float) -> float:
     if nloop==2:
         return AlphaS1(nf, Q)
     raise ValueError('Only LO and NLO implemented!')
-
-
-
-
-
-
-
-
 
 
 """
@@ -290,15 +288,6 @@ def lsumrev(m: Union[complex, np.ndarray], n: Union[complex, np.ndarray])-> Unio
     
     return sum((2*l+1)*deldelS2((m+1)/2,l/2)/2 for l in range(1))
 
-
-
-
-
-
-
-
-
-
 def non_singlet_LO(n:Union[complex, np.ndarray], nf: int, p: int, prty: int = 1) -> Union[complex, np.ndarray]:
     """Non-singlet LO anomalous dimension.
 
@@ -462,15 +451,6 @@ def singlet_NLO(n: complex, nf: int, p: int, prty: int = 1) -> np.ndarray:
 
     #return np.array([[qq1, qg1],
     #                 [gq1, gg1]])[np.newaxis,...]*np.ones_like(p)
-
-
-
-
-
-
-
-
-
 
 """
 ***********************Evolution operator of GPD in the moment space*******
@@ -734,33 +714,6 @@ def evolop(j: complex, nf: int, p: int, mu: float):
 
     return [evola0NS, evola0] # (N) and (N, 2, 2)
 
-
-def Charge_Factor(particle:int):
-    
-    """The charge factors. For mesons it also multiplies with decay widths (f_m  is for meson m). Output is in evolution basis
-    
-    Args: 
-        particle (integer): shape(5,)
-    
-    Returns:
-        The charge factors are multiplied by decay constant of the m meson, f_m
-        
-     | particle=0 refers to DVCS
-     | particle=1 refers to rho meson 
-     | particle=3  refers to j/psi meson 
-    """ 
-    if (particle==0):
-        return [0, -1/6, 0, 5/18, 5/18]
-        
-    if (particle==1):
-        return f_rho *[1,0,0,1/np.sqrt(2),1/np.sqrt(2)]
-    
-    if (particle==3):
-        return f_jpsi *[0,0,0,2/3,2/3]
-
-
-
-
 # Need Wilson coefficients for evolution. Allows numerical pre-calculation of non-diagonal piece using Mellin-Barnes integral
 
 def WilsonCoef(j: complex) -> complex:
@@ -774,12 +727,6 @@ def WilsonCoef(j: complex) -> complex:
     """
     return 2 ** (1+j) * gamma(5/2+j) / (gamma(3/2) * gamma(3+j))
 
-
-
-
-
-
-
 def WilsonCoef_DVCS_LO(j: complex) -> complex:
     """LO Wilson coefficient of DVCS in the evolution basis (qVal, q_du_plus, q_du_minus, qSigma, g)
         
@@ -792,15 +739,13 @@ def WilsonCoef_DVCS_LO(j: complex) -> complex:
     | Charge factor are calculated such that the sum in the evolution basis are identical to the sum in the flavor basis
     | Gluon charge factor is the same as the singlet one, but the LO Wilson coefficient is zero in DVCS.
     """
-    
+    charge_fact = np.array([0, -1/6, 0, 5/18, 5/18])
     CWT = np.array([WilsonCoef(j), \
                     WilsonCoef(j), \
                     WilsonCoef(j), \
                     WilsonCoef(j),\
                     0 * j])
-    return np.einsum('j, j...->j...', Charge_Factor(0), CWT)
-
-
+    return np.einsum('j, j...->j...', charge_fact, CWT)
 
 def WilsonCoef_DVMP_LO(j: complex, nf: int, meson: int) -> complex:
     """LO Wilson coefficient of DVMP in the evolution basis (qVal, q_du_plus, q_du_minus, qSigma, g)
@@ -823,27 +768,13 @@ def WilsonCoef_DVMP_LO(j: complex, nf: int, meson: int) -> complex:
                        WilsonCoef(j), \
                        1/ nf * WilsonCoef(j),\
                        2 /CF/ (j+3) * WilsonCoef(j)])
-    
-    '''
-    if the meson is jpsi we are setting all the quark parts to zero
-    '''
-                      
-    if(meson== 3):
-    
-     CWT = 3* np.array([0*j, \
-                        0*j, \
-                        0*j, \
-                        0*j, \
-                       2 /CF/ (j+3) * WilsonCoef(j)])
+                             
+    if(meson == 3):
+        return np.einsum('j, j...->j...', [0,0,0,0,2/3], CWT) * f_jpsi * CF/NC
 
-    return np.einsum('j, j...->j...', Charge_Factor(meson), CWT) 
-
-  
-
-
-def WilsonCoef_DVMP_NLO(j: complex, k: complex, nf: int, Q: float, muf: float, meson: int, p:int):
+def WilsonCoef_DVMP_NLO(j: complex, k: complex, nf: int, Q: float, muf: float, meson: int):
     """NLO Wilson coefficient of DVMP in the evolution basis (qVal, q_du_plus, q_du_minus, qSigma, g)
-  
+    
     | currently setting factorization scale and renormalization scale to the same as muf
     | Only singlet at this point.
 
@@ -854,7 +785,6 @@ def WilsonCoef_DVMP_NLO(j: complex, k: complex, nf: int, Q: float, muf: float, m
         Q (float): the photon virtuality 
         mufact (float): the factorization scale mu_fact
         meson (int): 1 for rho, 2 for phi, and 3 for Jpsi
-        p(int):parity 1 for vector -1 for axial. 
         
     Returns:
         Wilson coefficient of shape (N,5) in the evolution basis (qVal, q_du_plus, q_du_minus, qSigma, g)
@@ -862,22 +792,21 @@ def WilsonCoef_DVMP_NLO(j: complex, k: complex, nf: int, Q: float, muf: float, m
     | Charge factor are calculated such that the sum in the evolution basis are identical to the sum in the flavor basis
     | Gluon charge factor is the same as the singlet one.
     | The meson decay constant, CF/NC, and eq are included in the prefactor of Wilson coefficient. 
-    |Parity was called ptyk in GEPARD not with p. So we are setting  ptyk=p
     """
     
     mufact2 = muf ** 2
     mures2 =  muf ** 2
     muphi2 =  muf ** 2
 
+   # CQCF = (-np.log(Q**2/mufact) + S1(j+1) + S1(k + 1) - 1 - 1/2/(j+1)/(j+2) - 1/2/(k+1)/(k+2))*(4*S1(j+1) - 3 - 2/(j+1)/(j+2))/2 + (-np.log(Q**2/muphi) + S1(k+1) + S1(j + 1) - 1 - 1/2/(k+1)/(k+2) - 1/2/(j+1)/(j+2))*(4*S1(k+1) - 3 - 2/(k+1)/(k+2))/2 - 23/3 + (3*(j+1)*(j+2)+1)/2/(j+1)**2/(j+2)**2 + (3*(k+1)*(k+2)+1)/2/(k+1)**2/(k+2)**2
+    
+   # CQCG = (2*S1(j+2) - 1/(j+1)/(j+2))*(1 + (-1)**k - (-1)**k * (k+1)*(k+2)*Delta_S2((k+1)/2)/2) + (2*S1(k+2) - 1/(k+1)/(k+2))*(1 + (-1) - (-1) * (j+1)*(j+2)*Delta_S2((j+1)/2)/2) + np.pi**2 / 3 - 7/3 + ((-1)**k * Script_S3(k+1) + (-1)**k * Delta_S2((k+1)/2) / 2 / (k+1) / (k+2) - S3(k+1) + zeta(3) - ((k+1)*(k+2)-1)/2/(k+1)**2/(k+2)**2)*2*(k+1)*(k+2) + ((-1) * Script_S3(j+1) + (-1) * Delta_S2((j+1)/2) / 2 / (j+1) / (j+2) - S3(j+1) + zeta(3) - ((j+1)*(j+2)-1)/2/(j+1)**2/(j+2)**2)*2*(j+1)*(j+2) - 2*(1+(-1)**k)*((k+1)*(k+2)+1)/(k+1)**2/(k+2)**2 - 2*(1+(-1))*((j+1)*(j+2)+1)/(j+1)**2/(j+2)**2 - 2*(-1)**(1+k)/(j+1)/(j+2)/(k+1)/(k+2) + 2*(j-k)*(j+k+3)*(S3(j+1) - zeta(3) + (-1)**k *(k+1)*DDelta_S2((j+1)/2,(k+1)/2)/2 - lsum(j,k)) + 2*(k-j)*(j+k+3)*(-1) * (Script_S3(j+1) - S1(k+1)*Delta_S2((j+1)/2)/2 - lsumrev(j,k)) + ((-1)**k *(k+1)*(k+2)/2)*sum((-1)**b * (2*k + 3*b) * (4 + 3*b*(3-b) + 2*k*b + 2*(k+1)**2)*DDelta_S2((j+1)/2,(k+b)/2)/(3 + (-1)**b)/(2*k + 3) for b in range(3)) - ((-1) * (k+1)*(k+2) / 2)*sum((2*k + 3*b) * (4 + 3*b*(3-b) + 2*k*b + 2*(k+1)**2)*DDelta_S2((j+1)/2,(k+b)/2)/(3 + (-1)**b)/(2*k + 3) for b in range(3)) + ((-1)**k *((j+1)*(j+2) - 1)*((k+1)*(k+2)*Delta_S2((k+1)/2) - 2)/2/(j+1)/(j+2)) - 2*(-1)**k / (j+1) / (j+2) / (k+1) / (k+2) - ((k+1)**2 + 2 +(j+1)*(j+2)/(k+1)/(k+2))*((-1) * Delta_S2((j+1)/2)/2) - ((-1) * (k+1) * Delta_S2((k+1)/2) / 2) + ((-1))/(k+1)/(k+2)
+    
+   # CQBeta = np.log(Q**2/mures)/4 - S1(j+1) - S1(k+1) -5/6 + 1/2/(j+1)/(j+2) + 1/2/(k+1)/(k+2)
    
-    ptyk=p
     ptyk = 1
- 
-    
+    sgntr = 1
         
- 
-    
- 
     MCQ1CF = -np.log(Q**2 / mufact2)-23/3+(0.5*(1.+3.*(1.+j)*(2.+j)))/((
              1 + j)**2*(2.+j)**2)+(0.5*(1.+3.*(1.+k)*(2.+k)))/((1.+k)**2
              *(2.+k)**2)+0.5*(-3.-2./((1.+j)*(2.+j))+4.*S1(1.+j))*((-
@@ -898,8 +827,6 @@ def WilsonCoef_DVMP_NLO(j: complex, k: complex, nf: int, Q: float, muf: float, m
            1.+j))+S2(-0.5+0.5*LI)-S2(0.5*LI)))/((0.5*(1.+j)-0.5*LI)*(2.+j+LI))
         SUMB += SUMANDB
         SUMA += (-1)**LI * SUMANDB
-        
-       
 
     DELc1aGJK = (-2.*ptyk)/((1.+j)*(2.+j)*(1.+k)*(2.+k))+(0.5
        *(-1.+(1.+j)*(2.+j))*(-2.+(1.+k)*(2.+k)*(S2(0.5*(1.+k)) -
@@ -917,9 +844,6 @@ def WilsonCoef_DVMP_NLO(j: complex, k: complex, nf: int, Q: float, muf: float, m
        (0.5*(1.+k))+S2(-0.5+0.5*(1.+k)))*ptyk)/((0.5*(1.+j)+0.5
        *(-1.-k))*(3.+j+k)))
 
-    
-  
-                                                 
     DELc1bGKJ = 1/((1.+k)*(2.+k))+0.5*(-2.-(1.+k)**2-((1.+j)*(2
        +j))/((1.+k)*(2.+k)))*(S2(0.5*(1.+j))-S2(-0.5+0.5*(1. +
        j)))-0.5*(1.+k)*(S2(0.5*(1.+k))-S2(-0.5+0.5*(1.+k)))-(0.125
@@ -934,15 +858,7 @@ def WilsonCoef_DVMP_NLO(j: complex, k: complex, nf: int, Q: float, muf: float, m
        +j+k)*(-SUMB-0.5*S1(1.+k)*(S2(0.5*(1.+j))-S2(-0.5+0.5
        *(1.+j)))+SB3(1+j))
 
-    def MCQ1CG(sgntr:int):
-        """Nonsinglet moment 
-        
-        Args:
-            sgntr(integer): shape() charge parity or signature of the moment
-            
-        Returns: One of the non singlet moments
-        """
-        return 0.9565348003631189+DELc1aGJK-(2.*(1.+(1.+j)*(2.+j)
+    MCQ1CG = 0.9565348003631189+DELc1aGJK-(2.*(1.+(1.+j)*(2.+j)
        )*(1.-sgntr))/((1.+j)**2*(2.+j)**2)-DELc1bGKJ*sgntr+(-(1 /
        ((1.+k)*(2.+k)))+2.*S1(1.+k))*(1.-sgntr+0.5*(1.+j)*(2.+j
        )*sgntr*(-S2(0.5*j)+S2(0.5*(1.+j)))) + (2.*sgntr*ptyk)/(
@@ -957,16 +873,7 @@ def WilsonCoef_DVMP_NLO(j: complex, k: complex, nf: int, Q: float, muf: float, m
        k)**2*(2.+k)**2)+zeta(3)-S3(1.+k)+(0.5*(-S2(0.5*k) +
            S2(0.5*(1.+k)))*ptyk)/((1.+k)*(2.+k))+ptyk*SB3(1+k))
 
-    def CQNS(sgntr:int):
-        """The nonsinglet amplitude
-        
-        Args:
-            sgntr(integer): shape() charge parity or signature of the moment
-            
-        Returns: One of the non singlet moments
-        """
-       
-        return AlphaS(nloop_alphaS, nf, Init_Scale_Q) / 2 / np.pi * (CF * MCQ1CF + (CF - NC/2) * MCQ1CG(sgntr) + beta0(nf) * MCQ1BET0)
+    CQNS = AlphaS(nloop_alphaS, nf, Init_Scale_Q) / 2 / np.pi * (CF * MCQ1CF + (CF - NC/2) * MCQ1CG + beta0(nf) * MCQ1BET0)
     
     CQPS = AlphaS(nloop_alphaS, nf, Init_Scale_Q) / 2 / np.pi * ((-np.log(Q**2/mufact2) - 1 + 2*S1(j+1) + 2*S1(k+1) - 1)*(-2*(4 + 3*j + j**2)/j/(j+1)/(j+2)/(j+3)) - (1/2 + 1/(j+1)/(j+2) + 1/(k+1)/(k+2))*2/(j+1)/(j+2) + k*(k+1)*(k+2)*(k+3)*(deldelS2((j+1)/2,k/2) - deldelS2((j+1)/2,(k+2)/2))/2/(2*k+3) )
     
@@ -974,26 +881,24 @@ def WilsonCoef_DVMP_NLO(j: complex, k: complex, nf: int, Q: float, muf: float, m
     
     CGCF = AlphaS(nloop_alphaS, nf, Init_Scale_Q) / 2 / np.pi * ((-np.log(Q**2 / muphi2) + S1(j+1) + S1(k+1) - 3/4 - 1/2/(k+1)/(k+2) - 1/(j+1)/(j+2))*(4*S1(k+1) - 3 - 2/(k+1)/(k+2))/2 + (-np.log(Q**2 / mufact2) + 1 + 3*S1(j+1) - 0.5 + (2*S1(j+1)-1)/(k+1)/(k+2) -1/(j+1)/(j+2))*(-(4+2*(j+1)*(j+2))/(j+1)/(j+2)/(j+3))*(j+3)/4 - (35 - ((k+1)*(k+2) + 2)*delS2((k+1)/2) + 4/(k+1)**2/(k+2)**2)/8 + (((k+1)*(k+2) + 2)*S1(j+1)/(k+1)/(k+2) +1)/(j+1)/(j+2) + (delS2((j+1)/2)/2/(k+1)/(k+2) - ((k-1)*k*deldelS2((j+1)/2,k/2) - (k+3)*(k+4)*deldelS2((j+1)/2,(k+2)/2))/2/(2*k+3))*((k+1)*(k+2)*((k+1)*(k+2) +2)/4) - ((k+1)*(k+2) + 2)/2/(j+1)/(j+2)/(k+1)/(k+2))
     
-   
-  
-
-    CWT= np.array([CQNS(1)*(3 * 2 ** (1+j) * gamma(5/2+j) / (gamma(3/2) * gamma(3+j))), CQNS(-1)*(3 * 2 ** (1+j) * gamma(5/2+j) / (gamma(3/2) * gamma(3+j))),  CQNS(-1)*(3 * 2 ** (1+j) * gamma(5/2+j) / (gamma(3/2) * gamma(3+j))), \
-                   CQNS(1)*(3 * 2 ** (1+j) * gamma(5/2+j) / (gamma(3/2) * gamma(3+j)))/nf + CQPS * (3 * 2 ** (1+j) * gamma(5/2+j) / (gamma(3/2) * gamma(3+j))), \
-                   2/ CF / (j + 3) * 3 * 2 ** (1+j) * gamma(5/2+j) / (gamma(3/2) * gamma(3+j)) * (NC*CGNC + CF*CGCF + beta0(nf)*np.log(mufact2/mures2)/2)],dtype=complex) #+ beta0(nf)*np.log(mufact/mures)
-
-    if (meson==3):
-        
-        """
-        |if the meson is jpsi we are setting all the quark parts to zero except the pure singlet
-        """ 
-
-        CWT= np.array([0*j, 0*j,  0*j, \
-                  CQPS * (3 * 2 ** (1+j) * gamma(5/2+j) / (gamma(3/2) * gamma(3+j))), \
-                2/ CF / (j + 3) * 3 * 2 ** (1+j) * gamma(5/2+j) / (gamma(3/2) * gamma(3+j)) * (NC*CGNC + CF*CGCF + beta0(nf)*np.log(mufact2/mures2)/2)],dtype=complex) #+ beta0(nf)*np.log(mufact/mures)
-
-    return  np.einsum('j, j...->j...', Charge_Factor(meson), CWT)    
-      
-   
+    # Without sea quarks
+    #return np.array([0*j, 0*j, 0*j, 0*j, 3 * 2 * 2 ** (1+j) * gamma(5/2+j) / (j + 3) / (gamma(3/2) * gamma(3+j)) * (NC*CGNC + CF*CGCF)],dtype=complex) #+ beta0(nf)*np.log(mufacf/mures)
+    
+    # With sea quarks A factor of 3 coming from the asymptotic DA. The factors for S/G can be found in eq. (22b) of 2310.13837
+    CWT= 3 * np.array([0*j, 0*j, 0*j, \
+                       (0 * CQNS/nf + CQPS) * WilsonCoef(j), \
+                       2 / CF / (j + 3) *  WilsonCoef(j) * (NC*CGNC + CF*CGCF + beta0(nf)*np.log(mufact2/mures2)/2)],dtype=complex) #+ beta0(nf)*np.log(mufact/mures)
+    '''
+    if(meson == 1):
+        return np.einsum('j, j...->j...', TFF_rho_trans, CWT)                
+    if(meson== 2):
+        return np.einsum('j, j...->j...', TFF_phi_trans, CWT)                
+    if(meson == 3):
+        return np.einsum('j, j...->j...', TFF_jpsi_trans, CWT)
+    '''
+    # Only sea quark implemented, not apply to rho production.
+    if(meson == 3):
+        return CWT * f_jpsi  * CF/NC * (2/3)
 
 def np_cache(function):
     @functools.cache
