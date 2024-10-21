@@ -517,7 +517,9 @@ def singlet_NLO(n: complex, nf: int, p: int, prty: int = 1) -> np.ndarray:
                    + 16*CF*TF*(-2*S1(n-1)/(3*n)+S1(n-1)/(3*(n+1)) + 7/(9*n) - 2/(9*(n+1))-2/(3*n**2)+1/(3*(n+1)**2)))
                 
        
+               
     """
+       The identity S_12(n)+S_21=S_1(n)S_2(n)+S_3  (from hep-ph/9810241 Eq.(129)) was used in axial part of gg1 
     """
       
     gg1 = np.where(p>0, (CF*nf*TF*(8+(16*(-4-4*n-10*n**3+n**4+4*n**5+2*n**6 - 5*(n*n)))/((-1+n)*n**3*(1+n)**3*(2+n))) 
