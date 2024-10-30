@@ -1,3 +1,5 @@
+.. _dvcs_xsec_module:
+
 DVCS\_xsec module
 =================
 

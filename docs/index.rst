@@ -23,6 +23,7 @@ of GPD global analysis. We are still working to develop better user interface bu
    DVCSIntro
    DVMPIntro
    modules
+   Citation
 
 
 

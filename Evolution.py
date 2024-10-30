@@ -50,16 +50,10 @@ flav_trans =np.array([[1, 0, 1, 0, 0],
 
 inv_flav_trans = np.linalg.inv(flav_trans)
 
-f_rho_u = 0.209 # Change to 0.222
-f_rho_d = 0.209 # Change to 0.210
-f_rho_g = 0.209 # Change to 0.216
+f_rho= 0.209 
 f_phi = 0.221 # Change to 0.233
 f_jpsi = 0.406
-'''
-TFF_rho_trans = np.array([f_rho_u * 2 / 3 / np.sqrt(2), f_rho_u * 4 / 3 / np.sqrt(2), f_rho_d * 1 / 3 / np.sqrt(2), f_rho_d * 2 / 3 / np.sqrt(2), f_rho_g * 3 / 4 / np.sqrt(2)])#np.array([f_rho_u * 2 / 3 / np.sqrt(2), f_rho_u * 4 / 3 / np.sqrt(2), f_rho_d / 3 / np.sqrt(2), f_rho_d * 2 / 3 / np.sqrt(2), f_rho_g * 3 / 4 / np.sqrt(2)])
-TFF_phi_trans = np.array([0, 0, 0, 0, -1/3]) # strange contribution should be included but doesn't exist in current 2 quark framework
-TFF_jpsi_trans = np.array([0, 0, 0, 0, 2/3])
-'''
+
 """
 ***********************pQCD running coupling constant***********************
 Here rundec is used instead.
@@ -117,6 +111,14 @@ def AlphaS(nloop: int, nf: int, Q: float) -> float:
     if nloop==2:
         return AlphaS1(nf, Q)
     raise ValueError('Only LO and NLO implemented!')
+
+
+
+
+
+
+
+
 
 
 """
@@ -205,12 +207,12 @@ def S4(z: Union[complex, np.ndarray]) -> Union[complex, np.ndarray]:
     return zeta(4) - dpsi(z+1, 3) / 6
 
 def S2_prime(z: Union[complex, np.ndarray], prty: int) -> Union[complex, np.ndarray]:
-    """Curci et al Eq. (5.25)."""
+    """https://www.sciencedirect.com/science/article/pii/0550321380900036?via%3Dihub  Eq. (5.25)."""
     # note this is related to delS2
     return (1+prty)*S2(z)/2 + (1-prty)*S2(z-1/2)/2
 
 def S3_prime(z: Union[complex, np.ndarray], prty: int) -> Union[complex, np.ndarray]:
-    """Curci et al Eq. (5.25)."""
+    """https://www.sciencedirect.com/science/article/pii/0550321380900036?via%3Dihub Eq. (5.25)."""
     return (1+prty)*S3(z)/2 + (1-prty)*S3(z-1/2)/2
 
 def delS2(z: Union[complex, np.ndarray]) -> Union[complex, np.ndarray]:
@@ -220,7 +222,7 @@ def delS2(z: Union[complex, np.ndarray]) -> Union[complex, np.ndarray]:
         z: complex argument
 
     Returns:
-        delS2((z+1)/2) From Eq. (4.13) of 1310.5394.
+        delS2((z+1)/2) From Eq. (4.13) of https://arxiv.org/abs/1310.5394
         Note halving of the argument.
 
     """
@@ -234,15 +236,12 @@ def deldelS2(j: Union[complex, np.ndarray], k: int) -> Union[complex, np.ndarray
         k: integer index
 
     Returns:
-        Equal to delS2((j+1)/2, (k+1)/2) From Eq. (4.38) of 1310.5394.
+        Equal to delS2((j+1)/2, (k+1)/2) From Eq. (4.38) of https://arxiv.org/abs/1310.5394
         Note halving of the argument.
 
     """
     return (delS2(j) - delS2(k)) / (4*(j-k)*(2*j+2*k+1))
 
-def Sm1(z: Union[complex, np.ndarray], k: int) -> Union[complex, np.ndarray]:
-    """Aux fun. FIXME: not tested."""
-    return - log(2) + 0.5 * (1-2*(k % 2)) * (psi((z+2)/2) - psi((z+1)/2))
 
 def MellinF2(n: Union[complex, np.ndarray]) -> Union[complex, np.ndarray]:
     """Return Mellin transform  i.e. x^(N-1) moment of Li2(x)/(1+x).
@@ -251,7 +250,7 @@ def MellinF2(n: Union[complex, np.ndarray]) -> Union[complex, np.ndarray]:
         n: complex argument
 
     Returns:
-        According to Eq. (33) in Bluemlein and Kurth, hep-ph/9708388
+        According to Eq. (33) in https://arxiv.org/abs/hep-ph/9708388
 
     """
     abk = np.array([0.9999964239, -0.4998741238,
@@ -270,15 +269,36 @@ def MellinF2(n: Union[complex, np.ndarray]) -> Union[complex, np.ndarray]:
     return zeta(2) * log(2) - mf2
 
 def SB3(j: Union[complex, np.ndarray]) -> Union[complex, np.ndarray]:
-    """Eq. (4.44e) of arXiv:1310.5394."""
+    """Eq. (4.44e) of https://arxiv.org/abs/1310.5394"""
     return 0.5*S1(j)*(-S2(-0.5+0.5*j)+S2(0.5*j))+0.125*(-S3(
              - 0.5 + 0.5 * j) + S3(0.5 * j)) - 2 * (0.8224670334241131 * (
                  -S1(0.5 * (-1 + j)) + S1(0.5 * j)) - MellinF2(1 + j))
+                 
+                 
+                           
+def S1_tilde(n: Union[complex, np.ndarray], prty: int) -> Union[complex, np.ndarray]:
+    """Eq. (39) of https://arxiv.org/abs/hep-ph/9810241 """
+    return  prty * (dpsi((n+2)/2,1) - dpsi((n+1)/2,1))-log(2)   
 
 def S2_tilde(n: Union[complex, np.ndarray], prty: int) -> Union[complex, np.ndarray]:
-    """Eq. (30) of  Bluemlein and Kurth, hep-ph/9708388."""
+    """Eq. (30) of  https://arxiv.org/abs/hep-ph/9708388"""
     G = psi((n+1)/2) - psi(n/2)
     return -(5/8)*zeta(3) + prty*(S1(n)/n**2 - (zeta(2)/2)*G + MellinF2(n))
+
+
+def S3_tilde(n: Union[complex, np.ndarray], prty: int) -> Union[complex, np.ndarray]:
+    """Eqs. (47) and (37) of https://arxiv.org/abs/hep-ph/9810241"""
+    return prty*1/2* 1/2*(dpsi((n+2)/2,2) - dpsi((n+1)/2,2)) -3/4*zeta(3)
+
+
+def Sm2p1(n: Union[complex, np.ndarray], prty: int) -> Union[complex, np.ndarray]: 
+    """Eq. (50) of https://arxiv.org/abs/hep-ph/9810241""" 
+    return (-prty) * MellinF2(n,1) + zeta(2)*S1_tilde(n,prty) - (5/8)*zeta(3) + zeta(2) * log(2)
+
+def Sp1m2(n: Union[complex, np.ndarray], prty: int) -> Union[complex, np.ndarray]: 
+    """Eq. (131) of https://arxiv.org/abs/hep-ph/9810241"""
+    return S1(n)*S2_tilde(n)+S3_tilde(n,prty)-Sm2p1(n,prty)
+
 
 def lsum(m: Union[complex, np.ndarray], n: Union[complex, np.ndarray])-> Union[complex, np.ndarray]:
     
@@ -287,6 +307,15 @@ def lsum(m: Union[complex, np.ndarray], n: Union[complex, np.ndarray])-> Union[c
 def lsumrev(m: Union[complex, np.ndarray], n: Union[complex, np.ndarray])-> Union[complex, np.ndarray]:
     
     return sum((2*l+1)*deldelS2((m+1)/2,l/2)/2 for l in range(1))
+
+
+
+
+
+
+
+
+
 
 def non_singlet_LO(n:Union[complex, np.ndarray], nf: int, p: int, prty: int = 1) -> Union[complex, np.ndarray]:
     """Non-singlet LO anomalous dimension.
@@ -402,55 +431,61 @@ def singlet_NLO(n: complex, nf: int, p: int, prty: int = 1) -> np.ndarray:
         ((QQ, QG),
         (GQ, GG))
         
+     |The axial case for the two loop singlet anomalous dimensions is taken from  https://arxiv.org/abs/hep-ph/9506451 Eqs(3.75)-(3.77)
+     |The identity S_12(n)+S_21=S_1(n)S_2(n)+S_3  (from https://arxiv.org/abs/hep-ph/9810241 Eq.(129)) was used in axial part of gg1  
+        
     """
     
-   # qq1 = non_singlet_NLO(n, nf, 1) + np.ones_like(p) * (-4*CF*TF*nf*((2 + n*(n + 5))*(4 + n*(4 + n*(7 + 5*n)))/(n-1)/n**3/(n+1)**3/(n+2)**2))
+    epsilon = 0.00001 * ( n == 1)
     
-   # qg1 = np.ones_like(p) * 2*nf*TF*(S1(n)*(2*S1(n)*(-CF*(n-1)*(n+2)**2*(2+n+n**2)*n**2*(n+1)**2 + CA*n**2*(n+1)**2*(n+2)**2*(n**3 + n - 2)) - CF*(n-1)*(n+2)**2*(-4*n*(n+1)**3*(n+2)) - 2*CA*(4*(n-1)*n**3*(n+1)*(n+2)*(2*n + 3))) + S2_prime(n)*(2*CA*n**2*(n+1)**2*(n+2)**2*(n**3 + n - 2)) - CF*(n-1)*(n+1)**2*(64 + 160*(n-1) + 159*(n-1)**2 + 70*(n-1)**3 + 11*(n-1)**4 + n**2*(n+1)**2*5*(2 + n + n**2)) - 2*CA*(16 + 64*n + 104*n**2 + 128*n**3 + 85*n**4 + 36*n**5 + 25*n**6 + 15*n**7 + 6*n**8 + n**9))/(n-1)/n**3/(n+1)**3/(n+2)**3
+    qq1 = np.where(p>0, non_singlet_NLO(n, nf, 1) - 4*CF*TF*nf*(5*n**5 +32*n**4 +49*n**3 +38*n**2 +28*n +8)/(n-1 +epsilon) * n**3 * (n+1)**3 * (n+2)**2
+                      ,non_singlet_NLO(n, nf, 1) - 4*CF*TF*nf*(5*n**5 +32*n**4 +49*n**3 +38*n**2 +28*n +8)/(n-1+ epsilon) * n**3 * (n+1)**3 * (n+2)**2)
     
-  #  gq1 = np.ones_like(p) * (-CF)*(S1(n)*(S1(n)*(18*CA*n**2*(n+1)**2*(n+2)**2*(n**3 + n - 2) - 18*CF*(n-1)*n**2*(n+2)**2*(2 + 5*n + 5*n**2 + 3*n**3 + n**4)) + 18*CF*(n-1)*n**2*(n+2)**2*(10 + 27*n + 25*n**2 + 13*n**3 + 5*n**4) - 6*CA*n*(n+1)**2*(n+2)**2*(-12 + n*(-22 + 41*n + 17*n**3)) + 24*(n-1)*n**2*(n+1)**2*(n+2)**2*(n**2 + n + 2)*TF*nf) + S2(n)*(18*CA*n**2*(n+1)**2*(n+2)**2*(n**3 + n - 2) - 18*CF*(n-1)*n**2*(n+2)**2*(2 + 5*n + 5*n**2 + 3*n**3 + n**4)) + 9*CF*(n-1)*(n+2)**2*(-4 + n*(-12 + n*(-1 + 28*n + 43*n + 43*n**2 + 30*n**3 + 12*n**4))) + 2*CA*(2592 + 21384*(n-1) + 72582*(n-1)**2 + 128024*(n-1)**3 + 133818*(n-1)**4 + 88673*(n-1)**5 + 38822*(n-1)**6 + 10292*(n-1)**7 + 1662*(n-1)**8 + 109*(n-1)**9 - 9*n**2*(n+1)**2*(n+2)**2*(n**3 + n - 2)*S2_prime(n)) - 8*(n-1)*n**2*(n+1)**2*(n+2)**2*(16 + 27*n + 13*n**2 + 8*n**3)*TF*nf)/9/n**3/(n+1)**3/(n**2 + n - 2)**2
-    
-  #  gg1 = np.ones_like(p) * (S1(n)*(CA**2*(134/9 + 16*(2*n + 1)*(-2 + n*(n+1)*(n**2 + n + 2))/(n-1)**2*n**2*(n+1)**2*(n+2)**2 - 4*S2_prime(n)) - 40*CA*TF*nf/9) + CA**2*(-16/3 - (576 + n*(1488 + n*(560 + n*(-1632 + n*(-2344 + n*(1567 + n*(6098 + n*(6040 + 457*n*(6 + n)))))))))/9/(n-1)**2/n**3/(n+1)**3/(n+2)**3 + 8*(n*82 + n + 1)*S2_prime(n)/(n-1)*n*(n+1)*(n+2) - S3_prime(n) + 8*S2_tilde(n)) + 8*CF*TF*nf*(3 + (6+ n*(n+1)*(28 + 19*n*(n+1)))/n**2/(n+1)**2/(n**2 + n - 2))/9 + 2*CF*TF*nf*(-8 + n*(-8 + n*(-10 + n*(-22 + n*(-3 + n*(6 + n*(8 + n*(4 + n)))))))))
-    
-  #  qq1_qg1 = np.stack((qq1, qg1), axis=-1)
-  #  gq1_gg1 = np.stack((gq1, gg1), axis=-1)
+    qg1 = np.where(p>0,(-8*CF*nf*TF*(-4*S1(n)/n**2+(4+8*n + 26*n**3 + 11*n**4 + 15*(n*n))/(n**3*(1+n)**3*(2+n)) 
+                                     +((2+n+n*n)*(5-2*S2(n) + 2*(S1(n)*S1(n))))/(n*(1+n)*(2+n))) 
+                        -8*CA*nf*TF*( 8*(3+2*n)*S1(n)/((1+n)**2*(2+n)**2) + (2*(16+64*n+128*n**3+85*n**4+36*n**5+25*n**6 +15*n**7+6*n**8+n**9+104*(n*n)))/((-1+n+epsilon)*n**3*(1+n)**3*(2+n)**3)
+                                     +((2+n+n*n)*(2*S2(n)-2*(S1(n)*S1(n))-2*S2(n/2)))/(n*(1+n)*(2+n))))/4 
+                      , 8*CA*TF*nf*( -S1(n-1)**2/n +2*S1(n-1)**2/(n+1) -2*S1(n-1)/n**2 +4*S1(n-1)/(n+1)**2
+                                     -S2(n-1)/n + 2*S2(n-1)/(n+1) -2*S2_tilde(n-1,prty)/n +4*S2_tilde(n-1,prty)/(n+1)
+                                     -4/n +3/(n+1) -3/n*n + 8/(n+1)**2 +2/n**3 +12/(n+1)**3)
+                       +4*CF*TF*nf*(  2*S1(n-1)**2/n -4*S1(n-1)**2/(n+1) -2*S2(n-1)/n +4*S2(n-1)/(n+1) 
+                                     +14/n -19/(n+1) -1/n*n -8/(n+1)**2 -2/n**3 + 4/(n+1)**3))
+    gq1 = np.where(p>0, (-(32/3)*CF*nf*TF*((1+n)**(-2) + ((-(8/3)+S1(n))*(2+n+n*n))/((-1+n+epsilon)*n*(1+n)))
+                         -4*(CF*CF)*( (-4*S1(n))/(1+n)**2-( -4-12*n+28*n**3+43*n**4 + 30*n**5+12*n**6-n*n)/((-1+n+epsilon)*n**3*(1+n)**3) 
+                                     +((2+n+n*n)*(10*S1(n)-2*S2(n)-2*(S1(n)*S1(n))))/((-1+n+epsilon)*n*(1+n))) 
+                         -8*CF*CA*( ((1/9)*(144+432*n-1304*n**3-1031*n**4 + 695*n**5+1678*n**6+1400*n**7+621*n**8+109*n**9 - 152*(n*n)))/((-1+n+epsilon)**2*n**3*(1+n)**3*(2+n)**2)
+                                   -((1/3)*S1(n)*(-12-22*n+17*n**4 + 41*(n*n)))/((-1+n+epsilon)**2*n**2*(1+n))+( (2+n+n*n)*(S2(n) + S1(n)*S1(n)-S2(n/2)))/((-1+n+epsilon)*n*(1+n))))/4
+                      , 4*CA*CF*( -2*S1(n-1)**2/n +S1(n-1)**2/(n+1) +16*S1(n-1)/(3*n) -5*S1(n-1)/(3(n+1)) 
+                                  +2*S2(n-1)/n -S2(n-1)/(n+1) +4*S2_tilde(n-1,prty)/n -2*S2_tilde(n-1,prty)/(n+1) -56/(9*n) 
+                                  -20/(9*(n+1)) + 28/(3*n*n) -38/(3*(n+1)**2) -4/(n**3) - 6/((n+1)**3)) 
+                       +2*CF**2*(  4*S1(n-1)**2/n - 2*S1(n-1)**2/(n+1) - 8*S1(n-1)/n + 2*S1(n-1)/(n+1)
+                                  +8*S1(n-1)/(n**2)  -4*S1(n-1)/((n+1)**2) +4*S2(n-1)/n -2*S2(n-1)/(n+1) 
+                                  +15/n -6/(n+1) - 12 /(n**2) + 3/((n+1)**2) + 4/(n**3) -2/((n+1)**3))
+                       +16*CF*TF*nf*(-2*S1(n-1)/(3*n) +S1(n-1)/(3*(n+1)) +7/(9*n) -2/(9*(n+1)) -2/(3*n**2) +1/(3*(n+1)**2)))
+    gg1 = np.where(p>0, (1/4)*( CF*nf*TF*(8+(16*(-4-4*n-10*n**3+n**4+4*n**5+2*n**6 - 5*(n*n)))/((-1+n+epsilon)*n**3*(1+n)**3*(2+n))) 
+                                +CA*nf*TF*(32/3 - (160/9)*S1(n)+( (16/9)*(12+56*n+76*n**3+38*n**4+94*(n*n)))/((-1+n+epsilon)*n**2*(1+n)**2*(2+n))) 
+                                +CA*CA*(-64/3+(536/9)*S1(n)+(64*S1(n)*( -2-2*n+8*n**3+5*n**4+2*n**5+7*(n*n)))/((-1+n+epsilon)**2*n**2*(1+n)**2*(2+n)**2) 
+                                -((4/9)*(576+1488*n-1632*n**3-2344*n**4+1567*n**5 + 6098*n**6+6040*n**7+2742*n**8+457*n**9+560*(n*n)))/( (-1+n+epsilon)**2*n**3*(1+n)**3*(2+n)**3) 
+                                -16*S1(n)*S2(n/2)+(32*(1+n+n*n)*S2(n/2))/( (-1+n+epsilon)*n*(1+n)*(2+n))-4*S3(n/2) + 32*(S1(n)/n**2-(5/8)*zeta(3)+MellinF2(n) - zeta(2)*(-psi(n/2)+psi((1+n)/2))/2)))
+                       , 2*CA**2*( (134/9)*S1(n-1) +8*S1(n-1)/(n*n) -16*S1(n-1)/(n+1)**2 
+                                  +8*S2(n-1)/n -16*S2(n-1)/(n+1) +4*S3(n-1) 
+                                  -8*(S1(n-1)*S2(n-1)+S3(n-1))+ 8*S2_tilde(n-1,prty)/n -16*S2_tilde(n-1,prty)/(n+1) 
+                                  +4*S3_tilde(n-1,prty) -8*Sp1m2(n-1,prty)-107/(9*n) +241/(9*(n+1)) 
+                                  +58/(3*n*n)- 86/(3*(n+1)**2) -8/(n**3) -48/(n+1)**3 -16/3)
+                        +16*CA*TF*nf*(-5*S1(n-1)/9 +14/(9*n) -19/(9*(n+1)) -1/(3*n*n) -1/(3*(n+1)**2) +1/3)
+                        +4*CF*TF*nf*(-10/(n+1) +2/(n+1)**2 +4/(n+1)**3 +1 +10/n -10/(n*n) +4/(n**3)))
 
-   # return np.stack((qq1_qg1, gq1_gg1), axis=-2)# (N, 2, 2)
+    
+
+     
+    qq1_qg1 = np.stack((qq1, qg1), axis=-1)
+    gq1_gg1 = np.stack((gq1, gg1), axis=-1)
+    
+    return np.stack((qq1_qg1, gq1_gg1), axis=-2) #(N, 2, 2)
     
     
-   # qq1 = np.where(p>0, non_singlet_NLO(n, nf, 1) - 4*CF*TF*nf*(5*n**5+32*n**4+49*n**3+38*n**2 + 28*n+8)/((n-1)*n**3*(n+1)**3*(n+2)**2), non_singlet_NLO(n, nf, 1) - 4*CF*TF*nf*(5*n**5+32*n**4+49*n**3+38*n**2 + 28*n+8)/((n-1)*n**3*(n+1)**3*(n+2)**2))
+  
 
-   # qg1 = np.where(p>0,(-8*CF*nf*TF*((-4*S1(n))/n**2+(4+8*n + 26*n**3 + 11*n**4 + 15*(n*n))/(n**3*(1+n)**3*(2+n)) + ((2+n+n*n)*(5-2*S2(n) + 2*(S1(n)*S1(n))))/(n*(1+n)*(2+n))) - 8*CA*nf*TF*((8*(3+2*n)*S1(n))/((1+n)**2*(2+n)**2) + (2*(16+64*n+128*n**3+85*n**4+36*n**5+25*n**6 + 15*n**7+6*n**8+n**9+104*(n*n)))/( (-1+n)*n**3*(1+n)**3*(2+n)**3)+( (2+n+n*n)*(2*S2(n)-2*(S1(n)*S1(n))-2*S2(n/2)))/(n*(1+n)*(2+n))))/4, (-8*CF*nf*TF*((-4*S1(n))/n**2+(4+8*n + 26*n**3 + 11*n**4 + 15*(n*n))/(n**3*(1+n)**3*(2+n)) + ((2+n+n*n)*(5-2*S2(n) + 2*(S1(n)*S1(n))))/(n*(1+n)*(2+n))) - 8*CA*nf*TF*((8*(3+2*n)*S1(n))/((1+n)**2*(2+n)**2) + (2*(16+64*n+128*n**3+85*n**4+36*n**5+25*n**6 + 15*n**7+6*n**8+n**9+104*(n*n)))/( (-1+n)*n**3*(1+n)**3*(2+n)**3)+( (2+n+n*n)*(2*S2(n)-2*(S1(n)*S1(n))-2*S2(n/2)))/(n*(1+n)*(2+n))))/4)
-
-   # gq1 = np.where(p>0, (-(32/3)*CF*nf*TF*((1+n)**(-2) + ((-(8/3)+S1(n))*(2+n+n*n))/((-1+n)*n*(1+n))) - 4*(CF*CF)*((-4*S1(n))/(1+n)**2-( -4-12*n+28*n**3+43*n**4 + 30*n**5+12*n**6-n*n)/((-1+n)*n**3*(1+n)**3) + ((2+n+n*n)*(10*S1(n)-2*S2(n)-2*(S1(n)*S1(n))))/((-1+n)*n*(1+n))) - 8*CF*CA*(((1/9)*(144+432*n-1304*n**3-1031*n**4 + 695*n**5+1678*n**6+1400*n**7+621*n**8+109*n**9 - 152*(n*n)))/((-1+n)**2*n**3*(1+n)**3*(2+n)**2) - ((1/3)*S1(n)*(-12-22*n+17*n**4 + 41*(n*n)))/((-1+n)**2*n**2*(1+n))+( (2+n+n*n)*(S2(n) + S1(n)*S1(n)-S2(n/2)))/((-1+n)*n*(1+n))))/4, (-(32/3)*CF*nf*TF*((1+n)**(-2) + ((-(8/3)+S1(n))*(2+n+n*n))/((-1+n)*n*(1+n))) - 4*(CF*CF)*((-4*S1(n))/(1+n)**2-( -4-12*n+28*n**3+43*n**4 + 30*n**5+12*n**6-n*n)/((-1+n)*n**3*(1+n)**3) + ((2+n+n*n)*(10*S1(n)-2*S2(n)-2*(S1(n)*S1(n))))/((-1+n)*n*(1+n))) - 8*CF*CA*(((1/9)*(144+432*n-1304*n**3-1031*n**4 + 695*n**5+1678*n**6+1400*n**7+621*n**8+109*n**9 - 152*(n*n)))/((-1+n)**2*n**3*(1+n)**3*(2+n)**2) - ((1/3)*S1(n)*(-12-22*n+17*n**4 + 41*(n*n)))/((-1+n)**2*n**2*(1+n))+( (2+n+n*n)*(S2(n) + S1(n)*S1(n)-S2(n/2)))/((-1+n)*n*(1+n))))/4)
-
-   # gg1 = np.where(p>0, (CF*nf*TF*(8+(16*(-4-4*n-10*n**3+n**4+4*n**5+2*n**6 - 5*(n*n)))/((-1+n)*n**3*(1+n)**3*(2+n))) + CA*nf*TF*(32/3 - (160/9)*S1(n)+( (16/9)*(12+56*n+76*n**3+38*n**4+94*(n*n)))/((-1+n)*n**2*(1+n)**2*(2+n))) + CA*CA*(-64/3+(536/9)*S1(n)+(64*S1(n)*( -2-2*n+8*n**3+5*n**4+2*n**5+7*(n*n)))/((-1+n)**2*n**2*(1+n)**2*(2+n)**2) - ((4/9)*(576+1488*n-1632*n**3-2344*n**4+1567*n**5 + 6098*n**6+6040*n**7+2742*n**8+457*n**9+560*(n*n)))/( (-1+n)**2*n**3*(1+n)**3*(2+n)**3) - 16*S1(n)*S2(n/2)+(32*(1+n+n*n)*S2(n/2))/( (-1+n)*n*(1+n)*(2+n))-4*S3(n/2) + 32*(S1(n)/n**2-(5/8)*zeta(3)+MellinF2(n) - zeta(2)*(-psi(n/2)+psi((1+n)/2))/2)))/4, (CF*nf*TF*(8+(16*(-4-4*n-10*n**3+n**4+4*n**5+2*n**6 - 5*(n*n)))/((-1+n)*n**3*(1+n)**3*(2+n))) + CA*nf*TF*(32/3 - (160/9)*S1(n)+( (16/9)*(12+56*n+76*n**3+38*n**4+94*(n*n)))/((-1+n)*n**2*(1+n)**2*(2+n))) + CA*CA*(-64/3+(536/9)*S1(n)+(64*S1(n)*( -2-2*n+8*n**3+5*n**4+2*n**5+7*(n*n)))/((-1+n)**2*n**2*(1+n)**2*(2+n)**2) - ((4/9)*(576+1488*n-1632*n**3-2344*n**4+1567*n**5 + 6098*n**6+6040*n**7+2742*n**8+457*n**9+560*(n*n)))/( (-1+n)**2*n**3*(1+n)**3*(2+n)**3) - 16*S1(n)*S2(n/2)+(32*(1+n+n*n)*S2(n/2))/( (-1+n)*n*(1+n)*(2+n))-4*S3(n/2) + 32*(S1(n)/n**2-(5/8)*zeta(3)+MellinF2(n) - zeta(2)*(-psi(n/2)+psi((1+n)/2))/2)))/4)
-
-
-    qq1 = non_singlet_NLO(n, nf, 1) + np.ones_like(p) * (-4*CF*TF*nf*(5*n**5+32*n**4+49*n**3+38*n**2 + 28*n+8)/((n-1)*n**3*(n+1)**3*(n+2)**2))
-    
-    qg1 = np.ones_like(p) * ((-8*CF*nf*TF*((-4*S1(n))/n**2+(4+8*n + 26*n**3 + 11*n**4 + 15*(n*n))/(n**3*(1+n)**3*(2+n)) + ((2+n+n*n)*(5-2*S2(n) + 2*(S1(n)*S1(n))))/(n*(1+n)*(2+n))) - 8*CA*nf*TF*((8*(3+2*n)*S1(n))/((1+n)**2*(2+n)**2) + (2*(16+64*n+128*n**3+85*n**4+36*n**5+25*n**6 + 15*n**7+6*n**8+n**9+104*(n*n)))/( (-1+n)*n**3*(1+n)**3*(2+n)**3)+( (2+n+n*n)*(2*S2(n)-2*(S1(n)*S1(n))-2*S2(n/2)))/(n*(1+n)*(2+n))))/4)
-    
-    gq1 = np.ones_like(p) * ((-(32/3)*CF*nf*TF*((1+n)**(-2) + ((-(8/3)+S1(n))*(2+n+n*n))/((-1+n)*n*(1+n))) - 4*(CF*CF)*((-4*S1(n))/(1+n)**2-( -4-12*n+28*n**3+43*n**4 + 30*n**5+12*n**6-n*n)/((-1+n)*n**3*(1+n)**3) + ((2+n+n*n)*(10*S1(n)-2*S2(n)-2*(S1(n)*S1(n))))/((-1+n)*n*(1+n))) - 8*CF*CA*(((1/9)*(144+432*n-1304*n**3-1031*n**4 + 695*n**5+1678*n**6+1400*n**7+621*n**8+109*n**9 - 152*(n*n)))/((-1+n)**2*n**3*(1+n)**3*(2+n)**2) - ((1/3)*S1(n)*(-12-22*n+17*n**4 + 41*(n*n)))/((-1+n)**2*n**2*(1+n))+( (2+n+n*n)*(S2(n) + S1(n)*S1(n)-S2(n/2)))/((-1+n)*n*(1+n))))/4)
-    
-    gg1 = np.ones_like(p) * ((CF*nf*TF*(8+(16*(-4-4*n-10*n**3+n**4+4*n**5+2*n**6 - 5*(n*n)))/((-1+n)*n**3*(1+n)**3*(2+n))) + CA*nf*TF*(32/3 - (160/9)*S1(n)+( (16/9)*(12+56*n+76*n**3+38*n**4+94*(n*n)))/((-1+n)*n**2*(1+n)**2*(2+n))) + CA*CA*(-64/3+(536/9)*S1(n)+(64*S1(n)*( -2-2*n+8*n**3+5*n**4+2*n**5+7*(n*n)))/((-1+n)**2*n**2*(1+n)**2*(2+n)**2) - ((4/9)*(576+1488*n-1632*n**3-2344*n**4+1567*n**5 + 6098*n**6+6040*n**7+2742*n**8+457*n**9+560*(n*n)))/( (-1+n)**2*n**3*(1+n)**3*(2+n)**3) - 16*S1(n)*S2(n/2)+(32*(1+n+n*n)*S2(n/2))/( (-1+n)*n*(1+n)*(2+n))-4*S3(n/2) + 32*(S1(n)/n**2-(5/8)*zeta(3)+MellinF2(n) - zeta(2)*(-psi(n/2)+psi((1+n)/2))/2)))/4)
-                          
-    #qq1_qg1 = np.stack((qq1, qg1), axis=0)
-    #gq1_gg1 = np.stack((gq1, gg1), axis=0)
-    
-    n_tester = np.array([1.0])
-    if type(n)==type(n_tester):
-        qq1_qg1 = np.stack((qq1, qg1), axis=-1)
-        gq1_gg1 = np.stack((gq1, gg1), axis=-1)
-        result = np.stack((qq1_qg1,gq1_gg1),axis=-1)
-    else:
-        length = 1
-        result = np.reshape(np.array([[qq1, qg1], [gq1, gg1]]),(length,2,2))
-
-    return result# (N, 2, 2)    
-
-    #return np.array([[qq1, qg1],
-    #                 [gq1, gg1]])[np.newaxis,...]*np.ones_like(p)
 
 """
 ***********************Evolution operator of GPD in the moment space*******
@@ -540,7 +575,7 @@ def outer_subtract(arr1,arr2):
 def rmudep(nf, lamj, lamk, mu):
     """Scale dependent part of NLO evolution matrix 
     
-    | Ref to the eq. (126) in hep-ph/0703179 
+    | Ref to the eq. (126) in https://arxiv.org/abs/hep-ph/0703179
     | Here the expression is exactly the same as the ref, UNLIKE the Gepard with has an extra beta_0 to be canceled with amuindep
 
     Args:
@@ -550,7 +585,7 @@ def rmudep(nf, lamj, lamk, mu):
         mu (float): final scale to be evolved from inital scale Init_Scale_Q
 
     Returns:
-        R_ij^ab(Q}|n=1) according to eq. (126) in hep-ph/0703179 
+        R_ij^ab(Q}|n=1) according to eq. (126) in https://arxiv.org/abs/hep-ph/0703179
     """
 
     lamdif=outer_subtract(lamj,lamk)
@@ -568,7 +603,7 @@ def rmudep(nf, lamj, lamk, mu):
 def amuindep(j: complex, nf: int, p: int, prty: int = 1):
     """Result the P [gamma] P part of the diagonal evolution operator A.
     
-    | Ref to eq. (124) in hep-ph/0703179 (the A operator are the same in both CSbar and MSbar scheme)
+    | Ref to eq. (124) in https://arxiv.org/abs/hep-ph/0703179 (the A operator are the same in both CSbar and MSbar scheme)
     | Here the expression is exactly the same as the ref, UNLIKE the Gepard with has an extra 1/beta_0 to be canceled with rmudep
     
     Args:
@@ -602,7 +637,7 @@ def amuindepNS(j: complex, nf: int, p: int, prty: int = 1):
 def bmudep(mu, zn, zk, nf: int, p: int, NS: bool = False, prty: int = 1):
     """Return the off-diagonal part of the evolution operator B^{jk} combined with (alpha(Q)/alpha(mu_0)) ^ (-b/beta0)
     
-    Check eq. (140) in hep-ph/0703179 for the expression of B^{jk}, and eq. (137) for the following factor
+    Check eq. (140) in https://arxiv.org/abs/hep-ph/0703179 for the expression of B^{jk}, and eq. (137) for the following factor
 
     Args:
         mu (float): scale evolved to from the initial scale Init_Scale_Q
@@ -714,6 +749,33 @@ def evolop(j: complex, nf: int, p: int, mu: float):
 
     return [evola0NS, evola0] # (N) and (N, 2, 2)
 
+
+def Charge_Factor(particle:int):
+    
+    """The charge factors. For mesons it also multiplies with decay widths (f_m  is for meson m). Output is in evolution basis
+    
+    Args: 
+        particle (integer): 
+    
+    Returns:
+        Charge_Factor (array): The charge factors for each process, multiplied by decay constant of the m meson for DVMP, f_m.  shape(5,)
+        
+     | particle=0 refers to DVCS
+     | particle=1 refers to rho meson 
+     | particle=3  refers to j/psi meson 
+    """ 
+    if (particle==0):
+        return [0, -1/6, 0, 5/18, 5/18]
+        
+    if (particle==1):
+        return f_rho *[0,1,0,1/np.sqrt(2),1/np.sqrt(2)]
+    
+    if (particle==3):
+        return f_jpsi *[0,0,0,2/3,2/3]
+
+
+
+
 # Need Wilson coefficients for evolution. Allows numerical pre-calculation of non-diagonal piece using Mellin-Barnes integral
 
 def WilsonCoef(j: complex) -> complex:
@@ -727,6 +789,12 @@ def WilsonCoef(j: complex) -> complex:
     """
     return 2 ** (1+j) * gamma(5/2+j) / (gamma(3/2) * gamma(3+j))
 
+
+
+
+
+
+
 def WilsonCoef_DVCS_LO(j: complex) -> complex:
     """LO Wilson coefficient of DVCS in the evolution basis (qVal, q_du_plus, q_du_minus, qSigma, g)
         
@@ -739,13 +807,15 @@ def WilsonCoef_DVCS_LO(j: complex) -> complex:
     | Charge factor are calculated such that the sum in the evolution basis are identical to the sum in the flavor basis
     | Gluon charge factor is the same as the singlet one, but the LO Wilson coefficient is zero in DVCS.
     """
-    charge_fact = np.array([0, -1/6, 0, 5/18, 5/18])
+    
     CWT = np.array([WilsonCoef(j), \
                     WilsonCoef(j), \
                     WilsonCoef(j), \
                     WilsonCoef(j),\
                     0 * j])
-    return np.einsum('j, j...->j...', charge_fact, CWT)
+    return np.einsum('j, j...->j...', Charge_Factor(0), CWT)
+
+
 
 def WilsonCoef_DVMP_LO(j: complex, nf: int, meson: int) -> complex:
     """LO Wilson coefficient of DVMP in the evolution basis (qVal, q_du_plus, q_du_minus, qSigma, g)
@@ -768,13 +838,27 @@ def WilsonCoef_DVMP_LO(j: complex, nf: int, meson: int) -> complex:
                        WilsonCoef(j), \
                        1/ nf * WilsonCoef(j),\
                        2 /CF/ (j+3) * WilsonCoef(j)])
-                             
-    if(meson == 3):
-        return np.einsum('j, j...->j...', [0,0,0,0,2/3], CWT) * f_jpsi * CF/NC
-
-def WilsonCoef_DVMP_NLO(j: complex, k: complex, nf: int, Q: float, muf: float, meson: int):
-    """NLO Wilson coefficient of DVMP in the evolution basis (qVal, q_du_plus, q_du_minus, qSigma, g)
     
+    '''
+    if the meson is jpsi we are setting all the quark parts to zero
+    '''
+                      
+    if(meson== 3):
+    
+     CWT = 3* np.array([0*j, \
+                        0*j, \
+                        0*j, \
+                        0*j, \
+                       2 /CF/ (j+3) * WilsonCoef(j)])
+
+    return np.einsum('j, j...->j...', Charge_Factor(meson), CWT)*(CF/NC) 
+
+  
+
+
+def WilsonCoef_DVMP_NLO(j: complex, k: complex, nf: int, Q: float, muf: float, meson: int, p:int):
+    """NLO Wilson coefficient of DVMP in the evolution basis (qVal, q_du_plus, q_du_minus, qSigma, g)
+  
     | currently setting factorization scale and renormalization scale to the same as muf
     | Only singlet at this point.
 
@@ -785,6 +869,7 @@ def WilsonCoef_DVMP_NLO(j: complex, k: complex, nf: int, Q: float, muf: float, m
         Q (float): the photon virtuality 
         mufact (float): the factorization scale mu_fact
         meson (int): 1 for rho, 2 for phi, and 3 for Jpsi
+        p(int):parity 1 for vector -1 for axial. 
         
     Returns:
         Wilson coefficient of shape (N,5) in the evolution basis (qVal, q_du_plus, q_du_minus, qSigma, g)
@@ -792,21 +877,23 @@ def WilsonCoef_DVMP_NLO(j: complex, k: complex, nf: int, Q: float, muf: float, m
     | Charge factor are calculated such that the sum in the evolution basis are identical to the sum in the flavor basis
     | Gluon charge factor is the same as the singlet one.
     | The meson decay constant, CF/NC, and eq are included in the prefactor of Wilson coefficient. 
+    |Parity is p. GPD charge parity is called prty.  DA charge parity is pytk (which is set to 1 because we are not using any psudoscalar meson data)
     """
     
     mufact2 = muf ** 2
     mures2 =  muf ** 2
     muphi2 =  muf ** 2
 
-   # CQCF = (-np.log(Q**2/mufact) + S1(j+1) + S1(k + 1) - 1 - 1/2/(j+1)/(j+2) - 1/2/(k+1)/(k+2))*(4*S1(j+1) - 3 - 2/(j+1)/(j+2))/2 + (-np.log(Q**2/muphi) + S1(k+1) + S1(j + 1) - 1 - 1/2/(k+1)/(k+2) - 1/2/(j+1)/(j+2))*(4*S1(k+1) - 3 - 2/(k+1)/(k+2))/2 - 23/3 + (3*(j+1)*(j+2)+1)/2/(j+1)**2/(j+2)**2 + (3*(k+1)*(k+2)+1)/2/(k+1)**2/(k+2)**2
-    
-   # CQCG = (2*S1(j+2) - 1/(j+1)/(j+2))*(1 + (-1)**k - (-1)**k * (k+1)*(k+2)*Delta_S2((k+1)/2)/2) + (2*S1(k+2) - 1/(k+1)/(k+2))*(1 + (-1) - (-1) * (j+1)*(j+2)*Delta_S2((j+1)/2)/2) + np.pi**2 / 3 - 7/3 + ((-1)**k * Script_S3(k+1) + (-1)**k * Delta_S2((k+1)/2) / 2 / (k+1) / (k+2) - S3(k+1) + zeta(3) - ((k+1)*(k+2)-1)/2/(k+1)**2/(k+2)**2)*2*(k+1)*(k+2) + ((-1) * Script_S3(j+1) + (-1) * Delta_S2((j+1)/2) / 2 / (j+1) / (j+2) - S3(j+1) + zeta(3) - ((j+1)*(j+2)-1)/2/(j+1)**2/(j+2)**2)*2*(j+1)*(j+2) - 2*(1+(-1)**k)*((k+1)*(k+2)+1)/(k+1)**2/(k+2)**2 - 2*(1+(-1))*((j+1)*(j+2)+1)/(j+1)**2/(j+2)**2 - 2*(-1)**(1+k)/(j+1)/(j+2)/(k+1)/(k+2) + 2*(j-k)*(j+k+3)*(S3(j+1) - zeta(3) + (-1)**k *(k+1)*DDelta_S2((j+1)/2,(k+1)/2)/2 - lsum(j,k)) + 2*(k-j)*(j+k+3)*(-1) * (Script_S3(j+1) - S1(k+1)*Delta_S2((j+1)/2)/2 - lsumrev(j,k)) + ((-1)**k *(k+1)*(k+2)/2)*sum((-1)**b * (2*k + 3*b) * (4 + 3*b*(3-b) + 2*k*b + 2*(k+1)**2)*DDelta_S2((j+1)/2,(k+b)/2)/(3 + (-1)**b)/(2*k + 3) for b in range(3)) - ((-1) * (k+1)*(k+2) / 2)*sum((2*k + 3*b) * (4 + 3*b*(3-b) + 2*k*b + 2*(k+1)**2)*DDelta_S2((j+1)/2,(k+b)/2)/(3 + (-1)**b)/(2*k + 3) for b in range(3)) + ((-1)**k *((j+1)*(j+2) - 1)*((k+1)*(k+2)*Delta_S2((k+1)/2) - 2)/2/(j+1)/(j+2)) - 2*(-1)**k / (j+1) / (j+2) / (k+1) / (k+2) - ((k+1)**2 + 2 +(j+1)*(j+2)/(k+1)/(k+2))*((-1) * Delta_S2((j+1)/2)/2) - ((-1) * (k+1) * Delta_S2((k+1)/2) / 2) + ((-1))/(k+1)/(k+2)
-    
-   # CQBeta = np.log(Q**2/mures)/4 - S1(j+1) - S1(k+1) -5/6 + 1/2/(j+1)/(j+2) + 1/2/(k+1)/(k+2)
    
-    ptyk = 1
-    sgntr = 1
+    ptyk=1 # Charge parity of DA because we are using only vector meson data
+    
+    
+ 
+    
         
+ 
+    
+ 
     MCQ1CF = -np.log(Q**2 / mufact2)-23/3+(0.5*(1.+3.*(1.+j)*(2.+j)))/((
              1 + j)**2*(2.+j)**2)+(0.5*(1.+3.*(1.+k)*(2.+k)))/((1.+k)**2
              *(2.+k)**2)+0.5*(-3.-2./((1.+j)*(2.+j))+4.*S1(1.+j))*((-
@@ -827,6 +914,8 @@ def WilsonCoef_DVMP_NLO(j: complex, k: complex, nf: int, Q: float, muf: float, m
            1.+j))+S2(-0.5+0.5*LI)-S2(0.5*LI)))/((0.5*(1.+j)-0.5*LI)*(2.+j+LI))
         SUMB += SUMANDB
         SUMA += (-1)**LI * SUMANDB
+        
+       
 
     DELc1aGJK = (-2.*ptyk)/((1.+j)*(2.+j)*(1.+k)*(2.+k))+(0.5
        *(-1.+(1.+j)*(2.+j))*(-2.+(1.+k)*(2.+k)*(S2(0.5*(1.+k)) -
@@ -844,6 +933,9 @@ def WilsonCoef_DVMP_NLO(j: complex, k: complex, nf: int, Q: float, muf: float, m
        (0.5*(1.+k))+S2(-0.5+0.5*(1.+k)))*ptyk)/((0.5*(1.+j)+0.5
        *(-1.-k))*(3.+j+k)))
 
+    
+  
+                                                 
     DELc1bGKJ = 1/((1.+k)*(2.+k))+0.5*(-2.-(1.+k)**2-((1.+j)*(2
        +j))/((1.+k)*(2.+k)))*(S2(0.5*(1.+j))-S2(-0.5+0.5*(1. +
        j)))-0.5*(1.+k)*(S2(0.5*(1.+k))-S2(-0.5+0.5*(1.+k)))-(0.125
@@ -858,22 +950,39 @@ def WilsonCoef_DVMP_NLO(j: complex, k: complex, nf: int, Q: float, muf: float, m
        +j+k)*(-SUMB-0.5*S1(1.+k)*(S2(0.5*(1.+j))-S2(-0.5+0.5
        *(1.+j)))+SB3(1+j))
 
-    MCQ1CG = 0.9565348003631189+DELc1aGJK-(2.*(1.+(1.+j)*(2.+j)
-       )*(1.-sgntr))/((1.+j)**2*(2.+j)**2)-DELc1bGKJ*sgntr+(-(1 /
-       ((1.+k)*(2.+k)))+2.*S1(1.+k))*(1.-sgntr+0.5*(1.+j)*(2.+j
-       )*sgntr*(-S2(0.5*j)+S2(0.5*(1.+j)))) + (2.*sgntr*ptyk)/(
+    def MCQ1CG(prty:int):
+        """Nonsinglet moment 
+        
+        Args:
+            prty(integer): shape() charge parity or signature of the moment
+            
+        Returns: One of the non singlet moments
+        """
+        return 0.9565348003631189+DELc1aGJK-(2.*(1.+(1.+j)*(2.+j)
+       )*(1.-prty))/((1.+j)**2*(2.+j)**2)-DELc1bGKJ*prty+(-(1 /
+       ((1.+k)*(2.+k)))+2.*S1(1.+k))*(1.-prty+0.5*(1.+j)*(2.+j
+       )*prty*(-S2(0.5*j)+S2(0.5*(1.+j)))) + (2.*prty*ptyk)/(
                (1.+j)*(2.+j)*(1.+k)*(2.+k))-(
                2.*(1.+(1.+k)*(2.+k))*(1.+
        ptyk))/((1.+k)**2*(2.+k)**2)+(-(1/((1.+j)*(2.+j))) +
        2*S1(1.+j))*(1.+ptyk-0.5*(1.+k)*(2.+k)*(-S2(0.5*k) +
        S2(0.5*(1.+k)))*ptyk)+2.*(1.+j)*(2.+j)*((-0.5*(-1.+(1.+j)*(
-       2.+j)))/((1.+j)**2*(2.+j)**2)+zeta(3)-(0.5*sgntr*(-S2(0.5 *
-       j)+S2(0.5*(1.+j))))/((1.+j)*(2.+j))-S3(1.+j)-sgntr*SB3(
+       2.+j)))/((1.+j)**2*(2.+j)**2)+zeta(3)-(0.5*prty*(-S2(0.5 *
+       j)+S2(0.5*(1.+j))))/((1.+j)*(2.+j))-S3(1.+j)-prty*SB3(
        1+j))+2.*(1.+k)*(2.+k)*((-0.5*(-1.+(1.+k)*(2.+k)))/((1. +
        k)**2*(2.+k)**2)+zeta(3)-S3(1.+k)+(0.5*(-S2(0.5*k) +
            S2(0.5*(1.+k)))*ptyk)/((1.+k)*(2.+k))+ptyk*SB3(1+k))
 
-    CQNS = AlphaS(nloop_alphaS, nf, Init_Scale_Q) / 2 / np.pi * (CF * MCQ1CF + (CF - NC/2) * MCQ1CG + beta0(nf) * MCQ1BET0)
+    def CQNS(prty:int):
+        """The nonsinglet amplitude
+        
+        Args:
+            prty(integer): shape() charge parity or signature of the moment
+            
+        Returns: One of the non singlet moments
+        """
+       
+        return AlphaS(nloop_alphaS, nf, Init_Scale_Q) / 2 / np.pi * (CF * MCQ1CF + (CF - NC/2) * MCQ1CG(prty) + beta0(nf) * MCQ1BET0)
     
     CQPS = AlphaS(nloop_alphaS, nf, Init_Scale_Q) / 2 / np.pi * ((-np.log(Q**2/mufact2) - 1 + 2*S1(j+1) + 2*S1(k+1) - 1)*(-2*(4 + 3*j + j**2)/j/(j+1)/(j+2)/(j+3)) - (1/2 + 1/(j+1)/(j+2) + 1/(k+1)/(k+2))*2/(j+1)/(j+2) + k*(k+1)*(k+2)*(k+3)*(deldelS2((j+1)/2,k/2) - deldelS2((j+1)/2,(k+2)/2))/2/(2*k+3) )
     
@@ -881,24 +990,30 @@ def WilsonCoef_DVMP_NLO(j: complex, k: complex, nf: int, Q: float, muf: float, m
     
     CGCF = AlphaS(nloop_alphaS, nf, Init_Scale_Q) / 2 / np.pi * ((-np.log(Q**2 / muphi2) + S1(j+1) + S1(k+1) - 3/4 - 1/2/(k+1)/(k+2) - 1/(j+1)/(j+2))*(4*S1(k+1) - 3 - 2/(k+1)/(k+2))/2 + (-np.log(Q**2 / mufact2) + 1 + 3*S1(j+1) - 0.5 + (2*S1(j+1)-1)/(k+1)/(k+2) -1/(j+1)/(j+2))*(-(4+2*(j+1)*(j+2))/(j+1)/(j+2)/(j+3))*(j+3)/4 - (35 - ((k+1)*(k+2) + 2)*delS2((k+1)/2) + 4/(k+1)**2/(k+2)**2)/8 + (((k+1)*(k+2) + 2)*S1(j+1)/(k+1)/(k+2) +1)/(j+1)/(j+2) + (delS2((j+1)/2)/2/(k+1)/(k+2) - ((k-1)*k*deldelS2((j+1)/2,k/2) - (k+3)*(k+4)*deldelS2((j+1)/2,(k+2)/2))/2/(2*k+3))*((k+1)*(k+2)*((k+1)*(k+2) +2)/4) - ((k+1)*(k+2) + 2)/2/(j+1)/(j+2)/(k+1)/(k+2))
     
-    # Without sea quarks
-    #return np.array([0*j, 0*j, 0*j, 0*j, 3 * 2 * 2 ** (1+j) * gamma(5/2+j) / (j + 3) / (gamma(3/2) * gamma(3+j)) * (NC*CGNC + CF*CGCF)],dtype=complex) #+ beta0(nf)*np.log(mufacf/mures)
-    
-    # With sea quarks A factor of 3 coming from the asymptotic DA. The factors for S/G can be found in eq. (22b) of 2310.13837
-    CWT= 3 * np.array([0*j, 0*j, 0*j, \
-                       (0 * CQNS/nf + CQPS) * WilsonCoef(j), \
-                       2 / CF / (j + 3) *  WilsonCoef(j) * (NC*CGNC + CF*CGCF + beta0(nf)*np.log(mufact2/mures2)/2)],dtype=complex) #+ beta0(nf)*np.log(mufact/mures)
-    '''
-    if(meson == 1):
-        return np.einsum('j, j...->j...', TFF_rho_trans, CWT)                
-    if(meson== 2):
-        return np.einsum('j, j...->j...', TFF_phi_trans, CWT)                
-    if(meson == 3):
-        return np.einsum('j, j...->j...', TFF_jpsi_trans, CWT)
-    '''
-    # Only sea quark implemented, not apply to rho production.
-    if(meson == 3):
-        return CWT * f_jpsi  * CF/NC * (2/3)
+   
+  
+
+    CWT= np.array([CQNS(-1)*(3 * 2 ** (1+j) * gamma(5/2+j) / (gamma(3/2) * gamma(3+j))), 
+                   CQNS(+1)*(3 * 2 ** (1+j) * gamma(5/2+j) / (gamma(3/2) * gamma(3+j))),  
+                   CQNS(-1)*(3 * 2 ** (1+j) * gamma(5/2+j) / (gamma(3/2) * gamma(3+j))), \
+                   CQNS(+1)*(3 * 2 ** (1+j) * gamma(5/2+j) / (gamma(3/2) * gamma(3+j)))/nf + CQPS * (3 * 2 ** (1+j) * gamma(5/2+j) / (gamma(3/2) * gamma(3+j))), \
+                   2/ CF / (j + 3) * 3 * 2 ** (1+j) * gamma(5/2+j) / (gamma(3/2) * gamma(3+j)) * (NC*CGNC + CF*CGCF + beta0(nf)*np.log(mufact2/mures2)/2)],dtype=complex) #+ beta0(nf)*np.log(mufact/mures)
+
+    if (meson==3):
+        
+        """
+        |if the meson is jpsi we are setting all the quark parts to zero except the pure singlet
+        """ 
+
+        CWT= np.array([0*j, 
+                       0*j,  
+                       0*j, \
+                  CQPS * (3 * 2 ** (1+j) * gamma(5/2+j) / (gamma(3/2) * gamma(3+j))), \
+                2/ CF / (j + 3) * 3 * 2 ** (1+j) * gamma(5/2+j) / (gamma(3/2) * gamma(3+j)) * (NC*CGNC + CF*CGCF + beta0(nf)*np.log(mufact2/mures2)/2)],dtype=complex) #+ beta0(nf)*np.log(mufact/mures)
+
+    return  np.einsum('j, j...->j...', Charge_Factor(meson), CWT)*(CF/NC)    
+      
+   
 
 def np_cache(function):
     @functools.cache
