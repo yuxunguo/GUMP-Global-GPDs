@@ -617,22 +617,94 @@ def amuindep(j: complex, nf: int, p: int, prty: int = 1):
     """
     lam, pr = projectors(j+1, nf, p, prty)
     
-    gam0 = singlet_LO(j+1,nf,p)
-    gam1 = singlet_NLO(j+1,nf,p)
+    gam0 = singlet_LO(j+1,nf,p, prty)
+    gam1 = singlet_NLO(j+1,nf,p, prty)
     a1 = - gam1 + 0.5 * beta1(nf) * gam0 / beta0(nf)
     A = np.einsum('...aic,...cd,...bdj->...abij', pr, a1, pr)
    
     return A
 
-'''
 def amuindepNS(j: complex, nf: int, p: int, prty: int = 1):
+    """Result the [gamma] part of the diagonal evolution operator A.
     
-    gam0NS = non_singlet_LO(j+1,nf,p)
-    gam1NS = non_singlet_NLO(j+1,nf,p)
+    Ref to eq. (124) in https://arxiv.org/pdf/hep-ph/07031799 (the A operator are the same in both CSbar and MSbar scheme)
+    Args:
+        j (complex): _description_
+        nf (int): _description_
+        p (int): _description_
+        prty (int, optional): _description_. Defaults to 1.
+    Returns:
+        the [gamma]  part of the diagonal evolution operator A.
+    """
+    gam0NS = non_singlet_LO(j+1,nf,p, prty)
+    gam1NS = non_singlet_NLO(j+1,nf, prty)
     a1 = - gam1NS + 0.5 * beta1(nf) * gam0NS / beta0(nf) 
     return a1
-#print(amuindepNS(np.array([0.1,0.2]),2,1,1))
-'''
+
+def rmudepNS(nf, lamj, lamk, mu):
+    """Scale dependent part of NLO evolution matrix 
+    
+    Ref to eq. (124) in https://arxiv.org/pdf/hep-ph/07031799 (the A operator are the same in both CSbar and MSbar scheme)
+    
+    Args:
+        nf (int): number of effective fermions
+        lamj (np.array): shape (N,), each row is 2-by-2 matrix of anomalous dimension in the (S, G) basis
+        lamk (np.array): shape (N,), second row anomalous dimension for k
+        mu (float): final scale to be evolved from inital scale Init_Scale_Q
+    Returns:
+        R_ij^ab(Q}|n=1) according to eq. (126) in hep-ph/0703179 
+    """
+
+    lamdif=lamj-lamk
+
+    b0 = beta0(nf) # scalar
+    b11 = b0 * np.ones_like(lamdif) + lamdif # shape (N)
+    #print(b11)
+    R = AlphaS(nloop_alphaS, nf, mu)/AlphaS(nloop_alphaS, nf, Init_Scale_Q) # shape N
+    R = np.array(R)
+    #print(R)
+    Rpow = (1/R)**(b11/b0) # shape (N)
+    #print((np.ones_like(Rpow) - Rpow) / b11)
+    return (np.ones_like(Rpow) - Rpow) / b11 # shape (N,)
+
+def bmudepNS(mu, zn, zk, nf: int, p: int, prty: int = 1):
+    """Return the off-diagonal part of the evolution operator B^{jk} combined with (alpha(Q)/alpha(mu_0)) ^ (-b/beta0)
+    
+    Check eq. (140) in hep-ph/0703179 for the expression of B^{jk}, and eq. (137) for the following factor
+    Args:
+        mu (float): scale evolved to from the initial scale Init_Scale_Q
+        zn (np.array): shape (N,) moment j
+        zk (np.array): shape (N,) moment k that differs from j for off-diagonal term
+        nf (int): number of effective fermions
+        p (int): parity of the GPDs 
+        prty (int, optional): The party of the parton distributions +1 for + basis and -1 for - and valence basis.
+    Returns:
+       B^{jk}
+    """
+    R = AlphaS(nloop_alphaS, nf, mu)/AlphaS(nloop_alphaS, nf, Init_Scale_Q) # shape N
+    R = np.array(R)
+    b0 = beta0(nf)
+
+    AAA = (S1((zn+zk+2)/2) -
+           S1((zn-zk-2)/2) +
+           2*S1(zn-zk-1) -
+           S1(zn+1))
+    god = 2 * CF * (
+            2*AAA + (AAA - S1(zn+1))*(zn-zk)*(
+                zn+zk + 3)/(zk+1)/(zk+2))
+    dm = np.ones_like(zn)
+
+    fac = 2**(zk-zn)*gamma(1+zn)/gamma(zn+3/2)*gamma(zk+3/2)/gamma(1+zk)*(2*zk+3)/(zn-zk)/(zn+zk+3) 
+
+    lamn = non_singlet_LO(zn + 1, nf, p, prty)
+    lamk = non_singlet_LO(zk + 1, nf, p, prty)
+    lamdif = lamn-lamk 
+
+    er1 = rmudepNS(nf, lamn, lamk, mu)
+
+    Bjk = - fac * er1 * lamdif* ((b0-lamk)*dm + god) * R**(-lamk/b0)
+
+    return Bjk
 
 def bmudep(mu, zn, zk, nf: int, p: int, NS: bool = False, prty: int = 1):
     """Return the off-diagonal part of the evolution operator B^{jk} combined with (alpha(Q)/alpha(mu_0)) ^ (-b/beta0)
@@ -791,10 +863,6 @@ def WilsonCoef(j: complex) -> complex:
 
 
 
-
-
-
-
 def WilsonCoef_DVCS_LO(j: complex) -> complex:
     """LO Wilson coefficient of DVCS in the evolution basis (qVal, q_du_plus, q_du_minus, qSigma, g)
         
@@ -802,7 +870,7 @@ def WilsonCoef_DVCS_LO(j: complex) -> complex:
         j (complex array): shape(N,) conformal spin j
         
     Returns:
-        Wilson coefficient of shape (N,5) in the evolution basis (qVal, q_du_plus, q_du_minus, qSigma, g)
+        Wilson coefficient of shape (5,N) in the evolution basis (qVal, q_du_plus, q_du_minus, qSigma, g)
         
     | Charge factor are calculated such that the sum in the evolution basis are identical to the sum in the flavor basis
     | Gluon charge factor is the same as the singlet one, but the LO Wilson coefficient is zero in DVCS.
@@ -815,7 +883,42 @@ def WilsonCoef_DVCS_LO(j: complex) -> complex:
                     0 * j])
     return np.einsum('j, j...->j...', Charge_Factor(0), CWT)
 
+def WilsonCoef_DVCS_NLO(j: complex, nf: int, Q: float, mu: float, p:int) -> complex:
+    """NLO Wilson coefficient of DVCS in the evolution basis (qVal, q_du_plus, q_du_minus, qSigma, g)
+    Check eqs. (127)-(130) of https://arxiv.org/pdf/hep-ph/0703179 
+    
+    Args:
+        j (complex array): shape(N,) conformal spin j
+        nf (int): number of effective fermions
+        Q (float): the photon virtuality 
+        mu (float): the factorization scale mu_fact
+        p (int): 1 for vector-like GPD (Ht, Et), -1 for axial-vector-like GPDs (Ht, Et), scalars
+        
+    Returns:
+        Wilson coefficient of shape (5,N) in the evolution basis (qVal, q_du_plus, q_du_minus, qSigma, g)
+        
+    | Charge factor are calculated such that the sum in the evolution basis are identical to the sum in the flavor basis
+    | Gluon charge factor is the same as the singlet one, but the LO Wilson coefficient is zero in DVCS.
+    """
+    gam0 = singlet_LO(j+1, nf, p)
+    qq0 = gam0[...,0,0]
+    qg0 = gam0[...,0,1]
 
+    if(p == 1):
+        CWT = np.array([WilsonCoef(j) * (CF * (2 * (S1(1+j)) ** 2 - 9/2 + (5 - 4* S1(j+1))/2/(j+1)/(j+2) + 1/(j+1)**2/(j+2)**2)+ np.log(mu**2/Q**2)/2*qq0), \
+                        WilsonCoef(j) * (CF * (2 * (S1(1+j)) ** 2 - 9/2 + (5 - 4* S1(j+1))/2/(j+1)/(j+2) + 1/(j+1)**2/(j+2)**2)+ np.log(mu**2/Q**2)/2*qq0), \
+                        WilsonCoef(j) * (CF * (2 * (S1(1+j)) ** 2 - 9/2 + (5 - 4* S1(j+1))/2/(j+1)/(j+2) + 1/(j+1)**2/(j+2)**2)+ np.log(mu**2/Q**2)/2*qq0), \
+                        WilsonCoef(j) * (CF * (2 * (S1(1+j)) ** 2 - 9/2 + (5 - 4* S1(j+1))/2/(j+1)/(j+2) + 1/(j+1)**2/(j+2)**2)+ np.log(mu**2/Q**2)/2*qq0),\
+                        WilsonCoef(j) * (-nf *((4 + 3*j + j**2) * (S1(j)+S1(j+2)) + 2+3*j+j**2)/(j+1)/(j+2)/(j+3) + np.log(mu**2/Q**2)/2*qg0)])
+
+    else:
+        CWT = np.array([WilsonCoef(j) * (CF * (2 * (S1(1+j)) ** 2 - 9/2 + (3 - 4* S1(j+1))/2/(j+1)/(j+2) + 1/(j+1)**2/(j+2)**2)+ np.log(mu**2/Q**2)/2*qq0), \
+                        WilsonCoef(j) * (CF * (2 * (S1(1+j)) ** 2 - 9/2 + (3 - 4* S1(j+1))/2/(j+1)/(j+2) + 1/(j+1)**2/(j+2)**2)+ np.log(mu**2/Q**2)/2*qq0), \
+                        WilsonCoef(j) * (CF * (2 * (S1(1+j)) ** 2 - 9/2 + (3 - 4* S1(j+1))/2/(j+1)/(j+2) + 1/(j+1)**2/(j+2)**2)+ np.log(mu**2/Q**2)/2*qq0), \
+                        WilsonCoef(j) * (CF * (2 * (S1(1+j)) ** 2 - 9/2 + (3 - 4* S1(j+1))/2/(j+1)/(j+2) + 1/(j+1)**2/(j+2)**2)+ np.log(mu**2/Q**2)/2*qq0),\
+                        WilsonCoef(j) * (-nf * j * (1 + S1(j) + S1(j+2))/(j+1)/(j+2) + np.log(mu**2/Q**2)/2*qg0)])
+
+    return np.einsum('j, j...->j...', Charge_Factor(0), CWT)
 
 def WilsonCoef_DVMP_LO(j: complex, nf: int, meson: int) -> complex:
     """LO Wilson coefficient of DVMP in the evolution basis (qVal, q_du_plus, q_du_minus, qSigma, g)
@@ -826,7 +929,7 @@ def WilsonCoef_DVMP_LO(j: complex, nf: int, meson: int) -> complex:
         meson (int): 1 for rho, 2 for phi, and 3 for Jpsi
         
     Returns:
-        Wilson coefficient of shape (N,5) in the evolution basis (qVal, q_du_plus, q_du_minus, qSigma, g)
+        Wilson coefficient of shape (5,N) in the evolution basis (qVal, q_du_plus, q_du_minus, qSigma, g)
         
     | Charge factor are calculated such that the sum in the evolution basis are identical to the sum in the flavor basis
     | Gluon charge factor is the same as the singlet one.
@@ -872,7 +975,7 @@ def WilsonCoef_DVMP_NLO(j: complex, k: complex, nf: int, Q: float, muf: float, m
         p(int):parity 1 for vector -1 for axial. 
         
     Returns:
-        Wilson coefficient of shape (N,5) in the evolution basis (qVal, q_du_plus, q_du_minus, qSigma, g)
+        Wilson coefficient of shape (5,N) in the evolution basis (qVal, q_du_plus, q_du_minus, qSigma, g)
     
     | Charge factor are calculated such that the sum in the evolution basis are identical to the sum in the flavor basis
     | Gluon charge factor is the same as the singlet one.
@@ -1247,10 +1350,17 @@ def WCoef_Evo_NLO(j: np.array, nf: int, p: int, Q: float, meson: int, muf: float
     evola1_diag_ab = np.einsum('kab,kabij->kabij', rmu1, pproj)
     evola1_diag = np.einsum('...abij,...b,...->...ij', evola1_diag_ab, Rfact,Alphafact)
 
-    # NLO NS evolutioon set to zero
-    CWNS_ev1 = np.zeros_like(CWNS_ev0)
+    # NS diagonal NLO evolution operator, note in evolution basis (qVal, q_du_plus, q_du_minus) has parity (-1,1,-1)
+    amuindepNS_stack = np.stack((amuindepNS(j,nf,p,-1),\
+                                 amuindepNS(j,nf,p,1), \
+                                 amuindepNS(j,nf,p,-1)), axis=-1)
+
+    evola1NS_diag_plus = np.einsum('...,...i->...i',Alphafact * evola0NS * rmudepNS(nf, gam0NS, gam0NS, muf),amuindepNS_stack ) # shape (N,) and (N,3) to (N,3)
+
+    # NLO NS diagonal evolutioon 
+    CWNS_ev1_diag = np.einsum('...i,i...->...i',evola1NS_diag_plus,CWNS) # shape (N,3) and (3,N) to (N,3)
     # S/G diagonal NLO evolution operator
-    CWSG_ev1_diag = np.einsum('...ij,i...->...ij',evola1_diag,CWSG)
+    CWSG_ev1_diag = np.einsum('...ij,i...->...ij',evola1_diag,CWSG) # shape (N,2,2) and (2,N) to (N,2,2)
         
     # Following are the second integral resumming the off diagonal pieces, note that (j,k) meshgrid is used for vectorized j and k input. Check the paper for expression
     reK = -0.8
@@ -1273,13 +1383,37 @@ def WCoef_Evo_NLO(j: np.array, nf: int, p: int, Q: float, meson: int, muf: float
 
         return out
     
-    intd_non_diag_ev1_vec=fixed_quadvec(lambda imK:non_diag_integrand_mesh(reK+1j*imK)+non_diag_integrand_mesh(reK-1j*imK),0,Max_imK,300)
-    
     # Off-diagonal piece for the NS evolution
-    CWSG_ev1_non_diag = intd_non_diag_ev1_vec     
+    CWSG_ev1_non_diag = fixed_quadvec(lambda imK:non_diag_integrand_mesh(reK+1j*imK)+non_diag_integrand_mesh(reK-1j*imK),0,Max_imK,300)
+    
     # Combine the diagonal and off-diagonal pieces
     CWSG_ev1 = CWSG_ev1_diag + CWSG_ev1_non_diag
-     
+    
+    reK = -0.8
+    Max_imK = 150
+
+    def non_diag_integrand_mesh_NS(k):
+
+        jmesh, kmesh= np.meshgrid(j,k)        
+        meshshape=jmesh.shape
+
+        jmesh=jmesh.reshape(-1)
+        kmesh=kmesh.reshape(-1)
+
+        CWk = WilsonCoef_DVMP_LO(jmesh+kmesh+1, nf, meson)[:3]        
+        # prty of NS are not the same but Bjk only concern leading order anomalous dimension there for we take prty=1
+        BjkNS = np.array(bmudepNS(muf, np.array(jmesh+kmesh+1,dtype=complex), np.array(jmesh,dtype=complex), nf,p))*Alphafact
+        out = np.einsum('...i,...->...i',np.einsum('...,i...->...i',BjkNS,CWk), 1/4*np.tan(np.pi * kmesh / 2))  #first shape (N,) and (3,N) to (N,3), then (N,3) and (N,) to (N,3)
+
+        outorishape=out.shape
+        out=out.reshape(meshshape[0],meshshape[1],*outorishape[1:])
+
+        return out
+
+    CWNS_ev1_non_diag=fixed_quadvec(lambda imK:non_diag_integrand_mesh_NS(reK+1j*imK)+non_diag_integrand_mesh_NS(reK-1j*imK),0,Max_imK,300)
+
+    CWNS_ev1 = CWNS_ev1_diag + CWNS_ev1_non_diag
+    
     # NLO Wilson coefficient combined with leading-order evolved conformal moment
     CWilsonT_1_SG = WilsonCoef_DVMP_NLO(j,0,nf,Q, muf, meson)[-2:]     
     CWilsonT_1_SG_ev0 = np.einsum('i...,...ij->...ij',CWilsonT_1_SG,evola0)
