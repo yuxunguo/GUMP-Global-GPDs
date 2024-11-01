@@ -1,3 +1,0 @@
-Minimizer Intro
-================
-
