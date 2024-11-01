@@ -113,14 +113,6 @@ def AlphaS(nloop: int, nf: int, Q: float) -> float:
     raise ValueError('Only LO and NLO implemented!')
 
 
-
-
-
-
-
-
-
-
 """
 ***********************Anomalous dimensions of GPD in the moment space*****
 Refer to the adim.py at https://github.com/kkumer/gepard.
@@ -242,7 +234,6 @@ def deldelS2(j: Union[complex, np.ndarray], k: int) -> Union[complex, np.ndarray
     """
     return (delS2(j) - delS2(k)) / (4*(j-k)*(2*j+2*k+1))
 
-
 def MellinF2(n: Union[complex, np.ndarray]) -> Union[complex, np.ndarray]:
     """Return Mellin transform  i.e. x^(N-1) moment of Li2(x)/(1+x).
 
@@ -273,9 +264,7 @@ def SB3(j: Union[complex, np.ndarray]) -> Union[complex, np.ndarray]:
     return 0.5*S1(j)*(-S2(-0.5+0.5*j)+S2(0.5*j))+0.125*(-S3(
              - 0.5 + 0.5 * j) + S3(0.5 * j)) - 2 * (0.8224670334241131 * (
                  -S1(0.5 * (-1 + j)) + S1(0.5 * j)) - MellinF2(1 + j))
-                 
-                 
-                           
+
 def S1_tilde(n: Union[complex, np.ndarray], prty: int) -> Union[complex, np.ndarray]:
     """Eq. (39) of https://arxiv.org/abs/hep-ph/9810241 """
     return  prty * (dpsi((n+2)/2,1) - dpsi((n+1)/2,1))-log(2)   
@@ -285,11 +274,9 @@ def S2_tilde(n: Union[complex, np.ndarray], prty: int) -> Union[complex, np.ndar
     G = psi((n+1)/2) - psi(n/2)
     return -(5/8)*zeta(3) + prty*(S1(n)/n**2 - (zeta(2)/2)*G + MellinF2(n))
 
-
 def S3_tilde(n: Union[complex, np.ndarray], prty: int) -> Union[complex, np.ndarray]:
     """Eqs. (47) and (37) of https://arxiv.org/abs/hep-ph/9810241"""
     return prty*1/2* 1/2*(dpsi((n+2)/2,2) - dpsi((n+1)/2,2)) -3/4*zeta(3)
-
 
 def Sm2p1(n: Union[complex, np.ndarray], prty: int) -> Union[complex, np.ndarray]: 
     """Eq. (50) of https://arxiv.org/abs/hep-ph/9810241""" 
@@ -299,7 +286,7 @@ def Sp1m2(n: Union[complex, np.ndarray], prty: int) -> Union[complex, np.ndarray
     """Eq. (131) of https://arxiv.org/abs/hep-ph/9810241"""
     return S1(n)*S2_tilde(n)+S3_tilde(n,prty)-Sm2p1(n,prty)
 
-
+'''
 def lsum(m: Union[complex, np.ndarray], n: Union[complex, np.ndarray])-> Union[complex, np.ndarray]:
     
     return sum( (2*l+1)*(-1)**l * deldelS2((m+1)/2,l/2)/2 for l in range(1))
@@ -307,15 +294,7 @@ def lsum(m: Union[complex, np.ndarray], n: Union[complex, np.ndarray])-> Union[c
 def lsumrev(m: Union[complex, np.ndarray], n: Union[complex, np.ndarray])-> Union[complex, np.ndarray]:
     
     return sum((2*l+1)*deldelS2((m+1)/2,l/2)/2 for l in range(1))
-
-
-
-
-
-
-
-
-
+'''
 
 def non_singlet_LO(n:Union[complex, np.ndarray], nf: int, p: int, prty: int = 1) -> Union[complex, np.ndarray]:
     """Non-singlet LO anomalous dimension.
@@ -419,6 +398,9 @@ def non_singlet_NLO(n: complex, nf: int, prty: int) -> complex:
 def singlet_NLO(n: complex, nf: int, p: int, prty: int = 1) -> np.ndarray:
     """Singlet NLO anomalous dimensions matrix.
     
+    |The axial case for the two loop singlet anomalous dimensions is taken from  https://arxiv.org/abs/hep-ph/9506451 Eqs(3.75)-(3.77)
+    |The identity S_12(n)+S_21=S_1(n)S_2(n)+S_3  (from https://arxiv.org/abs/hep-ph/9810241 Eq.(129)) was used in axial part of gg1  
+    
     Args:
         n (complex): which moment (= Mellin moment for integer n)
         nf (int): number of active quark flavors
@@ -430,16 +412,13 @@ def singlet_NLO(n: complex, nf: int, p: int, prty: int = 1) -> np.ndarray:
         2x2 complex matrix
         ((QQ, QG),
         (GQ, GG))
-        
-     |The axial case for the two loop singlet anomalous dimensions is taken from  https://arxiv.org/abs/hep-ph/9506451 Eqs(3.75)-(3.77)
-     |The identity S_12(n)+S_21=S_1(n)S_2(n)+S_3  (from https://arxiv.org/abs/hep-ph/9810241 Eq.(129)) was used in axial part of gg1  
-        
+
     """
     
     epsilon = 0.00001 * ( n == 1)
     
     qq1 = np.where(p>0, non_singlet_NLO(n, nf, 1) - 4*CF*TF*nf*(5*n**5 +32*n**4 +49*n**3 +38*n**2 +28*n +8)/(n-1 +epsilon) * n**3 * (n+1)**3 * (n+2)**2
-                      ,non_singlet_NLO(n, nf, 1) - 4*CF*TF*nf*(5*n**5 +32*n**4 +49*n**3 +38*n**2 +28*n +8)/(n-1+ epsilon) * n**3 * (n+1)**3 * (n+2)**2)
+                      , non_singlet_NLO(n, nf, 1) - 4*CF*TF*nf*(5*n**5 +32*n**4 +49*n**3 +38*n**2 +28*n +8)/(n-1+ epsilon) * n**3 * (n+1)**3 * (n+2)**2)
     
     qg1 = np.where(p>0,(-8*CF*nf*TF*(-4*S1(n)/n**2+(4+8*n + 26*n**3 + 11*n**4 + 15*(n*n))/(n**3*(1+n)**3*(2+n)) 
                                      +((2+n+n*n)*(5-2*S2(n) + 2*(S1(n)*S1(n))))/(n*(1+n)*(2+n))) 
@@ -476,17 +455,12 @@ def singlet_NLO(n: complex, nf: int, p: int, prty: int = 1) -> np.ndarray:
                         +4*CF*TF*nf*(-10/(n+1) +2/(n+1)**2 +4/(n+1)**3 +1 +10/n -10/(n*n) +4/(n**3)))
 
     
-
-     
     qq1_qg1 = np.stack((qq1, qg1), axis=-1)
     gq1_gg1 = np.stack((gq1, gg1), axis=-1)
     
     return np.stack((qq1_qg1, gq1_gg1), axis=-2) #(N, 2, 2)
     
     
-  
-
-
 """
 ***********************Evolution operator of GPD in the moment space*******
 Refer to the evolution.py at https://github.com/kkumer/gepard. Modifications are made.
@@ -957,8 +931,6 @@ def WilsonCoef_DVMP_LO(j: complex, nf: int, meson: int) -> complex:
     return np.einsum('j, j...->j...', Charge_Factor(meson), CWT)*(CF/NC) 
 
   
-
-
 def WilsonCoef_DVMP_NLO(j: complex, k: complex, nf: int, Q: float, muf: float, meson: int, p:int):
     """NLO Wilson coefficient of DVMP in the evolution basis (qVal, q_du_plus, q_du_minus, qSigma, g)
   
@@ -990,13 +962,6 @@ def WilsonCoef_DVMP_NLO(j: complex, k: complex, nf: int, Q: float, muf: float, m
    
     ptyk=1 # Charge parity of DA because we are using only vector meson data
     
-    
- 
-    
-        
- 
-    
- 
     MCQ1CF = -np.log(Q**2 / mufact2)-23/3+(0.5*(1.+3.*(1.+j)*(2.+j)))/((
              1 + j)**2*(2.+j)**2)+(0.5*(1.+3.*(1.+k)*(2.+k)))/((1.+k)**2
              *(2.+k)**2)+0.5*(-3.-2./((1.+j)*(2.+j))+4.*S1(1.+j))*((-
@@ -1018,8 +983,6 @@ def WilsonCoef_DVMP_NLO(j: complex, k: complex, nf: int, Q: float, muf: float, m
         SUMB += SUMANDB
         SUMA += (-1)**LI * SUMANDB
         
-       
-
     DELc1aGJK = (-2.*ptyk)/((1.+j)*(2.+j)*(1.+k)*(2.+k))+(0.5
        *(-1.+(1.+j)*(2.+j))*(-2.+(1.+k)*(2.+k)*(S2(0.5*(1.+k)) -
        S2(-0.5+0.5*(1.+k))))*ptyk)/((1.+j)*(2.+j))+(1.+k)*(2.
@@ -1035,10 +998,7 @@ def WilsonCoef_DVMP_NLO(j: complex, k: complex, nf: int, Q: float, muf: float, m
        )+(0.125*(1.+k)*(S2(0.5*(1.+j))-S2(-0.5+0.5*(1.+j))-S2
        (0.5*(1.+k))+S2(-0.5+0.5*(1.+k)))*ptyk)/((0.5*(1.+j)+0.5
        *(-1.-k))*(3.+j+k)))
-
-    
-  
-                                                 
+                                      
     DELc1bGKJ = 1/((1.+k)*(2.+k))+0.5*(-2.-(1.+k)**2-((1.+j)*(2
        +j))/((1.+k)*(2.+k)))*(S2(0.5*(1.+j))-S2(-0.5+0.5*(1. +
        j)))-0.5*(1.+k)*(S2(0.5*(1.+k))-S2(-0.5+0.5*(1.+k)))-(0.125
@@ -1093,9 +1053,6 @@ def WilsonCoef_DVMP_NLO(j: complex, k: complex, nf: int, Q: float, muf: float, m
     
     CGCF = AlphaS(nloop_alphaS, nf, Init_Scale_Q) / 2 / np.pi * ((-np.log(Q**2 / muphi2) + S1(j+1) + S1(k+1) - 3/4 - 1/2/(k+1)/(k+2) - 1/(j+1)/(j+2))*(4*S1(k+1) - 3 - 2/(k+1)/(k+2))/2 + (-np.log(Q**2 / mufact2) + 1 + 3*S1(j+1) - 0.5 + (2*S1(j+1)-1)/(k+1)/(k+2) -1/(j+1)/(j+2))*(-(4+2*(j+1)*(j+2))/(j+1)/(j+2)/(j+3))*(j+3)/4 - (35 - ((k+1)*(k+2) + 2)*delS2((k+1)/2) + 4/(k+1)**2/(k+2)**2)/8 + (((k+1)*(k+2) + 2)*S1(j+1)/(k+1)/(k+2) +1)/(j+1)/(j+2) + (delS2((j+1)/2)/2/(k+1)/(k+2) - ((k-1)*k*deldelS2((j+1)/2,k/2) - (k+3)*(k+4)*deldelS2((j+1)/2,(k+2)/2))/2/(2*k+3))*((k+1)*(k+2)*((k+1)*(k+2) +2)/4) - ((k+1)*(k+2) + 2)/2/(j+1)/(j+2)/(k+1)/(k+2))
     
-   
-  
-
     CWT= np.array([CQNS(-1)*(3 * 2 ** (1+j) * gamma(5/2+j) / (gamma(3/2) * gamma(3+j))), 
                    CQNS(+1)*(3 * 2 ** (1+j) * gamma(5/2+j) / (gamma(3/2) * gamma(3+j))),  
                    CQNS(-1)*(3 * 2 ** (1+j) * gamma(5/2+j) / (gamma(3/2) * gamma(3+j))), \
@@ -1116,7 +1073,7 @@ def WilsonCoef_DVMP_NLO(j: complex, k: complex, nf: int, Q: float, muf: float, m
 
     return  np.einsum('j, j...->j...', Charge_Factor(meson), CWT)*(CF/NC)    
       
-   
+
 
 def np_cache(function):
     @functools.cache
