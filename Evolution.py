@@ -31,9 +31,9 @@ CF = (NC**2 - 1) / (2 * NC)
 CA = NC
 CG = CF - CA/2
 TF = 0.5
-Alpha_Mz = 0.1181
+Alpha_Ref = 0.305
 # All unit in GeV for dimensional quantities.
-Mz = 91.1876
+Ref_Scale = 2. 
 # One loop accuracy for running strong coupling constant. 
 nloop_alphaS = 2
 # Initial scale of distribution functions at 2 GeV.
@@ -80,15 +80,15 @@ def _fbeta1(a: float, nf: int) -> float:
 
 @njit(["float64[:](int32, float64[:])", "float64(int32, float64)"])
 def AlphaS0(nf: int, Q: float) -> float:
-    return Alpha_Mz / (1 - Alpha_Mz/2/np.pi * beta0(nf) * np.log(Q/Mz))
+    return Alpha_Ref / (1 - Alpha_Ref/2/np.pi * beta0(nf) * np.log(Q/Ref_Scale))
 
 @njit(["float64[:](int32, float64[:])", "float64(int32, float64)"])
 def AlphaS1(nf: int, Q: float) -> float:
     NASTPS = 20
     
     # a below is as defined in 1/4pi expansion
-    a = np.ones_like(Q) * Alpha_Mz / 4 / np.pi
-    lrrat = 2 * np.log(Q/Mz)
+    a = np.ones_like(Q) * Alpha_Ref / 4 / np.pi
+    lrrat = 2 * np.log(Q/Ref_Scale)
     dlr = lrrat / NASTPS
 
    
