@@ -13,7 +13,7 @@ Note:
 
 import numpy as np
 from Parameters import Moment_Sum
-from scipy.special import psi, zeta, gamma, orthogonal, loggamma
+from scipy.special import psi, zeta, gamma, loggamma, p_roots
 from math import factorial, log
 from mpmath import mp, hyp2f1
 from typing import Tuple, Union
@@ -120,7 +120,7 @@ Refer to the adim.py at https://github.com/kkumer/gepard.
 
 # Fixed quad function that allow more general function. The func here take input of shape (N,) and output (N,......) which doesn't have to be (N,)
 def fixed_quadvec(func, a, b, n=100, args=()):
-    rootsNLO, weightsNLO = orthogonal.p_roots(n)
+    rootsNLO, weightsNLO = p_roots(n)
     y = (b-a) * (rootsNLO + 1)/2.0 + a
     yfunc = func(y)
     return (b-a)/2.0*np.einsum('j,j...->...',weightsNLO,yfunc)
@@ -280,11 +280,11 @@ def S3_tilde(n: Union[complex, np.ndarray], prty: int) -> Union[complex, np.ndar
 
 def Sm2p1(n: Union[complex, np.ndarray], prty: int) -> Union[complex, np.ndarray]: 
     """Eq. (50) of https://arxiv.org/abs/hep-ph/9810241""" 
-    return (-prty) * MellinF2(n,1) + zeta(2)*S1_tilde(n,prty) - (5/8)*zeta(3) + zeta(2) * log(2)
+    return (-prty) * MellinF2(n) + zeta(2)*S1_tilde(n,prty) - (5/8)*zeta(3) + zeta(2) * log(2)
 
 def Sp1m2(n: Union[complex, np.ndarray], prty: int) -> Union[complex, np.ndarray]: 
     """Eq. (131) of https://arxiv.org/abs/hep-ph/9810241"""
-    return S1(n)*S2_tilde(n)+S3_tilde(n,prty)-Sm2p1(n,prty)
+    return S1(n)*S2_tilde(n,prty)+S3_tilde(n,prty)-Sm2p1(n,prty)
 
 '''
 def lsum(m: Union[complex, np.ndarray], n: Union[complex, np.ndarray])-> Union[complex, np.ndarray]:
@@ -366,12 +366,15 @@ def singlet_LO(n: Union[complex, np.ndarray], nf: int, p: int, prty: int = 1) ->
 
     return np.stack((qq0_qg0, gq0_gg0), axis=-2)# (N, 2, 2)
 
-def non_singlet_NLO(n: complex, nf: int, prty: int) -> complex:
+def non_singlet_NLO(n: complex, nf: int, p: int, prty: int) -> complex:
     """Non-singlet anomalous dimension.
 
+    The same of vector (p=1) and axial-vector (p=-1) GPDs, check https://arxiv.org/pdf/hep-ph/9506451 page 17
+    
     Args:
         n (complex): which moment (= Mellin moment for integer n)
         nf (int): number of active quark flavors
+        p (int): 1 for vector-like GPD (Ht, Et), -1 for axial-vector-like GPDs (Ht, Et)
         prty (int): 1 for NS^{+}, -1 for NS^{-}
 
     Returns:
@@ -417,8 +420,8 @@ def singlet_NLO(n: complex, nf: int, p: int, prty: int = 1) -> np.ndarray:
     
     epsilon = 0.00001 * ( n == 1)
     
-    qq1 = np.where(p>0, non_singlet_NLO(n, nf, 1) - 4*CF*TF*nf*(5*n**5 +32*n**4 +49*n**3 +38*n**2 +28*n +8)/(n-1 +epsilon) * n**3 * (n+1)**3 * (n+2)**2
-                      , non_singlet_NLO(n, nf, 1) - 4*CF*TF*nf*(5*n**5 +32*n**4 +49*n**3 +38*n**2 +28*n +8)/(n-1+ epsilon) * n**3 * (n+1)**3 * (n+2)**2)
+    qq1 = np.where(p>0, non_singlet_NLO(n, nf, p, 1) - 4*CF*TF*nf*(5*n**5 +32*n**4 +49*n**3 +38*n**2 +28*n +8)/(n-1 +epsilon) * n**3 * (n+1)**3 * (n+2)**2
+                      , non_singlet_NLO(n, nf, p, 1) - 4*CF*TF*nf*(5*n**5 +32*n**4 +49*n**3 +38*n**2 +28*n +8)/(n-1+ epsilon) * n**3 * (n+1)**3 * (n+2)**2)
     
     qg1 = np.where(p>0,(-8*CF*nf*TF*(-4*S1(n)/n**2+(4+8*n + 26*n**3 + 11*n**4 + 15*(n*n))/(n**3*(1+n)**3*(2+n)) 
                                      +((2+n+n*n)*(5-2*S2(n) + 2*(S1(n)*S1(n))))/(n*(1+n)*(2+n))) 
@@ -434,7 +437,7 @@ def singlet_NLO(n: complex, nf: int, p: int, prty: int = 1) -> np.ndarray:
                                      +((2+n+n*n)*(10*S1(n)-2*S2(n)-2*(S1(n)*S1(n))))/((-1+n+epsilon)*n*(1+n))) 
                          -8*CF*CA*( ((1/9)*(144+432*n-1304*n**3-1031*n**4 + 695*n**5+1678*n**6+1400*n**7+621*n**8+109*n**9 - 152*(n*n)))/((-1+n+epsilon)**2*n**3*(1+n)**3*(2+n)**2)
                                    -((1/3)*S1(n)*(-12-22*n+17*n**4 + 41*(n*n)))/((-1+n+epsilon)**2*n**2*(1+n))+( (2+n+n*n)*(S2(n) + S1(n)*S1(n)-S2(n/2)))/((-1+n+epsilon)*n*(1+n))))/4
-                      , 4*CA*CF*( -2*S1(n-1)**2/n +S1(n-1)**2/(n+1) +16*S1(n-1)/(3*n) -5*S1(n-1)/(3(n+1)) 
+                      , 4*CA*CF*( -2*S1(n-1)**2/n +S1(n-1)**2/(n+1) +16*S1(n-1)/(3*n) -5*S1(n-1)/(3*(n+1)) 
                                   +2*S2(n-1)/n -S2(n-1)/(n+1) +4*S2_tilde(n-1,prty)/n -2*S2_tilde(n-1,prty)/(n+1) -56/(9*n) 
                                   -20/(9*(n+1)) + 28/(3*n*n) -38/(3*(n+1)**2) -4/(n**3) - 6/((n+1)**3)) 
                        +2*CF**2*(  4*S1(n-1)**2/n - 2*S1(n-1)**2/(n+1) - 8*S1(n-1)/n + 2*S1(n-1)/(n+1)
@@ -611,7 +614,7 @@ def amuindepNS(j: complex, nf: int, p: int, prty: int = 1):
         the [gamma]  part of the diagonal evolution operator A.
     """
     gam0NS = non_singlet_LO(j+1,nf,p, prty)
-    gam1NS = non_singlet_NLO(j+1,nf, prty)
+    gam1NS = non_singlet_NLO(j+1,nf,p, prty)
     a1 = - gam1NS + 0.5 * beta1(nf) * gam0NS / beta0(nf) 
     return a1
 
@@ -811,16 +814,13 @@ def Charge_Factor(particle:int):
      | particle=3  refers to j/psi meson 
     """ 
     if (particle==0):
-        return [0, -1/6, 0, 5/18, 5/18]
+        return np.array([0, -1/6, 0, 5/18, 5/18])
         
     if (particle==1):
-        return f_rho *[0,1,0,1/np.sqrt(2),1/np.sqrt(2)]
+        return f_rho * np.array([0,1,0,1/np.sqrt(2),1/np.sqrt(2)])
     
     if (particle==3):
-        return f_jpsi *[0,0,0,2/3,2/3]
-
-
-
+        return f_jpsi * np.array([0,0,0,2/3,2/3])
 
 # Need Wilson coefficients for evolution. Allows numerical pre-calculation of non-diagonal piece using Mellin-Barnes integral
 
@@ -1072,7 +1072,6 @@ def WilsonCoef_DVMP_NLO(j: complex, k: complex, nf: int, Q: float, muf: float, m
                 2/ CF / (j + 3) * 3 * 2 ** (1+j) * gamma(5/2+j) / (gamma(3/2) * gamma(3+j)) * (NC*CGNC + CF*CGCF + beta0(nf)*np.log(mufact2/mures2)/2)],dtype=complex) #+ beta0(nf)*np.log(mufact/mures)
 
     return  np.einsum('j, j...->j...', Charge_Factor(meson), CWT)*(CF/NC)    
-      
 
 
 def np_cache(function):
@@ -1084,6 +1083,23 @@ def np_cache(function):
     @functools.wraps(function)
     def wrapper(arr, nf, p, Q, meson, muset):
         return cached_wrapper(tuple((tuple(arr), nf, p, Q, meson, muset)))
+
+    # copy lru_cache attributes over too
+    wrapper.cache_info = cached_wrapper.cache_info
+    wrapper.cache_clear = cached_wrapper.cache_clear
+
+    return wrapper
+
+
+def np_cache_dvcs(function):
+    @functools.cache
+    def cached_wrapper(tupled_arr):
+        [arr, nf, p, Q, muset] = np.array(tupled_arr[0]), int(tupled_arr[1]), int(tupled_arr[2]), float(tupled_arr[3]), float(tupled_arr[4])
+        return function(arr, nf, p, Q, muset)
+
+    @functools.wraps(function)
+    def wrapper(arr, nf, p, Q, muset):
+        return cached_wrapper(tuple((tuple(arr), nf, p, Q, muset)))
 
     # copy lru_cache attributes over too
     wrapper.cache_info = cached_wrapper.cache_info
@@ -1253,7 +1269,7 @@ def TFF_Evo_LO(j: np.array, nf: int, p: int, mu: float, ConfFlav: np.array, meso
     return EvoConf
 
 @np_cache
-def WCoef_Evo_NLO(j: np.array, nf: int, p: int, Q: float, meson: int, muf: float) -> Tuple[np.ndarray, np.ndarray]:
+def DVMP_WCoef_Evo_NLO(j: np.array, nf: int, p: int, Q: float, meson: int, muf: float) -> Tuple[np.ndarray, np.ndarray]:
     """Next-to-leading order evolution of the DVMP Wilson coefficient (Evolved Wilson coefficient method)
 
     Args:
@@ -1261,7 +1277,6 @@ def WCoef_Evo_NLO(j: np.array, nf: int, p: int, Q: float, meson: int, muf: float
         nf: number of effective fermions; scalars
         p (int): 1 for vector-like GPD (Ht, Et), -1 for axial-vector-like GPDs (Ht, Et); scalars
         Q (float): photon virtuality. At NLO the scale Q enters the amplitudes through logs.
-        ConfFlav: uneolved conformal moments in flavor space ConfFlav = [ConfMoment_uV, ConfMoment_ubar, ConfMoment_dV, ConfMoment_dbar, ConfMoment_g]; shape (N,5)
         meson (int): 1 for rho, 2 for phi, 3 for Jpsi
         muf: factorization evolution scale; scalar
 
@@ -1372,7 +1387,7 @@ def WCoef_Evo_NLO(j: np.array, nf: int, p: int, Q: float, meson: int, muf: float
     CWNS_ev1 = CWNS_ev1_diag + CWNS_ev1_non_diag
     
     # NLO Wilson coefficient combined with leading-order evolved conformal moment
-    CWilsonT_1_SG = WilsonCoef_DVMP_NLO(j,0,nf,Q, muf, meson)[-2:]     
+    CWilsonT_1_SG = WilsonCoef_DVMP_NLO(j,0,nf,Q, muf, meson,p)[-2:]     
     CWilsonT_1_SG_ev0 = np.einsum('i...,...ij->...ij',CWilsonT_1_SG,evola0)
      
     # LO plus NLO evolution    
@@ -1405,8 +1420,178 @@ def TFF_Evo_NLO_evWC(j: np.array, nf: int, p: int, Q: float, ConfFlav: np.array,
     
     assert j.ndim == 1, "Check dimension of j, must be 1D array" # shape (N,)
     
-    # Retrive the evolved Wilson coefficient from WCoef_Evo_NLO()
-    [CWilsonT_ev_NS_tot, CWilsonT_ev_SG_tot] = WCoef_Evo_NLO(j, nf, p, Q, meson, muf)
+    # Retrive the evolved Wilson coefficient from DVMP_WCoef_Evo_NLO()
+    [CWilsonT_ev_NS_tot, CWilsonT_ev_SG_tot] = DVMP_WCoef_Evo_NLO(j, nf, p, Q, meson, muf)
+
+    # Transform the unevolved moments to evolution basis
+    ConfEvoBasis = np.einsum('ij, ...j->...i', flav_trans, ConfFlav) # shape (N, 5)   
+    
+    # Taking the non-singlet and singlet parts of the conformal moments
+    ConfNS = ConfEvoBasis[..., :3] # (N, 3)
+    ConfSG = ConfEvoBasis[..., -2:] # (N, 2)
+    
+    # Combine the evolved Wilson coefficient with conformal moments
+    EvoConfNS = np.einsum('...j,...j->...j', CWilsonT_ev_NS_tot, ConfNS)
+    EvoConfSG = np.einsum('...ij,...j->...i', CWilsonT_ev_SG_tot, ConfSG)
+
+    # Recombing the non-singlet and singlet parts
+    EvoConf = np.concatenate((EvoConfNS, EvoConfSG), axis=-1) # (N, 5)
+    
+    return EvoConf
+
+@np_cache_dvcs
+def DVCS_WCoef_Evo_NLO(j: np.array, nf: int, p: int, Q: float, muf: float) -> Tuple[np.ndarray, np.ndarray]:
+    """Next-to-leading order evolution of the DVCS Wilson coefficient (Evolved Wilson coefficient method)
+
+    Args:
+        j: conformal spin j (conformal spin is actually j+2 but anyway): array (N,)
+        nf: number of effective fermions; scalars
+        p (int): 1 for vector-like GPD (Ht, Et), -1 for axial-vector-like GPDs (Ht, Et); scalars
+        Q (float): photon virtuality. At NLO the scale Q enters the amplitudes through logs.
+        muf: factorization evolution scale; scalar
+
+    Returns:
+        Evolved DVCS Wilson coefficients in the evolution basis;
+        CWilsonT_ev_NS_tot: Non-singlet evolved Wilson coefficient with shape (N,3)
+        CWilsonT_ev_SG_tot Singlet/Gluon evolved Wilson coefficient with shape (N,2)
+
+    | The j here accept array input and preferrably just 1D for the contour integral in j. 
+    | Therefore, j has shape (N,) where N is the interpolating order of the fixed quad.
+    | Other quantities must be broadcastable with j and thus they should be preferrably scalar
+    """
+    
+    assert j.ndim == 1, "Check dimension of j, must be 1D array" # shape (N,)
+    
+    # Separate out NS and S/G Wilson coefficients
+    CWNS = WilsonCoef_DVCS_LO(j)[:3]
+    CWSG = WilsonCoef_DVCS_LO(j)[-2:]
+     
+    #Set up evolution operator for WCs
+    Alphafact = np.array(AlphaS(nloop_alphaS, nf, muf)) / np.pi / 2
+    R = AlphaS(nloop_alphaS, nf, muf)/AlphaS(nloop_alphaS, nf, Init_Scale_Q) # shape N
+    R = np.array(R)
+
+    b0 = beta0(nf)
+    lam, pr = projectors(j+1, nf, p)
+    pproj = amuindep(j, nf, p)
+     
+    rmu1 = rmudep(nf, lam, lam, muf)
+    Rfact = R[...,np.newaxis]**(-lam/b0)  # LO evolution (alpha(mu)/alpha(mu0))^(-gamma/beta0)
+
+    # S/G LO evolution operator
+    evola0 = np.einsum('...aij,...a->...ij', pr, Rfact)
+    # NS LO evolution operator
+    gam0NS = non_singlet_LO(j+1, nf, p)
+    evola0NS = R**(-gam0NS/b0)
+    
+    # LO evolved singlet and non-singlet WCs
+    CWNS_ev0 = np.einsum('...,i...->...i',evola0NS,CWNS)
+    CWSG_ev0 = np.einsum('...ij,i...->...ij',evola0,CWSG)
+    
+    # S/G diagonal NLO evolution operator     
+    evola1_diag_ab = np.einsum('kab,kabij->kabij', rmu1, pproj)
+    evola1_diag = np.einsum('...abij,...b,...->...ij', evola1_diag_ab, Rfact,Alphafact)
+
+    # NS diagonal NLO evolution operator, note in evolution basis (qVal, q_du_plus, q_du_minus) has parity (-1,1,-1)
+    amuindepNS_stack = np.stack((amuindepNS(j,nf,p,-1),\
+                                 amuindepNS(j,nf,p,1), \
+                                 amuindepNS(j,nf,p,-1)), axis=-1)
+
+    evola1NS_diag_plus = np.einsum('...,...i->...i',Alphafact * evola0NS * rmudepNS(nf, gam0NS, gam0NS, muf),amuindepNS_stack ) # shape (N,) and (N,3) to (N,3)
+
+    # NLO NS diagonal evolutioon 
+    CWNS_ev1_diag = np.einsum('...i,i...->...i',evola1NS_diag_plus,CWNS) # shape (N,3) and (3,N) to (N,3)
+    # S/G diagonal NLO evolution operator
+    CWSG_ev1_diag = np.einsum('...ij,i...->...ij',evola1_diag,CWSG) # shape (N,2,2) and (2,N) to (N,2,2)
+        
+    # Following are the second integral resumming the off diagonal pieces, note that (j,k) meshgrid is used for vectorized j and k input. Check the paper for expression
+    reK = -0.8
+    Max_imK = 150
+     
+    def non_diag_integrand_mesh(k):
+        
+        jmesh, kmesh= np.meshgrid(j,k)        
+        meshshape=jmesh.shape
+
+        jmesh=jmesh.reshape(-1)
+        kmesh=kmesh.reshape(-1)
+        
+        CWk = WilsonCoef_DVCS_LO(jmesh+kmesh+1)[-2:]        
+        Bjk = np.array(bmudep(muf, np.array(jmesh+kmesh+1,dtype=complex), np.array(jmesh,dtype=complex), nf,p))*Alphafact
+        out = np.einsum('...ij,...->...ij',np.einsum('...ij,i...->...ij',Bjk,CWk), 1/4*np.tan(np.pi * kmesh / 2))  
+
+        outorishape=out.shape
+        out=out.reshape(meshshape[0],meshshape[1],*outorishape[1:])
+
+        return out
+    
+    # Off-diagonal piece for the NS evolution
+    CWSG_ev1_non_diag = fixed_quadvec(lambda imK:non_diag_integrand_mesh(reK+1j*imK)+non_diag_integrand_mesh(reK-1j*imK),0,Max_imK,300)
+    
+    # Combine the diagonal and off-diagonal pieces
+    CWSG_ev1 = CWSG_ev1_diag + CWSG_ev1_non_diag
+    
+    reK = -0.8
+    Max_imK = 150
+
+    def non_diag_integrand_mesh_NS(k):
+
+        jmesh, kmesh= np.meshgrid(j,k)        
+        meshshape=jmesh.shape
+
+        jmesh=jmesh.reshape(-1)
+        kmesh=kmesh.reshape(-1)
+
+        CWk = WilsonCoef_DVCS_LO(jmesh+kmesh+1)[:3]        
+        # prty of NS are not the same but Bjk only concern leading order anomalous dimension there for we take prty=1
+        BjkNS = np.array(bmudepNS(muf, np.array(jmesh+kmesh+1,dtype=complex), np.array(jmesh,dtype=complex), nf,p))*Alphafact
+        out = np.einsum('...i,...->...i',np.einsum('...,i...->...i',BjkNS,CWk), 1/4*np.tan(np.pi * kmesh / 2))  #first shape (N,) and (3,N) to (N,3), then (N,3) and (N,) to (N,3)
+
+        outorishape=out.shape
+        out=out.reshape(meshshape[0],meshshape[1],*outorishape[1:])
+
+        return out
+
+    CWNS_ev1_non_diag=fixed_quadvec(lambda imK:non_diag_integrand_mesh_NS(reK+1j*imK)+non_diag_integrand_mesh_NS(reK-1j*imK),0,Max_imK,300)
+
+    CWNS_ev1 = CWNS_ev1_diag + CWNS_ev1_non_diag
+    
+    # NLO Wilson coefficient combined with leading-order evolved conformal moment
+    CWilsonT_1_SG = WilsonCoef_DVCS_NLO(j,nf,Q, muf, p)[-2:]     
+    CWilsonT_1_SG_ev0 = np.einsum('i...,...ij->...ij',CWilsonT_1_SG,evola0)
+     
+    # LO plus NLO evolution    
+    CWilsonT_ev_NS_tot = CWNS_ev0 + CWNS_ev1
+    CWilsonT_ev_SG_tot = CWSG_ev0 + CWSG_ev1 + CWilsonT_1_SG_ev0
+    
+    return CWilsonT_ev_NS_tot, CWilsonT_ev_SG_tot
+
+def CFF_Evo_NLO_evWC(j: np.array, nf: int, p: int, Q: float, ConfFlav: np.array, muf: float) -> np.array:
+    """Next-to-leading order evolved DVCS Wilson coefficients in the flavor space combined with the conformal moments (Evolved Wilson coefficient method)
+    
+    Args:
+        j: conformal spin j (conformal spin is actually j+2 but anyway): array (N,)
+        nf: number of effective fermions; scalars
+        p (int): 1 for vector-like GPD (Ht, Et), -1 for axial-vector-like GPDs (Ht, Et); scalars
+        Q (float): photon virtuality. At NLO the scale Q enters the amplitudes through logs.
+        ConfFlav: uneolved conformal moments in flavor space ConfFlav = [ConfMoment_uV, ConfMoment_ubar, ConfMoment_dV, ConfMoment_dbar, ConfMoment_g]; shape (N,5)
+        meson (int): 1 for rho, 2 for phi, 3 for Jpsi
+        muf: factorization evolution scale; scalar
+
+    Returns:
+        Evolved conformal moments times the DVCS Wilson coefficients in the evolution basis (qVal, q_du_plus, q_du_minus, qSigma, g);
+        Ingredients for the Mellin-Barnes integral for TFF 
+        return shape (N, 5)
+        
+    | The j here accept array input and preferrably just 1D for the contour integral in j. 
+    | Therefore, j has shape (N,) where N is the interpolating order of the fixed quad.
+    | Other quantities must be broadcastable with j and thus they should be preferrably scalar
+    """
+    
+    assert j.ndim == 1, "Check dimension of j, must be 1D array" # shape (N,)
+    
+    # Retrive the evolved Wilson coefficient from DVCS_WCoef_Evo_NLO()
+    [CWilsonT_ev_NS_tot, CWilsonT_ev_SG_tot] = DVCS_WCoef_Evo_NLO(j, nf, p, Q, muf)
 
     # Transform the unevolved moments to evolution basis
     ConfEvoBasis = np.einsum('ij, ...j->...i', flav_trans, ConfFlav) # shape (N, 5)   
