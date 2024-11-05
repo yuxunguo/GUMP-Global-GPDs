@@ -14,6 +14,5 @@ It's recommended that you go through the quickguide of each submodules and look 
    Minimizer
    Observables
    Parameters
-   Plotting
    Predictions
    config

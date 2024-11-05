@@ -442,7 +442,7 @@ def singlet_NLO(n: complex, nf: int, p: int, prty: int = 1) -> np.ndarray:
     if type(n)==type(n_tester):
         qq1_qg1 = np.stack((qq1, qg1), axis=-1)
         gq1_gg1 = np.stack((gq1, gg1), axis=-1)
-        result = np.stack((qq1_qg1,gq1_gg1),axis=-1)
+        result = np.stack((qq1_qg1,gq1_gg1),axis=-2)
     else:
         length = 1
         result = np.reshape(np.array([[qq1, qg1], [gq1, gg1]]),(length,2,2))
