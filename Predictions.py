@@ -194,22 +194,29 @@ if __name__ == '__main__':
     NC=3
     prefact = np.pi * 3 * f_jpsi / NC /x * 2/3
     print(prefact*gpd1)
-
+    '''
 
     # Test of two methods of calculating TFF evolved to mu =5 GeV
     x=0.0001
     _GPD_theo = GPDobserv(x,x,0.0,5.0,1)
+    '''
     TFF1 = _GPD_theo.TFFNLO(Para_spe,5.0, meson = 3, flv ='All')
     print(TFF1)
     TFF2 = _GPD_theo.TFFNLO_evMom(Para_spe,5.0, meson = 3, flv ='All')
     print(TFF2)
     print(TFF2-TFF1)
     '''
+    TFF3 = _GPD_theo.TFFNLO(Para_spe,5.0, meson = 1, flv ='All')
+    print(TFF3)
+    TFF4 = _GPD_theo.TFFNLO_evMom(Para_spe,5.0, meson = 1, flv ='All')
+    print(TFF4)
+    print(TFF4-TFF3)
+
     #
     # Plotting results of the paper
     #
     
-
+    '''
     # Comparing PDF with the global extraction of PDF
 
     x = np.exp(np.linspace(np.log(0.0001), np.log(0.05), 100, dtype = float))
@@ -248,7 +255,7 @@ if __name__ == '__main__':
     with open(os.path.join(dir_path,"GUMP_Results/Rrat2D.csv"),"w",newline='') as my_csv:
         csvWriter = csv.writer(my_csv,delimiter=',')
         csvWriter.writerows(np.transpose([xmeshflat,qmeshflat,rrat2dlst]))
-
+    '''
     '''
     # Comparing the cross-sections
     
