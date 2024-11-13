@@ -600,9 +600,9 @@ class GPDobserv (object) :
                 ConfFlav_xi2 = Moment_Sum(j, self.t, Para_xi2)
                 ConfFlav_xi4 = Moment_Sum(j, self.t, Para_xi4)
                 
-                EvoConf_Wilson = (TFF_Evo_LO(j, NFEFF, self.p, self.Q, ConfFlav, meson) \
-                                    + TFF_Evo_LO(j+2, NFEFF, self.p, self.Q, ConfFlav_xi2, meson) \
-                                        + TFF_Evo_LO(j+4, NFEFF, self.p, self.Q, ConfFlav_xi4, meson))
+                EvoConf_Wilson = (TFF_Evo_LO(j, NFEFF, self.p, muf, ConfFlav, meson) \
+                                    + TFF_Evo_LO(j+2, NFEFF, self.p, muf, ConfFlav_xi2, meson) \
+                                        + TFF_Evo_LO(j+4, NFEFF, self.p, muf, ConfFlav_xi4, meson))
                 
                 fmask = flvmask(flv)
                 return np.einsum('j, ...j', fmask, EvoConf_Wilson)  

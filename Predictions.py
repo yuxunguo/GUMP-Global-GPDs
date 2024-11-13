@@ -219,7 +219,7 @@ if __name__ == '__main__':
     #
 
     # Comparing PDF with the global extraction of PDF
-
+    '''
     x = np.exp(np.linspace(np.log(0.0001), np.log(0.05), 100, dtype = float))
     
     pdflst = np.array([PDF_theo_s(x_i,0.,2.,1,'g',Para_spe, 2) for x_i in x ])
@@ -257,7 +257,7 @@ if __name__ == '__main__':
     with open(os.path.join(dir_path,"GUMP_Results/Rrat2D.csv"),"w",newline='') as my_csv:
         csvWriter = csv.writer(my_csv,delimiter=',')
         csvWriter.writerows(np.transpose([xmeshflat,qmeshflat,rrat2dlst]))
-
+    '''
     # Comparing the cross-sections
     
     DVjpsiPH1_xBtQ_theo = np.array(list(pool.map(partial(DVjpsiPxsec_theo_xBtQ, Para_Unp = Para_Unp, xsec_norm = jpsinorm, p_order = 2, muset = 1, flv = 'All'), DVJpsiPH1xsec_group_data))).flatten()
@@ -274,6 +274,19 @@ if __name__ == '__main__':
     
     DVjpsiPH1_xBtQ_theo_mu_6 = np.array(list(pool.map(partial(DVjpsiPxsec_theo_xBtQ, Para_Unp = Para_Unp, xsec_norm = jpsinorm, p_order = 2, muset = np.sqrt(1.25), flv = 'All'), DVJpsiPH1xsec_group_data))).flatten()  
 
+    DVjpsiPH1_xBtQ_theo_mu_1_LO = np.array(list(pool.map(partial(DVjpsiPxsec_theo_xBtQ, Para_Unp = Para_Unp, xsec_norm = jpsinorm, p_order = 1, muset = np.sqrt(0.5), flv = 'All'), DVJpsiPH1xsec_group_data))).flatten()
+    
+    DVjpsiPH1_xBtQ_theo_mu_2_LO = np.array(list(pool.map(partial(DVjpsiPxsec_theo_xBtQ, Para_Unp = Para_Unp, xsec_norm = jpsinorm, p_order = 1, muset = np.sqrt(2), flv = 'All'), DVJpsiPH1xsec_group_data))).flatten()  
+    
+    DVjpsiPH1_xBtQ_theo_mu_3_LO = np.array(list(pool.map(partial(DVjpsiPxsec_theo_xBtQ, Para_Unp = Para_Unp, xsec_norm = jpsinorm, p_order = 1, muset = np.sqrt(0.75), flv = 'All'), DVJpsiPH1xsec_group_data))).flatten()
+    
+    DVjpsiPH1_xBtQ_theo_mu_4_LO = np.array(list(pool.map(partial(DVjpsiPxsec_theo_xBtQ, Para_Unp = Para_Unp, xsec_norm = jpsinorm, p_order = 1, muset = np.sqrt(1.5), flv = 'All'), DVJpsiPH1xsec_group_data))).flatten()  
+
+    DVjpsiPH1_xBtQ_theo_mu_5_LO = np.array(list(pool.map(partial(DVjpsiPxsec_theo_xBtQ, Para_Unp = Para_Unp, xsec_norm = jpsinorm, p_order = 1, muset = np.sqrt(0.9), flv = 'All'), DVJpsiPH1xsec_group_data))).flatten()
+    
+    DVjpsiPH1_xBtQ_theo_mu_6_LO = np.array(list(pool.map(partial(DVjpsiPxsec_theo_xBtQ, Para_Unp = Para_Unp, xsec_norm = jpsinorm, p_order = 1, muset = np.sqrt(1.25), flv = 'All'), DVJpsiPH1xsec_group_data))).flatten()  
+
+
     DVJpsiPH1xsec_group_data_shape = np.array(DVJpsiPH1xsec_group_data).shape
     
     with open(os.path.join(dir_path,"GUMP_Results/dvjpsiph1data.csv"),"w",newline='') as my_csv:
@@ -282,7 +295,7 @@ if __name__ == '__main__':
     
     with open(os.path.join(dir_path,"GUMP_Results/dvjpsiph1theo.csv"),"w",newline='') as my_csv:
         csvWriter = csv.writer(my_csv,delimiter=',')
-        csvWriter.writerows(np.transpose([DVjpsiPH1_xBtQ_theo,DVjpsiPH1_xBtQ_theo_mu_1,DVjpsiPH1_xBtQ_theo_mu_2,DVjpsiPH1_xBtQ_theo_mu_3,DVjpsiPH1_xBtQ_theo_mu_4,DVjpsiPH1_xBtQ_theo_mu_5,DVjpsiPH1_xBtQ_theo_mu_6]))
+        csvWriter.writerows(np.transpose([DVjpsiPH1_xBtQ_theo,DVjpsiPH1_xBtQ_theo_mu_1,DVjpsiPH1_xBtQ_theo_mu_2,DVjpsiPH1_xBtQ_theo_mu_3,DVjpsiPH1_xBtQ_theo_mu_4,DVjpsiPH1_xBtQ_theo_mu_5,DVjpsiPH1_xBtQ_theo_mu_6,DVjpsiPH1_xBtQ_theo_mu_1_LO,DVjpsiPH1_xBtQ_theo_mu_2_LO,DVjpsiPH1_xBtQ_theo_mu_3_LO,DVjpsiPH1_xBtQ_theo_mu_4_LO,DVjpsiPH1_xBtQ_theo_mu_5_LO,DVjpsiPH1_xBtQ_theo_mu_6_LO]))
 
     # Decomposing into different orders and flavors
     # mulst =np.linspace(4,40, 20, dtype = float)
