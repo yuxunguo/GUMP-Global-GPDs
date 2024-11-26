@@ -1,7 +1,7 @@
 from Parameters import ParaManager_Unp, ParaManager_Pol
 from Observables import GPDobserv
 from DVCS_xsec import dsigma_TOT, dsigma_DVCS_HERA, M
-from DVMP_xsec import dsigma_dt, M_jpsi
+from DVMP_xsec import dsigma_Jpsi_dt,dsigma_phi_dt,dsigma_rho_dt, M_jpsi
 from multiprocessing import Pool
 from functools import partial
 from iminuit import Minuit
@@ -19,7 +19,6 @@ Time_Counter = 1
 Q_threshold = 1.9
 
 xB_Cut = 0.5
-
 
 xB_small_Cut = 0.0001
 
@@ -273,8 +272,6 @@ def TFF_theo_jpsi(xB, t, Q, Para_Unp, p_order = 1, muset = 1, flv = 'All'):
 def TFF_theo(xB, t, Q, Para_Unp, meson:int, p_order = 1, muset = 1, flv = 'All'):
     x = 0
     xi = (1/(2 - xB) - (2*t*(-1 + xB))/((Q**2)*(-2 + xB)**2))*xB
-    if (meson==3):
-       xi = (1/(2 - xB) - (2*t*(-1 + xB))/((Q**2 + M_jpsi**2)*(-2 + xB)**2))*xB
     H_E = GPDobserv(x, xi, t, Q, 1)
     HTFF = H_E.TFF(Para_Unp[..., 0, :, :, :, :], muset * Q, meson, p_order, flv)
     ETFF = H_E.TFF(Para_Unp[..., 1, :, :, :, :], muset * Q, meson, p_order, flv)
@@ -350,6 +347,14 @@ def DVphiPxsec_theo(DVphiPxsec_input: pd.DataFrame, TFF_phi_input: np.array):
     [HTFF_phi, ETFF_phi] = TFF_phi_input
     return 2*np.pi*dsigma_phi_dt(y, xB, t, Q, 0, HTFF_phi, ETFF_phi)
 '''
+def DVjpsiPxsec_theo(DVjpsiPxsec_input: pd.DataFrame, TFF_jpsi_input: np.array):
+    y = DVjpsiPxsec_input['y'].to_numpy()
+    xB = DVjpsiPxsec_input['xB'].to_numpy()
+    t = DVjpsiPxsec_input['t'].to_numpy()
+    Q = DVjpsiPxsec_input['Q'].to_numpy()    
+    [HTFF_jpsi, ETFF_jpsi] = TFF_jpsi_input
+    return dsigma_Jpsi_dt(y, xB, t, Q, 0, HTFF_jpsi, ETFF_jpsi)
+
 
 
 
@@ -360,10 +365,11 @@ def DVMPxsec_theo(DVMPxsec_input: pd.DataFrame,  TFF_input: np.array, meson:int)
     Q = DVMPxsec_input['Q'].to_numpy()    
     [HTFF, ETFF] = TFF_input
     
-    
-    return dsigma_dt(y, xB, t, Q, meson, HTFF, ETFF)
+    if (meson==1):
+        return dsigma_rho_dt(y, xB, t, Q, 0, HTFF, ETFF)
 
-   
+    if (meson==3):
+        return dsigma_Jpsi_dt(y, xB, t, Q, 0, HTFF, ETFF)
 
 
 
@@ -380,13 +386,14 @@ def DVrhoPxsec_NLO_cost_xBtQ(DVrhoPxsec_data_xBtQ: pd.DataFrame, Para_Unp, xsec_
     DVrhoP_pred_xBtQ = DVrhoPxsec_theo(DVrhoPxsec_data_xBtQ, TFF_rho_input = [HTFF_rho, ETFF_rho]) * xsec_norm
     return np.sum(((DVrhoP_pred_xBtQ - DVrhoPxsec_data_xBtQ['f'])/ DVrhoPxsec_data_xBtQ['delta f']) ** 2 )
 '''
+def DVjpsiPxsec_cost_xBtQ(DVjpsiPxsec_data_xBtQ: pd.DataFrame, Para_Unp, xsec_norm, p_order = 2):
+    [xB, t, Q] = [DVjpsiPxsec_data_xBtQ['xB'].iat[0], DVjpsiPxsec_data_xBtQ['t'].iat[0], DVjpsiPxsec_data_xBtQ['Q'].iat[0]] 
+    [HTFF_jpsi, ETFF_jpsi] = TFF_theo_jpsi(xB, t, Q, Para_Unp, p_order, muset = 1)
+    DVjpsiP_pred_xBtQ = DVjpsiPxsec_theo(DVjpsiPxsec_data_xBtQ, TFF_jpsi_input = [HTFF_jpsi, ETFF_jpsi]) * xsec_norm**2
+    return np.sum(((DVjpsiP_pred_xBtQ - DVjpsiPxsec_data_xBtQ['f'])/ DVjpsiPxsec_data_xBtQ['delta f']) ** 2 )
 
- 
 
-def DVMPxsec_cost_xBtQ(DVMPxsec_data_xBtQ: pd.DataFrame, Para_Unp, xsec_norm, meson:int, p_order=2):
-    """ 
-    DVMP cost function assumes NLO (p_order=2)
-    """
+def DVMPxsec_cost_xBtQ(DVMPxsec_data_xBtQ: pd.DataFrame, Para_Unp, xsec_norm, meson:int, p_order = 2):
     [xB, t, Q] = [DVMPxsec_data_xBtQ['xB'].iat[0], DVMPxsec_data_xBtQ['t'].iat[0], DVMPxsec_data_xBtQ['Q'].iat[0]] 
     [HTFF, ETFF] = TFF_theo(xB, t, Q, Para_Unp, meson, p_order, muset = 1)
     DVMP_pred_xBtQ = DVMPxsec_theo(DVMPxsec_data_xBtQ, TFF_input = [HTFF, ETFF]) * xsec_norm**2
@@ -1250,10 +1257,8 @@ def cost_dvmp(Norm_HuV,    alpha_HuV,    beta_HuV,    alphap_HuV,
     #cost_DVjpsiPZEUS_xBtQ = np.array(list(pool.map(partial(DVjpsiPxsec_cost_xBtQ, Para_Unp = Para_Unp_all, xsec_norm = jpsinormzeus, p_order = 2), DVJpsiPZEUSxsec_group_data)))
     #cost_DVjpsiPZEUSxsec = np.sum(cost_DVjpsiPZEUS_xBtQ)
     
-    cost_DVjpsiPH1_xBtQ = np.array(list(pool.map(partial(DVMPxsec_cost_xBtQ, Para_Unp = Para_Unp_all, xsec_norm = jpsinorm, p_order = 2), DVJpsiPH1xsec_group_data)))
+    cost_DVjpsiPH1_xBtQ = np.array(list(pool.map(partial(DVjpsiPxsec_cost_xBtQ, Para_Unp = Para_Unp_all, xsec_norm = jpsinorm, p_order = 2), DVJpsiPH1xsec_group_data)))
     cost_DVjpsiPH1xsec = np.sum(cost_DVjpsiPH1_xBtQ)
-    
-   
 
     return cost_PDF_H_g_smallx + cost_DVjpsiPH1xsec #+ cost_DVjpsiPZEUSxsec
 
