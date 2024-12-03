@@ -8,3 +8,6 @@ __pycache__/
 
 #Mac OS files
 .DS_Store
+
+# GUMP-related test/working files 
+GUMP_Results/
