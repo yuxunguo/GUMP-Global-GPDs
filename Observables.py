@@ -7,7 +7,7 @@ import numpy as np
 from mpmath import mp, hyp2f1
 from scipy.integrate import quad_vec, fixed_quad
 from scipy.special import gamma
-from Evolution import Moment_Evo_LO,TFF_Evo_LO, CFF_Evo_LO, TFF_Evo_NLO_evWC, TFF_Evo_NLO_evMOM, GPD_Moment_Evo_NLO,tPDF_Moment_Evo_NLO, fixed_quadvec, inv_flav_trans
+from Evolution import Moment_Evo_LO,TFF_Evo_LO, CFF_Evo_LO, TFF_Evo_NLO_evWC, TFF_Evo_NLO_evMOM, CFF_Evo_NLO_evWC,CFF_Evo_NLO_evMOM, GPD_Moment_Evo_NLO,tPDF_Moment_Evo_NLO, fixed_quadvec, inv_flav_trans
 from Parameters import Moment_Sum
 
 """
@@ -318,10 +318,6 @@ class GPDobserv (object) :
         Para_Forward = ParaAll[..., 0, :, :, :]  # each (N, 5, 1, 5)
         Para_xi2     = ParaAll[..., 1, :, :, :]
         Para_xi4     = ParaAll[..., 2, :, :, :]
-        '''
-        # Removing xi^4 terms
-        Para_xi4     = ParaAll[..., 2, :, :, :]
-        '''
 
         # The contour for Mellin-Barnes integral in terms of j not n.         
 
@@ -497,18 +493,15 @@ class GPDobserv (object) :
         Returns:
             CFF \mathcal{F}(xi, t) = Q_u^2 F_u + Q_d^2 F_d
         """
-        #[Para_Forward, Para_xi2, Para_xi4] = ParaAll  # each (N, 5, 1, 5)
+        if (p_order == 2):
+            return self.CFFNLO(ParaAll, muf, flv)
+        
         Para_Forward = ParaAll[..., 0, :, :, :]  # each (N, 5, 1, 5)
         Para_xi2     = ParaAll[..., 1, :, :, :]
         Para_xi4     = ParaAll[..., 2, :, :, :]
 
         def Integrand_Mellin_Barnes_CFF(j: complex):
 
-            '''
-            ConfFlav = np.array( list(map(lambda paraset: Moment_Sum(j, self.t, paraset), Para_Forward)) )
-            ConfFlav_xi2 = np.array( list(map(lambda paraset: Moment_Sum(j, self.t, paraset), Para_xi2)) )
-            ConfFlav_xi4 = np.array( list(map(lambda paraset: Moment_Sum(j, self.t, paraset), Para_xi4)) )
-            '''
             ConfFlav     = Moment_Sum(j, self.t, Para_Forward) #(N, 5)
             ConfFlav_xi2 = Moment_Sum(j, self.t, Para_xi2)
             ConfFlav_xi4 = Moment_Sum(j, self.t, Para_xi4)
@@ -530,16 +523,7 @@ class GPDobserv (object) :
                 result *= (1j + np.tan((reJ + 1j * imJ) * np.pi / 2))
             else:
                 result *= (1j - 1/np.tan((reJ + 1j * imJ) * np.pi / 2))
-            '''
-            if np.ndim(result)>0:
-                result[mask] *= (1j + np.tan((reJ + 1j * imJ) * np.pi / 2))
-                result[~mask] *= (1j - 1/np.tan((reJ + 1j * imJ) * np.pi / 2))
-            else: # scalar
-                if self.p==1:
-                    result *= (1j + np.tan((reJ + 1j * imJ) * np.pi / 2))
-                else:
-                    result *= (1j - 1/np.tan((reJ + 1j * imJ) * np.pi / 2))
-            '''
+
             return result
 
         # Adding extra j = 0 term for the axial vector CFFs
@@ -558,268 +542,333 @@ class GPDobserv (object) :
         
         return fixed_quadvec(lambda imJ: Integrand_CFF(imJ)+Integrand_CFF(-imJ), 0,  Max_imJ, n=500) + CFFj0()
 
-        '''
-        if (self.p == 1):
-            return quad_vec(lambda imJ : self.xi ** (-reJ - 1j * imJ - 1) * (1j + np.tan((reJ + 1j * imJ) * np.pi / 2)) *Integrand_Mellin_Barnes_CFF(reJ + 1j * imJ) / 2, - Max_imJ, + Max_imJ, epsrel = Prec_Goal)[0]
-        
-        if (self.p == -1):
-            return quad_vec(lambda imJ : self.xi ** (-reJ - 1j * imJ - 1) * (1j - 1/np.tan((reJ + 1j * imJ) * np.pi / 2)) *Integrand_Mellin_Barnes_CFF(reJ + 1j * imJ) / 2, - Max_imJ, + Max_imJ, epsrel = Prec_Goal)[0]
-        '''
-    
     def TFF(self, ParaAll, muf , meson, p_order = 1, flv = 'All'):
-            """TFF $\mathcal{F}(xi, t) (\mathcal{F}$
-            
-            Args:
-                ParaAll: array as [Para_Forward, Para_xi2, Para_xi4]
-            
-                    - Para_Forward = array as [Para_Forward_uV, Para_Forward_ubar, Para_Forward_dV, Para_Forward_dbar, Para_Forward_g]
-                      where Para_Forward_i is forward parameter sets for valence u quark (uV), sea u quark (ubar), valence d quark (dV), sea d quark (dbar) and gluon (g)
-                    - Para_xi2 = array as [Para_xi2_uV, Para_xi2_ubar, Para_xi2_dV, Para_xi2_dbar, Para_xi2_g]
-                      where Para_xi2_i is xi^2 parameter sets for valence u quark (uV), sea u quark (ubar), valence d quark (dV), sea d quark (dbar) and gluon (g)
-                    - Para_xi4 = array as [Para_xi4_uV, Para_xi4_ubar, Para_xi4_dV, Para_xi4_dbar, Para_xi4_g]
-                      where Para_xi4_i is xi^4 parameter sets for valence u quark (uV), sea u quark (ubar), valence d quark (dV), sea d quark (dbar) and gluon (g)
-                muf: factorization scale
-                meson: [1 for rho, 2 for phi, 3 for jpsi]
-                p_order: 1 for leading-order evolution (default); 2 for next-to-leading-order evolution ; higher order not implemented yet
-                flv: "q", "g", or "All"
-                
-            Returns:
-                TFF \mathcal{F}(xi, t)
-            """
-            if (p_order == 2):
-                return self.TFFNLO(ParaAll, muf, meson, flv)
-            
-            #[Para_Forward, Para_xi2, Para_xi4] = ParaAll  # each (N, 5, 1, 5)
-            Para_Forward = ParaAll[..., 0, :, :, :]  # each (N, 5, 1, 5)
-            Para_xi2     = ParaAll[..., 1, :, :, :]
-            Para_xi4     = ParaAll[..., 2, :, :, :]
-
-            def Integrand_Mellin_Barnes_TFF(j: complex):
-
-                ConfFlav     = Moment_Sum(j, self.t, Para_Forward) #(N, 5)
-                ConfFlav_xi2 = Moment_Sum(j, self.t, Para_xi2)
-                ConfFlav_xi4 = Moment_Sum(j, self.t, Para_xi4)
-                
-                EvoConf_Wilson = (TFF_Evo_LO(j, NFEFF, self.p, self.Q, ConfFlav, meson) \
-                                    + TFF_Evo_LO(j+2, NFEFF, self.p, self.Q, ConfFlav_xi2, meson) \
-                                        + TFF_Evo_LO(j+4, NFEFF, self.p, self.Q, ConfFlav_xi4, meson))
-                
-                fmask = flvmask(flv)
-                return np.einsum('j, ...j', fmask, EvoConf_Wilson)  
-         
-            def Integrand_TFF(imJ: complex):
-                # mask = (self.p==1) # assume p can only be either 1 or -1
-
-                result = np.ones_like(self.p) * self.xi ** (-reJ - 1j * imJ - 1) * Integrand_Mellin_Barnes_TFF(reJ + 1j * imJ) / 2
-
-                if self.p==1:
-                    result *= (1j + np.tan((reJ + 1j * imJ) * np.pi / 2))
-                else:
-                    result *= (1j - 1/np.tan((reJ + 1j * imJ) * np.pi / 2))
-                '''
-                if np.ndim(result)>0:
-                    result[mask] *= (1j + np.tan((reJ + 1j * imJ) * np.pi / 2))
-                    result[~mask] *= (1j - 1/np.tan((reJ + 1j * imJ) * np.pi / 2))
-                else: # scalar
-                    if self.p==1:
-                        result *= (1j + np.tan((reJ + 1j * imJ) * np.pi / 2))
-                    else:
-                        result *= (1j - 1/np.tan((reJ + 1j * imJ) * np.pi / 2))
-                '''
-                return result
-
-            # Adding extra j = 0 term for the axial vector CFFs
-            def TFFj0():
-
-                if self.p==1:
-                    result = np.ones_like(self.p) * 0
-                else:
-                    result = np.ones_like(self.p) * self.xi ** (- 1) * Integrand_Mellin_Barnes_TFF(0) *(2)
-
-                return result
-            
-            # The contour for Mellin-Barnes integral in terms of j not n.
-            reJ = 0.5 
-            Max_imJ = 120 
-            
-            return fixed_quadvec(lambda imJ: Integrand_TFF(imJ)+Integrand_TFF(-imJ), 0,  Max_imJ, n=500) + TFFj0()
+        """TFF $\mathcal{F}(xi, t) (\mathcal{F}$
         
-            #return fixed_quad(Integrand_TFF, - Max_imJ, + Max_imJ, n=1000)[0] + TFFj0()
-
-            '''
-            if (self.p == 1):
-                return quad_vec(lambda imJ : self.xi ** (-reJ - 1j * imJ - 1) * (1j + np.tan((reJ + 1j * imJ) * np.pi / 2)) *Integrand_Mellin_Barnes_CFF(reJ + 1j * imJ) / 2, - Max_imJ, + Max_imJ, epsrel = Prec_Goal)[0]
+        Args:
+            ParaAll: array as [Para_Forward, Para_xi2, Para_xi4]
+        
+                - Para_Forward = array as [Para_Forward_uV, Para_Forward_ubar, Para_Forward_dV, Para_Forward_dbar, Para_Forward_g]
+                    where Para_Forward_i is forward parameter sets for valence u quark (uV), sea u quark (ubar), valence d quark (dV), sea d quark (dbar) and gluon (g)
+                - Para_xi2 = array as [Para_xi2_uV, Para_xi2_ubar, Para_xi2_dV, Para_xi2_dbar, Para_xi2_g]
+                    where Para_xi2_i is xi^2 parameter sets for valence u quark (uV), sea u quark (ubar), valence d quark (dV), sea d quark (dbar) and gluon (g)
+                - Para_xi4 = array as [Para_xi4_uV, Para_xi4_ubar, Para_xi4_dV, Para_xi4_dbar, Para_xi4_g]
+                    where Para_xi4_i is xi^4 parameter sets for valence u quark (uV), sea u quark (ubar), valence d quark (dV), sea d quark (dbar) and gluon (g)
+            muf: factorization scale
+            meson: [1 for rho, 2 for phi, 3 for jpsi]
+            p_order: 1 for leading-order evolution (default); 2 for next-to-leading-order evolution ; higher order not implemented yet
+            flv: "q", "g", or "All"
             
-            if (self.p == -1):
-                return quad_vec(lambda imJ : self.xi ** (-reJ - 1j * imJ - 1) * (1j - 1/np.tan((reJ + 1j * imJ) * np.pi / 2)) *Integrand_Mellin_Barnes_CFF(reJ + 1j * imJ) / 2, - Max_imJ, + Max_imJ, epsrel = Prec_Goal)[0]
-            '''
+        Returns:
+            TFF \mathcal{F}(xi, t)
+        """
+        if (p_order == 2):
+            return self.TFFNLO(ParaAll, muf, meson, flv)
+        
+        #[Para_Forward, Para_xi2, Para_xi4] = ParaAll  # each (N, 5, 1, 5)
+        Para_Forward = ParaAll[..., 0, :, :, :]  # each (N, 5, 1, 5)
+        Para_xi2     = ParaAll[..., 1, :, :, :]
+        Para_xi4     = ParaAll[..., 2, :, :, :]
 
-    # A separate function for next-to-leading order TFF, it can be called directly or with TFF() by setting p_order = 2 
+        def Integrand_Mellin_Barnes_TFF(j: complex):
+
+            ConfFlav     = Moment_Sum(j, self.t, Para_Forward) #(N, 5)
+            ConfFlav_xi2 = Moment_Sum(j, self.t, Para_xi2)
+            ConfFlav_xi4 = Moment_Sum(j, self.t, Para_xi4)
+            
+            EvoConf_Wilson = (TFF_Evo_LO(j, NFEFF, self.p, self.Q, ConfFlav, meson) \
+                                + TFF_Evo_LO(j+2, NFEFF, self.p, self.Q, ConfFlav_xi2, meson) \
+                                    + TFF_Evo_LO(j+4, NFEFF, self.p, self.Q, ConfFlav_xi4, meson))
+            
+            fmask = flvmask(flv)
+            return np.einsum('j, ...j', fmask, EvoConf_Wilson)  
+        
+        def Integrand_TFF(imJ: complex):
+            # mask = (self.p==1) # assume p can only be either 1 or -1
+
+            result = np.ones_like(self.p) * self.xi ** (-reJ - 1j * imJ - 1) * Integrand_Mellin_Barnes_TFF(reJ + 1j * imJ) / 2
+
+            if self.p==1:
+                result *= (1j + np.tan((reJ + 1j * imJ) * np.pi / 2))
+            else:
+                result *= (1j - 1/np.tan((reJ + 1j * imJ) * np.pi / 2))
+
+            return result
+
+        # Adding extra j = 0 term for the axial vector CFFs
+        def TFFj0():
+
+            if self.p==1:
+                result = np.ones_like(self.p) * 0
+            else:
+                result = np.ones_like(self.p) * self.xi ** (- 1) * Integrand_Mellin_Barnes_TFF(0) *(2)
+
+            return result
+        
+        # The contour for Mellin-Barnes integral in terms of j not n.
+        reJ = 0.5 
+        Max_imJ = 120 
+        
+        return fixed_quadvec(lambda imJ: Integrand_TFF(imJ)+Integrand_TFF(-imJ), 0,  Max_imJ, n=500) + TFFj0()
+    
+    # !!! Working in progress
+    def CFFNLO(self, ParaAll, muf: float, flv = 'All'):
+        """CFF $\mathcal{F}(xi, t) (\mathcal{F}$
+        
+        A separate function for next-to-leading order CFF, it can be called directly or with CFF() by setting p_order = 2 
+        
+        Args:
+            ParaAll: array as [Para_Forward, Para_xi2, Para_xi4]
+        
+                - Para_Forward = array as [Para_Forward_uV, Para_Forward_ubar, Para_Forward_dV, Para_Forward_dbar, Para_Forward_g]
+                    where Para_Forward_i is forward parameter sets for valence u quark (uV), sea u quark (ubar), valence d quark (dV), sea d quark (dbar) and gluon (g)
+                - Para_xi2 = array as [Para_xi2_uV, Para_xi2_ubar, Para_xi2_dV, Para_xi2_dbar, Para_xi2_g]
+                    where Para_xi2_i is xi^2 parameter sets for valence u quark (uV), sea u quark (ubar), valence d quark (dV), sea d quark (dbar) and gluon (g)
+                - Para_xi4 = array as [Para_xi4_uV, Para_xi4_ubar, Para_xi4_dV, Para_xi4_dbar, Para_xi4_g]
+                    where Para_xi4_i is xi^4 parameter sets for valence u quark (uV), sea u quark (ubar), valence d quark (dV), sea d quark (dbar) and gluon (g)
+            muf: factorization scale
+            flv: "q", "g", or "All"
+            
+        Returns:
+            CFF \mathcal{F}(xi, t)
+        """
+        #[Para_Forward, Para_xi2, Para_xi4] = ParaAll  # each (N, 5, 1, 5)
+        Para_Forward = ParaAll[..., 0, :, :, :]  # each (N, 5, 1, 5)
+        Para_xi2     = ParaAll[..., 1, :, :, :]
+        Para_xi4     = ParaAll[..., 2, :, :, :]
+
+        # The contour for Mellin-Barnes integral in terms of j not n.
+        reJ = Mellin_Barnes_intercept 
+        Max_imJ = Mellin_Barnes_cutoff
+        
+        def Integrand_Mellin_Barnes_CFF(j: complex):
+            # j is a scalar
+
+            ConfFlav     = Moment_Sum(j, self.t, Para_Forward) #(N, 5)
+            ConfFlav_xi2 = Moment_Sum(j, self.t, Para_xi2)
+            ConfFlav_xi4 = Moment_Sum(j, self.t, Para_xi4)
+
+            EvoConf_Wilson = (CFF_Evo_NLO_evWC(j, NFEFF, self.p, self.Q, ConfFlav, muf) \
+                                +  CFF_Evo_NLO_evWC(j+2, NFEFF, self.p, self.Q, ConfFlav_xi2, muf) \
+                                +  CFF_Evo_NLO_evWC(j+4, NFEFF, self.p, self.Q, ConfFlav_xi4, muf))
+                        
+            fmask = flvmask(flv)
+            return np.einsum('j, ...j', fmask, EvoConf_Wilson)
+        
+        def tan_factor(j):
+            if (self.p==1):
+                return  1/(2j)*self.xi ** (-j-1)*(1j+np.tan(j * np.pi / 2))
+            else:
+                return  1/(2j)*self.xi ** (-j-1)*(1j-1/np.tan(j * np.pi / 2))
+        
+        eps= 10. **(-6)            
+        # adding back the j=0 contribution            
+        def CFFj0():
+            if self.p==1:
+                return 0
+            else:
+                return self.xi ** (- 1.) * Integrand_Mellin_Barnes_CFF(np.array([0.+eps])) *(2) # the last factor of 2 is the residual of -1/(2j)*np.cot(j * np.pi / 2) at j=0
+        
+        reJ = 1-0.8
+        
+        Max_imJ = 150
+        
+        return 1j*fixed_quadvec(lambda imJ: tan_factor(reJ+1j*imJ)*Integrand_Mellin_Barnes_CFF(reJ+1j*imJ)+tan_factor(reJ-1j*imJ)*Integrand_Mellin_Barnes_CFF(reJ-1j*imJ), 0, Max_imJ,n = 300) + CFFj0()
+
+    # !!! Working in progress
+    def CFFNLO_evMom(self, ParaAll, muf: float, flv = 'All'):
+        """NLOCFF $\mathcal{F}(xi, t) (\mathcal{F}) $
+        
+        A different function for next-to-leading order TFF using evolved moment method, it can be checked that it generate the same results as the evolve Wilson coefficient method
+        
+        Args:
+            ParaAll: array as [Para_Forward, Para_xi2, Para_xi4]
+        
+                - Para_Forward = array as [Para_Forward_uV, Para_Forward_ubar, Para_Forward_dV, Para_Forward_dbar, Para_Forward_g]
+                    where Para_Forward_i is forward parameter sets for valence u quark (uV), sea u quark (ubar), valence d quark (dV), sea d quark (dbar) and gluon (g)
+                - Para_xi2 = array as [Para_xi2_uV, Para_xi2_ubar, Para_xi2_dV, Para_xi2_dbar, Para_xi2_g]
+                    where Para_xi2_i is xi^2 parameter sets for valence u quark (uV), sea u quark (ubar), valence d quark (dV), sea d quark (dbar) and gluon (g)
+                - Para_xi4 = array as [Para_xi4_uV, Para_xi4_ubar, Para_xi4_dV, Para_xi4_dbar, Para_xi4_g]
+                    where Para_xi4_i is xi^4 parameter sets for valence u quark (uV), sea u quark (ubar), valence d quark (dV), sea d quark (dbar) and gluon (g)
+            muf: factorization scale
+            flv: "q", "g", or "All"
+            
+        Returns:
+            CFF \mathcal{F}(xi, t)
+        """
+        Para_Forward = ParaAll[..., 0, :, :, :]  # each (N, 5, 1, 5)
+        Para_xi2     = ParaAll[..., 1, :, :, :]
+        Para_xi4     = ParaAll[..., 2, :, :, :]
+
+        # The contour for Mellin-Barnes integral in terms of j not n.
+        reJ = Mellin_Barnes_intercept 
+        Max_imJ = Mellin_Barnes_cutoff
+        
+        def Integrand_Mellin_Barnes_CFF(j: complex):
+            
+            EvoConf_Wilson = (CFF_Evo_NLO_evMOM(j, NFEFF, self.p, self.Q, self.t, self.xi, Para_Forward, 0, muf) \
+                                        +  CFF_Evo_NLO_evMOM(j+2, NFEFF, self.p, self.Q, self.t, self.xi, Para_xi2, 2, muf) \
+                                            +  CFF_Evo_NLO_evMOM(j+4, NFEFF, self.p, self.Q, self.t, self.xi, Para_xi4, 4, muf))
+            
+            fmask = flvmask(flv)
+            return np.einsum('j, ...j', fmask, EvoConf_Wilson)
+        
+        def tan_factor(j):
+            if (self.p==1):
+                return  1/(2j)*self.xi ** (-j-1)*(1j+np.tan(j * np.pi / 2))
+            else:
+                return  1/(2j)*self.xi ** (-j-1)*(1j-1/np.tan(j * np.pi / 2))
+        
+        eps= 10. **(-6)
+        
+        # adding back the j=0 contribution            
+        def CFFj0():
+            if self.p==1:
+                return 0
+            else:
+                return self.xi ** (- 1.) * Integrand_Mellin_Barnes_CFF(np.array([0.+eps])) *(2) # the last factor of 2 is the residual of -1/(2j)*np.cot(j * np.pi / 2) at j=0
+        
+        #for moment evolution, the j=1 pole is also missed because we choose 1<cj<2.
+        def CFFj1():
+
+            if self.p==1:
+                return self.xi ** (- 2.) * Integrand_Mellin_Barnes_CFF(np.array([1.+eps])) *(2) # the last factor of 2 is the residual of 1/(2j)*np.tan(j * np.pi / 2) at j=1
+            else:
+                return 0            
+        
+        reJ = 2. - 0.5
+    
+        Max_imJ = 150
+
+        return 1j*fixed_quadvec(lambda imJ: tan_factor(reJ+1j*imJ)*Integrand_Mellin_Barnes_CFF(reJ+1j*imJ)+tan_factor(reJ-1j*imJ)*Integrand_Mellin_Barnes_CFF(reJ-1j*imJ), 0, Max_imJ,n = 400) + CFFj0() + CFFj1()
+    
     def TFFNLO(self, ParaAll, muf: float, meson: int, flv = 'All'):
-            """TFF $\mathcal{F}(xi, t) (\mathcal{F}$
-            
-            Args:
-                ParaAll: array as [Para_Forward, Para_xi2, Para_xi4]
-            
-                    - Para_Forward = array as [Para_Forward_uV, Para_Forward_ubar, Para_Forward_dV, Para_Forward_dbar, Para_Forward_g]
-                      where Para_Forward_i is forward parameter sets for valence u quark (uV), sea u quark (ubar), valence d quark (dV), sea d quark (dbar) and gluon (g)
-                    - Para_xi2 = array as [Para_xi2_uV, Para_xi2_ubar, Para_xi2_dV, Para_xi2_dbar, Para_xi2_g]
-                      where Para_xi2_i is xi^2 parameter sets for valence u quark (uV), sea u quark (ubar), valence d quark (dV), sea d quark (dbar) and gluon (g)
-                    - Para_xi4 = array as [Para_xi4_uV, Para_xi4_ubar, Para_xi4_dV, Para_xi4_dbar, Para_xi4_g]
-                      where Para_xi4_i is xi^4 parameter sets for valence u quark (uV), sea u quark (ubar), valence d quark (dV), sea d quark (dbar) and gluon (g)
-                muf: factorization scale
-                meson: [1 for rho, 2 for phi, 3 for jpsi]
-                flv: "q", "g", or "All"
-                
-            Returns:
-                TFF \mathcal{F}(xi, t)
-            """
-            #[Para_Forward, Para_xi2, Para_xi4] = ParaAll  # each (N, 5, 1, 5)
-            Para_Forward = ParaAll[..., 0, :, :, :]  # each (N, 5, 1, 5)
-            Para_xi2     = ParaAll[..., 1, :, :, :]
-            Para_xi4     = ParaAll[..., 2, :, :, :]
-            '''
-            # Removing xi^4 terms
-            Para_xi4     = ParaAll[..., 2, :, :, :]
-            '''
-
-            # The contour for Mellin-Barnes integral in terms of j not n.
-            reJ = Mellin_Barnes_intercept 
-            Max_imJ = Mellin_Barnes_cutoff
-            
-            def Integrand_Mellin_Barnes_TFF(j: complex):
-                # j is a scalar
-
-                '''
-                ConfFlav = np.array( list(map(lambda paraset: Moment_Sum(j, self.t, paraset), Para_Forward)) )
-                ConfFlav_xi2 = np.array( list(map(lambda paraset: Moment_Sum(j, self.t, paraset), Para_xi2)) )
-                ConfFlav_xi4 = np.array( list(map(lambda paraset: Moment_Sum(j, self.t, paraset), Para_xi4)) )
-                '''
-                ConfFlav     = Moment_Sum(j, self.t, Para_Forward) #(N, 5)
-                ConfFlav_xi2 = Moment_Sum(j, self.t, Para_xi2)
-                ConfFlav_xi4 = Moment_Sum(j, self.t, Para_xi4)
-                '''
-                # Removing xi^4 terms
-                ConfFlav_xi4 = Moment_Sum(j, self.t, Para_xi4)
-                '''
-
-                # shape (N, 5)
-                """
-                # Removing xi^4 terms
-                EvoConf_Wilson = (CWilson(j) * Moment_Evo(j, NFEFF, self.p, self.Q, ConfFlav) \
-                                    + CWilson(j+2) * Moment_Evo(j+2, NFEFF, self.p, self.Q, ConfFlav_xi2) \
-                                    + CWilson(j+4) * Moment_Evo(j+4, NFEFF, self.p, self.Q, ConfFlav_xi4))
-                """
-                EvoConf_Wilson = (TFF_Evo_NLO_evWC(j, NFEFF, self.p, self.Q, ConfFlav, meson, muf) \
-                                 +  TFF_Evo_NLO_evWC(j+2, NFEFF, self.p, self.Q, ConfFlav_xi2, meson, muf) \
-                                 +  TFF_Evo_NLO_evWC(j+4, NFEFF, self.p, self.Q, ConfFlav_xi4, meson, muf))
-                
-                '''
-                if(meson == 1):
-                    return np.einsum('j, ...j', TFF_rho_trans, EvoConf_Wilson)                
-                if(meson== 2):
-                    return np.einsum('j, ...j', TFF_phi_trans, EvoConf_Wilson)                
-                if(meson == 3):
-                    return np.einsum('j, ...j', TFF_jpsi_trans, EvoConf_Wilson)
-                '''                
-                fmask = flvmask(flv)
-                return np.einsum('j, ...j', fmask, EvoConf_Wilson)
-            
-            def tan_factor(j):
-                if (self.p==1):
-                    return  1/(2j)*self.xi ** (-j-1)*(1j+np.tan(j * np.pi / 2))
-                else:
-                    return  1/(2j)*self.xi ** (-j-1)*(1j-1/np.tan(j * np.pi / 2))
-            
-            eps= 10. **(-6)            
-            # adding back the j=0 contribution            
-            def TFFj0():
-                if self.p==1:
-                    return 0
-                else:
-                    return self.xi ** (- 1.) * Integrand_Mellin_Barnes_TFF(np.array([0.+eps])) *(2) # the last factor of 2 is the residual of -1/(2j)*np.cot(j * np.pi / 2) at j=0
-            
-            reJ = 1-0.8
-            
-            Max_imJ = 150
-            
-            return 1j*fixed_quadvec(lambda imJ: tan_factor(reJ+1j*imJ)*Integrand_Mellin_Barnes_TFF(reJ+1j*imJ)+tan_factor(reJ-1j*imJ)*Integrand_Mellin_Barnes_TFF(reJ-1j*imJ), 0, Max_imJ,n = 300) + TFFj0()
-
-    # A different function for next-to-leading order TFF using evolved moment method, it can be checked that it generate the same results as the evolve Wilson coefficient method
-    def TFFNLO_evMom(self, ParaAll, muf: float, meson: int, flv = 'All'):
-            """NLOTFF $\mathcal{F}(xi, t) (\mathcal{F}) $
-            
-            Args:
-                ParaAll: array as [Para_Forward, Para_xi2, Para_xi4]
-            
-                    - Para_Forward = array as [Para_Forward_uV, Para_Forward_ubar, Para_Forward_dV, Para_Forward_dbar, Para_Forward_g]
-                      where Para_Forward_i is forward parameter sets for valence u quark (uV), sea u quark (ubar), valence d quark (dV), sea d quark (dbar) and gluon (g)
-                    - Para_xi2 = array as [Para_xi2_uV, Para_xi2_ubar, Para_xi2_dV, Para_xi2_dbar, Para_xi2_g]
-                      where Para_xi2_i is xi^2 parameter sets for valence u quark (uV), sea u quark (ubar), valence d quark (dV), sea d quark (dbar) and gluon (g)
-                    - Para_xi4 = array as [Para_xi4_uV, Para_xi4_ubar, Para_xi4_dV, Para_xi4_dbar, Para_xi4_g]
-                      where Para_xi4_i is xi^4 parameter sets for valence u quark (uV), sea u quark (ubar), valence d quark (dV), sea d quark (dbar) and gluon (g)
-                muf: factorization scale
-                meson: [1 for rho, 2 for phi, 3 for jpsi]
-                flv: "q", "g", or "All"
-                
-            Returns:
-                TFF \mathcal{F}(xi, t)
-            """
-            #[Para_Forward, Para_xi2, Para_xi4] = ParaAll  # each (N, 5, 1, 5)
-            Para_Forward = ParaAll[..., 0, :, :, :]  # each (N, 5, 1, 5)
-            Para_xi2     = ParaAll[..., 1, :, :, :]
-            Para_xi4     = ParaAll[..., 2, :, :, :]
-            '''
-            # Removing xi^4 terms
-            Para_xi4     = ParaAll[..., 2, :, :, :]
-            '''
-
-            # The contour for Mellin-Barnes integral in terms of j not n.
-            reJ = Mellin_Barnes_intercept 
-            Max_imJ = Mellin_Barnes_cutoff
-            
-            def Integrand_Mellin_Barnes_TFF(j: complex):
-                
-                EvoConf_Wilson = (TFF_Evo_NLO_evMOM(j, NFEFF, self.p, self.Q, self.t, self.xi, Para_Forward, 0, meson, muf) \
-                                          +  TFF_Evo_NLO_evMOM(j+2, NFEFF, self.p, self.Q, self.t, self.xi, Para_xi2, 2, meson, muf) \
-                                              +  TFF_Evo_NLO_evMOM(j+4, NFEFF, self.p, self.Q, self.t, self.xi, Para_xi4, 4, meson, muf))
-                
-                '''
-                if(meson == 1):
-                    return np.einsum('j, ...j', TFF_rho_trans, EvoConf_Wilson)                
-                if(meson== 2):
-                    return np.einsum('j, ...j', TFF_phi_trans, EvoConf_Wilson)                
-                if(meson == 3):
-                    return np.einsum('j, ...j', TFF_jpsi_trans, EvoConf_Wilson)                
-                '''
-                fmask = flvmask(flv)
-                return np.einsum('j, ...j', fmask, EvoConf_Wilson)
-            
-            def tan_factor(j):
-                if (self.p==1):
-                    return  1/(2j)*self.xi ** (-j-1)*(1j+np.tan(j * np.pi / 2))
-                else:
-                    return  1/(2j)*self.xi ** (-j-1)*(1j-1/np.tan(j * np.pi / 2))
-            
-            eps= 10. **(-6)
-            
-            # adding back the j=0 contribution            
-            def TFFj0():
-                if self.p==1:
-                    return 0
-                else:
-                    return self.xi ** (- 1.) * Integrand_Mellin_Barnes_TFF(np.array([0.+eps])) *(2) # the last factor of 2 is the residual of -1/(2j)*np.cot(j * np.pi / 2) at j=0
-            
-            #for moment evolution, the j=1 pole is also missed because we choose 1<cj<2.
-            def TFFj1():
-
-                if self.p==1:
-                    return self.xi ** (- 2.) * Integrand_Mellin_Barnes_TFF(np.array([1.+eps])) *(2) # the last factor of 2 is the residual of 1/(2j)*np.tan(j * np.pi / 2) at j=1
-                else:
-                    return 0            
-            
-            reJ = 2. - 0.5
+        """TFF $\mathcal{F}(xi, t) (\mathcal{F}$
         
-            Max_imJ = 150
+        A separate function for next-to-leading order TFF, it can be called directly or with TFF() by setting p_order = 2 
+        
+        Args:
+            ParaAll: array as [Para_Forward, Para_xi2, Para_xi4]
+        
+                - Para_Forward = array as [Para_Forward_uV, Para_Forward_ubar, Para_Forward_dV, Para_Forward_dbar, Para_Forward_g]
+                    where Para_Forward_i is forward parameter sets for valence u quark (uV), sea u quark (ubar), valence d quark (dV), sea d quark (dbar) and gluon (g)
+                - Para_xi2 = array as [Para_xi2_uV, Para_xi2_ubar, Para_xi2_dV, Para_xi2_dbar, Para_xi2_g]
+                    where Para_xi2_i is xi^2 parameter sets for valence u quark (uV), sea u quark (ubar), valence d quark (dV), sea d quark (dbar) and gluon (g)
+                - Para_xi4 = array as [Para_xi4_uV, Para_xi4_ubar, Para_xi4_dV, Para_xi4_dbar, Para_xi4_g]
+                    where Para_xi4_i is xi^4 parameter sets for valence u quark (uV), sea u quark (ubar), valence d quark (dV), sea d quark (dbar) and gluon (g)
+            muf: factorization scale
+            meson: [1 for rho, 2 for phi, 3 for jpsi]
+            flv: "q", "g", or "All"
+            
+        Returns:
+            TFF \mathcal{F}(xi, t)
+        """
+        Para_Forward = ParaAll[..., 0, :, :, :]  # each (N, 5, 1, 5)
+        Para_xi2     = ParaAll[..., 1, :, :, :]
+        Para_xi4     = ParaAll[..., 2, :, :, :]
 
-            return 1j*fixed_quadvec(lambda imJ: tan_factor(reJ+1j*imJ)*Integrand_Mellin_Barnes_TFF(reJ+1j*imJ)+tan_factor(reJ-1j*imJ)*Integrand_Mellin_Barnes_TFF(reJ-1j*imJ), 0, Max_imJ,n = 400) + TFFj0() + TFFj1()
+        # The contour for Mellin-Barnes integral in terms of j not n.
+        reJ = Mellin_Barnes_intercept 
+        Max_imJ = Mellin_Barnes_cutoff
+        
+        def Integrand_Mellin_Barnes_TFF(j: complex):
+            # j is a scalar
+
+            ConfFlav     = Moment_Sum(j, self.t, Para_Forward) #(N, 5)
+            ConfFlav_xi2 = Moment_Sum(j, self.t, Para_xi2)
+            ConfFlav_xi4 = Moment_Sum(j, self.t, Para_xi4)
+
+            EvoConf_Wilson = (TFF_Evo_NLO_evWC(j, NFEFF, self.p, self.Q, ConfFlav, meson, muf) \
+                                +  TFF_Evo_NLO_evWC(j+2, NFEFF, self.p, self.Q, ConfFlav_xi2, meson, muf) \
+                                +  TFF_Evo_NLO_evWC(j+4, NFEFF, self.p, self.Q, ConfFlav_xi4, meson, muf))
+                        
+            fmask = flvmask(flv)
+            return np.einsum('j, ...j', fmask, EvoConf_Wilson)
+        
+        def tan_factor(j):
+            if (self.p==1):
+                return  1/(2j)*self.xi ** (-j-1)*(1j+np.tan(j * np.pi / 2))
+            else:
+                return  1/(2j)*self.xi ** (-j-1)*(1j-1/np.tan(j * np.pi / 2))
+        
+        eps= 10. **(-6)            
+        # adding back the j=0 contribution            
+        def TFFj0():
+            if self.p==1:
+                return 0
+            else:
+                return self.xi ** (- 1.) * Integrand_Mellin_Barnes_TFF(np.array([0.+eps])) *(2) # the last factor of 2 is the residual of -1/(2j)*np.cot(j * np.pi / 2) at j=0
+        
+        reJ = 1-0.8
+        
+        Max_imJ = 150
+        
+        return 1j*fixed_quadvec(lambda imJ: tan_factor(reJ+1j*imJ)*Integrand_Mellin_Barnes_TFF(reJ+1j*imJ)+tan_factor(reJ-1j*imJ)*Integrand_Mellin_Barnes_TFF(reJ-1j*imJ), 0, Max_imJ,n = 300) + TFFj0()
+
+    def TFFNLO_evMom(self, ParaAll, muf: float, meson: int, flv = 'All'):
+        """NLOTFF $\mathcal{F}(xi, t) (\mathcal{F}) $
+        
+        A different function for next-to-leading order TFF using evolved moment method, it can be checked that it generate the same results as the evolve Wilson coefficient method
+        
+        Args:
+            ParaAll: array as [Para_Forward, Para_xi2, Para_xi4]
+        
+                - Para_Forward = array as [Para_Forward_uV, Para_Forward_ubar, Para_Forward_dV, Para_Forward_dbar, Para_Forward_g]
+                    where Para_Forward_i is forward parameter sets for valence u quark (uV), sea u quark (ubar), valence d quark (dV), sea d quark (dbar) and gluon (g)
+                - Para_xi2 = array as [Para_xi2_uV, Para_xi2_ubar, Para_xi2_dV, Para_xi2_dbar, Para_xi2_g]
+                    where Para_xi2_i is xi^2 parameter sets for valence u quark (uV), sea u quark (ubar), valence d quark (dV), sea d quark (dbar) and gluon (g)
+                - Para_xi4 = array as [Para_xi4_uV, Para_xi4_ubar, Para_xi4_dV, Para_xi4_dbar, Para_xi4_g]
+                    where Para_xi4_i is xi^4 parameter sets for valence u quark (uV), sea u quark (ubar), valence d quark (dV), sea d quark (dbar) and gluon (g)
+            muf: factorization scale
+            meson: [1 for rho, 2 for phi, 3 for jpsi]
+            flv: "q", "g", or "All"
+            
+        Returns:
+            TFF \mathcal{F}(xi, t)
+        """
+
+        Para_Forward = ParaAll[..., 0, :, :, :]  # each (N, 5, 1, 5)
+        Para_xi2     = ParaAll[..., 1, :, :, :]
+        Para_xi4     = ParaAll[..., 2, :, :, :]
+
+        # The contour for Mellin-Barnes integral in terms of j not n.
+        reJ = Mellin_Barnes_intercept 
+        Max_imJ = Mellin_Barnes_cutoff
+        
+        def Integrand_Mellin_Barnes_TFF(j: complex):
+            
+            EvoConf_Wilson = (TFF_Evo_NLO_evMOM(j, NFEFF, self.p, self.Q, self.t, self.xi, Para_Forward, 0, meson, muf) \
+                                        +  TFF_Evo_NLO_evMOM(j+2, NFEFF, self.p, self.Q, self.t, self.xi, Para_xi2, 2, meson, muf) \
+                                            +  TFF_Evo_NLO_evMOM(j+4, NFEFF, self.p, self.Q, self.t, self.xi, Para_xi4, 4, meson, muf))
+            
+            fmask = flvmask(flv)
+            return np.einsum('j, ...j', fmask, EvoConf_Wilson)
+        
+        def tan_factor(j):
+            if (self.p==1):
+                return  1/(2j)*self.xi ** (-j-1)*(1j+np.tan(j * np.pi / 2))
+            else:
+                return  1/(2j)*self.xi ** (-j-1)*(1j-1/np.tan(j * np.pi / 2))
+        
+        eps= 10. **(-6)
+        
+        # adding back the j=0 contribution            
+        def TFFj0():
+            if self.p==1:
+                return 0
+            else:
+                return self.xi ** (- 1.) * Integrand_Mellin_Barnes_TFF(np.array([0.+eps])) *(2) # the last factor of 2 is the residual of -1/(2j)*np.cot(j * np.pi / 2) at j=0
+        
+        #for moment evolution, the j=1 pole is also missed because we choose 1<cj<2.
+        def TFFj1():
+
+            if self.p==1:
+                return self.xi ** (- 2.) * Integrand_Mellin_Barnes_TFF(np.array([1.+eps])) *(2) # the last factor of 2 is the residual of 1/(2j)*np.tan(j * np.pi / 2) at j=1
+            else:
+                return 0            
+        
+        reJ = 2. - 0.5
+    
+        Max_imJ = 150
+
+        return 1j*fixed_quadvec(lambda imJ: tan_factor(reJ+1j*imJ)*Integrand_Mellin_Barnes_TFF(reJ+1j*imJ)+tan_factor(reJ-1j*imJ)*Integrand_Mellin_Barnes_TFF(reJ-1j*imJ), 0, Max_imJ,n = 400) + TFFj0() + TFFj1()
