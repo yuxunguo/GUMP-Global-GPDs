@@ -199,13 +199,13 @@ if __name__ == '__main__':
     # Test of two methods of calculating TFF evolved to mu =5 GeV
     x=0.0001
     _GPD_theo = GPDobserv(x,x,0.0,5.0,1)
-    '''
+
     TFF1 = _GPD_theo.TFFNLO(Para_spe,5.0, meson = 3, flv ='All')
     print(TFF1)
     TFF2 = _GPD_theo.TFFNLO_evMom(Para_spe,5.0, meson = 3, flv ='All')
     print(TFF2)
     print(TFF2-TFF1)
-    '''
+
     TFF3 = _GPD_theo.TFFNLO(Para_spe,5.0, meson = 1, flv ='All')
     print(TFF3)
     TFF4 = _GPD_theo.TFFNLO_evMom(Para_spe,5.0, meson = 1, flv ='All')
@@ -216,9 +216,11 @@ if __name__ == '__main__':
     # Plotting results of the paper
     #
     
-    '''
-    # Comparing PDF with the global extraction of PDF
 
+    # Comparing PDF with the global extraction of PDF
+    '''
+    os.makedirs(os.path.join(dir_path,"GUMP_Results"), exist_ok=True)
+    
     x = np.exp(np.linspace(np.log(0.0001), np.log(0.05), 100, dtype = float))
     
     pdflst = np.array([PDF_theo_s(x_i,0.,2.,1,'g',Para_spe, 2) for x_i in x ])
@@ -238,7 +240,7 @@ if __name__ == '__main__':
         csvWriter = csv.writer(my_csv,delimiter=',')
         csvWriter.writerows(np.transpose([x,gpdlst]))
     print(time.time()-ts)
-
+    
     # Ploting the R ratio
 
     x = np.exp(np.linspace(np.log(0.0001), np.log(0.01), 20, dtype = float))

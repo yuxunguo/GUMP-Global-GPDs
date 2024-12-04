@@ -895,7 +895,7 @@ def WilsonCoef_DVCS_NLO(j: complex, nf: int, Q: float, mu: float, p:int) -> comp
 
     return np.einsum('j, j...->j...', Charge_Factor(0), CWT)
 
-def WilsonCoef_DVMP_LO(j: complex, nf: int, meson: int) -> complex:
+def WilsonCoef_DVMP_LO(j: complex, nf: int, muf: float,meson: int) -> complex:
     """LO Wilson coefficient of DVMP in the evolution basis (qVal, q_du_plus, q_du_minus, qSigma, g)
 
     Args:
@@ -911,7 +911,7 @@ def WilsonCoef_DVMP_LO(j: complex, nf: int, meson: int) -> complex:
     | The meson decay constant, CF/NC, and eq are included in the prefactor of Wilson coefficient. 
     """
     # A factor of 3 coming from the asymptotic DA. The factors for S/G can be found in eq. (22b) of 2310.13837
-    CWT = 3* np.array([WilsonCoef(j), \
+    CWT = 3* AlphaS(nloop_alphaS, nf, muf)* np.array([WilsonCoef(j), \
                        WilsonCoef(j), \
                        WilsonCoef(j), \
                        1/ nf * WilsonCoef(j),\
@@ -923,7 +923,7 @@ def WilsonCoef_DVMP_LO(j: complex, nf: int, meson: int) -> complex:
                       
     if(meson== 3):
     
-     CWT = 3* np.array([0*j, \
+     CWT = 3* AlphaS(nloop_alphaS, nf, muf)* np.array([0*j, \
                         0*j, \
                         0*j, \
                         0*j, \
@@ -1046,15 +1046,15 @@ def WilsonCoef_DVMP_NLO(j: complex, k: complex, nf: int, Q: float, muf: float, m
         Returns: One of the non singlet moments
         """
        
-        return AlphaS(nloop_alphaS, nf, Init_Scale_Q) / 2 / np.pi * (CF * MCQ1CF + (CF - NC/2) * MCQ1CG(prty) + beta0(nf) * MCQ1BET0)
+        return AlphaS(nloop_alphaS, nf, muf) / 2 / np.pi * (CF * MCQ1CF + (CF - NC/2) * MCQ1CG(prty) + beta0(nf) * MCQ1BET0)
     
-    CQPS = AlphaS(nloop_alphaS, nf, Init_Scale_Q) / 2 / np.pi * ((-np.log(Q**2/mufact2) - 1 + 2*S1(j+1) + 2*S1(k+1) - 1)*(-2*(4 + 3*j + j**2)/j/(j+1)/(j+2)/(j+3)) - (1/2 + 1/(j+1)/(j+2) + 1/(k+1)/(k+2))*2/(j+1)/(j+2) + k*(k+1)*(k+2)*(k+3)*(deldelS2((j+1)/2,k/2) - deldelS2((j+1)/2,(k+2)/2))/2/(2*k+3) )
+    CQPS = AlphaS(nloop_alphaS, nf, muf) / 2 / np.pi * ((-np.log(Q**2/mufact2) - 1 + 2*S1(j+1) + 2*S1(k+1) - 1)*(-2*(4 + 3*j + j**2)/j/(j+1)/(j+2)/(j+3)) - (1/2 + 1/(j+1)/(j+2) + 1/(k+1)/(k+2))*2/(j+1)/(j+2) + k*(k+1)*(k+2)*(k+3)*(deldelS2((j+1)/2,k/2) - deldelS2((j+1)/2,(k+2)/2))/2/(2*k+3) )
     
-    CGNC =  AlphaS(nloop_alphaS, nf, Init_Scale_Q) / 2 / np.pi * ((-np.log(Q**2 / mufact2) + S1(j+1) + 3*S1(k+1)/2 + 0.5 + 1/(j+1)/(j+2))*(4*S1(j+1) + 4/(j+1)/(j+2) - 12/j/(j+3)) * 0.5 - (3 * (2*S1(j+1) + S1(k+1) - 6) / j / (j+3)) + (8 + 4*np.pi**2 / 6 - (k+1)*(k+2)*delS2((k+1)/2))/8 - delS2((j+1)/2)/2 - (10*(j+1)*(j+2) + 4)/(j+1)**2 / (j+2)**2 - (delS2((j+1)/2) / 2 / (k+1) / (k+2) - (k-1)*deldelS2((j+1)/2,k/2)/(2*k+3) + (k+4)*deldelS2((j+1)/2,(k+2)/2)/(2*k+3))*k*(k+1)*(k+2)*(k+3)/4 + ((k+1)*(k+2)*S1(k+1)-2)/(j+1)/(j+2)/(k+1)/(k+2))
+    CGNC =  AlphaS(nloop_alphaS, nf, muf) / 2 / np.pi * ((-np.log(Q**2 / mufact2) + S1(j+1) + 3*S1(k+1)/2 + 0.5 + 1/(j+1)/(j+2))*(4*S1(j+1) + 4/(j+1)/(j+2) - 12/j/(j+3)) * 0.5 - (3 * (2*S1(j+1) + S1(k+1) - 6) / j / (j+3)) + (8 + 4*np.pi**2 / 6 - (k+1)*(k+2)*delS2((k+1)/2))/8 - delS2((j+1)/2)/2 - (10*(j+1)*(j+2) + 4)/(j+1)**2 / (j+2)**2 - (delS2((j+1)/2) / 2 / (k+1) / (k+2) - (k-1)*deldelS2((j+1)/2,k/2)/(2*k+3) + (k+4)*deldelS2((j+1)/2,(k+2)/2)/(2*k+3))*k*(k+1)*(k+2)*(k+3)/4 + ((k+1)*(k+2)*S1(k+1)-2)/(j+1)/(j+2)/(k+1)/(k+2))
     
-    CGCF = AlphaS(nloop_alphaS, nf, Init_Scale_Q) / 2 / np.pi * ((-np.log(Q**2 / muphi2) + S1(j+1) + S1(k+1) - 3/4 - 1/2/(k+1)/(k+2) - 1/(j+1)/(j+2))*(4*S1(k+1) - 3 - 2/(k+1)/(k+2))/2 + (-np.log(Q**2 / mufact2) + 1 + 3*S1(j+1) - 0.5 + (2*S1(j+1)-1)/(k+1)/(k+2) -1/(j+1)/(j+2))*(-(4+2*(j+1)*(j+2))/(j+1)/(j+2)/(j+3))*(j+3)/4 - (35 - ((k+1)*(k+2) + 2)*delS2((k+1)/2) + 4/(k+1)**2/(k+2)**2)/8 + (((k+1)*(k+2) + 2)*S1(j+1)/(k+1)/(k+2) +1)/(j+1)/(j+2) + (delS2((j+1)/2)/2/(k+1)/(k+2) - ((k-1)*k*deldelS2((j+1)/2,k/2) - (k+3)*(k+4)*deldelS2((j+1)/2,(k+2)/2))/2/(2*k+3))*((k+1)*(k+2)*((k+1)*(k+2) +2)/4) - ((k+1)*(k+2) + 2)/2/(j+1)/(j+2)/(k+1)/(k+2))
+    CGCF = AlphaS(nloop_alphaS, nf, muf) / 2 / np.pi * ((-np.log(Q**2 / muphi2) + S1(j+1) + S1(k+1) - 3/4 - 1/2/(k+1)/(k+2) - 1/(j+1)/(j+2))*(4*S1(k+1) - 3 - 2/(k+1)/(k+2))/2 + (-np.log(Q**2 / mufact2) + 1 + 3*S1(j+1) - 0.5 + (2*S1(j+1)-1)/(k+1)/(k+2) -1/(j+1)/(j+2))*(-(4+2*(j+1)*(j+2))/(j+1)/(j+2)/(j+3))*(j+3)/4 - (35 - ((k+1)*(k+2) + 2)*delS2((k+1)/2) + 4/(k+1)**2/(k+2)**2)/8 + (((k+1)*(k+2) + 2)*S1(j+1)/(k+1)/(k+2) +1)/(j+1)/(j+2) + (delS2((j+1)/2)/2/(k+1)/(k+2) - ((k-1)*k*deldelS2((j+1)/2,k/2) - (k+3)*(k+4)*deldelS2((j+1)/2,(k+2)/2))/2/(2*k+3))*((k+1)*(k+2)*((k+1)*(k+2) +2)/4) - ((k+1)*(k+2) + 2)/2/(j+1)/(j+2)/(k+1)/(k+2))
     
-    CWT= np.array([CQNS(-1)*(3 * 2 ** (1+j) * gamma(5/2+j) / (gamma(3/2) * gamma(3+j))), 
+    CWT= AlphaS(nloop_alphaS, nf, muf) * np.array([CQNS(-1)*(3 * 2 ** (1+j) * gamma(5/2+j) / (gamma(3/2) * gamma(3+j))), 
                    CQNS(+1)*(3 * 2 ** (1+j) * gamma(5/2+j) / (gamma(3/2) * gamma(3+j))),  
                    CQNS(-1)*(3 * 2 ** (1+j) * gamma(5/2+j) / (gamma(3/2) * gamma(3+j))), \
                    CQNS(+1)*(3 * 2 ** (1+j) * gamma(5/2+j) / (gamma(3/2) * gamma(3+j)))/nf + CQPS * (3 * 2 ** (1+j) * gamma(5/2+j) / (gamma(3/2) * gamma(3+j))), \
@@ -1066,7 +1066,7 @@ def WilsonCoef_DVMP_NLO(j: complex, k: complex, nf: int, Q: float, muf: float, m
         |if the meson is jpsi we are setting all the quark parts to zero except the pure singlet
         """ 
 
-        CWT= np.array([0*j, 
+        CWT= AlphaS(nloop_alphaS, nf, muf)* np.array([0*j, 
                        0*j,  
                        0*j, \
                   CQPS * (3 * 2 ** (1+j) * gamma(5/2+j) / (gamma(3/2) * gamma(3+j))), \
@@ -1256,8 +1256,8 @@ def TFF_Evo_LO(j: np.array, nf: int, p: int, mu: float, ConfFlav: np.array, meso
     [evons, evoa] = evolop(j, nf, p, mu) # (N) and (N, 2, 2)
     
     # Combine with the corresponding wilson coefficient in the evolution basis
-    EvoWCNS = np.einsum('i...,...->...i',WilsonCoef_DVMP_LO(j,nf, meson)[:3,...],evons)
-    EvoWCS = np.einsum('ik,kij->kij', WilsonCoef_DVMP_LO(j,nf, meson)[-2:,...], evoa)
+    EvoWCNS = np.einsum('i...,...->...i',WilsonCoef_DVMP_LO(j,nf,mu, meson)[:3,...],evons)
+    EvoWCS = np.einsum('ik,kij->kij', WilsonCoef_DVMP_LO(j,nf,mu, meson)[-2:,...], evoa)
 
     # Non-singlet part evolves multiplicatively
     EvoConfNS = np.einsum('...j,...j->...j',EvoWCNS, ConfNS)
@@ -1294,8 +1294,8 @@ def DVMP_WCoef_Evo_NLO(j: np.array, nf: int, p: int, Q: float, meson: int, muf: 
     assert j.ndim == 1, "Check dimension of j, must be 1D array" # shape (N,)
     
     # Separate out NS and S/G Wilson coefficients
-    CWNS = WilsonCoef_DVMP_LO(j, nf, meson)[:3]
-    CWSG = WilsonCoef_DVMP_LO(j, nf, meson)[-2:]
+    CWNS = WilsonCoef_DVMP_LO(j, nf, muf, meson)[:3]
+    CWSG = WilsonCoef_DVMP_LO(j, nf, muf, meson)[-2:]
      
     #Set up evolution operator for WCs
     Alphafact = np.array(AlphaS(nloop_alphaS, nf, muf)) / np.pi / 2
@@ -1347,7 +1347,7 @@ def DVMP_WCoef_Evo_NLO(j: np.array, nf: int, p: int, Q: float, meson: int, muf: 
         jmesh=jmesh.reshape(-1)
         kmesh=kmesh.reshape(-1)
         
-        CWk = WilsonCoef_DVMP_LO(jmesh+kmesh+1, nf, meson)[-2:]        
+        CWk = WilsonCoef_DVMP_LO(jmesh+kmesh+1, nf, muf, meson)[-2:]        
         Bjk = np.array(bmudep(muf, np.array(jmesh+kmesh+1,dtype=complex), np.array(jmesh,dtype=complex), nf,p))*Alphafact
         out = np.einsum('...ij,...->...ij',np.einsum('...ij,i...->...ij',Bjk,CWk), 1/4*np.tan(np.pi * kmesh / 2))  
 
@@ -1373,7 +1373,7 @@ def DVMP_WCoef_Evo_NLO(j: np.array, nf: int, p: int, Q: float, meson: int, muf: 
         jmesh=jmesh.reshape(-1)
         kmesh=kmesh.reshape(-1)
 
-        CWk = WilsonCoef_DVMP_LO(jmesh+kmesh+1, nf, meson)[:3]        
+        CWk = WilsonCoef_DVMP_LO(jmesh+kmesh+1, nf, muf, meson)[:3]        
         # prty of NS are not the same but Bjk only concern leading order anomalous dimension there for we take prty=1
         BjkNS = np.array(bmudepNS(muf, np.array(jmesh+kmesh+1,dtype=complex), np.array(jmesh,dtype=complex), nf,p))*Alphafact
         out = np.einsum('...i,...->...i',np.einsum('...,i...->...i',BjkNS,CWk), 1/4*np.tan(np.pi * kmesh / 2))  #first shape (N,) and (3,N) to (N,3), then (N,3) and (N,) to (N,3)
@@ -1811,9 +1811,9 @@ def TFF_Evo_NLO_evMOM(j: np.array, nf: int, p: int, Q: float, t: float, xi: floa
     conf_ev_NS_tot, conf_ev_SG_tot, confNS_ev0, confSG_ev0 = Moment_Evo_NLO(j, nf, p, muf, t, xi, Para, momshift)
     
     # Leading order non-singlet DVMP Wilson coefficient
-    NSCoef_0 = WilsonCoef_DVMP_LO(j,nf, meson)[:3]
+    NSCoef_0 = WilsonCoef_DVMP_LO(j,nf, muf, meson)[:3]
     # Leading order singlet DVMP Wilson coefficient
-    SCoef_0 = WilsonCoef_DVMP_LO(j,nf, meson)[-2:]
+    SCoef_0 = WilsonCoef_DVMP_LO(j,nf, muf, meson)[-2:]
     
     # Next-to-leading order non-singlet DVMP Wilson coefficient
     NSCoef_1 = WilsonCoef_DVMP_NLO(j,0,nf,Q,muf, meson, p)[:3]

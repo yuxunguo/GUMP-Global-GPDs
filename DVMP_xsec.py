@@ -37,89 +37,156 @@ alphaEM = 1 / 137.036
 """
 
 
-@njit
-def prefac_rho(y: float, xB: float, t: float, Q: float, phi: int): 
+
+def epsilon(y:float):
+    """ Photon polarizability.
+
+    Args:
+       y (float): Beam energy lost parameter
+     
+
+    Returns:
+        epsilon:  "Eq.(31) in https://arxiv.org/pdf/1112.2597" 
+    """
+    return (1 - y) / (1 - y - y**2 / 2)
+   #Is epsilont different for DVCS and DVMP?
+
+
+def R(Q:float, meson:int):
+    """ The ratio of longitudinal to transverse cross-sections.
+
+    Args:
+        Q: The photon virtuality 
+        meson:The meson being produced in DVMP process: 1 for rho, 2 for phi, 3 for j/psi
+     
+
+    Returns: The parametrization of R factor and the fitted (a,p) parameters in  L/T separation  as in  Eq.(32) in https://arxiv.org/pdf/1112.2597"
+       
+    """
+       
+   
     
-    # Here we use the R extraction by Cuic et al, taking trivial W dependence and central values of the fit (a,p) parameters
-    return gevtonb * ev.AlphaS(2, 2, Q)**2 * ((1 - y) / (1 - y - y**2 / 2) + (1 + 3 * Q**2 / M_rho**2) * M_rho**2 / Q**2)  * alphaEM * (xB ** 2) * 2 * np.pi * ev.CF** 2 / (1 - xB) / (Q ** 6) / np.sqrt(1 - eps(xB, Q) ** 2) / ev.NC ** 2
+    def M_meson(meson:int):
+        """ Meson mass.
+
+        Args:
+            meson:The meson being produced in DVMP process: 1 for rho, 2 for phi, 3 for j/psi
+         
+
+        Returns:
+           Meson mass: 1 for rho, 2 for phi, 3 for j/psi
+        """
+        if (meson==1):
+            return M_rho
+        if (meson==2):
+             return M_phi
+        if (meson==3):
+             return M_jpsi
+         
+    def a_meson (meson:int):
+        """ Parameter a in the parametrization of R
+
+        Args:
+            meson:The meson being produced in DVMP process: 1 for rho, 2 for phi, 3 for j/psi
+         
+
+        Returns:
+          a as in  Eq.(32) in https://arxiv.org/pdf/1112.2597"
+        """
+        if (meson==1):
+             return 2.2
+        if (meson==2): 
+             return 25.4
+        if (meson==3):
+             return 0
+    
+    def p_meson (meson:int):
+        """ Parameter p in the parametrization of R
+
+        Args:
+            meson:The meson being produced in DVMP process: 1 for rho, 2 for phi, 3 for j/psi
+         
+
+        Returns:
+          p as in  Eq.(32) in https://arxiv.org/pdf/1112.2597"
+        """
+        if (meson==1):
+            return 0.451
+        if (meson==2): 
+            return 0.180
+        if (meson==3):
+            return 0
+    #print(M_meson(meson)**1.5, 'worked')
+    #print(a_meson(meson)**1.5,'worked')
+    #print(p_meson(meson)**1.5,'worked')
+    return  (Q**2/M_meson(meson)**2)/(1+a_meson(meson)*Q**2/M_meson(meson)**2)**p_meson(meson)
+    
+def MassCorr(meson:int):
+    """ Mass corrections 
+
+     Args:
+         meson:The meson being produced in DVMP process: 1 for rho, 2 for phi, 3 for j/psi
+      
+
+     Returns:
+        mass correction only for j/psi
+     """
+  
+    if (meson==3):
+        return  M_jpsi
+    else:
+        return 0
+  
+         
 
     
-    # Multiply with gamma factor (photon flux) for full cross section. Here for rho and phi we use the R(Q^2) fit from Muller and Lautenschlager.
-    #return gevtonb * ev.AlphaS(2, 2, Q)**2 * ((1 - y) / (1 - y - y**2 / 2) + (1 + 2.2 * Q**2 / M_rho**2)**0.451 * M_rho**2 / Q**2)  * alphaEM * (xB ** 2) * 2 * np.pi * ev.CF** 2 / (1 - xB) / (Q ** 6) / np.sqrt(1 - eps(xB, Q) ** 2) / ev.NC ** 2
-
-@njit
-def prefac_phi(y: float, xB: float, t: float, Q: float, phi: int):
-    
-    return gevtonb * ev.AlphaS(2, 2, Q)**2 * ((1 - y) / (1 - y - y**2 / 2) + (1 + 25.4 * Q**2 / M_phi**2)**0.180 * M_phi**2 / Q**2)  * alphaEM * (xB ** 2) * 2 * np.pi * ev.CF ** 2 / (1 - xB) / (Q ** 6) / np.sqrt(1 - eps(xB, Q) ** 2) / ev.NC ** 2
-
-@njit
-def prefac_jpsi(y: float, xB: float, t: float, Q: float, phi: int):
-    
-    return gevtonb * 2 * np.pi * ((1 - y) / (1 - y - y**2 / 2) + M_jpsi**2 / Q**2) * ev.AlphaS(2, 2, Q)**2 * alphaEM * (xB ** 2) * 2 * np.pi * ev.CF ** 2 / (1 - xB) / (Q ** 6) / np.sqrt(1 - eps(xB, Q) ** 2) / ev.NC ** 2
-
-# Jpsi xsec is calculated as longitudinal piece only, compared to total xsec from data converted to longitudinal piece with experimental values for R and error propagation
-
-
-@njit
-def eps(xB: float, Q: float):
-    
-    return 2 * xB * M_p / Q
-
-@njit
-def m2(xB: float, Q: float, t: float):
-    
-    return -1 * (Q ** 2 - M_p ** 2 + (t / 2)) ** 3 * (1 / ((2 * Q ** 2) / xB - Q ** 2 - M_p ** 2 + t) ) ** 2 / ( 2 * Q ** 4)
-
-@njit
-def K(xB: float, Q: float, t: float):
-    
-    return np.sqrt(-1 * M_p ** 2 * xB ** 2 * ((1 - ((m2(xB, Q, t) - t) / Q ** 2)) ** 2 + 4 * m2(xB, Q, t) * (1 - (t / 4 / (M_p ** 2))) / (Q ** 2)) - (1 - xB) * t * (1 - (xB * (m2(xB, Q, t) - t) / (Q ** 2))))
+    #return Q**2/M_meson(meson)**2 /(1 + a_meson(meson) * Q**2 / M_meson(meson)**2)**p_meson(meson)
 
 @np.vectorize
-def dsigma_rho_dt(y: float, xB: float, t: float, Q: float, phi: float, HTFF_rho: complex, ETFF_rho: complex):
-    
-    """
-    
-    differential cross section in t
-    
-    """
-    
-    """
-    
-    unpolarized nucleon to unpolarized nucleon
-    
-    """
-   # return prefac_rho(y, xB, t, Q, phi) * ((4 * (1 - xB) * (1 - xB * (m2(xB, Q, t) - t) / (Q ** 2)) - (m2(xB, Q, t) * eps(xB, Q) ** 2 / (M_p ** 2))) / ((2 - xB - (xB * (m2(xB, Q, t) - t) / Q ** 2)) ** 2) * Real((HTFF_rho - ((xB ** 2 * ((1 + (m2(xB, Q, t) - t) / Q ** 2) ** 2) + 4 * xB * t / Q ** 2) * ETFF_rho / (4 * (1 - xB) * (1 - xB * (m2(xB, Q, t) - t) / Q ** 2) - (m2(xB, Q, t) * eps(xB,Q) ** 2 / M_p ** 2)))) * Conjugate((HTFF_rho - ((xB ** 2 * ((1 + (m2(xB, Q, t) - t) / Q ** 2) ** 2) + 4 * xB * t / Q ** 2) * ETFF_rho / (4 * (1 - xB) * (1 - xB * (m2(xB, Q, t) - t) / Q ** 2) - (m2(xB, Q, t) * eps(xB,Q) ** 2 / M_p ** 2)))))) + (K(xB, Q, t) ** 2 * Real(ETFF_rho * Conjugate(ETFF_rho)) / 4 / M_p ** 2 / ((1 - xB) * (1 - xB * (m2(xB, Q, t) - t) / Q ** 2) - (m2(xB, Q, t) * eps(xB, Q) ** 2 / 4 / M_p ** 2))))
-    
-    return gevtonb * ((1 - y) / (1 - y - y**2 / 2) + (1 + 2.2 * Q**2 / M_rho**2)**0.451 * M_rho**2 / Q**2) * 2 * np.pi * alphaEM * xB**2 * ev.CF**2 * ev.AlphaS(2,2,Q)**2 * HTFF_rho * Conjugate(HTFF_rho) / Q**6 / ev.NC**2
-    
+def dsigmaL_dt(y: float, xB: float, t: float, Q: float, meson:int, HTFF: complex, ETFF: complex):
+    """Longitudinal DVMP cross section differential only in t
+          
+      Args:
+          y (float): Beam energy lost parameter
+          xB (float): x_bjorken
+          t (float): momentum transfer square
+          Q (float): photon virtuality
+          TFF (complex): Transition form factor H 
+          ETFF (complex): Transition form factor E
+          MassCorr(int): Mass corrections to the cross section.  Nonzero only for j/psi
+   
+      
 
-    
+      Returns:
+          
+          Eq.(2.8) as in https://arxiv.org/pdf/2409.17231"
+    """
 
+    return  ( 4* np.pi**2  *alphaEM * xB ** 2 / ((Q**2 + MassCorr(meson)**2) ** 2))* (Real(HTFF* Conjugate(HTFF)) - t/4/ M_p**2 * Real(ETFF* Conjugate(ETFF)))
+                                         
+                                                
+        
+   # return  gevtonb *2*np.pi**2 * alphaEM * (xB ** 2 / (1 - xB) * Q**4 * np.sqrt(1 + eps(xB, Q) ** 2))* Cunp(xB, t, Q, HTFF_rho, ETFF_rho, meson)
 
 @np.vectorize
-def dsigma_phi_dt(y: float, xB: float, t: float, Q: float, phi: float, HTFF_phi: complex, ETFF_phi: complex):
-    
+def dsigma_dt(y: float, xB: float, t: float, Q: float, meson:int, HTFF: complex, ETFF: complex):
+    """The total DVMP cross section differential only in t
+          
+      Args:
+          y (float): Beam energy lost parameter
+          xB (float): x_bjorken
+          t (float): momentum transfer square
+          Q (float): photon virtuality
+          TFF (complex): Transition form factor H 
+          ETFF (complex): Transition form factor E
+          MassCorr(int): Mass corrections to the cross section.  Nonzero only for j/psi
+   
+      
+
+      Returns:
+          
+          Eq.(2.16) as in https://arxiv.org/pdf/2409.17231"
     """
-    
-    unpolarized nucleon to unpolarized nucleon
-    
-    """
-    return prefac_phi(y, xB, t, Q, phi) * ((4 * (1 - xB) * (1 - xB * (m2(xB, Q, t) - t) / (Q ** 2)) - (m2(xB, Q, t) * eps(xB, Q) ** 2 / (M_p ** 2))) / ((2 - xB - (xB * (m2(xB, Q, t) - t) / Q ** 2)) ** 2) * (HTFF_phi - ((xB ** 2 * ((1 + (m2(xB, Q, t) - t) / Q ** 2) ** 2) + 4 * xB * t / Q ** 2) * ETFF_phi / (4 * (1 - xB) * (1 - xB * (m2(xB, Q, t) - t) / Q ** 2) - (m2(xB, Q, t) * eps(xB,Q) ** 2 / M_p ** 2)))) * Conjugate((HTFF_phi - ((xB ** 2 * ((1 + (m2(xB, Q, t) - t) / Q ** 2) ** 2) + 4 * xB * t / Q ** 2) * ETFF_phi / (4 * (1 - xB) * (1 - xB * (m2(xB, Q, t) - t) / Q ** 2) - (m2(xB, Q, t) * eps(xB,Q) ** 2 / M_p ** 2))))) + (K(xB, Q, t) ** 2 * ETFF_phi * Conjugate(ETFF_phi) / 4 / M_p ** 2 / ((1 - xB) * (1 - xB * (m2(xB, Q, t) - t) / Q ** 2) - (m2(xB, Q, t) * eps(xB, Q) ** 2 / 4 / M_p ** 2))))
-    
-    
-    
-    
-@np.vectorize
-def dsigma_Jpsi_dt(y: float, xB: float, t: float, Q: float, phi: float, HTFF_jpsi: complex, ETFF_jpsi: complex):
-    
-    """
-    
-    unpolarized nucleon to unpolarized nucleon
-    
-    """
-    LplusT = (1 - y) / (1 - y - y**2 / 2) + M_jpsi**2 / Q**2 
-    
-    return LplusT * gevtonb * 4 * np.pi ** 2 * alphaEM * xB ** 2 / ((Q**2 + M_jpsi**2) ** 2) * ev.AlphaS(2, 2, np.sqrt(Q**2 + M_jpsi**2))**2  * (Real(HTFF_jpsi* Conjugate(HTFF_jpsi)) - t/4/ M_p**2 * Real(ETFF_jpsi* Conjugate(ETFF_jpsi))) * (Q/ (Q**2 + M_jpsi**2)) ** 2
-    # Version including mass corrections! Extra factor of 3 C_F**2 needed to account for different factors included in gluon TFF. 
-    #return ((1 - y) / (1 - y - y**2 / 2) + M_jpsi**2 / Q**2) * gevtonb * 4 / 9 * 2 * np.pi**2 * alphaEM * ev.AlphaS(2, 2, np.sqrt(Q**2 + M_jpsi**2))**2 * ev.CF**2 * Q**2 * (((1 - (xB / (2 - xB))**2) * Real((HTFF_jpsi - (xB**2 / 4 / (1-xB)) * ETFF_jpsi) * Conjugate(HTFF_jpsi - (xB**2 / 4 / (1-xB)) * ETFF_jpsi)) / ev.NC**2 / (M_jpsi**2 + Q**2)**2 / ((M_jpsi**2 + Q**2) / xB - Q**2 - M_p**2) / np.sqrt(((M_jpsi**2 + Q**2) / xB - Q**2)**2 + Q**4 + M_p**4 + 2 * ((M_jpsi**2 + Q**2) / xB - Q**2) * Q**2 + 2 * Q**2 * M_p**2 - 2 * ((M_jpsi**2 + Q**2) / xB - Q**2) * M_p**2)) + (((-t - (M_p**2 * xB**2 / (1-xB))) / 2 / M_p) * Real((ETFF_jpsi) * Conjugate(ETFF_jpsi)) / ev.NC**2 / (M_jpsi**2 + Q**2)**2 / ((M_jpsi**2 + Q**2) / xB - Q**2 - M_p**2) / np.sqrt(((M_jpsi**2 + Q**2) / xB - Q**2)**2 + Q**4 + M_p**4 + 2 * ((M_jpsi**2 + Q**2) / xB - Q**2) * Q**2 + 2 * Q**2 * M_p**2 - 2 * ((M_jpsi**2 + Q**2) / xB - Q**2) * M_p**2)))
+
+    return  gevtonb *dsigmaL_dt(y, xB, t, Q, meson, HTFF, ETFF)*(epsilon(y)+1/R(Q,meson))
+ 
