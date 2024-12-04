@@ -532,7 +532,7 @@ class GPDobserv (object) :
             if self.p==1:
                 result = np.ones_like(self.p) * 0
             else:
-                result = np.ones_like(self.p) * self.xi ** (- 1) * Integrand_Mellin_Barnes_CFF(np.array([0.])) *(2)
+                result = np.ones_like(self.p) * self.xi ** (- 1) * Integrand_Mellin_Barnes_CFF(np.array([0.]))[0] *(2)
 
             return result
         
@@ -667,7 +667,7 @@ class GPDobserv (object) :
             if self.p==1:
                 return 0
             else:
-                return self.xi ** (- 1.) * Integrand_Mellin_Barnes_CFF(np.array([0.+eps])) *(2) # the last factor of 2 is the residual of -1/(2j)*np.cot(j * np.pi / 2) at j=0
+                return self.xi ** (- 1.) * Integrand_Mellin_Barnes_CFF(np.array([0.+eps]))[0] *(2) # the last factor of 2 is the residual of -1/(2j)*np.cot(j * np.pi / 2) at j=0
         
         reJ = 1-0.8
         
@@ -726,13 +726,13 @@ class GPDobserv (object) :
             if self.p==1:
                 return 0
             else:
-                return self.xi ** (- 1.) * Integrand_Mellin_Barnes_CFF(np.array([0.+eps])) *(2) # the last factor of 2 is the residual of -1/(2j)*np.cot(j * np.pi / 2) at j=0
+                return self.xi ** (- 1.) * Integrand_Mellin_Barnes_CFF(np.array([0.+eps]))[0] *(2) # the last factor of 2 is the residual of -1/(2j)*np.cot(j * np.pi / 2) at j=0
         
         #for moment evolution, the j=1 pole is also missed because we choose 1<cj<2.
         def CFFj1():
 
             if self.p==1:
-                return self.xi ** (- 2.) * Integrand_Mellin_Barnes_CFF(np.array([1.+eps])) *(2) # the last factor of 2 is the residual of 1/(2j)*np.tan(j * np.pi / 2) at j=1
+                return self.xi ** (- 2.) * Integrand_Mellin_Barnes_CFF(np.array([1.+eps]))[0] *(2) # the last factor of 2 is the residual of 1/(2j)*np.tan(j * np.pi / 2) at j=1
             else:
                 return 0            
         
@@ -797,7 +797,7 @@ class GPDobserv (object) :
             if self.p==1:
                 return 0
             else:
-                return self.xi ** (- 1.) * Integrand_Mellin_Barnes_TFF(np.array([0.+eps])) *(2) # the last factor of 2 is the residual of -1/(2j)*np.cot(j * np.pi / 2) at j=0
+                return self.xi ** (- 1.) * Integrand_Mellin_Barnes_TFF(np.array([0.+eps]))[0] *(2) # the last factor of 2 is the residual of -1/(2j)*np.cot(j * np.pi / 2) at j=0
         
         reJ = 1-0.8
         
@@ -857,13 +857,13 @@ class GPDobserv (object) :
             if self.p==1:
                 return 0
             else:
-                return self.xi ** (- 1.) * Integrand_Mellin_Barnes_TFF(np.array([0.+eps])) *(2) # the last factor of 2 is the residual of -1/(2j)*np.cot(j * np.pi / 2) at j=0
+                return self.xi ** (- 1.) * Integrand_Mellin_Barnes_TFF(np.array([0.+eps]))[0] *(2) # the last factor of 2 is the residual of -1/(2j)*np.cot(j * np.pi / 2) at j=0
         
         #for moment evolution, the j=1 pole is also missed because we choose 1<cj<2.
         def TFFj1():
 
             if self.p==1:
-                return self.xi ** (- 2.) * Integrand_Mellin_Barnes_TFF(np.array([1.+eps])) *(2) # the last factor of 2 is the residual of 1/(2j)*np.tan(j * np.pi / 2) at j=1
+                return self.xi ** (- 2.) * Integrand_Mellin_Barnes_TFF(np.array([1.+eps]))[0] *(2) # the last factor of 2 is the residual of 1/(2j)*np.tan(j * np.pi / 2) at j=1
             else:
                 return 0            
         

@@ -162,7 +162,7 @@ def dsigmaL_dt(y: float, xB: float, t: float, Q: float, meson:int, HTFF: complex
           Eq.(2.8) as in https://arxiv.org/pdf/2409.17231"
     """
 
-    return  ( 4* np.pi**2  *alphaEM * xB ** 2 / ((Q**2 + MassCorr(meson)**2) ** 2))* (Real(HTFF* Conjugate(HTFF)) - t/4/ M_p**2 * Real(ETFF* Conjugate(ETFF)))
+    return  ( 4* np.pi**2  *alphaEM * xB ** 2 / ((Q**2 + MassCorr(meson)**2) ** 2)) * (Q/ (Q**2 + MassCorr(meson)**2)) ** 2 * (Real(HTFF* Conjugate(HTFF)) - t/4/ M_p**2 * Real(ETFF* Conjugate(ETFF)))
                                          
                                                 
         

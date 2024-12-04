@@ -8,7 +8,8 @@ from Minimizer import PDF_theo, tPDF_theo, GFF_theo, CFF_theo
 from Minimizer import DVCSxsec_theo, DVCSxsec_cost_xBtQ, DVCSxsec_HERA_theo, DVJpsiPH1xsec_group_data
 from multiprocessing import Pool
 import time
-from DVMP_xsec import dsigma_Jpsi_dt, M_jpsi
+from DVMP_xsec import dsigma_dt, M_jpsi
+from Evolution import AlphaS
 from functools import partial
 import os
 dir_path = os.path.dirname(os.path.realpath(__file__))
@@ -37,41 +38,50 @@ def rratio_theo_s(xi, t, Q, p, flv, Para, p_order):
     _GPD_theo = GPDobserv(xi, xi, t, Q, p)
     return _GPD_theo.GPD(flv, Para, p_order)/_GPD_theo.tPDF(flv, Para, p_order)
 
-def HTFF_theo_jpsi(xB, t, Q, Para_spe, p_order = 1, muset =1, flv = 'All'):
+def HTFF_theo(xB, t, Q, Para_spe, meson,p_order = 1, muset =1, flv = 'All'):
     x = 0
-    xi = (1/(2 - xB) - (2*t*(-1 + xB))/((Q**2 + M_jpsi**2)*(-2 + xB)**2))*xB
+    xi = (1/(2 - xB) - (2*t*(-1 + xB))/((Q**2)*(-2 + xB)**2))*xB
+    if (meson==3):
+       xi = (1/(2 - xB) - (2*t*(-1 + xB))/((Q**2 + M_jpsi**2)*(-2 + xB)**2))*xB
     H_E = GPDobserv(x, xi, t, Q, 1)
-    HTFF_jpsi = H_E.TFF(Para_Unp[..., 0, :, :, :, :], muset * Q, 3, p_order, flv)
+    HTFF = H_E.TFF(Para_Unp[..., 0, :, :, :, :], muset * Q, meson, p_order, flv)
     
-    return HTFF_jpsi
+    return HTFF
 
-def TFF_theo_jpsi(xB, t, Q, Para_spe, p_order = 1, muset =1, flv = 'All'):
+def TFF_theo(xB, t, Q, Para_Unp, meson:int, p_order = 1, muset = 1, flv = 'All'):
     x = 0
-    xi = (1/(2 - xB) - (2*t*(-1 + xB))/((Q**2 + M_jpsi**2)*(-2 + xB)**2))*xB
+    xi = (1/(2 - xB) - (2*t*(-1 + xB))/((Q**2)*(-2 + xB)**2))*xB
+    if (meson==3):
+       xi = (1/(2 - xB) - (2*t*(-1 + xB))/((Q**2 + M_jpsi**2)*(-2 + xB)**2))*xB
     H_E = GPDobserv(x, xi, t, Q, 1)
-    HTFF_jpsi = H_E.TFF(Para_Unp[..., 0, :, :, :, :], muset * Q, 3, p_order, flv)
-    ETFF_jpsi = H_E.TFF(Para_Unp[..., 1, :, :, :, :], muset * Q, 3, p_order, flv)
-    
-    return  [ HTFF_jpsi, ETFF_jpsi ]
+    HTFF = H_E.TFF(Para_Unp[..., 0, :, :, :, :], muset * Q, meson, p_order, flv)
+    ETFF = H_E.TFF(Para_Unp[..., 1, :, :, :, :], muset * Q, meson, p_order, flv)
 
-def DVjpsiPxsec_theo(DVjpsiPxsec_input: pd.DataFrame, TFF_jpsi_input: np.array):
-    y = DVjpsiPxsec_input['y'].to_numpy()
-    xB = DVjpsiPxsec_input['xB'].to_numpy()
-    t = DVjpsiPxsec_input['t'].to_numpy()
-    Q = DVjpsiPxsec_input['Q'].to_numpy()    
-    [HTFF_jpsi, ETFF_jpsi] = TFF_jpsi_input
-    return dsigma_Jpsi_dt(y, xB, t, Q, 0, HTFF_jpsi, ETFF_jpsi)
+    return  [ HTFF, ETFF]
 
-def DVjpsiPxsec_theo_xBtQ(DVjpsiPxsec_data_xBtQ: pd.DataFrame, Para_Unp, xsec_norm, p_order = 2, muset = 1, flv = 'All'):
-    [xB, t, Q] = [DVjpsiPxsec_data_xBtQ['xB'].iat[0], DVjpsiPxsec_data_xBtQ['t'].iat[0], DVjpsiPxsec_data_xBtQ['Q'].iat[0]] 
-    [HTFF_jpsi, ETFF_jpsi] = TFF_theo_jpsi(xB, t, Q, Para_Unp, p_order, muset, flv)
-    DVjpsiP_pred_xBtQ = DVjpsiPxsec_theo(DVjpsiPxsec_data_xBtQ, TFF_jpsi_input = [HTFF_jpsi, ETFF_jpsi]) * xsec_norm**2
-    return DVjpsiP_pred_xBtQ
-'''
-def DVjpsiPxsec_theo_scalar(y: float, xB: float, t: float, Q: float, Para_Unp, xsec_norm, p_order = 2, muset = 1, flv = 'All'):
-    [HTFF_jpsi, ETFF_jpsi] = TFF_theo_jpsi(xB, t, Q, Para_Unp, p_order, muset, flv)
-    return dsigma_Jpsi_dt(y, xB, t, Q, 0, HTFF_jpsi, ETFF_jpsi)* xsec_norm**2
-'''
+def DVMPxsec_theo(DVMPxsec_input: pd.DataFrame, TFF_input: np.array, meson:int):
+    y = DVMPxsec_input['y'].to_numpy()
+    xB = DVMPxsec_input['xB'].to_numpy()
+    t = DVMPxsec_input['t'].to_numpy()
+    Q = DVMPxsec_input['Q'].to_numpy()    
+    [HTFF, ETFF] = TFF_input
+
+    return dsigma_dt(y, xB, t, Q, meson, HTFF, ETFF)
+
+def DVMPxsec_cost_xBtQ(DVMPxsec_data_xBtQ: pd.DataFrame, Para_Unp, xsec_norm, meson:int, p_order=2):
+
+    [xB, t, Q] = [DVMPxsec_data_xBtQ['xB'].iat[0], DVMPxsec_data_xBtQ['t'].iat[0], DVMPxsec_data_xBtQ['Q'].iat[0]] 
+    [HTFF, ETFF] = TFF_theo(xB, t, Q, Para_Unp, meson, p_order, muset = 1)
+    DVMP_pred_xBtQ = DVMPxsec_theo(DVMPxsec_data_xBtQ, TFF_input = [HTFF, ETFF], meson = meson) * xsec_norm**2
+    return np.sum(((DVMP_pred_xBtQ - DVMPxsec_data_xBtQ['f'])/ DVMPxsec_data_xBtQ['delta f']) ** 2 )
+
+def DVMPxsec_theo_xBtQ(DVMPxsec_data_xBtQ: pd.DataFrame, Para_Unp, xsec_norm, meson:int, p_order = 2, muset = 1, flv = 'All'):
+
+    [xB, t, Q] = [DVMPxsec_data_xBtQ['xB'].iat[0], DVMPxsec_data_xBtQ['t'].iat[0], DVMPxsec_data_xBtQ['Q'].iat[0]] 
+    [HTFF, ETFF] = TFF_theo(xB, t, Q, Para_Unp, meson, p_order, muset = muset, flv = flv)
+    DVMP_pred_xBtQ = DVMPxsec_theo(DVMPxsec_data_xBtQ, TFF_input = [HTFF, ETFF], meson = meson) * xsec_norm**2
+    return DVMP_pred_xBtQ
+
 
 """
 def GFF(j, t, Q, flv, spe):
@@ -166,7 +176,7 @@ def DVCSxsec(y, xB, t, Q, phi, pol):
 if __name__ == '__main__':
     pool = Pool()
     Para_spe = Para_All[0]
-    '''
+
     # Test of LO ImCFF and quark GPD evolved to mu =5 GeV
     x=0.0001
     _GPD_theo = GPDobserv(x,x,0.0,5.0,1)
@@ -192,10 +202,10 @@ if __name__ == '__main__':
     f_jpsi= 0.406
     CF=4/3
     NC=3
-    prefact = np.pi * 3 * f_jpsi / NC /x * 2/3
+    prefact = np.pi * 3 * f_jpsi / NC /x * 2/3 * AlphaS(2,2,5.0)
     print(prefact*gpd1)
-    '''
 
+    '''
     # Test of two methods of calculating TFF evolved to mu =5 GeV
     x=0.0001
     _GPD_theo = GPDobserv(x,x,0.0,5.0,1)
@@ -211,14 +221,14 @@ if __name__ == '__main__':
     TFF4 = _GPD_theo.TFFNLO_evMom(Para_spe,5.0, meson = 1, flv ='All')
     print(TFF4)
     print(TFF4-TFF3)
-
+    '''
     #
     # Plotting results of the paper
     #
     
-
-    # Comparing PDF with the global extraction of PDF
     '''
+    # Comparing PDF with the global extraction of PDF
+
     os.makedirs(os.path.join(dir_path,"GUMP_Results"), exist_ok=True)
     
     x = np.exp(np.linspace(np.log(0.0001), np.log(0.05), 100, dtype = float))
@@ -261,19 +271,19 @@ if __name__ == '__main__':
     '''
     # Comparing the cross-sections
     
-    DVjpsiPH1_xBtQ_theo = np.array(list(pool.map(partial(DVjpsiPxsec_theo_xBtQ, Para_Unp = Para_Unp, xsec_norm = jpsinorm, p_order = 2, muset = 1, flv = 'All'), DVJpsiPH1xsec_group_data))).flatten()
+    DVjpsiPH1_xBtQ_theo = np.array(list(pool.map(partial(DVMPxsec_theo_xBtQ, Para_Unp = Para_Unp, xsec_norm = jpsinorm, meson = 3, p_order = 2, muset = 1, flv = 'All'), DVJpsiPH1xsec_group_data))).flatten()
 
-    DVjpsiPH1_xBtQ_theo_mu_1 = np.array(list(pool.map(partial(DVjpsiPxsec_theo_xBtQ, Para_Unp = Para_Unp, xsec_norm = jpsinorm, p_order = 2, muset = np.sqrt(0.5), flv = 'All'), DVJpsiPH1xsec_group_data))).flatten()
+    DVjpsiPH1_xBtQ_theo_mu_1 = np.array(list(pool.map(partial(DVMPxsec_theo_xBtQ, Para_Unp = Para_Unp, xsec_norm = jpsinorm, meson = 3, p_order = 2, muset = np.sqrt(0.5), flv = 'All'), DVJpsiPH1xsec_group_data))).flatten()
     
-    DVjpsiPH1_xBtQ_theo_mu_2 = np.array(list(pool.map(partial(DVjpsiPxsec_theo_xBtQ, Para_Unp = Para_Unp, xsec_norm = jpsinorm, p_order = 2, muset = np.sqrt(2), flv = 'All'), DVJpsiPH1xsec_group_data))).flatten()  
+    DVjpsiPH1_xBtQ_theo_mu_2 = np.array(list(pool.map(partial(DVMPxsec_theo_xBtQ, Para_Unp = Para_Unp, xsec_norm = jpsinorm, meson = 3, p_order = 2, muset = np.sqrt(2), flv = 'All'), DVJpsiPH1xsec_group_data))).flatten()  
     
-    DVjpsiPH1_xBtQ_theo_mu_3 = np.array(list(pool.map(partial(DVjpsiPxsec_theo_xBtQ, Para_Unp = Para_Unp, xsec_norm = jpsinorm, p_order = 2, muset = np.sqrt(0.75), flv = 'All'), DVJpsiPH1xsec_group_data))).flatten()
+    DVjpsiPH1_xBtQ_theo_mu_3 = np.array(list(pool.map(partial(DVMPxsec_theo_xBtQ, Para_Unp = Para_Unp, xsec_norm = jpsinorm, meson = 3, p_order = 2, muset = np.sqrt(0.75), flv = 'All'), DVJpsiPH1xsec_group_data))).flatten()
     
-    DVjpsiPH1_xBtQ_theo_mu_4 = np.array(list(pool.map(partial(DVjpsiPxsec_theo_xBtQ, Para_Unp = Para_Unp, xsec_norm = jpsinorm, p_order = 2, muset = np.sqrt(1.5), flv = 'All'), DVJpsiPH1xsec_group_data))).flatten()  
+    DVjpsiPH1_xBtQ_theo_mu_4 = np.array(list(pool.map(partial(DVMPxsec_theo_xBtQ, Para_Unp = Para_Unp, xsec_norm = jpsinorm, meson = 3, p_order = 2, muset = np.sqrt(1.5), flv = 'All'), DVJpsiPH1xsec_group_data))).flatten()  
 
-    DVjpsiPH1_xBtQ_theo_mu_5 = np.array(list(pool.map(partial(DVjpsiPxsec_theo_xBtQ, Para_Unp = Para_Unp, xsec_norm = jpsinorm, p_order = 2, muset = np.sqrt(0.9), flv = 'All'), DVJpsiPH1xsec_group_data))).flatten()
+    DVjpsiPH1_xBtQ_theo_mu_5 = np.array(list(pool.map(partial(DVMPxsec_theo_xBtQ, Para_Unp = Para_Unp, xsec_norm = jpsinorm, meson = 3, p_order = 2, muset = np.sqrt(0.9), flv = 'All'), DVJpsiPH1xsec_group_data))).flatten()
     
-    DVjpsiPH1_xBtQ_theo_mu_6 = np.array(list(pool.map(partial(DVjpsiPxsec_theo_xBtQ, Para_Unp = Para_Unp, xsec_norm = jpsinorm, p_order = 2, muset = np.sqrt(1.25), flv = 'All'), DVJpsiPH1xsec_group_data))).flatten()  
+    DVjpsiPH1_xBtQ_theo_mu_6 = np.array(list(pool.map(partial(DVMPxsec_theo_xBtQ, Para_Unp = Para_Unp, xsec_norm = jpsinorm, meson = 3, p_order = 2, muset = np.sqrt(1.25), flv = 'All'), DVJpsiPH1xsec_group_data))).flatten()  
 
     DVJpsiPH1xsec_group_data_shape = np.array(DVJpsiPH1xsec_group_data).shape
     
@@ -291,12 +301,12 @@ if __name__ == '__main__':
     
     xb = 0.002
     
-    TFFq1=np.array([HTFF_theo_jpsi(xb,-0.05,q_i,Para_spe, 1, 1, 'q') for q_i in qlst ]).flatten()
-    TFFq2=np.array([HTFF_theo_jpsi(xb,-0.05,q_i,Para_spe, 2, 1, 'q') for q_i in qlst ]).flatten()
-    TFFg1=np.array([HTFF_theo_jpsi(xb,-0.05,q_i,Para_spe, 1, 1, 'g') for q_i in qlst ]).flatten()
-    TFFg2=np.array([HTFF_theo_jpsi(xb,-0.05,q_i,Para_spe, 2, 1, 'g') for q_i in qlst ]).flatten()
+    TFFq1=np.array([HTFF_theo(xb,-0.05,q_i,Para_spe,3, 1, 1, 'q') for q_i in qlst ]).flatten()
+    TFFq2=np.array([HTFF_theo(xb,-0.05,q_i,Para_spe,3, 2, 1, 'q') for q_i in qlst ]).flatten()
+    TFFg1=np.array([HTFF_theo(xb,-0.05,q_i,Para_spe,3, 1, 1, 'g') for q_i in qlst ]).flatten()
+    TFFg2=np.array([HTFF_theo(xb,-0.05,q_i,Para_spe,3, 2, 1, 'g') for q_i in qlst ]).flatten()
     
-    TFFfull=np.array([HTFF_theo_jpsi(xb,-0.05,q_i,Para_spe, 2, 1, 'All') for q_i in qlst ]).flatten()
+    TFFfull=np.array([HTFF_theo(xb,-0.05,q_i,Para_spe,3, 2, 1, 'All') for q_i in qlst ]).flatten()
   
     with open(os.path.join(dir_path,"GUMP_Results/TFFqg12xb1.csv"),"w",newline='') as my_csv:
         csvWriter = csv.writer(my_csv,delimiter=',')
@@ -304,18 +314,17 @@ if __name__ == '__main__':
         
     xb = 0.005
     
-    TFFq1=np.array([HTFF_theo_jpsi(xb,-0.05,q_i,Para_spe, 1, 1, 'q') for q_i in qlst ]).flatten()
-    TFFq2=np.array([HTFF_theo_jpsi(xb,-0.05,q_i,Para_spe, 2, 1, 'q') for q_i in qlst ]).flatten()
-    TFFg1=np.array([HTFF_theo_jpsi(xb,-0.05,q_i,Para_spe, 1, 1, 'g') for q_i in qlst ]).flatten()
-    TFFg2=np.array([HTFF_theo_jpsi(xb,-0.05,q_i,Para_spe, 2, 1, 'g') for q_i in qlst ]).flatten()
+    TFFq1=np.array([HTFF_theo(xb,-0.05,q_i,Para_spe,3, 1, 1, 'q') for q_i in qlst ]).flatten()
+    TFFq2=np.array([HTFF_theo(xb,-0.05,q_i,Para_spe,3, 2, 1, 'q') for q_i in qlst ]).flatten()
+    TFFg1=np.array([HTFF_theo(xb,-0.05,q_i,Para_spe,3, 1, 1, 'g') for q_i in qlst ]).flatten()
+    TFFg2=np.array([HTFF_theo(xb,-0.05,q_i,Para_spe,3, 2, 1, 'g') for q_i in qlst ]).flatten()
     
-    TFFfull=np.array([HTFF_theo_jpsi(xb,-0.05,q_i,Para_spe, 2, 1, 'All') for q_i in qlst ]).flatten()
+    TFFfull=np.array([HTFF_theo(xb,-0.05,q_i,Para_spe,3, 2, 1, 'All') for q_i in qlst ]).flatten()
   
     with open(os.path.join(dir_path,"GUMP_Results/TFFqg12xb2.csv"),"w",newline='') as my_csv:
         csvWriter = csv.writer(my_csv,delimiter=',')
         csvWriter.writerows(np.transpose([qlst,TFFfull,TFFq1,TFFq2,TFFg1,TFFg2]))
     '''
-    
     '''
     x = np.exp(np.linspace(np.log(0.005), np.log(0.6), 100, dtype = float))
 
