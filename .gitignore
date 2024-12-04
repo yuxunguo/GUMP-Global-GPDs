@@ -3,6 +3,10 @@ __pycache__/
 *.py[cod]
 *$py.class
 
+# Jupyter notebook files
+.ipynb_checkpoints/
+*.ipynb
+
 #VS code files
 .vscode/
 
