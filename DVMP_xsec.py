@@ -48,7 +48,7 @@ def epsilon(y:float):
     Returns:
         epsilon:  "Eq.(31) in https://arxiv.org/pdf/1112.2597" 
     """
-    return (1 - y) / (1 - y - y**2 / 2)
+    return (1 - y) / (1 - y + y**2 / 2)
    #Is epsilont different for DVCS and DVMP?
 
 

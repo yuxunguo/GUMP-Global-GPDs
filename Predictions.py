@@ -176,7 +176,7 @@ def DVCSxsec(y, xB, t, Q, phi, pol):
 if __name__ == '__main__':
     pool = Pool()
     Para_spe = Para_All[0]
-
+    '''
     # Test of LO ImCFF and quark GPD evolved to mu =5 GeV
     x=0.0001
     _GPD_theo = GPDobserv(x,x,0.0,5.0,1)
@@ -204,7 +204,7 @@ if __name__ == '__main__':
     NC=3
     prefact = np.pi * 3 * f_jpsi / NC /x * 2/3 * AlphaS(2,2,5.0)
     print(prefact*gpd1)
-
+    '''
     '''
     # Test of two methods of calculating TFF evolved to mu =5 GeV
     x=0.0001
@@ -250,12 +250,12 @@ if __name__ == '__main__':
         csvWriter = csv.writer(my_csv,delimiter=',')
         csvWriter.writerows(np.transpose([x,gpdlst]))
     print(time.time()-ts)
-    
+    '''
     # Ploting the R ratio
 
-    x = np.exp(np.linspace(np.log(0.0001), np.log(0.01), 20, dtype = float))
+    x = np.exp(np.linspace(np.log(0.0001), np.log(0.01), 80, dtype = float))
     
-    qlst = np.linspace(2,8, 20, dtype = float)
+    qlst = np.linspace(2,10, 80, dtype = float)
     
     xmesh, qmesh = np.meshgrid(x,qlst)
     
@@ -267,7 +267,7 @@ if __name__ == '__main__':
     with open(os.path.join(dir_path,"GUMP_Results/Rrat2D.csv"),"w",newline='') as my_csv:
         csvWriter = csv.writer(my_csv,delimiter=',')
         csvWriter.writerows(np.transpose([xmeshflat,qmeshflat,rrat2dlst]))
-    '''
+
     '''
     # Comparing the cross-sections
     
