@@ -373,6 +373,7 @@ class GPDobserv (object) :
         
         # Adding a j = 1 term because the contour do not enclose the j = 1 pole which should be the 1th conformal moment.
         def GPD1():
+
             eps= np.array([0.])
             return (-1)*Integrand_Mellin_Barnes(1.+eps) # Note the residual theorem gives -(2 np.pi *1j)*1/(2*np.sin((j+1)*np.pi)) with residual (-1) at j=1;
   
@@ -386,7 +387,8 @@ class GPDobserv (object) :
                   
                   The better choice is to model the leading moment terms separately, and fit them to other quantities since those terms are not well constrained by the CFF/TFF anyway.
             '''
-            j0 = 1+np.array([0.])
+            eps= 10. **(-6) 
+            j0 = np.array([eps])
             
             ConfFlav     = Moment_Sum(j0, self.t, Para_Forward)
             ConfFlav_xi2 = Moment_Sum(j0, self.t, Para_xi2)
@@ -400,7 +402,7 @@ class GPDobserv (object) :
                 ConfEv     = Moment_Evo_LO(j0, NFEFF, self.p, self.Q, ConfFlav)
                 ConfEv_xi2 = Moment_Evo_LO(j0+2, NFEFF, self.p, self.Q, ConfFlav_xi2)
                 ConfEv_xi4 = Moment_Evo_LO(j0+4, NFEFF, self.p, self.Q, ConfFlav_xi4)
-            # Use tPDF_Moment_Evo_NLO since the off-diagonal piece only contribute for non-zero skewness
+            # Use tPDF_Moment_Evo_NLO since the off-diagonal piece only mixes lower moments into higher moments and the subtraction terms are the lowest moments
             elif (p_order == 2):
                 ConfEv     = tPDF_Moment_Evo_NLO(j0, NFEFF, self.p, self.Q, ConfFlav)
                 ConfEv_xi2 = tPDF_Moment_Evo_NLO(j0+2, NFEFF, self.p, self.Q, ConfFlav_xi2)
@@ -416,7 +418,7 @@ class GPDobserv (object) :
        
         reJ = 2 - 0.5
         Max_imJ = 80
-        return 1/2*np.real(fixed_quadvec(lambda imJ : Integrand_Mellin_Barnes(reJ + 1j* imJ) / np.sin((reJ + 1j * imJ+1) * np.pi) + Integrand_Mellin_Barnes(reJ - 1j* imJ) / np.sin((reJ - 1j * imJ+1) * np.pi) ,0, Max_imJ, n=300)) + np.real(GPD1())  + np.real(GPD0()) 
+        return 1/2*np.real(fixed_quadvec(lambda imJ : Integrand_Mellin_Barnes(reJ + 1j* imJ) / np.sin((reJ + 1j * imJ+1) * np.pi) + Integrand_Mellin_Barnes(reJ - 1j* imJ) / np.sin((reJ - 1j * imJ+1) * np.pi) ,0, Max_imJ, n=300)) + np.real(GPD1()) # + np.real(GPD0()) 
           
     def GFFj0(self, j: int, flv, ParaAll, p_order):
         """Generalized Form Factors A_{j0}(t) which is the xi^0 term of the nth (n= j+1) Mellin moment of GPD int dx x^j F(x,xi,t) for quark and int dx x^(j-1) F(x,xi,t) for gluon
@@ -470,24 +472,6 @@ class GPDobserv (object) :
         result = Flv_Intp(np.einsum('...ij, ...j->...i', GFF_trans, EvoConfFlav), flv) # (N_~mask)
     
         return np.real(result)
-        # the result of np.einsum will be (N, 3)
-        # Flv_Intp  result (N)
-        mask = ((j==0) & (self.p==1))
-        result = np.empty_like(self.Q)
-
-        result[mask] = Flv_Intp(ConfFlav[mask][:, [0,2,4] ] , flv[mask] ) # (N_mask)
-        
-        if (p_order == 1):
-            ConfEv = Moment_Evo_LO(np.array([j]), NFEFF, self.p, self.Q, ConfFlav)
-        elif (p_order == 2):
-            ConfEv = tPDF_Moment_Evo_NLO(np.array([j]), NFEFF, self.p, self.Q, ConfFlav)
-            
-        # Inverse transform the evolved moments back to the flavor basis
-        EvoConfFlav = np.einsum('...ij, ...j->...i', inv_flav_trans, ConfEv) #(N, 5)       
-
-        result = Flv_Intp(np.einsum('...ij, ...j->...i', GFF_trans, EvoConfFlav), flv) # (N_~mask)
-
-        return result #(N)
     
     def CFF(self, ParaAll, muf, p_order = 1, flv = 'All'):
         """Charge averged CFF $\mathcal{F}(xi, t) (\mathcal{F} = Q_u^2 F_u + Q_d^2 F_d)$
