@@ -820,6 +820,8 @@ def Charge_Factor(particle:int):
     
     if (particle==3):
         return f_jpsi * np.array([0,0,0,2/3,2/3])
+    
+  
 
 # Need Wilson coefficients for evolution. Allows numerical pre-calculation of non-diagonal piece using Mellin-Barnes integral
 
@@ -963,27 +965,34 @@ def WilsonCoef_DVMP_NLO(j: complex, k: complex, nf: int, Q: float, muf: float, m
    
     ptyk=1 # Charge parity of DA because we are using only vector meson data
     
-    MCQ1CF = -np.log(Q**2 / mufact2)-23/3+(0.5*(1.+3.*(1.+j)*(2.+j)))/((
-             1 + j)**2*(2.+j)**2)+(0.5*(1.+3.*(1.+k)*(2.+k)))/((1.+k)**2
-             *(2.+k)**2)+0.5*(-3.-2./((1.+j)*(2.+j))+4.*S1(1.+j))*((-
-             0.5*(1.+(1.+j)*(2.+j)))/((1.+j)*(2.+j))-(0.5*(1.+(1.+k)*(
-             2.+k)))/((1.+k)*(2.+k))-0.+S1(1.+j)+S1(1.+k))+0.5 * \
-             ((-0.5*(1.+(1.+j)*(2.+j)))/((1.+j)*(2.+j))-(0.5*(1.+(1.+k
-             )*(2.+k)))/((1.+k)*(2.+k))-0.+S1(1.+j)+S1(1.+k))*(-
-             3.-2./((1.+k)*(2.+k))+4.*S1(1.+k))
+                                                              
+    MCQ1CF = -23/3+(0.5*(1.+3.*(1.+j)*(2.+j)))/((
+            1 + j)**2*(2.+j)**2)+(0.5*(1.+3.*(1.+k)*(2.+k)))/((1.+k)**2
+            *(2.+k)**2)+0.5*(-3.-2./((1.+j)*(2.+j))+4.*S1(1.+j))*((-
+            0.5*(1.+(1.+j)*(2.+j)))/((1.+j)*(2.+j))-(0.5*(1.+(1.+k)*(
+            2.+k)))/((1.+k)*(2.+k))-np.log(Q**2 / mufact2)+S1(1.+j)+S1(1.+k))+0.5 * \
+            ((-0.5*(1.+(1.+j)*(2.+j)))/((1.+j)*(2.+j))-(0.5*(1.+(1.+k
+            )*(2.+k)))/((1.+k)*(2.+k))-np.log(Q**2 / muphi2)+S1(1.+j)+S1(1.+k))*(-
+            3.-2./((1.+k)*(2.+k))+4.*S1(1.+k))
 
-    MCQ1BET0 = np.log(Q**2/mures2)/4-5/6+0.5/((1.+j)*(2.+j))+0.5/((
-               1 + k)*(2.+k))+0.5*0.-S1(1.+j)-S1(1.+k)
+
+    """
+    |The CF term in nonsinglet Wilson coefficient built from Eqs. (24b) of "https://arxiv.org/pdf/2310.13837" and (4.53 f ) of " https://arxiv.org/pdf/1310.5394"
+    """
+    
+    MCQ1BET0 = -5/6+0.5/((1.+j)*(2.+j))+0.5/((
+           1 + k)*(2.+k))+0.5*np.log(Q**2/mures2)-S1(1.+j)-S1(1.+k)
 
     SUMA = 0j
     SUMB = 0j
 
-    for LI in range(0, 1):
+    for LI in range(0, k+1):
         SUMANDB = (0.125*(1.+2.*LI)*(S2(0.5*(1.+j))-S2(-0.5+0.5*(
            1.+j))+S2(-0.5+0.5*LI)-S2(0.5*LI)))/((0.5*(1.+j)-0.5*LI)*(2.+j+LI))
         SUMB += SUMANDB
         SUMA += (-1)**LI * SUMANDB
         
+                                                 
     DELc1aGJK = (-2.*ptyk)/((1.+j)*(2.+j)*(1.+k)*(2.+k))+(0.5
        *(-1.+(1.+j)*(2.+j))*(-2.+(1.+k)*(2.+k)*(S2(0.5*(1.+k)) -
        S2(-0.5+0.5*(1.+k))))*ptyk)/((1.+j)*(2.+j))+(1.+k)*(2.
@@ -998,8 +1007,10 @@ def WilsonCoef_DVMP_NLO(j: complex, k: complex, nf: int, Q: float, muf: float, m
        *(2.+k))))*ptyk+2.*(j-k)*(3.+j+k)*(-SUMA-zeta(3)+S3(1.+j
        )+(0.125*(1.+k)*(S2(0.5*(1.+j))-S2(-0.5+0.5*(1.+j))-S2
        (0.5*(1.+k))+S2(-0.5+0.5*(1.+k)))*ptyk)/((0.5*(1.+j)+0.5
-       *(-1.-k))*(3.+j+k)))
+       *(-1.-k))*(3.+j+k)))                                          
                                       
+                                          
+                                                    
     DELc1bGKJ = 1/((1.+k)*(2.+k))+0.5*(-2.-(1.+k)**2-((1.+j)*(2
        +j))/((1.+k)*(2.+k)))*(S2(0.5*(1.+j))-S2(-0.5+0.5*(1. +
        j)))-0.5*(1.+k)*(S2(0.5*(1.+k))-S2(-0.5+0.5*(1.+k)))-(0.125
@@ -1022,12 +1033,12 @@ def WilsonCoef_DVMP_NLO(j: complex, k: complex, nf: int, Q: float, muf: float, m
             
         Returns: One of the non singlet moments
         """
-        return 0.9565348003631189+DELc1aGJK-(2.*(1.+(1.+j)*(2.+j)
+                                           
+        return  0.9565348003631189+DELc1aGJK-(2.*(1.+(1.+j)*(2.+j)
        )*(1.-prty))/((1.+j)**2*(2.+j)**2)-DELc1bGKJ*prty+(-(1 /
        ((1.+k)*(2.+k)))+2.*S1(1.+k))*(1.-prty+0.5*(1.+j)*(2.+j
        )*prty*(-S2(0.5*j)+S2(0.5*(1.+j)))) + (2.*prty*ptyk)/(
-               (1.+j)*(2.+j)*(1.+k)*(2.+k))-(
-               2.*(1.+(1.+k)*(2.+k))*(1.+
+       (1.+j)*(2.+j)*(1.+k)*(2.+k))-(2.*(1.+(1.+k)*(2.+k))*(1.+
        ptyk))/((1.+k)**2*(2.+k)**2)+(-(1/((1.+j)*(2.+j))) +
        2*S1(1.+j))*(1.+ptyk-0.5*(1.+k)*(2.+k)*(-S2(0.5*k) +
        S2(0.5*(1.+k)))*ptyk)+2.*(1.+j)*(2.+j)*((-0.5*(-1.+(1.+j)*(
@@ -1035,10 +1046,17 @@ def WilsonCoef_DVMP_NLO(j: complex, k: complex, nf: int, Q: float, muf: float, m
        j)+S2(0.5*(1.+j))))/((1.+j)*(2.+j))-S3(1.+j)-prty*SB3(
        1+j))+2.*(1.+k)*(2.+k)*((-0.5*(-1.+(1.+k)*(2.+k)))/((1. +
        k)**2*(2.+k)**2)+zeta(3)-S3(1.+k)+(0.5*(-S2(0.5*k) +
-           S2(0.5*(1.+k)))*ptyk)/((1.+k)*(2.+k))+ptyk*SB3(1+k))
+       S2(0.5*(1.+k)))*ptyk)/((1.+k)*(2.+k))+ptyk*SB3(1+k))                                         
+                                               
+                                               
+                                               
+                                               
+                                               
+                                               
 
     def CQNS(prty:int):
-        """The nonsinglet amplitude
+        """The nonsinglet amplitude: The first term of the first element in Eq.(22c) 
+           with the explicit expression in Eq.(22d) of "https://arxiv.org/pdf/2310.13837"
         
         Args:
             prty(integer): shape() charge parity or signature of the moment
@@ -1046,19 +1064,37 @@ def WilsonCoef_DVMP_NLO(j: complex, k: complex, nf: int, Q: float, muf: float, m
         Returns: One of the non singlet moments
         """
        
-        return AlphaS(nloop_alphaS, nf, muf) / 2 / np.pi * (CF * MCQ1CF + (CF - NC/2) * MCQ1CG(prty) + beta0(nf) * MCQ1BET0)
+        return 1/nf * (CF * MCQ1CF + beta0(nf) * MCQ1BET0 + (CF - CA/2) * MCQ1CG(prty) )
     
-    CQPS = AlphaS(nloop_alphaS, nf, muf) / 2 / np.pi * ((-np.log(Q**2/mufact2) - 1 + 2*S1(j+1) + 2*S1(k+1) - 1)*(-2*(4 + 3*j + j**2)/j/(j+1)/(j+2)/(j+3)) - (1/2 + 1/(j+1)/(j+2) + 1/(k+1)/(k+2))*2/(j+1)/(j+2) + k*(k+1)*(k+2)*(k+3)*(deldelS2((j+1)/2,k/2) - deldelS2((j+1)/2,(k+2)/2))/2/(2*k+3) )
+    CQPS =  ((-np.log(Q**2/mufact2) - 1 + 2*S1(j+1) + 2*S1(k+1) - 1)*(-2*(4 + 3*j + j**2)/j/(j+1)/(j+2)/(j+3)) - (1/2 + 1/(j+1)/(j+2) + 1/(k+1)/(k+2))*2/(j+1)/(j+2) + k*(k+1)*(k+2)*(k+3)*(deldelS2((j+1)/2,k/2) - deldelS2((j+1)/2,(k+2)/2))/2/(2*k+3) )
+    """
+    |Pure singlet term:  The second term of the first element of Eq.(22c) 
+       with the explicit expression in Eq.(24a) of "https://arxiv.org/pdf/2310.13837" 
+    """
     
-    CGNC =  AlphaS(nloop_alphaS, nf, muf) / 2 / np.pi * ((-np.log(Q**2 / mufact2) + S1(j+1) + 3*S1(k+1)/2 + 0.5 + 1/(j+1)/(j+2))*(4*S1(j+1) + 4/(j+1)/(j+2) - 12/j/(j+3)) * 0.5 - (3 * (2*S1(j+1) + S1(k+1) - 6) / j / (j+3)) + (8 + 4*np.pi**2 / 6 - (k+1)*(k+2)*delS2((k+1)/2))/8 - delS2((j+1)/2)/2 - (10*(j+1)*(j+2) + 4)/(j+1)**2 / (j+2)**2 - (delS2((j+1)/2) / 2 / (k+1) / (k+2) - (k-1)*deldelS2((j+1)/2,k/2)/(2*k+3) + (k+4)*deldelS2((j+1)/2,(k+2)/2)/(2*k+3))*k*(k+1)*(k+2)*(k+3)/4 + ((k+1)*(k+2)*S1(k+1)-2)/(j+1)/(j+2)/(k+1)/(k+2))
+    CGCF = ((-np.log(Q**2 / muphi2) + S1(j+1) + S1(k+1) - 3/4 - 1/2/(k+1)/(k+2) - 1/(j+1)/(j+2))*(4*S1(k+1) - 3 - 2/(k+1)/(k+2))/2 + (-np.log(Q**2 / mufact2) + 1 + 3*S1(j+1) - 0.5 + (2*S1(j+1)-1)/(k+1)/(k+2) -1/(j+1)/(j+2))*(-(4+2*(j+1)*(j+2))/(j+1)/(j+2)/(j+3))*(j+3)/4 - (35 - ((k+1)*(k+2) + 2)*delS2((k+1)/2) + 4/(k+1)**2/(k+2)**2)/8 + (((k+1)*(k+2) + 2)*S1(j+1)/(k+1)/(k+2) +1)/(j+1)/(j+2) + (delS2((j+1)/2)/2/(k+1)/(k+2) - ((k-1)*k*deldelS2((j+1)/2,k/2) - (k+3)*(k+4)*deldelS2((j+1)/2,(k+2)/2))/2/(2*k+3))*((k+1)*(k+2)*((k+1)*(k+2) +2)/4) - ((k+1)*(k+2) + 2)/2/(j+1)/(j+2)/(k+1)/(k+2))
+    """ 
+    |Eq.(24b) of  "https://arxiv.org/pdf/2310.13837"  
+    """
     
-    CGCF = AlphaS(nloop_alphaS, nf,muf) / 2 / np.pi * ((-np.log(Q**2 / muphi2) + S1(j+1) + S1(k+1) - 3/4 - 1/2/(k+1)/(k+2) - 1/(j+1)/(j+2))*(4*S1(k+1) - 3 - 2/(k+1)/(k+2))/2 + (-np.log(Q**2 / mufact2) + 1 + 3*S1(j+1) - 0.5 + (2*S1(j+1)-1)/(k+1)/(k+2) -1/(j+1)/(j+2))*(-(4+2*(j+1)*(j+2))/(j+1)/(j+2)/(j+3))*(j+3)/4 - (35 - ((k+1)*(k+2) + 2)*delS2((k+1)/2) + 4/(k+1)**2/(k+2)**2)/8 + (((k+1)*(k+2) + 2)*S1(j+1)/(k+1)/(k+2) +1)/(j+1)/(j+2) + (delS2((j+1)/2)/2/(k+1)/(k+2) - ((k-1)*k*deldelS2((j+1)/2,k/2) - (k+3)*(k+4)*deldelS2((j+1)/2,(k+2)/2))/2/(2*k+3))*((k+1)*(k+2)*((k+1)*(k+2) +2)/4) - ((k+1)*(k+2) + 2)/2/(j+1)/(j+2)/(k+1)/(k+2))
+    CGNC =  ((-np.log(Q**2 / mufact2) + S1(j+1) + 3*S1(k+1)/2 + 0.5 + 1/(j+1)/(j+2))*(4*S1(j+1) + 4/(j+1)/(j+2) - 12/j/(j+3)) * 0.5 - (3 * (2*S1(j+1) + S1(k+1) - 6) / j / (j+3)) + (8 + 4*np.pi**2 / 6 - (k+1)*(k+2)*delS2((k+1)/2))/8 - delS2((j+1)/2)/2 - (10*(j+1)*(j+2) + 4)/(j+1)**2 / (j+2)**2 - (delS2((j+1)/2) / 2 / (k+1) / (k+2) - (k-1)*deldelS2((j+1)/2,k/2)/(2*k+3) + (k+4)*deldelS2((j+1)/2,(k+2)/2)/(2*k+3))*k*(k+1)*(k+2)*(k+3)/4 + ((k+1)*(k+2)*S1(k+1)-2)/(j+1)/(j+2)/(k+1)/(k+2))
+    """ 
+    |Eq.(4.53) of  "https://arxiv.org/pdf/1310.5394"  
+    """
     
-    CWT= AlphaS(nloop_alphaS, nf, muf) * np.array([CQNS(-1)*(3 * 2 ** (1+j) * gamma(5/2+j) / (gamma(3/2) * gamma(3+j))), 
-                   CQNS(+1)*(3 * 2 ** (1+j) * gamma(5/2+j) / (gamma(3/2) * gamma(3+j))),  
-                   CQNS(-1)*(3 * 2 ** (1+j) * gamma(5/2+j) / (gamma(3/2) * gamma(3+j))), \
-                   CQNS(+1)*(3 * 2 ** (1+j) * gamma(5/2+j) / (gamma(3/2) * gamma(3+j)))/nf + CQPS * (3 * 2 ** (1+j) * gamma(5/2+j) / (gamma(3/2) * gamma(3+j))), \
-                   2/ CF / (j + 3) * 3 * 2 ** (1+j) * gamma(5/2+j) / (gamma(3/2) * gamma(3+j)) * (NC*CGNC + CF*CGCF + beta0(nf)*np.log(mufact2/mures2)/2)],dtype=complex) #+ beta0(nf)*np.log(mufact/mures)
+    CG = 2/ CF / (j + 3) * (NC*CGNC + CF*CGCF + beta0(nf)*np.log(mufact2/mures2)/2)
+    """
+    |The gluon term:  The second element of Eq.(22c) with the explicit expressions in Eq.(24a) of "https://arxiv.org/pdf/2310.13837" 
+    """
+    
+    CWT=  np.array([CQNS(-1), 
+                   CQNS(+1), 
+                   CQNS(-1), 
+                   CQNS(+1) + CQPS, 
+                   CG],dtype=complex) #+ beta0(nf)*np.log(mufact/mures)
+    """
+    |The gluon term:  The second element of Eq.(22c) with the explicit expressions in Eq.(24a) of "https://arxiv.org/pdf/2310.13837" 
+    """
 
     if (meson==3):
         
@@ -1066,13 +1102,19 @@ def WilsonCoef_DVMP_NLO(j: complex, k: complex, nf: int, Q: float, muf: float, m
         |if the meson is jpsi we are setting all the quark parts to zero except the pure singlet
         """ 
 
-        CWT= AlphaS(nloop_alphaS, nf, muf) * np.array([0*j, 
+        CWT=  np.array([0*j, 
                        0*j,  
-                       0*j, \
-                  CQPS * (3 * 2 ** (1+j) * gamma(5/2+j) / (gamma(3/2) * gamma(3+j))), \
-                2/ CF / (j + 3) * 3 * 2 ** (1+j) * gamma(5/2+j) / (gamma(3/2) * gamma(3+j)) * (NC*CGNC + CF*CGCF + beta0(nf)*np.log(mufact2/mures2)/2)],dtype=complex) #+ beta0(nf)*np.log(mufact/mures)
+                       0*j, 
+                       CQPS , 
+                       CG],dtype=complex) #+ beta0(nf)*np.log(mufact/mures)
 
-    return  np.einsum('j, j...->j...', Charge_Factor(meson), CWT)*(CF/NC)    
+    return  3 * WilsonCoef(j)* AlphaS(nloop_alphaS, nf, muf)**2 / 2 / np.pi * np.einsum('j, j...->j...',  Charge_Factor(meson), CWT)*(CF/NC)
+"""
+|The NLO term as in Eq.(22a) of "https://arxiv.org/pdf/2310.13837 but also multiplied with the charge factors" 
+"""
+
+
+
 
 
 def np_cache(function):

@@ -270,7 +270,7 @@ def TFF_theo_jpsi(xB, t, Q, Para_Unp, p_order = 1, muset = 1, flv = 'All'):
     return  [ HTFF_jpsi, ETFF_jpsi ]
 
 
-def TFF_theo(xB, t, Q, Para_Unp, meson:int, p_order = 1, muset = 1, flv = 'All'):
+def TFF_theo(xB, t, Q, Para_Unp, meson:int, p_order = 2, muset = 1, flv = 'All'):
     x = 0
     xi = (1/(2 - xB) - (2*t*(-1 + xB))/((Q**2)*(-2 + xB)**2))*xB
     if (meson==3):
@@ -389,7 +389,7 @@ def DVMPxsec_cost_xBtQ(DVMPxsec_data_xBtQ: pd.DataFrame, Para_Unp, xsec_norm, me
     """
     [xB, t, Q] = [DVMPxsec_data_xBtQ['xB'].iat[0], DVMPxsec_data_xBtQ['t'].iat[0], DVMPxsec_data_xBtQ['Q'].iat[0]] 
     [HTFF, ETFF] = TFF_theo(xB, t, Q, Para_Unp, meson, p_order, muset = 1)
-    DVMP_pred_xBtQ = DVMPxsec_theo(DVMPxsec_data_xBtQ, TFF_input = [HTFF, ETFF]) * xsec_norm**2
+    DVMP_pred_xBtQ = DVMPxsec_theo(DVMPxsec_data_xBtQ, TFF_input = [HTFF, ETFF], meson=meson) * xsec_norm**2
     return np.sum(((DVMP_pred_xBtQ - DVMPxsec_data_xBtQ['f'])/ DVMPxsec_data_xBtQ['delta f']) ** 2 )
 
 def cost_forward_H(Norm_HuV,    alpha_HuV,    beta_HuV,    alphap_HuV, 
@@ -1226,36 +1226,27 @@ def cost_dvmp(Norm_HuV,    alpha_HuV,    beta_HuV,    alphap_HuV,
     jpsinormzeus = Para_Unp_lst[-1] 
     Para_Unp_all = ParaManager_Unp(Para_Unp_lst[:-2])
     
-   # cost_DVrhoPZEUS_xBtQ = np.array(list(pool.map(partial(DVrhoPxsec_cost_xBtQ, Para_Unp = Para_Unp_all, xsec_norm = xsecnorm), DVrhoPZEUSxsec_group_data)))
-   # cost_DVrhoPZEUSxsec = np.sum(cost_DVrhoPZEUS_xBtQ)
-    
-   # cost_DVrhoPH1_xBtQ = np.array(list(pool.map(partial(DVrhoPxsec_cost_xBtQ, Para_Unp = Para_Unp_all, xsec_norm = 1), DVrhoPH1xsec_group_data)))
-   # cost_DVrhoPH1xsec = np.sum(cost_DVrhoPH1_xBtQ)
-   
-   # cost_DVrhoPH1_NLO_xBtQ = np.array(list(pool.map(partial(DVrhoPxsec_NLO_cost_xBtQ, Para_Unp = Para_Unp_all, xsec_norm = xsecnorm), DVrhoPH1xsec_group_data)))
-   # cost_DVrhoPH1xsec_NLO = np.sum(cost_DVrhoPH1_NLO_xBtQ)
-    
-   # cost_DVphiPZEUS_xBtQ = np.array(list(pool.map(partial(DVphiPxsec_cost_xBtQ, Para_Unp = Para_Unp_all), DVphiPZEUSxsec_group_data)))
-   # cost_DVphiPZEUSxsec = np.sum(cost_DVphiPZEUS_xBtQ)
-    
-   # cost_DVphiPH1_xBtQ = np.array(list(pool.map(partial(DVphiPxsec_cost_xBtQ, Para_Unp = Para_Unp_all), DVphiPH1xsec_group_data)))
-   # cost_DVphiPH1xsec = np.sum(cost_DVphiPH1_xBtQ)
-   
+
+ 
     PDF_H_g_smallx_pred = PDF_theo(PDFg_smallx_data, Para=Para_Unp_all, p_order = 2)
     cost_PDF_H_g_smallx = np.sum(((PDF_H_g_smallx_pred - PDFg_smallx_data['f'])/ PDFg_smallx_data['delta f']) ** 2 )
 
-   # cost_DVjpsiPZEUS_xBtQ = np.array(list(pool.map(partial(DVjpsiPxsec_cost_xBtQ, Para_Unp = Para_Unp_all), DVJpsiPZEUSxsec_group_data)))
-   # cost_DVjpsiPZEUSxsec = np.sum(cost_DVjpsiPZEUS_xBtQ)
+    #cost_DVjpsiPZEUS_xBtQ = np.array(list(pool.map(partial(DVjpsiPxsec_cost_xBtQ, Para_Unp = Para_Unp_all), DVJpsiPZEUSxsec_group_data)))
+    #cost_DVjpsiPZEUSxsec = np.sum(cost_DVjpsiPZEUS_xBtQ)
     
     #cost_DVjpsiPZEUS_xBtQ = np.array(list(pool.map(partial(DVjpsiPxsec_cost_xBtQ, Para_Unp = Para_Unp_all, xsec_norm = jpsinormzeus, p_order = 2), DVJpsiPZEUSxsec_group_data)))
     #cost_DVjpsiPZEUSxsec = np.sum(cost_DVjpsiPZEUS_xBtQ)
     
-    cost_DVjpsiPH1_xBtQ = np.array(list(pool.map(partial(DVMPxsec_cost_xBtQ, Para_Unp = Para_Unp_all, xsec_norm = jpsinorm, p_order = 2), DVJpsiPH1xsec_group_data)))
-    cost_DVjpsiPH1xsec = np.sum(cost_DVjpsiPH1_xBtQ)
+    
+    cost_DVrhoPH1_xBtQ =np.array(list(pool.map(partial(DVMPxsec_cost_xBtQ, Para_Unp = Para_Unp_all, xsec_norm= 1, meson=1, p_order = 2), DVrhoPH1xsec_group_data)))
+    cost_DVrhoPH1xsec = np.sum(cost_DVrhoPH1_xBtQ)
+    
+    #cost_DVjpsiPH1_xBtQ = np.array(list(pool.map(partial(DVMPxsec_cost_xBtQ, Para_Unp = Para_Unp_all, xsec_norm = jpsinorm, meson=3, p_order = 2), DVJpsiPH1xsec_group_data)))
+    #cost_DVjpsiPH1xsec = np.sum(cost_DVjpsiPH1_xBtQ)
     
    
 
-    return cost_PDF_H_g_smallx + cost_DVjpsiPH1xsec #+ cost_DVjpsiPZEUSxsec
+    return cost_PDF_H_g_smallx + cost_DVrhoPH1xsec #+ cost_DVjpsiPZEUSxsec
 
 def dvmp_fit(Paralst_Unp):
 
@@ -1284,7 +1275,7 @@ def dvmp_fit(Paralst_Unp):
                                             R_Eu_xi4 = R_Eu_xi4_Init,     R_Ed_xi4 = R_Ed_xi4_Init,        R_Eg_xi4 = R_Eg_xi4_Init,     bexp_HSea = bexp_HSea_Init, bexp_Hg = bexp_Hg_Init, Invm2_Hg = Invm2_Hg_Init, norm = norm_Init, norm2 = norm2_Init)
     fit_dvmp.errordef = 1
 
-    fit_dvmp.fixed['bexp_HSea'] = True
+    #fit_dvmp.fixed['bexp_HSea'] = True
     
     #fit_dvmp.fixed['bexp_Hg'] = True
     #fit_dvmp.limits['Invm2_Hg'] = (0.1,10)
@@ -1292,8 +1283,8 @@ def dvmp_fit(Paralst_Unp):
     fit_dvmp.fixed['Invm2_Hg'] = True
     fit_dvmp.limits['bexp_Hg']  = (0.1,4)
     
-    fit_dvmp.limits['norm'] = (0.1,10)
-    #fit_dvmp.fixed['norm'] = True
+    #fit_dvmp.limits['norm'] = (1.0,10)
+    fit_dvmp.fixed['norm'] = True
     
     #fit_dvmp.limits['norm2'] = (0.1,10)
     fit_dvmp.fixed['norm2'] = True
@@ -1346,25 +1337,30 @@ def dvmp_fit(Paralst_Unp):
     
     #fit_dvmp.limits['R_E_Sea']=(0,10)    
 
-    #fit_dvmp.limits['R_Hg_xi2'] = (-20,20)
+    fit_dvmp.limits['R_Hg_xi2'] = (-1,1)
+    fit_dvmp.limits['R_Hg_xi4'] = (-1,1)
+    fit_dvmp.limits['R_Hu_xi2'] = (-1,1)
+    fit_dvmp.limits['R_Hu_xi4'] = (-1,1)
+    fit_dvmp.limits['R_Hd_xi2'] = (-1,1)
+    fit_dvmp.limits['R_Hd_xi4'] = (-1,1)
 
     fit_dvmp.fixed['R_E_Sea'] = True    
-    fit_dvmp.fixed['R_Hu_xi2'] = True
-    fit_dvmp.fixed['R_Hd_xi2'] = True     
+    #fit_dvmp.fixed['R_Hu_xi2'] = True
+    #fit_dvmp.fixed['R_Hd_xi2'] = True     
    # fit_dvmp.fixed['R_Hg_xi2'] = True
     fit_dvmp.fixed['R_Eu_xi2'] = True
     fit_dvmp.fixed['R_Ed_xi2'] = True 
     fit_dvmp.fixed['R_Eg_xi2'] = True
     
 
-    #fit_dvmp.fixed['R_Hg_xi4'] = True
+   # fit_dvmp.fixed['R_Hg_xi4'] = True
     fit_dvmp.fixed['R_Eg_xi4'] = True
     
 
-    fit_dvmp.fixed['R_Hu_xi4']  = True 
+    #fit_dvmp.fixed['R_Hu_xi4']  = True 
     fit_dvmp.fixed['R_Eu_xi4']  = True
 
-    fit_dvmp.fixed['R_Hd_xi4']  = True 
+    #fit_dvmp.fixed['R_Hd_xi4']  = True 
     fit_dvmp.fixed['R_Ed_xi4']  = True
     
     
@@ -1376,11 +1372,11 @@ def dvmp_fit(Paralst_Unp):
     fit_dvmp.migrad()
     fit_dvmp.hesse()
 
-    ndof_dvmp = len(DVJpsiPH1xsec_data) + len(PDFg_smallx_data) - fit_dvmp.nfit 
+    ndof_dvmp = len(DVrhoPH1xsec_data) + len(PDFg_smallx_data) - fit_dvmp.nfit 
 
     time_end = time.time() -time_start
 
-    with open(os.path.join(dir_path,'GUMP_Output/dvmp_fit_NLOPDF.txt'), 'w', encoding="utf-8") as f:
+    with open(os.path.join(dir_path,'GUMP_Output/dvmp_fit_NLOrhoPDF.txt'), 'w', encoding="utf-8") as f:
         print('Total running time: %.1f minutes. Total call of cost function: %3d.\n' % ( time_end/60, fit_dvmp.nfcn), file=f)
         print('The chi squared/d.o.f. is: %.2f / %3d ( = %.2f ).\n' % (fit_dvmp.fval, ndof_dvmp, fit_dvmp.fval/ndof_dvmp), file = f)
         print('Below are the final output parameters from iMinuit:', file = f)

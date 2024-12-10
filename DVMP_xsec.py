@@ -37,6 +37,20 @@ alphaEM = 1 / 137.036
 """
 
 
+f_rho= 0.209 
+f_phi = 0.221 # Change to 0.233
+f_jpsi = 0.406
+
+
+
+def f_VL(meson:int):
+    if (meson==1):
+        return f_rho
+    if (meson==2):
+         return f_phi 
+    if (meson==3):
+         return f_jpsi 
+
 
 def epsilon(y:float):
     """ Photon polarizability.
@@ -48,7 +62,7 @@ def epsilon(y:float):
     Returns:
         epsilon:  "Eq.(31) in https://arxiv.org/pdf/1112.2597" 
     """
-    return (1 - y) / (1 - y - y**2 / 2)
+    return (1 - y) / (1 - y + y**2 / 2)
    #Is epsilont different for DVCS and DVMP?
 
 
@@ -116,9 +130,7 @@ def R(Q:float, meson:int):
             return 0.180
         if (meson==3):
             return 0
-    #print(M_meson(meson)**1.5, 'worked')
-    #print(a_meson(meson)**1.5,'worked')
-    #print(p_meson(meson)**1.5,'worked')
+   
     return  (Q**2/M_meson(meson)**2)/(1+a_meson(meson)*Q**2/M_meson(meson)**2)**p_meson(meson)
     
 def MassCorr(meson:int):
@@ -162,7 +174,8 @@ def dsigmaL_dt(y: float, xB: float, t: float, Q: float, meson:int, HTFF: complex
           Eq.(2.8) as in https://arxiv.org/pdf/2409.17231"
     """
 
-    return  ( 4* np.pi**2  *alphaEM * xB ** 2 / ((Q**2 + MassCorr(meson)**2) ** 2))* (Real(HTFF* Conjugate(HTFF)) - t/4/ M_p**2 * Real(ETFF* Conjugate(ETFF)))
+    return  ( 4* np.pi**2  *alphaEM * xB ** 2 / ((Q**2 + MassCorr(meson)**2) ** 2))* (Q/(Q**2+ MassCorr(meson)**2))**2 *(Real(HTFF* Conjugate(HTFF)) - t/4/ M_p**2 * Real(ETFF* Conjugate(ETFF)))
+
                                          
                                                 
         
@@ -188,7 +201,7 @@ def dsigma_dt(y: float, xB: float, t: float, Q: float, meson:int, HTFF: complex,
           Eq.(2.16) as in https://arxiv.org/pdf/2409.17231"
     """
 
-    return  gevtonb *dsigmaL_dt(y, xB, t, Q, meson, HTFF, ETFF)*(epsilon(y)+1/R(Q,meson))
+    return  gevtonb * dsigmaL_dt(y, xB, t, Q, meson, HTFF, ETFF)*(epsilon(y)+1/R(Q,meson))
  
 
 
