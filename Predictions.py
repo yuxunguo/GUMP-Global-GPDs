@@ -173,7 +173,7 @@ def DVCSxsec(y, xB, t, Q, phi, pol):
     return dsigma_TOT(y, xB, t, Q, phi, pol, HCFF, ECFF, HtCFF, EtCFF)
 """
 Para_spe = Para_All[0]
-    
+Para_spe_pol = Para_All[2]
 def compute_gpd(x_i):
     return GPD_theo_s(x_i, 0.002, 0., 2., 1, 'g', Para_spe, 2)
 
@@ -183,7 +183,35 @@ def compute_rratio(args):
 
 if __name__ == '__main__':
     pool = Pool()
-
+    x=0.5
+    _GPD_theo = GPDobserv(x,x,0.0,5.0,1)
+    CFFq = _GPD_theo.CFF(Para_spe,5.0,flv = 'q')
+    CFFg = _GPD_theo.CFF(Para_spe,5.0,flv = 'g')
+    CFFNLO1q = _GPD_theo.CFFNLO(Para_spe,5.0,flv = 'q')
+    CFFNLO1g = _GPD_theo.CFFNLO(Para_spe,5.0,flv = 'g')
+    CFFNLO2q = _GPD_theo.CFFNLO_evMom(Para_spe,5.0,flv = 'q')
+    CFFNLO2g = _GPD_theo.CFFNLO_evMom(Para_spe,5.0,flv = 'g')
+    print(CFFq)
+    print(CFFg)
+    print(CFFNLO1q)
+    print(CFFNLO1g)
+    print(CFFNLO2q)
+    print(CFFNLO2g)
+    
+    x=0.5
+    _GPD_theo = GPDobserv(x,x,0.0,5.0,-1)
+    CFFq = _GPD_theo.CFF(Para_spe_pol,5.0,flv = 'q')
+    CFFg = _GPD_theo.CFF(Para_spe_pol,5.0,flv = 'g')
+    CFFNLO1q = _GPD_theo.CFFNLO(Para_spe_pol,5.0,flv = 'q')
+    CFFNLO1g = _GPD_theo.CFFNLO(Para_spe_pol,5.0,flv = 'g')
+    CFFNLO2q = _GPD_theo.CFFNLO_evMom(Para_spe_pol,5.0,flv = 'q')
+    CFFNLO2g = _GPD_theo.CFFNLO_evMom(Para_spe_pol,5.0,flv = 'g')
+    print(CFFq)
+    print(CFFg)
+    print(CFFNLO1q)
+    print(CFFNLO1g)
+    print(CFFNLO2q)
+    print(CFFNLO2g)
     '''
     # Test of LO ImCFF and quark GPD evolved to mu =5 GeV
     x=0.0001
