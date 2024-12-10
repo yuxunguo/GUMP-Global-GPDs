@@ -5,6 +5,8 @@ from DVMP_xsec import dsigma_dt, M_jpsi
 from multiprocessing import Pool
 from functools import partial
 from iminuit import Minuit
+# Do not need tPDF_Moment_Evo_NLO generally, but we import it here to manually control the cache and save RAM.
+from Evolution import tPDF_Moment_Evo_NLO
 import numpy as np
 import pandas as pd
 import time
@@ -1286,14 +1288,7 @@ def dvmp_fit(Paralst_Unp):
 if __name__ == '__main__':
     pool = Pool()
     time_start = time.time()
-    
     '''
-    Paralst_Unp=pd.read_csv(os.path.join(dir_path,'GUMP_Params/Para_Unp.csv'), header=None).to_numpy()[0]
-    Paralst_Pol=pd.read_csv(os.path.join(dir_path,'GUMP_Params/Para_Pol.csv'), header=None).to_numpy()[0]
-
-    fit_dvmp = dvmp_fit(Paralst_Unp)
-    '''
-
     Paralst_Unp     = [4.922551238,0.21635596,3.228702555,2.349193947,0.163440601,1.135738688,6.896742038,0.15,3.358541913,0.184196049,4.41726899,3.475742056,0.249183402,1.051922382,6.548676693,2.864281106,1.052305853,7.412779844,0.15,0.161159704,0.916012032,1.02239598,0.41423421,-0.198595321,0.0,0.18394307,-2.260952723,0,1.159322377,2.569800357,0,0,0,0,0,0,0,3.296968216,0,0]
     Paralst_Pol     = [4.529773253,-0.246812532,3.037043159,2.607360484,0.076575866,0.516192897,4.369657188,0.15,-0.711694724,0.210181857,3.243538578,4.319727451,-0.057100694,0.612255908,2.099180441,0.243247279,0.630824175,2.71840147,0.15,9.065736349,0.79999977,7.357005187,2.083472023,-3.562901039,0.0,-0.634095327,-7.058667382,0,2.861662204,23.1231347,0,0,0,0,0,0,0,5.379752095]
    
@@ -1313,3 +1308,10 @@ if __name__ == '__main__':
     Paralst_Pol     = np.array(fit_forward_Et.values)
     
     fit_off_forward = off_forward_fit(Paralst_Unp, Paralst_Pol)
+    '''
+
+    Paralst_Unp=pd.read_csv(os.path.join(dir_path,'GUMP_Params/Para_Unp.csv'), header=None).to_numpy()[0]
+    Paralst_Pol=pd.read_csv(os.path.join(dir_path,'GUMP_Params/Para_Pol.csv'), header=None).to_numpy()[0]
+
+    fit_dvmp = dvmp_fit(Paralst_Unp)
+

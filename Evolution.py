@@ -1214,18 +1214,38 @@ def TFF_Evo_LO(j: np.array, nf: int, p: int, mu: float, ConfFlav: np.array, meso
     return EvoConf
 
 def np_cache_DVMP_Wilson_Coef(function):
-    @functools.cache
-    def cached_wrapper(tupled_arr):
-        [arr, nf, p, Q, meson, muset] = np.array(tupled_arr[0]), int(tupled_arr[1]), int(tupled_arr[2]), float(tupled_arr[3]), int(tupled_arr[4]), float(tupled_arr[5])
-        return function(arr, nf, p, Q, meson, muset)
-
     @functools.wraps(function)
     def wrapper(arr, nf, p, Q, meson, muset):
-        return cached_wrapper(tuple((tuple(arr), nf, p, Q, meson, muset)))
+        # Serialize the array and create a unique cache key
+        key = (
+            arr.tobytes(),  # Serialize the NumPy array
+            nf,             # Use integers and floats directly
+            p,
+            Q,
+            meson,
+            muset
+        )
+        
+        # Check if the result is in cache
+        if key in cache:
+            return cache[key]
 
-    # copy lru_cache attributes over too
-    wrapper.cache_info = cached_wrapper.cache_info
-    wrapper.cache_clear = cached_wrapper.cache_clear
+        # Compute and store the result in the cache
+        cache[key] = function(arr, nf, p, Q, meson, muset)
+        return cache[key]
+
+    # Cache dictionary
+    cache = {}
+
+    # Add cache management methods
+    def cache_info():
+        return {"size": len(cache)}
+
+    def cache_clear():
+        cache.clear()
+
+    wrapper.cache_info = cache_info
+    wrapper.cache_clear = cache_clear
 
     return wrapper
 
@@ -1403,18 +1423,37 @@ def TFF_Evo_NLO_evWC(j: np.array, nf: int, p: int, Q: float, ConfFlav: np.array,
     return EvoConf
 
 def np_cache_DVCS_Wilson_Coef(function):
-    @functools.cache
-    def cached_wrapper(tupled_arr):
-        [arr, nf, p, Q, muset] = np.array(tupled_arr[0]), int(tupled_arr[1]), int(tupled_arr[2]), float(tupled_arr[3]), float(tupled_arr[4])
-        return function(arr, nf, p, Q, muset)
-
     @functools.wraps(function)
     def wrapper(arr, nf, p, Q, muset):
-        return cached_wrapper(tuple((tuple(arr), nf, p, Q, muset)))
+        # Serialize the array and create a unique cache key
+        key = (
+            arr.tobytes(),  # Serialize the NumPy array
+            nf,             # Use integers and floats directly
+            p,
+            Q,
+            muset
+        )
+        
+        # Check if the result is in cache
+        if key in cache:
+            return cache[key]
 
-    # copy lru_cache attributes over too
-    wrapper.cache_info = cached_wrapper.cache_info
-    wrapper.cache_clear = cached_wrapper.cache_clear
+        # Compute and store the result in the cache
+        cache[key] = function(arr, nf, p, Q, muset)
+        return cache[key]
+
+    # Cache dictionary
+    cache = {}
+
+    # Add cache management methods
+    def cache_info():
+        return {"size": len(cache)}
+
+    def cache_clear():
+        cache.clear()
+
+    wrapper.cache_info = cache_info
+    wrapper.cache_clear = cache_clear
 
     return wrapper
 
@@ -1591,25 +1630,40 @@ def CFF_Evo_NLO_evWC(j: np.array, nf: int, p: int, Q: float, ConfFlav: np.array,
     return EvoConf
 
 def np_cache_GPD_moment(function):
-    
-    def totuple(a):
-        try:
-            return tuple(totuple(i) for i in a)
-        except TypeError:
-            return a
-    
-    @functools.cache
-    def cached_wrapper(tupled_arr):
-        [arr, nf, p, mu, t, xi, Para, momshift] = np.array(tupled_arr[0]), int(tupled_arr[1]), int(tupled_arr[2]), float(tupled_arr[3]), float(tupled_arr[4]), float(tupled_arr[5]), np.array(tupled_arr[6]) ,int(tupled_arr[7])
-        return function(arr, nf, p, mu, t, xi,Para, momshift)
-
     @functools.wraps(function)
-    def wrapper(arr, nf, p, mu, t, xi,Para, momshift):
-        return cached_wrapper(tuple((tuple(arr), nf, p, mu,t,xi,totuple(Para), momshift)))
+    def wrapper(arr, nf, p, mu, t, xi, Para, momshift):
+        # Serialize NumPy arrays to bytes for creating a unique key
+        key = (
+            arr.tobytes(),        # Serialize the array
+            nf,                  # Use integers and floats directly
+            p,
+            mu,
+            t,
+            xi,
+            Para.tobytes(),      # Serialize the parameter array
+            momshift
+        )
+        
+        # Check if result is cached
+        if key in cache:
+            return cache[key]
 
-    # copy lru_cache attributes over too
-    wrapper.cache_info = cached_wrapper.cache_info
-    wrapper.cache_clear = cached_wrapper.cache_clear
+        # Compute and cache the result
+        cache[key] = function(arr, nf, p, mu, t, xi, Para, momshift)
+        return cache[key]
+
+    # Dictionary for caching
+    cache = {}
+
+    # Add cache info functions for compatibility
+    def cache_info():
+        return {"size": len(cache)}
+
+    def cache_clear():
+        cache.clear()
+
+    wrapper.cache_info = cache_info
+    wrapper.cache_clear = cache_clear
 
     return wrapper
 
@@ -1930,27 +1984,43 @@ def GPD_Moment_Evo_NLO(j: np.array, nf: int, p: int, mu: float, t: float, xi: co
     return EvoConf
 
 def np_cache_tPDF_moment(function):
-    
-    def totuple(a):
-        try:
-            return tuple(totuple(i) for i in a)
-        except TypeError:
-            return a
-    
-    @functools.cache
-    def cached_wrapper(tupled_arr):
-        [arr, nf, p, mu, ConfFlav] = np.array(tupled_arr[0]), int(tupled_arr[1]), int(tupled_arr[2]), float(tupled_arr[3]), np.array(tupled_arr[4])
-        return function(arr, nf, p, mu, ConfFlav)
+    # Dictionary for caching
+    cache = {}
+
+    def cached_wrapper(arr, nf, p, mu, ConfFlav):
+        # Serialize the arrays and create a unique cache key
+        key = (
+            arr.tobytes(),            # Serialize the NumPy array arr
+            nf,                       # Use integers and floats directly
+            p,
+            mu,
+            ConfFlav.tobytes()        # Serialize the NumPy array ConfFlav
+        )
+        
+        # Check if the result is in the cache
+        if key not in cache:
+            cache[key] = function(arr, nf, p, mu, ConfFlav)  # Compute and store in cache
+        
+        return cache[key]  # Return the cached result
 
     @functools.wraps(function)
     def wrapper(arr, nf, p, mu, ConfFlav):
-        return cached_wrapper(tuple((tuple(arr), nf, p, mu,totuple(ConfFlav))))
+        return cached_wrapper(arr, nf, p, mu, ConfFlav)
 
-    # copy lru_cache attributes over too
-    wrapper.cache_info = cached_wrapper.cache_info
-    wrapper.cache_clear = cached_wrapper.cache_clear
+    # Cache info method: Returns the size of the cache
+    def cache_info():
+        return {'size': len(cache)}
+
+    # Cache clear method: Clears the cache
+    def cache_clear():
+        cache.clear()
+
+    # Attach the cache management methods to the wrapper
+    wrapper.cache_info = cache_info
+    wrapper.cache_clear = cache_clear
 
     return wrapper
+
 
 @np_cache_tPDF_moment
 def tPDF_Moment_Evo_NLO(j: np.array, nf: int, p: int, mu: float, ConfFlav: np.array) -> np.array:
