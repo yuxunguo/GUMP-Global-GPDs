@@ -160,7 +160,7 @@ def GFF_theo_scalar_helper(args):
     _GFF_theo = GPDobserv(x, xi, t_i, Q_i, p_i)  # Assume GPDobserv is defined elsewhere
     return _GFF_theo.GFFj0(j_i, flv_i, Para_i, p_order)
 
-def PDF_theo(PDF_input: pd.DataFrame, Para: np.array, p_order = 1):
+def PDF_theo(PDF_input: pd.DataFrame, Para: np.array, p_order = 2):
     xs = PDF_input['x'].to_numpy()
     ts = PDF_input['t'].to_numpy()
     Qs = PDF_input['Q'].to_numpy()
@@ -184,7 +184,7 @@ def PDF_theo(PDF_input: pd.DataFrame, Para: np.array, p_order = 1):
 
 tPDF_theo = PDF_theo
 
-def GFF_theo(GFF_input: pd.DataFrame, Para: np.array, p_order = 1):
+def GFF_theo(GFF_input: pd.DataFrame, Para: np.array, p_order = 2):
     
     js = GFF_input['j'].to_numpy()
     ts = GFF_input['t'].to_numpy()
@@ -264,7 +264,7 @@ def DVCSxsec_HERA_cost_xBtQ(DVCSxsec_HERA_data_xBtQ: pd.DataFrame, Para_Unp, Par
     DVCS_HERA_pred_xBtQ = DVCSxsec_HERA_theo(DVCSxsec_HERA_data_xBtQ, CFF_input = [HCFF, ECFF, HtCFF, EtCFF])
     return np.sum(((DVCS_HERA_pred_xBtQ - DVCSxsec_HERA_data_xBtQ['f'])/ DVCSxsec_HERA_data_xBtQ['delta f']) ** 2 )
 
-def TFF_theo(xB, t, Q, Para_Unp, meson:int, p_order = 1, muset = 1, flv = 'All'):
+def TFF_theo(xB, t, Q, Para_Unp, meson:int, p_order = 2, muset = 1, flv = 'All'):
     x = 0
     xi = (1/(2 - xB) - (2*t*(-1 + xB))/((Q**2)*(-2 + xB)**2))*xB
     if (meson==3):
@@ -284,7 +284,7 @@ def DVMPxsec_theo(DVMPxsec_input: pd.DataFrame, TFF_input: np.array, meson:int):
 
     return dsigma_dt(y, xB, t, Q, meson, HTFF, ETFF)
 
-def DVMPxsec_cost_xBtQ(DVMPxsec_data_xBtQ: pd.DataFrame, Para_Unp, xsec_norm, meson:int, p_order=2):
+def DVMPxsec_cost_xBtQ(DVMPxsec_data_xBtQ: pd.DataFrame, Para_Unp, xsec_norm, meson:int, p_order = 2):
 
     [xB, t, Q] = [DVMPxsec_data_xBtQ['xB'].iat[0], DVMPxsec_data_xBtQ['t'].iat[0], DVMPxsec_data_xBtQ['Q'].iat[0]] 
     [HTFF, ETFF] = TFF_theo(xB, t, Q, Para_Unp, meson, p_order, muset = 1)
