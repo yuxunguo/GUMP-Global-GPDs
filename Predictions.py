@@ -234,7 +234,7 @@ if __name__ == '__main__':
     # Plotting results of the paper
     #
     
-
+    '''
     # Comparing PDF with the global extraction of PDF
 
     os.makedirs(os.path.join(dir_path,"GUMP_Results"), exist_ok=True)
@@ -258,7 +258,7 @@ if __name__ == '__main__':
         csvWriter = csv.writer(my_csv,delimiter=',')
         csvWriter.writerows(np.transpose([x,gpdlst]))
     print(time.time()-ts)
-
+    '''
     '''
     # Ploting the R ratio
 

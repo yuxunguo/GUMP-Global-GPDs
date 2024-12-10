@@ -388,16 +388,20 @@ class GPDobserv (object) :
                   The better choice is to model the leading moment terms separately, and fit them to other quantities since those terms are not well constrained by the CFF/TFF anyway.
             '''
             eps= 10. **(-6) 
-            j0 = np.array([eps])
-            
+            j0 = np.array([0.]) + eps
+            j00 = np.array([0.])
+            # j0 has been shifted with eps whereas j00 are not;
+            # j0 is for evolved moments and j00 is for wave function
+            # The evolution kernel has numeric singular term at j=0 so it's shifted
+            # The wave function is taken at j exactly 0 so it's truncated at x=xi and avoid further numeric issues.
             ConfFlav     = Moment_Sum(j0, self.t, Para_Forward)
             ConfFlav_xi2 = Moment_Sum(j0, self.t, Para_xi2)
-            ConfFlav_xi4 = Moment_Sum(j0, self.t, Para_xi4)  
+            ConfFlav_xi4 = Moment_Sum(j0, self.t, Para_xi4)
 
             ConfFlav     = np.nan_to_num(ConfFlav)
             ConfFlav_xi2 = np.nan_to_num(ConfFlav_xi2) 
             ConfFlav_xi4 = np.nan_to_num(ConfFlav_xi4)  
-                
+            
             if (p_order == 1):
                 ConfEv     = Moment_Evo_LO(j0, NFEFF, self.p, self.Q, ConfFlav)
                 ConfEv_xi2 = Moment_Evo_LO(j0+2, NFEFF, self.p, self.Q, ConfFlav_xi2)
@@ -412,13 +416,13 @@ class GPDobserv (object) :
             ConfFlavEv_xi2 = np.einsum('...ij, ...j->...i', inv_flav_trans, ConfEv_xi2)
             ConfFlavEv_xi4 = np.einsum('...ij, ...j->...i', inv_flav_trans, ConfEv_xi4)
               
-            return Flv_Intp(np.einsum('...ij,...j->...i', ConfWaveConv(j0), ConfFlavEv) \
-                    + self.xi ** 2 * np.einsum('...ij,...j->...i', ConfWaveConv(j0+2), ConfFlavEv_xi2) \
-                    + self.xi ** 4 * np.einsum('...ij,...j->...i', ConfWaveConv(j0+4), ConfFlavEv_xi4),flv)
+            return Flv_Intp(np.einsum('...ij,...j->...i', ConfWaveConv(j00), ConfFlavEv) \
+                    + self.xi ** 2 * np.einsum('...ij,...j->...i', ConfWaveConv(j00+2), ConfFlavEv_xi2) \
+                    + self.xi ** 4 * np.einsum('...ij,...j->...i', ConfWaveConv(j00+4), ConfFlavEv_xi4),flv)
        
         reJ = 2 - 0.5
         Max_imJ = 80
-        return 1/2*np.real(fixed_quadvec(lambda imJ : Integrand_Mellin_Barnes(reJ + 1j* imJ) / np.sin((reJ + 1j * imJ+1) * np.pi) + Integrand_Mellin_Barnes(reJ - 1j* imJ) / np.sin((reJ - 1j * imJ+1) * np.pi) ,0, Max_imJ, n=300)) + np.real(GPD1()) # + np.real(GPD0()) 
+        return 1/2*np.real(fixed_quadvec(lambda imJ : Integrand_Mellin_Barnes(reJ + 1j* imJ) / np.sin((reJ + 1j * imJ+1) * np.pi) + Integrand_Mellin_Barnes(reJ - 1j* imJ) / np.sin((reJ - 1j * imJ+1) * np.pi) ,0, Max_imJ, n=300)) + np.real(GPD1()) + np.real(GPD0()) 
           
     def GFFj0(self, j: int, flv, ParaAll, p_order):
         """Generalized Form Factors A_{j0}(t) which is the xi^0 term of the nth (n= j+1) Mellin moment of GPD int dx x^j F(x,xi,t) for quark and int dx x^(j-1) F(x,xi,t) for gluon
