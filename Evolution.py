@@ -1075,62 +1075,6 @@ def WilsonCoef_DVMP_NLO(j: complex, k: complex, nf: int, Q: float, muf: float, m
     return  np.einsum('j, j...->j...', Charge_Factor(meson), CWT)*(CF/NC)    
 
 
-def np_cache(function):
-    @functools.cache
-    def cached_wrapper(tupled_arr):
-        [arr, nf, p, Q, meson, muset] = np.array(tupled_arr[0]), int(tupled_arr[1]), int(tupled_arr[2]), float(tupled_arr[3]), int(tupled_arr[4]), float(tupled_arr[5])
-        return function(arr, nf, p, Q, meson, muset)
-
-    @functools.wraps(function)
-    def wrapper(arr, nf, p, Q, meson, muset):
-        return cached_wrapper(tuple((tuple(arr), nf, p, Q, meson, muset)))
-
-    # copy lru_cache attributes over too
-    wrapper.cache_info = cached_wrapper.cache_info
-    wrapper.cache_clear = cached_wrapper.cache_clear
-
-    return wrapper
-
-
-def np_cache_dvcs(function):
-    @functools.cache
-    def cached_wrapper(tupled_arr):
-        [arr, nf, p, Q, muset] = np.array(tupled_arr[0]), int(tupled_arr[1]), int(tupled_arr[2]), float(tupled_arr[3]), float(tupled_arr[4])
-        return function(arr, nf, p, Q, muset)
-
-    @functools.wraps(function)
-    def wrapper(arr, nf, p, Q, muset):
-        return cached_wrapper(tuple((tuple(arr), nf, p, Q, muset)))
-
-    # copy lru_cache attributes over too
-    wrapper.cache_info = cached_wrapper.cache_info
-    wrapper.cache_clear = cached_wrapper.cache_clear
-
-    return wrapper
-
-def np_cache_moment(function):
-    
-    def totuple(a):
-        try:
-            return tuple(totuple(i) for i in a)
-        except TypeError:
-            return a
-    
-    @functools.cache
-    def cached_wrapper(tupled_arr):
-        [arr, nf, p, mu, t, xi, Para, momshift] = np.array(tupled_arr[0]), int(tupled_arr[1]), int(tupled_arr[2]), float(tupled_arr[3]), float(tupled_arr[4]), float(tupled_arr[5]), np.array(tupled_arr[6]) ,int(tupled_arr[7])
-        return function(arr, nf, p, mu, t, xi,Para, momshift)
-
-    @functools.wraps(function)
-    def wrapper(arr, nf, p, mu, t, xi,Para, momshift):
-        return cached_wrapper(tuple((tuple(arr), nf, p, mu,t,xi,totuple(Para), momshift)))
-
-    # copy lru_cache attributes over too
-    wrapper.cache_info = cached_wrapper.cache_info
-    wrapper.cache_clear = cached_wrapper.cache_clear
-
-    return wrapper
-    
 def Moment_Evo_LO(j: np.array, nf: int, p: int, mu: float, ConfFlav: np.array) -> np.array:
     """Leading order evolution of moments in the flavor space 
 
@@ -1269,7 +1213,23 @@ def TFF_Evo_LO(j: np.array, nf: int, p: int, mu: float, ConfFlav: np.array, meso
 
     return EvoConf
 
-@np_cache
+def np_cache_DVMP_Wilson_Coef(function):
+    @functools.cache
+    def cached_wrapper(tupled_arr):
+        [arr, nf, p, Q, meson, muset] = np.array(tupled_arr[0]), int(tupled_arr[1]), int(tupled_arr[2]), float(tupled_arr[3]), int(tupled_arr[4]), float(tupled_arr[5])
+        return function(arr, nf, p, Q, meson, muset)
+
+    @functools.wraps(function)
+    def wrapper(arr, nf, p, Q, meson, muset):
+        return cached_wrapper(tuple((tuple(arr), nf, p, Q, meson, muset)))
+
+    # copy lru_cache attributes over too
+    wrapper.cache_info = cached_wrapper.cache_info
+    wrapper.cache_clear = cached_wrapper.cache_clear
+
+    return wrapper
+
+@np_cache_DVMP_Wilson_Coef
 def DVMP_WCoef_Evo_NLO(j: np.array, nf: int, p: int, Q: float, meson: int, muf: float) -> Tuple[np.ndarray, np.ndarray]:
     """Next-to-leading order evolution of the DVMP Wilson coefficient (Evolved Wilson coefficient method)
 
@@ -1442,7 +1402,23 @@ def TFF_Evo_NLO_evWC(j: np.array, nf: int, p: int, Q: float, ConfFlav: np.array,
     
     return EvoConf
 
-@np_cache_dvcs
+def np_cache_DVCS_Wilson_Coef(function):
+    @functools.cache
+    def cached_wrapper(tupled_arr):
+        [arr, nf, p, Q, muset] = np.array(tupled_arr[0]), int(tupled_arr[1]), int(tupled_arr[2]), float(tupled_arr[3]), float(tupled_arr[4])
+        return function(arr, nf, p, Q, muset)
+
+    @functools.wraps(function)
+    def wrapper(arr, nf, p, Q, muset):
+        return cached_wrapper(tuple((tuple(arr), nf, p, Q, muset)))
+
+    # copy lru_cache attributes over too
+    wrapper.cache_info = cached_wrapper.cache_info
+    wrapper.cache_clear = cached_wrapper.cache_clear
+
+    return wrapper
+
+@np_cache_DVCS_Wilson_Coef
 def DVCS_WCoef_Evo_NLO(j: np.array, nf: int, p: int, Q: float, muf: float) -> Tuple[np.ndarray, np.ndarray]:
     """Next-to-leading order evolution of the DVCS Wilson coefficient (Evolved Wilson coefficient method)
 
@@ -1614,8 +1590,31 @@ def CFF_Evo_NLO_evWC(j: np.array, nf: int, p: int, Q: float, ConfFlav: np.array,
     
     return EvoConf
 
+def np_cache_GPD_moment(function):
+    
+    def totuple(a):
+        try:
+            return tuple(totuple(i) for i in a)
+        except TypeError:
+            return a
+    
+    @functools.cache
+    def cached_wrapper(tupled_arr):
+        [arr, nf, p, mu, t, xi, Para, momshift] = np.array(tupled_arr[0]), int(tupled_arr[1]), int(tupled_arr[2]), float(tupled_arr[3]), float(tupled_arr[4]), float(tupled_arr[5]), np.array(tupled_arr[6]) ,int(tupled_arr[7])
+        return function(arr, nf, p, mu, t, xi,Para, momshift)
+
+    @functools.wraps(function)
+    def wrapper(arr, nf, p, mu, t, xi,Para, momshift):
+        return cached_wrapper(tuple((tuple(arr), nf, p, mu,t,xi,totuple(Para), momshift)))
+
+    # copy lru_cache attributes over too
+    wrapper.cache_info = cached_wrapper.cache_info
+    wrapper.cache_clear = cached_wrapper.cache_clear
+
+    return wrapper
+
 # Turn off the cache to reduce hashing time if only one evolved moment is calculated for a set of parameters at a given kinematics. Otherwise cache it.
-@np_cache_moment
+@np_cache_GPD_moment
 def Moment_Evo_NLO(j: np.array, nf: int, p: int, mu: float, t: float, xi: float, Para: np.array, momshift: int) -> np.array:
     """Next-to-leading order evolution of the conformal moments (Evolved moment method)
 
@@ -1685,7 +1684,7 @@ def Moment_Evo_NLO(j: np.array, nf: int, p: int, mu: float, t: float, xi: float,
     evola1_diag_ab = np.einsum('kab,kabij->kabij', rmu1, pproj)
     evola1_diag = np.einsum('...abij,...b,...->...ij', evola1_diag_ab, Rfact,Alphafact)
     
-     # NS diagonal NLO evolution operator, note in evolution basis (qVal, q_du_plus, q_du_minus) has parity (-1,1,-1)
+    # NS diagonal NLO evolution operator, note in evolution basis (qVal, q_du_plus, q_du_minus) has parity (-1,1,-1)
     amuindepNS_stack = np.stack((amuindepNS(j,nf,p,-1),\
                                  amuindepNS(j,nf,p,1), \
                                  amuindepNS(j,nf,p,-1)), axis=-1)
@@ -1930,6 +1929,30 @@ def GPD_Moment_Evo_NLO(j: np.array, nf: int, p: int, mu: float, t: float, xi: co
 
     return EvoConf
 
+def np_cache_tPDF_moment(function):
+    
+    def totuple(a):
+        try:
+            return tuple(totuple(i) for i in a)
+        except TypeError:
+            return a
+    
+    @functools.cache
+    def cached_wrapper(tupled_arr):
+        [arr, nf, p, mu, ConfFlav] = np.array(tupled_arr[0]), int(tupled_arr[1]), int(tupled_arr[2]), float(tupled_arr[3]), np.array(tupled_arr[4])
+        return function(arr, nf, p, mu, ConfFlav)
+
+    @functools.wraps(function)
+    def wrapper(arr, nf, p, mu, ConfFlav):
+        return cached_wrapper(tuple((tuple(arr), nf, p, mu,totuple(ConfFlav))))
+
+    # copy lru_cache attributes over too
+    wrapper.cache_info = cached_wrapper.cache_info
+    wrapper.cache_clear = cached_wrapper.cache_clear
+
+    return wrapper
+
+@np_cache_tPDF_moment
 def tPDF_Moment_Evo_NLO(j: np.array, nf: int, p: int, mu: float, ConfFlav: np.array) -> np.array:
     """FORWARD Next-to-leading order evolved conformal moments in the evolution basis (Evolved moment method)    
     
@@ -1987,13 +2010,21 @@ def tPDF_Moment_Evo_NLO(j: np.array, nf: int, p: int, mu: float, ConfFlav: np.ar
     evola1_diag_ab = np.einsum('kab,kabij->kabij', rmu1, pproj)
     evola1_diag = np.einsum('...abij,...b,...->...ij', evola1_diag_ab, Rfact,Alphafact)
     
-    # NLO NS evolutioon set to zero
-    confNS_ev1 = np.zeros_like(confNS_ev0)
+    # NS diagonal NLO evolution operator, note in evolution basis (qVal, q_du_plus, q_du_minus) has parity (-1,1,-1)
+    amuindepNS_stack = np.stack((amuindepNS(j,nf,p,-1),\
+                                 amuindepNS(j,nf,p,1), \
+                                 amuindepNS(j,nf,p,-1)), axis=-1)
+
+    evola1NS_diag_plus = np.einsum('...,...i->...i',Alphafact * evola0NS * rmudepNS(nf, gam0NS, gam0NS, mu),amuindepNS_stack ) # shape (N,) and (N,3) to (N,3)
+
+    # NLO NS diagonal evolutioon 
+    confNS_ev1_diag = np.einsum('...i,...i->...i',evola1NS_diag_plus,ConfNS) # shape (N,3) and (N,3) to (N,3)
     # S/G diagonal NLO evolution operator    
     confSG_ev1_diag = np.einsum('...ij,...j->...i',evola1_diag,ConfSG)
     
     # Combine the diagonal and off-diagonal pieces
     confSG_ev1 = confSG_ev1_diag
+    confNS_ev1 = confNS_ev1_diag
     
     # LO plus NLO evolution    
     conf_ev_NS_tot = confNS_ev0 + confNS_ev1
