@@ -73,7 +73,7 @@ def Flv_Intp(Flv_array: np.array, flv):
 
     return result: (N) complex
     """
-    _flv_index = flvs_to_indx(flv)
+    _flv_index = flv_to_indx(flv)
     return np.choose(_flv_index, [Flv_array[...,0], Flv_array[..., 1], Flv_array[..., 2],\
                         Flv_array[..., 0]-Flv_array[..., 1], Flv_array[..., 0]+Flv_array[..., 1]])
     # return np.einsum('...j,...j', Flv_array, _helper) # (N)
@@ -444,7 +444,8 @@ class GPDobserv (object) :
         
         return Flv_Intp(np.einsum('...j,j', GFF_trans, Moment_Evo(j, NFEFF, self.p, self.Q, ConfFlav)), flv)
         '''
-
+        eps= 10. **(-6) 
+        
         Para_Forward = ParaAll[..., 0, :, :, :]  # (N, 5, 1, 5)
         _helper1 = np.array([[1, 1, 0, 0, 0],
                              [0, 0, 1, 1, 0],
@@ -454,7 +455,21 @@ class GPDobserv (object) :
                              [0, 0, 0, 0, -1/2]])
         GFF_trans = np.einsum('... , ij->...ij', self.p * (-1)**j, _helper2) + _helper1  # (N, 3, 5)
         ConfFlav = Moment_Sum(j, self.t, Para_Forward) # (N, 5)
-
+        ConfFlav = np.nan_to_num(ConfFlav)
+        #print(ConfFlav)
+        
+        if (p_order == 1):
+            ConfEv = Moment_Evo_LO(np.array([j+eps]), NFEFF, self.p, self.Q, ConfFlav)[0]
+        elif (p_order == 2):
+            ConfEv = tPDF_Moment_Evo_NLO(np.array([j+eps]), NFEFF, self.p, self.Q, ConfFlav)[0]
+            
+        #print(ConfEv)
+        # Inverse transform the evolved moments back to the flavor basis
+        EvoConfFlav = np.einsum('...ij, ...j->...i', inv_flav_trans, ConfEv) #(N, 5)
+        #print(EvoConfFlav)
+        result = Flv_Intp(np.einsum('...ij, ...j->...i', GFF_trans, EvoConfFlav), flv) # (N_~mask)
+    
+        return np.real(result)
         # the result of np.einsum will be (N, 3)
         # Flv_Intp  result (N)
         mask = ((j==0) & (self.p==1))
@@ -463,15 +478,15 @@ class GPDobserv (object) :
         result[mask] = Flv_Intp(ConfFlav[mask][:, [0,2,4] ] , flv[mask] ) # (N_mask)
         
         if (p_order == 1):
-            ConfEv = Moment_Evo_LO(j[~mask], NFEFF, self.p[~mask], self.Q[~mask], ConfFlav[~mask])
+            ConfEv = Moment_Evo_LO(np.array([j]), NFEFF, self.p, self.Q, ConfFlav)
         elif (p_order == 2):
-            ConfEv = tPDF_Moment_Evo_NLO(j[~mask], NFEFF, self.p[~mask], self.Q[~mask], ConfFlav[~mask], muset = 1)
+            ConfEv = tPDF_Moment_Evo_NLO(np.array([j]), NFEFF, self.p, self.Q, ConfFlav)
             
         # Inverse transform the evolved moments back to the flavor basis
         EvoConfFlav = np.einsum('...ij, ...j->...i', inv_flav_trans, ConfEv) #(N, 5)       
 
-        result[~mask] = Flv_Intp(np.einsum('...ij, ...j->...i', GFF_trans[~mask], EvoConfFlav[~mask]), flv[~mask]) # (N_~mask)
-                
+        result = Flv_Intp(np.einsum('...ij, ...j->...i', GFF_trans, EvoConfFlav), flv) # (N_~mask)
+
         return result #(N)
     
     def CFF(self, ParaAll, muf, p_order = 1, flv = 'All'):

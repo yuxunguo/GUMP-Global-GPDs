@@ -148,62 +148,66 @@ JpsiphotoH1xsec_data = JpsiphotoH1xsec_data[(JpsiphotoH1xsec_data['Q']>Q_thresho
 xBtQlst_JpsiphotoH1 = JpsiphotoH1xsec_data.drop_duplicates(subset = ['xB', 't', 'Q'], keep = 'first')[['xB','t','Q']].values.tolist()
 '''
 
+# Helper function for scalar computation
+def PDF_theo_scalar_helper(args):
+    x_i, xi_i, t_i, Q_i, p_i, flv_i, Para_i, p_order = args
+    _PDF_theo = GPDobserv(x_i, xi_i, t_i, Q_i, p_i)  
+    return _PDF_theo.tPDF(flv_i, Para_i, p_order)
+
+# Helper function for scalar computation
+def GFF_theo_scalar_helper(args):
+    j_i, x, xi, t_i, Q_i, p_i, flv_i, Para_i, p_order = args
+    _GFF_theo = GPDobserv(x, xi, t_i, Q_i, p_i)  # Assume GPDobserv is defined elsewhere
+    return _GFF_theo.GFFj0(j_i, flv_i, Para_i, p_order)
+
 def PDF_theo(PDF_input: pd.DataFrame, Para: np.array, p_order = 1):
-    # [x, t, Q, f, delta_f, spe, flv] = PDF_input
     xs = PDF_input['x'].to_numpy()
     ts = PDF_input['t'].to_numpy()
     Qs = PDF_input['Q'].to_numpy()
     flvs = PDF_input['flv'].to_numpy()
     spes = PDF_input['spe'].to_numpy()
- 
+    
     xis = np.zeros_like(xs)
+    ps = np.where(spes <= 1, 1, -1)
+    spes = np.where(spes <= 1, spes, spes - 2)
+    Para_spe = Para[spes]
 
-    ps = np.where(spes<=1, 1, -1)
-    spes = np.where(spes<=1, spes, spes-2)
-
-    Para_spe = Para[spes] # fancy indexing. Output (N, 3, 5, 1, 5)
+    # Prepare input arguments for parallel computation
+    args = [(x_i, xi_i, t_i, Q_i, p_i, flv_i, Para_i, p_order) 
+            for x_i, xi_i, t_i, Q_i, p_i, flv_i, Para_i 
+            in zip(xs, xis, ts, Qs, ps, flvs, Para_spe)]
     
-    '''
-    if(spe == 0 or spe == 1):
-        spe, p = spe, 1
-
-    if(spe == 2 or spe == 3):
-        spe, p = spe - 2 , -1
-    '''
-    # Para: (4, 2, 5, 1, 4)
-    def PDF_theo_scalar(x, xi, t, Q, p, flv, Para):
-        _PDF_theo = GPDobserv(x, xi, t, Q, p)
-        return _PDF_theo.tPDF(flv, Para, p_order)
+    # Use multiprocessing Pool to parallelize the computation
+    result = pool.map(PDF_theo_scalar_helper, args)
     
-    result = np.array([PDF_theo_scalar(x_i, xi_i, t_i, Q_i, p_i, flv_i, Para_i) for x_i, xi_i, t_i, Q_i, p_i, flv_i, Para_i in zip(xs, xis, ts, Qs, ps, flvs, Para_spe)])
-    return result
+    return np.array(result)
 
 tPDF_theo = PDF_theo
 
-def GFF_theo(GFF_input: np.array, Para):
-    # [j, t, Q, f, delta_f, spe, flv] = GFF_input
+def GFF_theo(GFF_input: pd.DataFrame, Para: np.array, p_order = 1):
+    
     js = GFF_input['j'].to_numpy()
     ts = GFF_input['t'].to_numpy()
     Qs = GFF_input['Q'].to_numpy()
-    #fs = GFF_input['f'].to_numpy()
-    #delta_fs = GFF_input['delta f'].to_numpy()
     flvs = GFF_input['flv'].to_numpy()
     spes = GFF_input['spe'].to_numpy()
+    
+    # Constants
     x = 0
-    xi = 0   
-    '''
-    if(spe == 0 or spe == 1):
-        spe, p = spe, 1
+    xi = 0
+    
+    ps = np.where(spes <= 1, 1, -1)
+    spes = np.where(spes <= 1, spes, spes - 2)
+    Para_spe = Para[spes]
 
-    if(spe == 2 or spe == 3):
-        spe, p = spe - 2 , -1
-    '''
-    ps = np.where(spes<=1, 1, -1)
-    spes = np.where(spes<=1, spes, spes-2)
+    # Prepare input arguments for parallel computation
+    args = [(j_i, x, xi, t_i, Q_i, p_i, flv_i, Para_i, p_order) 
+            for j_i, t_i, Q_i, p_i, flv_i, Para_i 
+            in zip(js, ts, Qs, ps, flvs, Para_spe)]
 
-    Para_spe = Para[spes] # fancy indexing. Output (N, 3, 5, 1, 5)
-    GFF_theo = GPDobserv(x, xi, ts, Qs, ps)
-    return GFF_theo.GFFj0(js, flvs, Para_spe) # (N)
+    result = pool.map(GFF_theo_scalar_helper, args)
+    
+    return np.array(result)
 
 def CFF_theo(xB, t, Q, Para_Unp, Para_Pol):
     x = 0
@@ -301,7 +305,17 @@ def cost_forward_H(Norm_HuV,    alpha_HuV,    beta_HuV,    alphap_HuV,
     # parameters not used in dvcs fit
     bexp_Hg = bexp_HSea
     Invm2_Hg = 0
+    
+    global Minuit_Counter, Time_Counter
 
+    time_now = time.time() - time_start
+    
+    if(time_now > Time_Counter * 600):
+        print('Runing Time:',round(time_now/60),'minutes. Cost function called total', Minuit_Counter, 'times.')
+        Time_Counter = Time_Counter + 1
+    
+    Minuit_Counter = Minuit_Counter + 1
+    
     Paralst = [Norm_HuV,    alpha_HuV,    beta_HuV,    alphap_HuV, 
                Norm_Hubar,  alpha_Hubar,  beta_Hubar,  alphap_Hqbar,
                Norm_HdV,    alpha_HdV,    beta_HdV,    alphap_HdV,
@@ -438,8 +452,10 @@ def forward_H_fit(Paralst_Unp):
     fit_forw_H.fixed['R_Eg_xi4'] = True
 
     fit_forw_H.fixed['bexp_HSea'] = True
-
-    global time_start
+    
+    global Minuit_Counter, Time_Counter, time_start
+    Minuit_Counter = 0
+    Time_Counter = 1
     time_start = time.time()
 
     fit_forw_H.migrad()
@@ -449,7 +465,7 @@ def forward_H_fit(Paralst_Unp):
 
     time_end = time.time() -time_start
 
-    with open(os.path.join(dir_path,'GUMP_Output/H_forward_fit.txt'), 'w') as f:
+    with open(os.path.join(dir_path,'GUMP_Output/H_forward_fit.txt'), 'w', encoding='utf-8') as f:
         print('Total running time: %.1f minutes. Total call of cost function: %3d.\n' % ( time_end/60, fit_forw_H.nfcn), file=f)
         print('The chi squared/d.o.f. is: %.2f / %3d ( = %.2f ).\n' % (fit_forw_H.fval, ndof_H, fit_forw_H.fval/ndof_H), file = f)
         print('Below are the final output parameters from iMinuit:', file = f)
@@ -557,7 +573,7 @@ def forward_E_fit(Paralst_Unp):
 
     time_end = time.time() -time_start
 
-    with open(os.path.join(dir_path,'GUMP_Output/E_forward_fit.txt'), 'w') as f:
+    with open(os.path.join(dir_path,'GUMP_Output/E_forward_fit.txt'), 'w', encoding='utf-8') as f:
         print('Total running time: %.1f minutes. Total call of cost function: %3d.\n' % ( time_end/60, fit_forw_E.nfcn), file=f)
         print('The chi squared/d.o.f. is: %.2f / %3d ( = %.2f ).\n' % (fit_forw_E.fval, ndof_E, fit_forw_E.fval/ndof_E), file = f)
         print('Below are the final output parameters from iMinuit:', file = f)
@@ -721,7 +737,7 @@ def forward_Ht_fit(Paralst_Pol):
     ndof_Ht = len(PDF_data_Ht.index) + len(tPDF_data_Ht.index) + len(GFF_data_Ht.index)  - fit_forw_Ht.nfit
 
     time_end = time.time() -time_start    
-    with open(os.path.join(dir_path,'GUMP_Output/Ht_forward_fit.txt'), 'w') as f:
+    with open(os.path.join(dir_path,'GUMP_Output/Ht_forward_fit.txt'), 'w', encoding='utf-8') as f:
         print('Total running time: %.1f minutes. Total call of cost function: %3d.\n' % ( time_end/60, fit_forw_Ht.nfcn), file=f)
         print('The chi squared/d.o.f. is: %.2f / %3d ( = %.2f ).\n' % (fit_forw_Ht.fval, ndof_Ht, fit_forw_Ht.fval/ndof_Ht), file = f)
         print('Below are the final output parameters from iMinuit:', file = f)
@@ -824,7 +840,7 @@ def forward_Et_fit(Paralst_Pol):
     ndof_Et = len(PDF_data_Et.index) + len(tPDF_data_Et.index) + len(GFF_data_Et.index)  - fit_forw_Et.nfit
 
     time_end = time.time() -time_start    
-    with open(os.path.join(dir_path,'GUMP_Output/Et_forward_fit.txt'), 'w') as f:
+    with open(os.path.join(dir_path,'GUMP_Output/Et_forward_fit.txt'), 'w', encoding='utf-8') as f:
         print('Total running time: %.1f minutes. Total call of cost function: %3d.\n' % ( time_end/60, fit_forw_Et.nfcn), file=f)
         print('The chi squared/d.o.f. is: %.2f / %3d ( = %.2f ).\n' % (fit_forw_Et.fval, ndof_Et, fit_forw_Et.fval/ndof_Et), file = f)
         print('Below are the final output parameters from iMinuit:', file = f)
@@ -962,25 +978,10 @@ def off_forward_fit(Paralst_Unp, Paralst_Pol):
     fit_off_forward.fixed['bexp_Hg'] = True
     fit_off_forward.fixed['Invm2_Hg'] = True
 
-    fit_off_forward.limits['bexp_HSea']  = (0, 7)
-    fit_off_forward.fixed['R_E_Sea'] = True
-    #fit_off_forward.fixed['R_Hu_xi2'] = True
-    #fit_off_forward.fixed['R_Hd_xi2'] = True
-    #fit_off_forward.fixed['R_Eu_xi2'] = True
-    #fit_off_forward.fixed['R_Ed_xi2'] = True
-    fit_off_forward.fixed['R_Et_Sea'] = True
-    fit_off_forward.fixed['R_Htu_xi2'] = True
-    fit_off_forward.fixed['R_Htd_xi2'] = True
-    fit_off_forward.fixed['R_Etu_xi2'] = True
-    fit_off_forward.fixed['R_Etd_xi2'] = True
-    fit_off_forward.fixed['bexp_HtSea'] = True
-    
-    
-    #fit_off_forward.limits['bexp_HtSea'] = (0, 10)
-    
+    fit_off_forward.limits['bexp_HSea']  = (0, 10)
+    fit_off_forward.limits['bexp_HtSea'] = (0, 10)
 
-    #fit_off_forward.limits['R_Et_Sea']   = (-50, 50)
-    
+    fit_off_forward.limits['R_Et_Sea']   = (-50, 50)
 
     fit_off_forward.fixed['Norm_HuV'] = True
     fit_off_forward.fixed['alpha_HuV'] = True
@@ -1067,17 +1068,6 @@ def off_forward_fit(Paralst_Unp, Paralst_Pol):
     fit_off_forward.fixed['R_Htd_xi4'] = True 
     fit_off_forward.fixed['R_Etd_xi4'] = True
 
-    """
-    fit_off_forward.fixed['R_Hu_xi4'] = True
-    fit_off_forward.fixed['R_Hd_xi4'] = True 
-    fit_off_forward.fixed['R_Eu_xi4'] = True
-    fit_off_forward.fixed['R_Ed_xi4'] = True
-    fit_off_forward.fixed['R_Htu_xi4'] = True
-    fit_off_forward.fixed['R_Htd_xi4'] = True 
-    fit_off_forward.fixed['R_Etu_xi4'] = True
-    fit_off_forward.fixed['R_Etd_xi4'] = True
-    """
-
     global Minuit_Counter, Time_Counter, time_start
     Minuit_Counter = 0
     Time_Counter = 1
@@ -1092,7 +1082,7 @@ def off_forward_fit(Paralst_Unp, Paralst_Pol):
 
     time_end = time.time() -time_start
 
-    with open(os.path.join(dir_path,'GUMP_Output/off_forward_fit.txt'), 'w') as f:
+    with open(os.path.join(dir_path,'GUMP_Output/off_forward_fit.txt'), 'w', encoding='utf-8') as f:
         print('Total running time: %.1f minutes. Total call of cost function: %3d.\n' % ( time_end/60, fit_off_forward.nfcn), file=f)
         print('The chi squared/d.o.f. is: %.2f / %3d ( = %.2f ).\n' % (fit_off_forward.fval, ndof_off_forward, fit_off_forward.fval/ndof_off_forward), file = f)
         print('Below are the final output parameters from iMinuit:', file = f)
@@ -1296,21 +1286,20 @@ def dvmp_fit(Paralst_Unp):
 if __name__ == '__main__':
     pool = Pool()
     time_start = time.time()
-
+    
+    '''
     Paralst_Unp=pd.read_csv(os.path.join(dir_path,'GUMP_Params/Para_Unp.csv'), header=None).to_numpy()[0]
     Paralst_Pol=pd.read_csv(os.path.join(dir_path,'GUMP_Params/Para_Pol.csv'), header=None).to_numpy()[0]
 
     fit_dvmp = dvmp_fit(Paralst_Unp)
-    
     '''
+
     Paralst_Unp     = [4.922551238,0.21635596,3.228702555,2.349193947,0.163440601,1.135738688,6.896742038,0.15,3.358541913,0.184196049,4.41726899,3.475742056,0.249183402,1.051922382,6.548676693,2.864281106,1.052305853,7.412779844,0.15,0.161159704,0.916012032,1.02239598,0.41423421,-0.198595321,0.0,0.18394307,-2.260952723,0,1.159322377,2.569800357,0,0,0,0,0,0,0,3.296968216,0,0]
     Paralst_Pol     = [4.529773253,-0.246812532,3.037043159,2.607360484,0.076575866,0.516192897,4.369657188,0.15,-0.711694724,0.210181857,3.243538578,4.319727451,-0.057100694,0.612255908,2.099180441,0.243247279,0.630824175,2.71840147,0.15,9.065736349,0.79999977,7.357005187,2.083472023,-3.562901039,0.0,-0.634095327,-7.058667382,0,2.861662204,23.1231347,0,0,0,0,0,0,0,5.379752095]
    
     Para_Unp = ParaManager_Unp(Paralst_Unp)
     Para_Pol = ParaManager_Pol(Paralst_Pol)
-
-    print(CFF_theo(0.1, -1.0,2.0, Para_Unp, Para_Pol))
-
+    
     fit_forward_H   = forward_H_fit(Paralst_Unp)
     Paralst_Unp     = np.array(fit_forward_H.values)
 
@@ -1324,6 +1313,3 @@ if __name__ == '__main__':
     Paralst_Pol     = np.array(fit_forward_Et.values)
     
     fit_off_forward = off_forward_fit(Paralst_Unp, Paralst_Pol)
-    '''
-
-
