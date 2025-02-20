@@ -265,29 +265,29 @@ def SB3(j: Union[complex, np.ndarray]) -> Union[complex, np.ndarray]:
              - 0.5 + 0.5 * j) + S3(0.5 * j)) - 2 * (0.8224670334241131 * (
                  -S1(0.5 * (-1 + j)) + S1(0.5 * j)) - MellinF2(1 + j))
 
-def S1_tilde(n: Union[complex, np.ndarray], prty: int) -> Union[complex, np.ndarray]:
+def S1_tilde(n: Union[complex, np.ndarray], sgtr: int) -> Union[complex, np.ndarray]:
     """Eq. (39) of https://arxiv.org/abs/hep-ph/9810241 """
-    return  prty * (psi((n+2)/2) - psi((n+1)/2)) / 2 - log(2)   
+    return  -sgtr * (psi((n+2)/2) - psi((n+1)/2)) / 2 - log(2)   
 
-def S2_tilde(n: Union[complex, np.ndarray], prty: int) -> Union[complex, np.ndarray]:
+def S2_tilde(n: Union[complex, np.ndarray], sgtr: int) -> Union[complex, np.ndarray]:
     """Eq. (41) of  https://arxiv.org/abs/hep-ph/9810241"""
     G = dpsi((n+2)/2,1) - dpsi((n+1)/2,1)
-    return -(1/2)*zeta(2) - prty*G/4
+    return -(1/2)*zeta(2) + sgtr*G/4
 
-def S3_tilde(n: Union[complex, np.ndarray], prty: int) -> Union[complex, np.ndarray]:
+def S3_tilde(n: Union[complex, np.ndarray], sgtr: int) -> Union[complex, np.ndarray]:
     """Eqs. (47) and (37) of https://arxiv.org/abs/hep-ph/9810241"""
     epsilon = 0.000001
-    return prty*1/2* 1/8*(dpsi((n+2+epsilon)/2,2) - dpsi((n+1+epsilon)/2,2)) -3/4*zeta(3)
+    return -sgtr*1/2* 1/8*(dpsi((n+2+epsilon)/2,2) - dpsi((n+1+epsilon)/2,2)) -3/4*zeta(3)
 
-def S2_tilde_KM(n, prty):
+def S2_tilde_KM(n, sgtr):
     """S2_tilde from Gepard"""
     G = psi((n+1)/2) - psi(n/2)
-    return -(5/8)*zeta(3) + prty*(S1(n)/n**2 - (zeta(2)/2)*G + MellinF2(n))
+    return -(5/8)*zeta(3) + sgtr*(S1(n)/n**2 - (zeta(2)/2)*G + MellinF2(n))
 
 def Sm2p1(n: Union[complex, np.ndarray], prty: int) -> Union[complex, np.ndarray]: 
     """Eq. (50) of https://arxiv.org/abs/hep-ph/9810241""" 
     epsilon = 0.000001
-    return (-prty) * MellinF2(n+1+epsilon) + zeta(2)*S1_tilde(n,prty) - (5/8)*zeta(3) + zeta(2) * log(2)
+    return (prty) * MellinF2(n+1+epsilon) + zeta(2)*S1_tilde(n,prty) - (5/8)*zeta(3) + zeta(2) * log(2)
 
 def Sp1m2(n: Union[complex, np.ndarray], prty: int) -> Union[complex, np.ndarray]: 
     """Eq. (131) of https://arxiv.org/abs/hep-ph/9810241"""
@@ -389,13 +389,15 @@ def non_singlet_NLO(n: complex, nf: int, p: int, prty: int) -> complex:
         
     This will work as long as n, nf, and prty can be broadcasted together.
     """
+    sgtr = p*prty
+    
     # From Curci et al.
     nlo = (CF * CG * (
             16*S1(n)*(2*n+1)/poch(n, 2)**2 +
-            16*(2*S1(n) - 1/poch(n, 2)) * (S2(n)-S2_prime(n/2, prty)) +
-            64 * Sm2p1(n, prty) + 24*S2(n) - 3 - 8*S3_prime(n/2, prty) -
+            16*(2*S1(n) - 1/poch(n, 2)) * (S2(n)-S2_prime(n/2, sgtr)) +
+            64 * Sm2p1(n, -sgtr) + 24*S2(n) - 3 - 8*S3_prime(n/2, sgtr) -
             8*(3*n**3 + n**2 - 1)/poch(n, 2)**3 -
-            16*prty*(2*n**2 + 2*n + 1)/poch(n, 2)**3) +
+            16*(sgtr)*(2*n**2 + 2*n + 1)/poch(n, 2)**3) +
            CF * CA * (S1(n)*(536/9 + 8*(2*n+1)/poch(n, 2)**2) - 16*S1(n)*S2(n) +
                       S2(n)*(-52/3 + 8/poch(n, 2)) - 43/6 -
                       4*(151*n**4 + 263*n**3 + 97*n**2 + 3*n + 9)/9/poch(n, 2)**3) +
@@ -436,7 +438,7 @@ def singlet_NLO(n: complex, nf: int, p: int, prty: int = 1) -> np.ndarray:
                         -8*CA*nf*TF*( 8*(3+2*n)*S1(n)/((1+n)**2*(2+n)**2) + (2*(16+64*n+128*n**3+85*n**4+36*n**5+25*n**6 +15*n**7+6*n**8+n**9+104*(n*n)))/((-1+n+epsilon)*n**3*(1+n)**3*(2+n)**3)
                                      +((2+n+n*n)*(2*S2(n)-2*(S1(n)*S1(n))-2*S2(n/2)))/(n*(1+n)*(2+n))))/4 
                       , 8*CA*TF*nf*( -S1(n-1)**2/n +2*S1(n-1)**2/(n+1) -2*S1(n-1)/n**2 +4*S1(n-1)/(n+1)**2
-                                     -S2(n-1)/n + 2*S2(n-1)/(n+1) -2*S2_tilde(n-1,-prty)/n +4*S2_tilde(n-1,-prty)/(n+1)
+                              -S2(n-1)/n + 2*S2(n-1)/(n+1) -2*S2_tilde(n-1,-prty)/n +4*S2_tilde(n-1,-prty)/(n+1)
                                      -4/n +3/(n+1) -3/n*n + 8/(n+1)**2 +2/n**3 +12/(n+1)**3)
                        +4*CF*TF*nf*(  2*S1(n-1)**2/n -4*S1(n-1)**2/(n+1) -2*S2(n-1)/n +4*S2(n-1)/(n+1) 
                                      +14/n -19/(n+1) -1/n*n -8/(n+1)**2 -2/n**3 + 4/(n+1)**3))
