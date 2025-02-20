@@ -405,7 +405,7 @@ def non_singlet_NLO(n: complex, nf: int, p: int, prty: int) -> complex:
                            16*(11*n**2 + 5*n - 3)/9/poch(n, 2)**2)) / 4
 
     return nlo
-    
+
 
 def singlet_NLO(n: complex, nf: int, p: int, prty: int = 1) -> np.ndarray:
     """Singlet NLO anomalous dimensions matrix.
@@ -429,6 +429,8 @@ def singlet_NLO(n: complex, nf: int, p: int, prty: int = 1) -> np.ndarray:
     
     epsilon = 0.00001 * ( n == 1)
     
+    sgtr = p*prty
+    
     qq1 = np.where(p>0, non_singlet_NLO(n, nf, p, prty) - 4*CF*TF*nf*(5*n**5 +32*n**4 +49*n**3 +38*n**2 +28*n +8)/((n-1 +epsilon) * n**3 * (n+1)**3 * (n+2)**2)
                       , non_singlet_NLO(n, nf, p, prty) + 8*CF*TF*nf*(2/((n+1)**3) + 3/((n+1)**2) + 1/(n+1) + 2/n**3 - 1/n**2 - 1/n))
     
@@ -438,7 +440,7 @@ def singlet_NLO(n: complex, nf: int, p: int, prty: int = 1) -> np.ndarray:
                         -8*CA*nf*TF*( 8*(3+2*n)*S1(n)/((1+n)**2*(2+n)**2) + (2*(16+64*n+128*n**3+85*n**4+36*n**5+25*n**6 +15*n**7+6*n**8+n**9+104*(n*n)))/((-1+n+epsilon)*n**3*(1+n)**3*(2+n)**3)
                                      +((2+n+n*n)*(2*S2(n)-2*(S1(n)*S1(n))-2*S2(n/2)))/(n*(1+n)*(2+n))))/4 
                       , 8*CA*TF*nf*( -S1(n-1)**2/n +2*S1(n-1)**2/(n+1) -2*S1(n-1)/n**2 +4*S1(n-1)/(n+1)**2
-                              -S2(n-1)/n + 2*S2(n-1)/(n+1) -2*S2_tilde(n-1,-prty)/n +4*S2_tilde(n-1,-prty)/(n+1)
+                              -S2(n-1)/n + 2*S2(n-1)/(n+1) -2*S2_tilde(n-1,sgtr)/n +4*S2_tilde(n-1,sgtr)/(n+1)
                                      -4/n +3/(n+1) -3/n*n + 8/(n+1)**2 +2/n**3 +12/(n+1)**3)
                        +4*CF*TF*nf*(  2*S1(n-1)**2/n -4*S1(n-1)**2/(n+1) -2*S2(n-1)/n +4*S2(n-1)/(n+1) 
                                      +14/n -19/(n+1) -1/n*n -8/(n+1)**2 -2/n**3 + 4/(n+1)**3))
@@ -448,7 +450,7 @@ def singlet_NLO(n: complex, nf: int, p: int, prty: int = 1) -> np.ndarray:
                          -8*CF*CA*( ((1/9)*(144+432*n-1304*n**3-1031*n**4 + 695*n**5+1678*n**6+1400*n**7+621*n**8+109*n**9 - 152*(n*n)))/((-1+n+epsilon)**2*n**3*(1+n)**3*(2+n)**2)
                                    -((1/3)*S1(n)*(-12-22*n+17*n**4 + 41*(n*n)))/((-1+n+epsilon)**2*n**2*(1+n))+( (2+n+n*n)*(S2(n) + S1(n)*S1(n)-S2(n/2)))/((-1+n+epsilon)*n*(1+n))))/4
                       , 4*CA*CF*( -2*S1(n-1)**2/n +S1(n-1)**2/(n+1) +16*S1(n-1)/(3*n) -5*S1(n-1)/(3*(n+1)) 
-                                  +2*S2(n-1)/n -S2(n-1)/(n+1) +4*S2_tilde(n-1,-prty)/(n) -2*S2_tilde(n-1,-prty)/(n+1) -56/(9*n) 
+                                  +2*S2(n-1)/n -S2(n-1)/(n+1) +4*S2_tilde(n-1,sgtr)/(n) -2*S2_tilde(n-1,sgtr)/(n+1) -56/(9*n) 
                                   -20/(9*(n+1)) + 28/(3*n*n) -38/(3*(n+1)**2) -4/(n**3) - 6/((n+1)**3)) 
                        +2*CF**2*(  4*S1(n-1)**2/n - 2*S1(n-1)**2/(n+1) - 8*S1(n-1)/n + 2*S1(n-1)/(n+1)
                                   +8*S1(n-1)/(n**2)  -4*S1(n-1)/((n+1)**2) +4*S2(n-1)/n -2*S2(n-1)/(n+1) 
@@ -461,8 +463,8 @@ def singlet_NLO(n: complex, nf: int, p: int, prty: int = 1) -> np.ndarray:
                                 -16*S1(n)*S2(n/2)+(32*(1+n+n*n)*S2(n/2))/( (-1+n+epsilon)*n*(1+n)*(2+n))-4*S3(n/2) + 32*(S1(n)/n**2-(5/8)*zeta(3)+MellinF2(n+1) - zeta(2)*(-psi(n/2)+psi((1+n)/2))/2)))
                        , 2*CA**2*( (134/9)*S1(n-1) +8*S1(n-1)/(n*n) -16*S1(n-1)/(n+1)**2 
                                   +8*S2(n-1)/n -16*S2(n-1)/(n+1) +4*S3(n-1) 
-                                  -8*(S1(n-1)*S2(n-1)+S3(n-1))+ 8*S2_tilde(n-1,-prty)/n -16*S2_tilde(n-1,-prty)/(n+1) 
-                                  +4*S3_tilde(n-1,-prty) -8*Sp1m2(n-1,-prty)-107/(9*n) +241/(9*(n+1)) 
+                                  -8*(S1(n-1)*S2(n-1)+S3(n-1))+ 8*S2_tilde(n-1,sgtr)/n -16*S2_tilde(n-1,sgtr)/(n+1) 
+                                  +4*S3_tilde(n-1,sgtr) -8*Sp1m2(n-1,sgtr)-107/(9*n) +241/(9*(n+1)) 
                                   +58/(3*n*n)- 86/(3*(n+1)**2) -8/(n**3) -48/(n+1)**3 -16/3)
                         +16*CA*TF*nf*(-5*S1(n-1)/9 +14/(9*n) -19/(9*(n+1)) -1/(3*n*n) -1/(3*(n+1)**2) +1/3)
                         +4*CF*TF*nf*(-10/(n+1) +2/(n+1)**2 +4/(n+1)**3 +1 +10/n -10/(n*n) +4/(n**3)))
