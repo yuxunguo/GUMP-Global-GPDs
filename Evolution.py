@@ -199,12 +199,12 @@ def S4(z: Union[complex, np.ndarray]) -> Union[complex, np.ndarray]:
     return zeta(4) - dpsi(z+1, 3) / 6
 
 def S2_prime(z: Union[complex, np.ndarray], prty: int) -> Union[complex, np.ndarray]:
-    """https://www.sciencedirect.com/science/article/pii/0550321380900036?via%3Dihub  Eq. (5.25)."""
+    """https://www.sciencedirect.com/science/article/pii/0550321380900036?via%3Dihub  Eq. (5.29)."""
     # note this is related to delS2
     return (1+prty)*S2(z)/2 + (1-prty)*S2(z-1/2)/2
 
 def S3_prime(z: Union[complex, np.ndarray], prty: int) -> Union[complex, np.ndarray]:
-    """https://www.sciencedirect.com/science/article/pii/0550321380900036?via%3Dihub Eq. (5.25)."""
+    """https://www.sciencedirect.com/science/article/pii/0550321380900036?via%3Dihub Eq. (5.29)."""
     return (1+prty)*S3(z)/2 + (1-prty)*S3(z-1/2)/2
 
 def delS2(z: Union[complex, np.ndarray]) -> Union[complex, np.ndarray]:
@@ -267,31 +267,29 @@ def SB3(j: Union[complex, np.ndarray]) -> Union[complex, np.ndarray]:
 
 def S1_tilde(n: Union[complex, np.ndarray], sgtr: int) -> Union[complex, np.ndarray]:
     """Eq. (39) of https://arxiv.org/abs/hep-ph/9810241 """
-    return  -sgtr * (psi((n+2)/2) - psi((n+1)/2)) / 2 - log(2)   
+    return  sgtr * (psi((n+2)/2) - psi((n+1)/2)) / 2 - log(2)   
 
 def S2_tilde(n: Union[complex, np.ndarray], sgtr: int) -> Union[complex, np.ndarray]:
     """Eq. (41) of  https://arxiv.org/abs/hep-ph/9810241"""
     G = dpsi((n+2)/2,1) - dpsi((n+1)/2,1)
-    return -(1/2)*zeta(2) + sgtr*G/4
+    return -(1/2)*zeta(2) - sgtr*G/4
 
 def S3_tilde(n: Union[complex, np.ndarray], sgtr: int) -> Union[complex, np.ndarray]:
     """Eqs. (47) and (37) of https://arxiv.org/abs/hep-ph/9810241"""
-    epsilon = 0.000001
-    return -sgtr*1/2* 1/8*(dpsi((n+2+epsilon)/2,2) - dpsi((n+1+epsilon)/2,2)) -3/4*zeta(3)
+    return sgtr*1/2* 1/8*(dpsi((n+2)/2,2) - dpsi((n+1)/2,2)) -3/4*zeta(3)
 
 def S2_tilde_KM(n, sgtr):
     """S2_tilde from Gepard"""
     G = psi((n+1)/2) - psi(n/2)
     return -(5/8)*zeta(3) + sgtr*(S1(n)/n**2 - (zeta(2)/2)*G + MellinF2(n))
 
-def Sm2p1(n: Union[complex, np.ndarray], prty: int) -> Union[complex, np.ndarray]: 
+def Sm2p1(n: Union[complex, np.ndarray], sgtr: int) -> Union[complex, np.ndarray]: 
     """Eq. (50) of https://arxiv.org/abs/hep-ph/9810241""" 
-    epsilon = 0.000001
-    return (prty) * MellinF2(n+1+epsilon) + zeta(2)*S1_tilde(n,prty) - (5/8)*zeta(3) + zeta(2) * log(2)
+    return (-sgtr) * MellinF2(n+1) + zeta(2)*S1_tilde(n,sgtr) - (5/8)*zeta(3) + zeta(2) * log(2)
 
-def Sp1m2(n: Union[complex, np.ndarray], prty: int) -> Union[complex, np.ndarray]: 
+def Sp1m2(n: Union[complex, np.ndarray], sgtr: int) -> Union[complex, np.ndarray]: 
     """Eq. (131) of https://arxiv.org/abs/hep-ph/9810241"""
-    return S1(n)*S2_tilde(n,prty)+S3_tilde(n,prty)-Sm2p1(n,prty)
+    return S1(n)*S2_tilde(n,sgtr)+S3_tilde(n,sgtr)-Sm2p1(n,sgtr)
 
 '''
 def lsum(m: Union[complex, np.ndarray], n: Union[complex, np.ndarray])-> Union[complex, np.ndarray]:
@@ -336,26 +334,6 @@ def singlet_LO(n: Union[complex, np.ndarray], nf: int, p: int, prty: int = 1) ->
 
     """
 
-    '''
-    if(p == 1):
-        qq0 = CF*(-3.0-2.0/(n*(1.0+n))+4.0*S1(n))
-        qg0 = (-4.0*nf*TF*(2.0+n+n*n))/(n*(1.0+n)*(2.0+n))
-        gq0 = (-2.0*CF*(2.0+n+n*n))/((-1.0+n)*n*(1.0+n))
-        gg0 = -4.0*CA*(1/((-1.0+n)*n)+1/((1.0+n)*(2.0+n))-S1(n)) -11*CA/3. + 4*nf*TF/3.
-
-        return np.array([[qq0, qg0],
-                        [gq0, gg0]])
-    
-    if(p == -1):
-        qq0 = CF*(-3.0-2.0/(n*(1.0+n))+4.0*S1(n))
-        qg0 = (-4.0*nf*TF*(-1.0+n))/(n*(1.0+n))
-        gq0 = (-2.0*CF*(2.0+n))/(n*(1.0+n))
-        gg0 = -4.0*CA*(2/(n*(1.0+n))-S1(n)) -11*CA/3. + 4*nf*TF/3.
-
-        return np.array([[qq0, qg0],
-                        [gq0, gg0]])
-    '''
-
     epsilon = 0.00001 * ( n == 1)
 
     # Here, I am making the assumption that a is either 1 or -1
@@ -375,7 +353,8 @@ def singlet_LO(n: Union[complex, np.ndarray], nf: int, p: int, prty: int = 1) ->
 
 def non_singlet_NLO(n: complex, nf: int, p: int, prty: int) -> complex:
     """Non-singlet anomalous dimension.
-
+    
+    Eq. (5.30) in https://www.sciencedirect.com/science/article/pii/0550321380900036?via%3Dihub
     The same of vector (p=1) and axial-vector (p=-1) GPDs, check https://arxiv.org/pdf/hep-ph/9506451 page 17
     
     Args:
@@ -389,13 +368,17 @@ def non_singlet_NLO(n: complex, nf: int, p: int, prty: int) -> complex:
         
     This will work as long as n, nf, and prty can be broadcasted together.
     """
+    # For given distributions and charge parity, only even or odd moments are physical.
+    # Signature indicates replacing (-1)^N with sgtr = +1 or -1 for even or odd moments
+    # For example, for vector (p=+1) and charge even (prty=+1), only even moments contribute, so sgtr = (-1)^N = 1
+    # Generally, one has prty = p * sgtr, so sgtr = p * prty, noting p^2 =1
     sgtr = p*prty
     
     # From Curci et al.
     nlo = (CF * CG * (
             16*S1(n)*(2*n+1)/poch(n, 2)**2 +
             16*(2*S1(n) - 1/poch(n, 2)) * (S2(n)-S2_prime(n/2, sgtr)) +
-            64 * Sm2p1(n, -sgtr) + 24*S2(n) - 3 - 8*S3_prime(n/2, sgtr) -
+            64 * Sm2p1(n, sgtr) + 24*S2(n) - 3 - 8*S3_prime(n/2, sgtr) -
             8*(3*n**3 + n**2 - 1)/poch(n, 2)**3 -
             16*(sgtr)*(2*n**2 + 2*n + 1)/poch(n, 2)**3) +
            CF * CA * (S1(n)*(536/9 + 8*(2*n+1)/poch(n, 2)**2) - 16*S1(n)*S2(n) +
@@ -426,7 +409,11 @@ def singlet_NLO(n: complex, nf: int, p: int, prty: int = 1) -> np.ndarray:
         (GQ, GG))
 
     """
-    
+    # For given distributions and charge parity, only even or odd moments are physical.
+    # Signature indicates replacing (-1)^N with sgtr = +1 or -1 for even or odd moments
+    # For example, for vector (p=+1) and charge even (prty=+1), only even moments contribute, so sgtr = (-1)^N = 1
+    # Generally, one has prty = p * sgtr, so sgtr = p * prty, noting p^2 =1
+    # Note: when the argument n is passed with mismatch like S2tilde(n-1), sgtr should be passed as -sgtr as the parity of n is flipped.
     epsilon = 0.00001 * ( n == 1)
     
     sgtr = p*prty
@@ -440,7 +427,7 @@ def singlet_NLO(n: complex, nf: int, p: int, prty: int = 1) -> np.ndarray:
                         -8*CA*nf*TF*( 8*(3+2*n)*S1(n)/((1+n)**2*(2+n)**2) + (2*(16+64*n+128*n**3+85*n**4+36*n**5+25*n**6 +15*n**7+6*n**8+n**9+104*(n*n)))/((-1+n+epsilon)*n**3*(1+n)**3*(2+n)**3)
                                      +((2+n+n*n)*(2*S2(n)-2*(S1(n)*S1(n))-2*S2(n/2)))/(n*(1+n)*(2+n))))/4 
                       , 8*CA*TF*nf*( -S1(n-1)**2/n +2*S1(n-1)**2/(n+1) -2*S1(n-1)/n**2 +4*S1(n-1)/(n+1)**2
-                              -S2(n-1)/n + 2*S2(n-1)/(n+1) -2*S2_tilde(n-1,sgtr)/n +4*S2_tilde(n-1,sgtr)/(n+1)
+                              -S2(n-1)/n + 2*S2(n-1)/(n+1) -2*S2_tilde(n-1,-sgtr)/n +4*S2_tilde(n-1,-sgtr)/(n+1)
                                      -4/n +3/(n+1) -3/n*n + 8/(n+1)**2 +2/n**3 +12/(n+1)**3)
                        +4*CF*TF*nf*(  2*S1(n-1)**2/n -4*S1(n-1)**2/(n+1) -2*S2(n-1)/n +4*S2(n-1)/(n+1) 
                                      +14/n -19/(n+1) -1/n*n -8/(n+1)**2 -2/n**3 + 4/(n+1)**3))
@@ -450,7 +437,7 @@ def singlet_NLO(n: complex, nf: int, p: int, prty: int = 1) -> np.ndarray:
                          -8*CF*CA*( ((1/9)*(144+432*n-1304*n**3-1031*n**4 + 695*n**5+1678*n**6+1400*n**7+621*n**8+109*n**9 - 152*(n*n)))/((-1+n+epsilon)**2*n**3*(1+n)**3*(2+n)**2)
                                    -((1/3)*S1(n)*(-12-22*n+17*n**4 + 41*(n*n)))/((-1+n+epsilon)**2*n**2*(1+n))+( (2+n+n*n)*(S2(n) + S1(n)*S1(n)-S2(n/2)))/((-1+n+epsilon)*n*(1+n))))/4
                       , 4*CA*CF*( -2*S1(n-1)**2/n +S1(n-1)**2/(n+1) +16*S1(n-1)/(3*n) -5*S1(n-1)/(3*(n+1)) 
-                                  +2*S2(n-1)/n -S2(n-1)/(n+1) +4*S2_tilde(n-1,sgtr)/(n) -2*S2_tilde(n-1,sgtr)/(n+1) -56/(9*n) 
+                                  +2*S2(n-1)/n -S2(n-1)/(n+1) +4*S2_tilde(n-1,-sgtr)/(n) -2*S2_tilde(n-1,-sgtr)/(n+1) -56/(9*n) 
                                   -20/(9*(n+1)) + 28/(3*n*n) -38/(3*(n+1)**2) -4/(n**3) - 6/((n+1)**3)) 
                        +2*CF**2*(  4*S1(n-1)**2/n - 2*S1(n-1)**2/(n+1) - 8*S1(n-1)/n + 2*S1(n-1)/(n+1)
                                   +8*S1(n-1)/(n**2)  -4*S1(n-1)/((n+1)**2) +4*S2(n-1)/n -2*S2(n-1)/(n+1) 
@@ -463,8 +450,8 @@ def singlet_NLO(n: complex, nf: int, p: int, prty: int = 1) -> np.ndarray:
                                 -16*S1(n)*S2(n/2)+(32*(1+n+n*n)*S2(n/2))/( (-1+n+epsilon)*n*(1+n)*(2+n))-4*S3(n/2) + 32*(S1(n)/n**2-(5/8)*zeta(3)+MellinF2(n+1) - zeta(2)*(-psi(n/2)+psi((1+n)/2))/2)))
                        , 2*CA**2*( (134/9)*S1(n-1) +8*S1(n-1)/(n*n) -16*S1(n-1)/(n+1)**2 
                                   +8*S2(n-1)/n -16*S2(n-1)/(n+1) +4*S3(n-1) 
-                                  -8*(S1(n-1)*S2(n-1)+S3(n-1))+ 8*S2_tilde(n-1,sgtr)/n -16*S2_tilde(n-1,sgtr)/(n+1) 
-                                  +4*S3_tilde(n-1,sgtr) -8*Sp1m2(n-1,sgtr)-107/(9*n) +241/(9*(n+1)) 
+                                  -8*(S1(n-1)*S2(n-1)+S3(n-1))+ 8*S2_tilde(n-1,-sgtr)/n -16*S2_tilde(n-1,-sgtr)/(n+1) 
+                                  +4*S3_tilde(n-1,-sgtr) -8*Sp1m2(n-1,-sgtr)-107/(9*n) +241/(9*(n+1)) 
                                   +58/(3*n*n)- 86/(3*(n+1)**2) -8/(n**3) -48/(n+1)**3 -16/3)
                         +16*CA*TF*nf*(-5*S1(n-1)/9 +14/(9*n) -19/(9*(n+1)) -1/(3*n*n) -1/(3*(n+1)**2) +1/3)
                         +4*CF*TF*nf*(-10/(n+1) +2/(n+1)**2 +4/(n+1)**3 +1 +10/n -10/(n*n) +4/(n**3)))
