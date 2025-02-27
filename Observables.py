@@ -645,7 +645,6 @@ class GPDobserv (object) :
         Max_imJ = Mellin_Barnes_cutoff
         
         def Integrand_Mellin_Barnes_CFF(j: complex):
-            # j is a scalar
 
             ConfFlav     = Moment_Sum(j, self.t, Para_Forward) #(N, 5)
             ConfFlav_xi2 = Moment_Sum(j, self.t, Para_xi2)
@@ -716,6 +715,23 @@ class GPDobserv (object) :
             fmask = flvmask(flv)
             return np.einsum('j, ...j', fmask, EvoConf_Wilson)
         
+        def Integrand_Mellin_Barnes_CFF_evWC(j: complex):
+            """
+            It might look strange that we use the evolved-Wilson-Coefficient method in the evolved-moment module.
+            We only use this to calcuate the j=0 contributions which has been excluded in the double summation formula because there's a pole in the moment F_j near j=0.
+            When adding back this term, since j=0 is fixed, we always sum over the moment of Wilson coefficient so it's equivalent to the j=0 term is the evolved-Wilson-Coefficient module
+            """
+            ConfFlav     = Moment_Sum(j, self.t, Para_Forward) #(N, 5)
+            ConfFlav_xi2 = Moment_Sum(j, self.t, Para_xi2)
+            ConfFlav_xi4 = Moment_Sum(j, self.t, Para_xi4)
+
+            EvoConf_Wilson = (CFF_Evo_NLO_evWC(j, NFEFF, self.p, self.Q, ConfFlav, muf) \
+                                +  CFF_Evo_NLO_evWC(j+2, NFEFF, self.p, self.Q, ConfFlav_xi2, muf) \
+                                +  CFF_Evo_NLO_evWC(j+4, NFEFF, self.p, self.Q, ConfFlav_xi4, muf))
+                        
+            fmask = flvmask(flv)
+            return np.einsum('j, ...j', fmask, EvoConf_Wilson)
+        
         def tan_factor(j):
             if (self.p==1):
                 return  1/(2j)*self.xi ** (-j-1)*(1j+np.tan(j * np.pi / 2))
@@ -724,12 +740,12 @@ class GPDobserv (object) :
         
         eps= 10. **(-6)
         
-        # adding back the j=0 contribution            
+        # adding back the j=0 contribution using the evolved-Wilson-Coefficient method. Reason explained above
         def CFFj0():
             if self.p==1:
                 return 0
             else:
-                return self.xi ** (- 1.) * Integrand_Mellin_Barnes_CFF(np.array([0.+eps]))[0] *(2) # the last factor of 2 is the residual of -1/(2j)*np.cot(j * np.pi / 2) at j=0
+                return self.xi ** (- 1.) * Integrand_Mellin_Barnes_CFF_evWC(np.array([0.+eps]))[0] *(2) # the last factor of 2 is the residual of -1/(2j)*np.cot(j * np.pi / 2) at j=0
         
         #for moment evolution, the j=1 pole is also missed because we choose 1<cj<2.
         def CFFj1():
@@ -775,7 +791,6 @@ class GPDobserv (object) :
         Max_imJ = Mellin_Barnes_cutoff
         
         def Integrand_Mellin_Barnes_TFF(j: complex):
-            # j is a scalar
 
             ConfFlav     = Moment_Sum(j, self.t, Para_Forward) #(N, 5)
             ConfFlav_xi2 = Moment_Sum(j, self.t, Para_xi2)
@@ -847,6 +862,24 @@ class GPDobserv (object) :
             fmask = flvmask(flv)
             return np.einsum('j, ...j', fmask, EvoConf_Wilson)
         
+        def Integrand_Mellin_Barnes_TFF_evWC(j: complex):
+            """
+            It might look strange that we use the evolved-Wilson-Coefficient method in the evolved-moment module.
+            We only use this to calcuate the j=0 contributions which has been excluded in the double summation formula because there's a pole in the moment F_j near j=0.
+            When adding back this term, since j=0 is fixed, we always sum over the moment of Wilson coefficient so it's equivalent to the j=0 term is the evolved-Wilson-Coefficient module
+            """
+            
+            ConfFlav     = Moment_Sum(j, self.t, Para_Forward) #(N, 5)
+            ConfFlav_xi2 = Moment_Sum(j, self.t, Para_xi2)
+            ConfFlav_xi4 = Moment_Sum(j, self.t, Para_xi4)
+
+            EvoConf_Wilson = (TFF_Evo_NLO_evWC(j, NFEFF, self.p, self.Q, ConfFlav, meson, muf) \
+                                +  TFF_Evo_NLO_evWC(j+2, NFEFF, self.p, self.Q, ConfFlav_xi2, meson, muf) \
+                                +  TFF_Evo_NLO_evWC(j+4, NFEFF, self.p, self.Q, ConfFlav_xi4, meson, muf))
+                        
+            fmask = flvmask(flv)
+            return np.einsum('j, ...j', fmask, EvoConf_Wilson)
+        
         def tan_factor(j):
             if (self.p==1):
                 return  1/(2j)*self.xi ** (-j-1)*(1j+np.tan(j * np.pi / 2))
@@ -855,12 +888,12 @@ class GPDobserv (object) :
         
         eps= 10. **(-6)
         
-        # adding back the j=0 contribution            
+        # adding back the j=0 contribution using the evolved-Wilson-Coefficient method. Reason explained above
         def TFFj0():
             if self.p==1:
                 return 0
             else:
-                return self.xi ** (- 1.) * Integrand_Mellin_Barnes_TFF(np.array([0.+eps]))[0] *(2) # the last factor of 2 is the residual of -1/(2j)*np.cot(j * np.pi / 2) at j=0
+                return self.xi ** (- 1.) * Integrand_Mellin_Barnes_TFF_evWC(np.array([0.+eps]))[0] *(2) # the last factor of 2 is the residual of -1/(2j)*np.cot(j * np.pi / 2) at j=0
         
         #for moment evolution, the j=1 pole is also missed because we choose 1<cj<2.
         def TFFj1():

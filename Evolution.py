@@ -1630,7 +1630,7 @@ def CFF_Evo_NLO_evWC(j: np.array, nf: int, p: int, Q: float, ConfFlav: np.array,
 
 def np_cache_GPD_moment(function):
     @functools.wraps(function)
-    def wrapper(arr, nf, p, mu, t, xi, Para, momshift):
+    def wrapper(arr, nf, p, mu, t, xi, Para, momshift, off_diag):
         # Serialize NumPy arrays to bytes for creating a unique key
         key = (
             arr.tobytes(),        # Serialize the array
@@ -1640,7 +1640,8 @@ def np_cache_GPD_moment(function):
             t,
             xi,
             Para.tobytes(),      # Serialize the parameter array
-            momshift
+            momshift,
+            off_diag
         )
         
         # Check if result is cached
@@ -1648,7 +1649,7 @@ def np_cache_GPD_moment(function):
             return cache[key]
 
         # Compute and cache the result
-        cache[key] = function(arr, nf, p, mu, t, xi, Para, momshift)
+        cache[key] = function(arr, nf, p, mu, t, xi, Para, momshift, off_diag)
         return cache[key]
 
     # Dictionary for caching
@@ -1668,7 +1669,7 @@ def np_cache_GPD_moment(function):
 
 # Turn off the cache to reduce hashing time if only one evolved moment is calculated for a set of parameters at a given kinematics. Otherwise cache it.
 @np_cache_GPD_moment
-def Moment_Evo_NLO(j: np.array, nf: int, p: int, mu: float, t: float, xi: float, Para: np.array, momshift: int) -> np.array:
+def Moment_Evo_NLO(j: np.array, nf: int, p: int, mu: float, t: float, xi: float, Para: np.array, momshift: int, off_diag: int =1) -> np.array:
     """Next-to-leading order evolution of the conformal moments (Evolved moment method)
 
     Args:
@@ -1680,6 +1681,7 @@ def Moment_Evo_NLO(j: np.array, nf: int, p: int, mu: float, t: float, xi: float,
         xi: skewness
         Para: parameters of the conformal moments
         momshift: shift of moments
+        off_diag: turn on/off the off-diagonal pieces. On (=1) by default. ONLY AND MUST TURN IT OFF when j=0 or 1, cause it would be problematic!
         
         Note: xi,t are need when for the evolution of moments:
             We need Para for the parameters rather than just the unevolved moment ConFlav;
@@ -1785,8 +1787,11 @@ def Moment_Evo_NLO(j: np.array, nf: int, p: int, mu: float, t: float, xi: float,
         return out        
     
     # Off-diagonal piece for the singlet evolution
-    confSG_ev1_non_diag=fixed_quadvec(lambda imK:non_diag_integrand_mesh(reK+1j*imK)+non_diag_integrand_mesh(reK-1j*imK),0,Max_imK,200)
-
+    if(off_diag == 1):
+        confSG_ev1_non_diag = fixed_quadvec(lambda imK:non_diag_integrand_mesh(reK+1j*imK)+non_diag_integrand_mesh(reK-1j*imK),0,Max_imK,200)
+    else:
+        confSG_ev1_non_diag = 0
+        
     reK = -0.6
     Max_imK = 150
         
@@ -1821,7 +1826,10 @@ def Moment_Evo_NLO(j: np.array, nf: int, p: int, mu: float, t: float, xi: float,
         return out        
     
     # Off-diagonal piece for the singlet evolution
-    confNS_ev1_non_diag=fixed_quadvec(lambda imK:non_diag_integrand_mesh_NS(reK+1j*imK)+non_diag_integrand_mesh_NS(reK-1j*imK),0,Max_imK,200)
+    if(off_diag == 1):
+        confNS_ev1_non_diag = fixed_quadvec(lambda imK:non_diag_integrand_mesh_NS(reK+1j*imK)+non_diag_integrand_mesh_NS(reK-1j*imK),0,Max_imK,200)
+    else:
+        confNS_ev1_non_diag = 0
     
     # Combine the diagonal and off-diagonal pieces
     confSG_ev1 = confSG_ev1_diag + confSG_ev1_non_diag     
@@ -1832,7 +1840,7 @@ def Moment_Evo_NLO(j: np.array, nf: int, p: int, mu: float, t: float, xi: float,
 
     return conf_ev_NS_tot, conf_ev_SG_tot, confNS_ev0, confSG_ev0
 
-def TFF_Evo_NLO_evMOM(j: np.array, nf: int, p: int, Q: float, t: float, xi: float, Para: np.array, momshift: int, meson: int, muf: float) -> np.array:
+def TFF_Evo_NLO_evMOM(j: np.array, nf: int, p: int, Q: float, t: float, xi: float, Para: np.array, momshift: int, meson: int, muf: float, off_diag: int =1) -> np.array:
     """Next-to-leading order evolved conformal moments combined with the DVMP Wilson coefficients in the evolution space (Evolved moment method)
     
     Args:
@@ -1846,6 +1854,7 @@ def TFF_Evo_NLO_evMOM(j: np.array, nf: int, p: int, Q: float, t: float, xi: floa
         Para: parameters of the conformal moments
         momshift: shift of moments
         muset: offset in the scale mu to study the scale dependence of the TFF
+        off_diag: turn on/off the off-diagonal pieces. On (=1) by default. ONLY AND MUST TURN IT OFF when j=0 or 1, cause it would be problematic!
         More notes in Moment_Evo_NLO() function above
 
     Returns:
@@ -1860,7 +1869,7 @@ def TFF_Evo_NLO_evMOM(j: np.array, nf: int, p: int, Q: float, t: float, xi: floa
     assert j.ndim == 1, "Check dimension of j, must be 1D array" # shape (N,)
     
     # Retrive the evolved moment in the evolution basis
-    conf_ev_NS_tot, conf_ev_SG_tot, confNS_ev0, confSG_ev0 = Moment_Evo_NLO(j, nf, p, muf, t, xi, Para, momshift)
+    conf_ev_NS_tot, conf_ev_SG_tot, confNS_ev0, confSG_ev0 = Moment_Evo_NLO(j, nf, p, muf, t, xi, Para, momshift, off_diag)
     
     # Leading order non-singlet DVMP Wilson coefficient
     NSCoef_0 = WilsonCoef_DVMP_LO(j,nf, muf, meson)[:3]
@@ -1889,7 +1898,7 @@ def TFF_Evo_NLO_evMOM(j: np.array, nf: int, p: int, Q: float, t: float, xi: floa
 
     return EvoConf
 
-def CFF_Evo_NLO_evMOM(j: np.array, nf: int, p: int, Q: float, t: float, xi: float, Para: np.array, momshift: int, muf: float) -> np.array:
+def CFF_Evo_NLO_evMOM(j: np.array, nf: int, p: int, Q: float, t: float, xi: float, Para: np.array, momshift: int, muf: float, off_diag: int =1) -> np.array:
     """Next-to-leading order evolved conformal moments combined with the DVCS Wilson coefficients in the evolution space (Evolved moment method)
     
     Args:
@@ -1903,6 +1912,7 @@ def CFF_Evo_NLO_evMOM(j: np.array, nf: int, p: int, Q: float, t: float, xi: floa
         Para: parameters of the conformal moments
         momshift: shift of moments
         muset: offset in the scale mu to study the scale dependence of the CFF
+        off_diag: turn on/off the off-diagonal pieces. On (=1) by default. ONLY AND MUST TURN IT OFF when j=0 or 1, cause it would be problematic!
         More notes in Moment_Evo_NLO() function above
 
     Returns:
@@ -1917,7 +1927,7 @@ def CFF_Evo_NLO_evMOM(j: np.array, nf: int, p: int, Q: float, t: float, xi: floa
     assert j.ndim == 1, "Check dimension of j, must be 1D array" # shape (N,)
     
     # Retrive the evolved moment in the evolution basis
-    conf_ev_NS_tot, conf_ev_SG_tot, confNS_ev0, confSG_ev0 = Moment_Evo_NLO(j, nf, p, muf, t, xi, Para, momshift)
+    conf_ev_NS_tot, conf_ev_SG_tot, confNS_ev0, confSG_ev0 = Moment_Evo_NLO(j, nf, p, muf, t, xi, Para, momshift, off_diag)
     
     # Leading order non-singlet DVCS Wilson coefficient
     NSCoef_0 = WilsonCoef_DVCS_LO(j)[:3]
@@ -1947,7 +1957,7 @@ def CFF_Evo_NLO_evMOM(j: np.array, nf: int, p: int, Q: float, t: float, xi: floa
     return EvoConf
 '''***********************************************'''
 
-def GPD_Moment_Evo_NLO(j: np.array, nf: int, p: int, mu: float, t: float, xi: complex, Para: np.array, momshift: int) -> np.array:
+def GPD_Moment_Evo_NLO(j: np.array, nf: int, p: int, mu: float, t: float, xi: complex, Para: np.array, momshift: int, off_diag:int =1) -> np.array:
     """Next-to-leading order evolved conformal moments in the evolution basis (Evolved moment method)
     
     Args:
@@ -1961,6 +1971,7 @@ def GPD_Moment_Evo_NLO(j: np.array, nf: int, p: int, mu: float, t: float, xi: co
         Para: parameters of the conformal moments
         momshift: shift of moments
         muset: offset in the scale mu to study the scale dependence of the TFF
+        off_diag: turn on/off the off-diagonal pieces. On (=1) by default. ONLY AND MUST TURN IT OFF when j=0 or 1, cause it would be problematic!
         More notes in Moment_Evo_NLO() function above
 
     Returns:
@@ -1975,7 +1986,7 @@ def GPD_Moment_Evo_NLO(j: np.array, nf: int, p: int, mu: float, t: float, xi: co
     assert j.ndim == 1, "Check dimension of j, must be 1D array" # shape (N,)
     
     # Retrive the evolved moment in evolution basis (the last two terms redundant here, only used for NLO TFF/CFF)
-    conf_ev_NS_tot, conf_ev_SG_tot, confNS_ev0, confSG_ev0 = Moment_Evo_NLO(j, nf, p, mu, t, xi, Para, momshift)
+    conf_ev_NS_tot, conf_ev_SG_tot, confNS_ev0, confSG_ev0 = Moment_Evo_NLO(j, nf, p, mu, t, xi, Para, momshift, off_diag)
     
     # Recombing the non-singlet and singlet parts
     EvoConf = np.concatenate((conf_ev_NS_tot, conf_ev_SG_tot), axis=-1) # (N, 5)
