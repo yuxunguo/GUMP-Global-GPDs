@@ -147,12 +147,31 @@ def ConfWaveFuncQ(j: complex, x: float, xi: float) -> complex:
         quark conformal wave function p_j(x,xi)
     """  
 
-    pDGLAP = np.where(x >= xi,                np.sin(np.pi * (j+1))/ np.pi * x**(-j-1) * np.array(hyp2f1_nparray( (j+1)/2, (j+2)/2, j+5/2, (xi/x) ** 2), dtype= complex)                           , 0)
+    pDGLAP = np.where(x > xi, np.sin(np.pi * (j+1))/ np.pi * x**(-j-1) * np.array(hyp2f1_nparray( (j+1)/2, (j+2)/2, j+5/2, (xi/x) ** 2), dtype= complex)                           , 0)
 
-    pERBL = np.where(((x > -xi) & (x < xi)), 2 ** (1+j) * gamma(5/2+j) / (gamma(1/2) * gamma(1+j)) * xi ** (-j-1) * (1+x/xi) * np.array(hyp2f1_nparray(-1-j,j+2,2, (x+xi)/(2*xi)), dtype= complex), 0)
+    pERBL = np.where(((x > -xi) & (x <= xi)), 2 ** (1+j) * gamma(5/2+j) / (gamma(1/2) * gamma(1+j)) * xi ** (-j-1) * (1+x/xi) * np.array(hyp2f1_nparray(-1-j,j+2,2, (x+xi)/(2*xi)), dtype= complex), 0)
 
     return pDGLAP + pERBL
 
+def ConfWaveFuncQ_over_sinpij(j: complex, x: float, xi: float) -> complex:
+    """Quark conformal wave function p_j(x,xi)/sin(pi(j+1))
+    
+    Check e.g. https://arxiv.org/pdf/hep-ph/0509204.pdf
+
+    Args:
+        j: conformal spin j (conformal spin is actually j+2 but anyway)
+        x: momentum fraction x
+        xi: skewness parameter xi
+
+    Returns:
+        quark conformal wave function p_j(x,xi)
+    """
+    
+    pDGLAP = np.where(x > xi, 1/ np.pi * x**(-j-1) * np.array(hyp2f1_nparray( (j+1)/2, (j+2)/2, j+5/2, (xi/x) ** 2), dtype= complex)                           , 0)
+
+    pERBL = np.where(((x > -xi) & (x <= xi)), 1/np.sin(np.pi * (j+1)) * 2 ** (1+j) * gamma(5/2+j) / (gamma(1/2) * gamma(1+j)) * xi ** (-j-1) * (1+x/xi) * np.array(hyp2f1_nparray(-1-j,j+2,2, (x+xi)/(2*xi)), dtype= complex), 0)
+
+    return pDGLAP + pERBL
 
 def ConfWaveFuncG(j: complex, x: float, xi: float) -> complex:
     """Gluon conformal wave function p_j(x,xi) 
@@ -168,26 +187,35 @@ def ConfWaveFuncG(j: complex, x: float, xi: float) -> complex:
         gluon conformal wave function p_j(x,xi)
     """ 
     # An extra minus sign defined different from the orginal definition to absorb the extra minus sign of MB integral for gluon
-    """
-    Minus = -1
-    if(x > xi):
-        pDGLAP = np.sin(np.pi * j)/ np.pi * x**(-j) * complex(hyp2f1( j/2, (j+1)/2, j+5/2, (xi/x) ** 2)) 
-        return Minus * pDGLAP
-
-    if(x > -xi):
-        pERBL = 2 ** j * gamma(5/2+j) / (gamma(1/2) * gamma(j)) * xi ** (-j) * (1+x/xi) ** 2 * complex(hyp2f1(-1-j,j+2,3, (x+xi)/(2*xi)))
-        return Minus * pERBL
-    
-    return 0
-    """
     Minus = -1
 
-    pDGLAP = np.where(x >= xi,                Minus * np.sin(np.pi * j)/ np.pi * x**(-j) * np.array(hyp2f1_nparray( j/2, (j+1)/2, j+5/2, (xi/x) ** 2), dtype= complex)                                   , 0)
+    pDGLAP = np.where(x > xi,                Minus * np.sin(np.pi * j)/ np.pi * x**(-j) * np.array(hyp2f1_nparray( j/2, (j+1)/2, j+5/2, (xi/x) ** 2), dtype= complex)                                   , 0)
 
-    pERBL = np.where(((x > -xi) & (x < xi)), Minus * 2 ** j * gamma(5/2+j) / (gamma(1/2) * gamma(j)) * xi ** (-j) * (1+x/xi) ** 2 * np.array((hyp2f1_nparray(-1-j,j+2,3, (x+xi)/(2*xi))), dtype= complex), 0)
+    pERBL = np.where(((x > -xi) & (x <= xi)), Minus * 2 ** j * gamma(5/2+j) / (gamma(1/2) * gamma(j)) * xi ** (-j) * (1+x/xi) ** 2 * np.array((hyp2f1_nparray(-1-j,j+2,3, (x+xi)/(2*xi))), dtype= complex), 0)
 
     return pDGLAP + pERBL
 
+def ConfWaveFuncG_over_sinpij(j: complex, x: float, xi: float) -> complex:
+    """Gluon conformal wave function p_j(x,xi)/sin(pi(j+1)) = Minus * p_j(x,xi)/sin(pi*j)
+    
+    Check e.g. https://arxiv.org/pdf/hep-ph/0509204.pdf
+
+    Args:
+        j: conformal spin j (actually conformal spin is j+2 but anyway)
+        x: momentum fraction x
+        xi: skewness parameter xi
+
+    Returns:
+        gluon conformal wave function p_j(x,xi)
+    """ 
+    # An extra minus sign defined different from the orginal definition to absorb the extra minus sign of MB integral for gluon
+    Minus = -1
+
+    pDGLAP = np.where(x > xi, 1/ np.pi * x**(-j) * np.array(hyp2f1_nparray( j/2, (j+1)/2, j+5/2, (xi/x) ** 2), dtype= complex)                                   , 0)
+
+    pERBL = np.where(((x > -xi) & (x <= xi)), 1/np.sin(np.pi * j) * 2 ** j * gamma(5/2+j) / (gamma(1/2) * gamma(j)) * xi ** (-j) * (1+x/xi) ** 2 * np.array((hyp2f1_nparray(-1-j,j+2,3, (x+xi)/(2*xi))), dtype= complex), 0)
+
+    return pDGLAP + pERBL
 """
 ***********************Observables***************************************
 """
@@ -320,9 +348,7 @@ class GPDobserv (object) :
         Para_xi4     = ParaAll[..., 2, :, :, :]
 
         # The contour for Mellin-Barnes integral in terms of j not n.         
-
         def ConfWaveConv(j: complex):
-
             """
             ConfWaveC = np.array([[ConfWaveFuncQ(j, self.x, self.xi), ConfWaveFuncQ(j, self.x, self.xi) - self.p * ConfWaveFuncQ(j, -self.x, self.xi),0,0,0],
                                   [0,0,ConfWaveFuncQ(j, self.x, self.xi), ConfWaveFuncQ(j, self.x, self.xi) - self.p * ConfWaveFuncQ(j, -self.x, self.xi),0],
@@ -345,7 +371,33 @@ class GPDobserv (object) :
 
             return ConfWaveC
         
-        def Integrand_Mellin_Barnes(j: complex):
+        def ConfWaveConv_over_sinpiji(j: complex):
+            """
+            This function exists for technical reasons:
+            
+            The 1/sin(pi*(j+1)) factor is exponentially suppressed on the imaginary axes on both side,
+            whereas the conformal partial wave function is exponentiall divergent.
+            So we absorb 1/sin(pi*(j+1)) factor into the conformal partial wave function in advance to avoid the overflow in the conformal wave function.
+            This is only need for Mellin-Barnes integral!
+            """
+            helper1 = np.array([[1, 1, 0, 0, 0],
+                                [0, 0, 1, 1, 0],
+                                [0, 0, 0, 0, 0]])
+            helper2 = np.array([[0, -1, 0, 0, 0],
+                                [0, 0, 0, -1, 0],
+                                [0, 0, 0, 0, 0]])
+            helper3 = np.array([[0, 0, 0, 0, 0],
+                                [0, 0, 0, 0, 0],
+                                [0, 0, 0, 0, 1]])
+
+            ConfWaveC =np.einsum('..., ij->...ij', ConfWaveFuncQ_over_sinpij(j, self.x, self.xi), helper1) \
+                     + np.einsum('... ,ij->...ij', self.p * ConfWaveFuncQ_over_sinpij(j, -self.x, self.xi), helper2) \
+                     + np.einsum('... ,ij->...ij', ConfWaveFuncG_over_sinpij(j, self.x, self.xi)+ self.p * ConfWaveFuncG_over_sinpij(j, -self.x, self.xi), helper3)
+
+            return ConfWaveC
+        
+        # Put in the extra 1/sin(pi*(j+1)) factor if over_pij = 1. Included (=1) by default
+        def Integrand_Mellin_Barnes(j: complex, over_pij: int = 1):
 
             ConfFlav     = Moment_Sum(j, self.t, Para_Forward) #(N, 5)
             ConfFlav_xi2 = Moment_Sum(j, self.t, Para_xi2)
@@ -367,26 +419,32 @@ class GPDobserv (object) :
             ConfFlavEv_xi2 = np.einsum('...ij, ...j->...i', inv_flav_trans, ConfEv_xi2)
             ConfFlavEv_xi4 = np.einsum('...ij, ...j->...i', inv_flav_trans, ConfEv_xi4)
             
-            return Flv_Intp(np.einsum('...ij,...j->...i', ConfWaveConv(j), ConfFlavEv) \
-                    + self.xi ** 2 * np.einsum('...ij,...j->...i', ConfWaveConv(j+2), ConfFlavEv_xi2) \
-                    + self.xi ** 4 * np.einsum('...ij,...j->...i', ConfWaveConv(j+4), ConfFlavEv_xi4),flv)
+            if(over_pij == 1):
+                return Flv_Intp(np.einsum('...ij,...j->...i', ConfWaveConv_over_sinpiji(j), ConfFlavEv) \
+                        + self.xi ** 2 * np.einsum('...ij,...j->...i', ConfWaveConv_over_sinpiji(j+2), ConfFlavEv_xi2) \
+                        + self.xi ** 4 * np.einsum('...ij,...j->...i', ConfWaveConv_over_sinpiji(j+4), ConfFlavEv_xi4),flv)
+            else:
+                return Flv_Intp(np.einsum('...ij,...j->...i', ConfWaveConv(j), ConfFlavEv) \
+                        + self.xi ** 2 * np.einsum('...ij,...j->...i', ConfWaveConv(j+2), ConfFlavEv_xi2) \
+                        + self.xi ** 4 * np.einsum('...ij,...j->...i', ConfWaveConv(j+4), ConfFlavEv_xi4),flv)
+                
         
         # Adding a j = 1 term because the contour do not enclose the j = 1 pole which should be the 1th conformal moment.
         def GPD1():
 
             eps= np.array([0.])
-            return (-1)*Integrand_Mellin_Barnes(1.+eps) # Note the residual theorem gives -(2 np.pi *1j)*1/(2*np.sin((j+1)*np.pi)) with residual (-1) at j=1;
-  
+            return (-1)*Integrand_Mellin_Barnes(1.+eps,over_pij = 0) # Note the residual theorem gives -(2 np.pi *1j)*1/(2*np.sin((j+1)*np.pi)) with residual (-1) at j=1;
+
         # Adding a j = 0 term because the contour do not enclose the j = 0 pole which should be the 0th conformal moment.
         def GPD0():
-            '''
-            Note: Naively, this function simply returns Integrand_Mellin_Barnes([0.]) like the GPD1() above.
-                  However, the zeroth moment is only defined for valence quark not sea quark or gluon
-                  Thus there will be divergences in moment when j = 0.       
-                  Here we use nan_to_num to set all the divergence to zero, such that the zero moment of the sea quark and gluon do not contribute to GPD.
-                  
-                  The better choice is to model the leading moment terms separately, and fit them to other quantities since those terms are not well constrained by the CFF/TFF anyway.
-            '''
+
+            #Note: Naively, this function simply returns Integrand_Mellin_Barnes([0.]) like the GPD1() above.
+            #      However, the zeroth moment is only defined for valence quark not sea quark or gluon
+            #      Thus there will be divergences in moment when j = 0.       
+            #      Here we use nan_to_num to set all the divergence to zero, such that the zero moment of the sea quark and gluon do not contribute to GPD.
+            #      
+            #      The better choice is to model the leading moment terms separately, and fit them to other quantities since those terms are not well constrained by the CFF/TFF anyway.
+
             eps= 10. **(-6) 
             j0 = np.array([0.]) + eps
             j00 = np.array([0.])
@@ -419,11 +477,11 @@ class GPDobserv (object) :
             return Flv_Intp(np.einsum('...ij,...j->...i', ConfWaveConv(j00), ConfFlavEv) \
                     + self.xi ** 2 * np.einsum('...ij,...j->...i', ConfWaveConv(j00+2), ConfFlavEv_xi2) \
                     + self.xi ** 4 * np.einsum('...ij,...j->...i', ConfWaveConv(j00+4), ConfFlavEv_xi4),flv)
-       
-        reJ = 2 - 0.5
-        Max_imJ = 80
-        return 1/2*np.real(fixed_quadvec(lambda imJ : Integrand_Mellin_Barnes(reJ + 1j* imJ) / np.sin((reJ + 1j * imJ+1) * np.pi) + Integrand_Mellin_Barnes(reJ - 1j* imJ) / np.sin((reJ - 1j * imJ+1) * np.pi) ,0, Max_imJ, n=300)) + np.real(GPD1()) + np.real(GPD0()) 
-          
+            
+        reJ = 2 - 0.9
+        Max_imJ = 200
+        return 1/2*np.real(fixed_quadvec(lambda imJ : Integrand_Mellin_Barnes(reJ + 1j* imJ) + Integrand_Mellin_Barnes(reJ - 1j* imJ),0, Max_imJ, n=1500)) #+ np.real(GPD1()) + np.real(GPD0()) 
+    
     def GFFj0(self, j: int, flv, ParaAll, p_order):
         """Generalized Form Factors A_{j0}(t) which is the xi^0 term of the nth (n= j+1) Mellin moment of GPD int dx x^j F(x,xi,t) for quark and int dx x^(j-1) F(x,xi,t) for gluon
             
@@ -540,9 +598,8 @@ class GPDobserv (object) :
             return result
         
         # The contour for Mellin-Barnes integral in terms of j not n.
-        reJ = 0.3 
-        Max_imJ = 150 
-        
+        reJ = 0.5 
+        Max_imJ = 180 
         return fixed_quadvec(lambda imJ: Integrand_CFF(imJ)+Integrand_CFF(-imJ), 0,  Max_imJ, n=500) + CFFj0()
 
     def TFF(self, ParaAll, muf , meson, p_order = 1, flv = 'All'):
@@ -645,7 +702,6 @@ class GPDobserv (object) :
         Max_imJ = Mellin_Barnes_cutoff
         
         def Integrand_Mellin_Barnes_CFF(j: complex):
-            # j is a scalar
 
             ConfFlav     = Moment_Sum(j, self.t, Para_Forward) #(N, 5)
             ConfFlav_xi2 = Moment_Sum(j, self.t, Para_xi2)
@@ -716,6 +772,23 @@ class GPDobserv (object) :
             fmask = flvmask(flv)
             return np.einsum('j, ...j', fmask, EvoConf_Wilson)
         
+        def Integrand_Mellin_Barnes_CFF_evWC(j: complex):
+            """
+            It might look strange that we use the evolved-Wilson-Coefficient method in the evolved-moment module.
+            We only use this to calcuate the j=0 contributions which has been excluded in the double summation formula because there's a pole in the moment F_j near j=0.
+            When adding back this term, since j=0 is fixed, we always sum over the moment of Wilson coefficient so it's equivalent to the j=0 term is the evolved-Wilson-Coefficient module
+            """
+            ConfFlav     = Moment_Sum(j, self.t, Para_Forward) #(N, 5)
+            ConfFlav_xi2 = Moment_Sum(j, self.t, Para_xi2)
+            ConfFlav_xi4 = Moment_Sum(j, self.t, Para_xi4)
+
+            EvoConf_Wilson = (CFF_Evo_NLO_evWC(j, NFEFF, self.p, self.Q, ConfFlav, muf) \
+                                +  CFF_Evo_NLO_evWC(j+2, NFEFF, self.p, self.Q, ConfFlav_xi2, muf) \
+                                +  CFF_Evo_NLO_evWC(j+4, NFEFF, self.p, self.Q, ConfFlav_xi4, muf))
+                        
+            fmask = flvmask(flv)
+            return np.einsum('j, ...j', fmask, EvoConf_Wilson)
+        
         def tan_factor(j):
             if (self.p==1):
                 return  1/(2j)*self.xi ** (-j-1)*(1j+np.tan(j * np.pi / 2))
@@ -724,14 +797,14 @@ class GPDobserv (object) :
         
         eps= 10. **(-6)
         
-        # adding back the j=0 contribution            
+        # adding back the j=0 contribution using the evolved-Wilson-Coefficient method. Reason explained above
         def CFFj0():
             if self.p==1:
                 return 0
             else:
-                return self.xi ** (- 1.) * Integrand_Mellin_Barnes_CFF(np.array([0.+eps]))[0] *(2) # the last factor of 2 is the residual of -1/(2j)*np.cot(j * np.pi / 2) at j=0
+                return self.xi ** (- 1.) * Integrand_Mellin_Barnes_CFF_evWC(np.array([0.+eps]))[0] *(2) # the last factor of 2 is the residual of -1/(2j)*np.cot(j * np.pi / 2) at j=0
         
-        #for moment evolution, the j=1 pole is also missed because we choose 1<cj<2.
+        # for moment evolution, the j=1 pole is also missed because we choose 1<cj<2. The diagonal piece will be calculated and the off-diagonal piece is zero as expected for C_1.
         def CFFj1():
 
             if self.p==1:
@@ -739,7 +812,7 @@ class GPDobserv (object) :
             else:
                 return 0            
         
-        reJ = 2. - 0.5
+        reJ = 2. - 0.6
     
         Max_imJ = 150
 
@@ -775,7 +848,6 @@ class GPDobserv (object) :
         Max_imJ = Mellin_Barnes_cutoff
         
         def Integrand_Mellin_Barnes_TFF(j: complex):
-            # j is a scalar
 
             ConfFlav     = Moment_Sum(j, self.t, Para_Forward) #(N, 5)
             ConfFlav_xi2 = Moment_Sum(j, self.t, Para_xi2)
@@ -855,14 +927,31 @@ class GPDobserv (object) :
         
         eps= 10. **(-6)
         
-        # adding back the j=0 contribution            
+        def Integrand_Mellin_Barnes_TFF_evWC(j: complex):
+            """
+            It might look strange that we use the evolved-Wilson-Coefficient method in the evolved-moment module.
+            We only use this to calcuate the j=0 contributions which has been excluded in the double summation formula because there's a pole in the moment F_j near j=0.
+            When adding back this term, since j=0 is fixed, we always sum over the moment of Wilson coefficient so it's equivalent to the j=0 term is the evolved-Wilson-Coefficient module
+            """
+            ConfFlav     = Moment_Sum(j, self.t, Para_Forward) #(N, 5)
+            ConfFlav_xi2 = Moment_Sum(j, self.t, Para_xi2)
+            ConfFlav_xi4 = Moment_Sum(j, self.t, Para_xi4)
+
+            EvoConf_Wilson = (TFF_Evo_NLO_evWC(j, NFEFF, self.p, self.Q, ConfFlav, meson, muf) \
+                                +  TFF_Evo_NLO_evWC(j+2, NFEFF, self.p, self.Q, ConfFlav_xi2, meson, muf) \
+                                +  TFF_Evo_NLO_evWC(j+4, NFEFF, self.p, self.Q, ConfFlav_xi4, meson, muf))
+                        
+            fmask = flvmask(flv)
+            return np.einsum('j, ...j', fmask, EvoConf_Wilson)
+        
+        # adding back the j=0 contribution using the evolved-Wilson-Coefficient method. Reason explained above
         def TFFj0():
             if self.p==1:
                 return 0
             else:
-                return self.xi ** (- 1.) * Integrand_Mellin_Barnes_TFF(np.array([0.+eps]))[0] *(2) # the last factor of 2 is the residual of -1/(2j)*np.cot(j * np.pi / 2) at j=0
+                return self.xi ** (- 1.) * Integrand_Mellin_Barnes_TFF_evWC(np.array([0.+eps]))[0] *(2) # the last factor of 2 is the residual of -1/(2j)*np.cot(j * np.pi / 2) at j=0
         
-        #for moment evolution, the j=1 pole is also missed because we choose 1<cj<2.
+        # for moment evolution, the j=1 pole is also missed because we choose 1<cj<2. The diagonal piece will be calculated and the off-diagonal piece is zero as expected for C_1.
         def TFFj1():
 
             if self.p==1:

@@ -183,14 +183,17 @@ def compute_rratio(args):
 
 if __name__ == '__main__':
     pool = Pool()
-    x=0.5
-    _GPD_theo = GPDobserv(x,x,0.0,5.0,1)
-    CFFq = _GPD_theo.CFF(Para_spe,5.0,flv = 'q')
-    CFFg = _GPD_theo.CFF(Para_spe,5.0,flv = 'g')
-    CFFNLO1q = _GPD_theo.CFFNLO(Para_spe,5.0,flv = 'q')
-    CFFNLO1g = _GPD_theo.CFFNLO(Para_spe,5.0,flv = 'g')
-    CFFNLO2q = _GPD_theo.CFFNLO_evMom(Para_spe,5.0,flv = 'q')
-    CFFNLO2g = _GPD_theo.CFFNLO_evMom(Para_spe,5.0,flv = 'g')
+
+    print("For vector CFFs")
+    x=0.0001
+    Q0=10.
+    _GPD_theo = GPDobserv(x,x,0.0,Q0,1)
+    CFFq = _GPD_theo.CFF(Para_spe,Q0,flv = 'q')
+    CFFg = _GPD_theo.CFF(Para_spe,Q0,flv = 'g')
+    CFFNLO1q = _GPD_theo.CFFNLO(Para_spe,Q0,flv = 'q')
+    CFFNLO1g = _GPD_theo.CFFNLO(Para_spe,Q0,flv = 'g')
+    CFFNLO2q = _GPD_theo.CFFNLO_evMom(Para_spe,Q0,flv = 'q')
+    CFFNLO2g = _GPD_theo.CFFNLO_evMom(Para_spe,Q0,flv = 'g')
     print(CFFq)
     print(CFFg)
     print(CFFNLO1q)
@@ -198,20 +201,23 @@ if __name__ == '__main__':
     print(CFFNLO2q)
     print(CFFNLO2g)
     
-    x=0.5
-    _GPD_theo = GPDobserv(x,x,0.0,5.0,-1)
-    CFFq = _GPD_theo.CFF(Para_spe_pol,5.0,flv = 'q')
-    CFFg = _GPD_theo.CFF(Para_spe_pol,5.0,flv = 'g')
-    CFFNLO1q = _GPD_theo.CFFNLO(Para_spe_pol,5.0,flv = 'q')
-    CFFNLO1g = _GPD_theo.CFFNLO(Para_spe_pol,5.0,flv = 'g')
-    CFFNLO2q = _GPD_theo.CFFNLO_evMom(Para_spe_pol,5.0,flv = 'q')
-    CFFNLO2g = _GPD_theo.CFFNLO_evMom(Para_spe_pol,5.0,flv = 'g')
+    print("For axial-vector CFFs")
+    x=0.0001
+    Q0=10.
+    _GPD_theo = GPDobserv(x,x,0.0,Q0,-1)
+    CFFq = _GPD_theo.CFF(Para_spe_pol,Q0,flv = 'q')
+    CFFg = _GPD_theo.CFF(Para_spe_pol,Q0,flv = 'g')
+    CFFNLO1q = _GPD_theo.CFFNLO(Para_spe_pol,Q0,flv = 'q')
+    CFFNLO1g = _GPD_theo.CFFNLO(Para_spe_pol,Q0,flv = 'g')
+    CFFNLO2q = _GPD_theo.CFFNLO_evMom(Para_spe_pol,Q0,flv = 'q')
+    CFFNLO2g = _GPD_theo.CFFNLO_evMom(Para_spe_pol,Q0,flv = 'g')
     print(CFFq)
     print(CFFg)
     print(CFFNLO1q)
     print(CFFNLO1g)
     print(CFFNLO2q)
     print(CFFNLO2g)
+    
     '''
     # Test of LO ImCFF and quark GPD evolved to mu =5 GeV
     x=0.0001
@@ -227,7 +233,22 @@ if __name__ == '__main__':
     gpd4 = (_GPD_theo2.GPD('d',Para_spe))* (1/3) ** 2
 
     print(np.pi*(gpd1-gpd2+gpd3-gpd4))
-
+    '''
+    '''
+    x=0.0001
+    _GPD_theo = GPDobserv(x,x,0.0,5.0,-1)
+    _GPD_theo2 = GPDobserv(-x,x,0.0,5.0,-1)
+    ts=time.time()
+    CFF = _GPD_theo.CFF(Para_spe_pol,5.0)
+    print(CFF)
+    ts=time.time()
+    gpd1 = (_GPD_theo.GPD('u',Para_spe_pol))* (2/3) ** 2
+    gpd2 = (_GPD_theo2.GPD('u',Para_spe_pol))* (2/3) ** 2
+    gpd3 = (_GPD_theo.GPD('d',Para_spe_pol))* (1/3) ** 2
+    gpd4 = (_GPD_theo2.GPD('d',Para_spe_pol))* (1/3) ** 2
+    print(np.pi*(gpd1+gpd2+gpd3+gpd4))
+    '''
+    '''
     # Test of LO ImTFF and gluon GPD evolved to mu = 5 GeV
     x=0.0001
     _GPD_theo = GPDobserv(x,x,0.0,5.0,1)
@@ -241,7 +262,7 @@ if __name__ == '__main__':
     prefact = np.pi * 3 * f_jpsi / NC /x * 2/3 * AlphaS(2,2,5.0)
     print(prefact*gpd1)
     '''
-    '''
+
     # Test of two methods of calculating TFF evolved to mu =5 GeV
     x=0.0001
     _GPD_theo = GPDobserv(x,x,0.0,5.0,1)
@@ -257,7 +278,7 @@ if __name__ == '__main__':
     TFF4 = _GPD_theo.TFFNLO_evMom(Para_spe,5.0, meson = 1, flv ='All')
     print(TFF4)
     print(TFF4-TFF3)
-    '''
+
     #
     # Plotting results of the paper
     #
