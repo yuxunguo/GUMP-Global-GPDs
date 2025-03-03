@@ -183,9 +183,9 @@ def compute_rratio(args):
 
 if __name__ == '__main__':
     pool = Pool()
-
+    '''
     print("For vector CFFs")
-    x=0.0001
+    x=0.001
     Q0=10.
     _GPD_theo = GPDobserv(x,x,0.0,Q0,1)
     CFFq = _GPD_theo.CFF(Para_spe,Q0,flv = 'q')
@@ -202,7 +202,7 @@ if __name__ == '__main__':
     print(CFFNLO2g)
     
     print("For axial-vector CFFs")
-    x=0.0001
+    x=0.001
     Q0=10.
     _GPD_theo = GPDobserv(x,x,0.0,Q0,-1)
     CFFq = _GPD_theo.CFF(Para_spe_pol,Q0,flv = 'q')
@@ -217,7 +217,7 @@ if __name__ == '__main__':
     print(CFFNLO1g)
     print(CFFNLO2q)
     print(CFFNLO2g)
-    
+    '''
     '''
     # Test of LO ImCFF and quark GPD evolved to mu =5 GeV
     x=0.0001
@@ -234,7 +234,7 @@ if __name__ == '__main__':
 
     print(np.pi*(gpd1-gpd2+gpd3-gpd4))
     '''
-    '''
+
     x=0.0001
     _GPD_theo = GPDobserv(x,x,0.0,5.0,-1)
     _GPD_theo2 = GPDobserv(-x,x,0.0,5.0,-1)
@@ -247,7 +247,7 @@ if __name__ == '__main__':
     gpd3 = (_GPD_theo.GPD('d',Para_spe_pol))* (1/3) ** 2
     gpd4 = (_GPD_theo2.GPD('d',Para_spe_pol))* (1/3) ** 2
     print(np.pi*(gpd1+gpd2+gpd3+gpd4))
-    '''
+
     '''
     # Test of LO ImTFF and gluon GPD evolved to mu = 5 GeV
     x=0.0001
@@ -262,7 +262,7 @@ if __name__ == '__main__':
     prefact = np.pi * 3 * f_jpsi / NC /x * 2/3 * AlphaS(2,2,5.0)
     print(prefact*gpd1)
     '''
-
+    '''
     # Test of two methods of calculating TFF evolved to mu =5 GeV
     x=0.0001
     _GPD_theo = GPDobserv(x,x,0.0,5.0,1)
@@ -278,7 +278,7 @@ if __name__ == '__main__':
     TFF4 = _GPD_theo.TFFNLO_evMom(Para_spe,5.0, meson = 1, flv ='All')
     print(TFF4)
     print(TFF4-TFF3)
-
+    '''
     #
     # Plotting results of the paper
     #

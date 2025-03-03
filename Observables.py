@@ -4,11 +4,11 @@ With the GPDs ansatz, observables with LO evolution are calculated
 """
 import scipy as sp
 import numpy as np
-from mpmath import mp, hyp2f1
 from scipy.integrate import quad_vec, fixed_quad
 from scipy.special import gamma
 from Evolution import Moment_Evo_LO,TFF_Evo_LO, CFF_Evo_LO, TFF_Evo_NLO_evWC, TFF_Evo_NLO_evMOM, CFF_Evo_NLO_evWC,CFF_Evo_NLO_evMOM, GPD_Moment_Evo_NLO,tPDF_Moment_Evo_NLO, fixed_quadvec, inv_flav_trans
 from Parameters import Moment_Sum
+from Evolution import ConfWaveFuncQ, ConfWaveFuncG, ConfWaveFuncQ_over_sinpij, ConfWaveFuncG_over_sinpij
 
 """
 ***********************GPD moments***************************************
@@ -87,11 +87,6 @@ def flvmask(flv: str):
     elif (flv == 'q'):
         return np.array([1,1,1,1,0])
     
-# precision for the hypergeometric function
-mp.dps = 25
-
-hyp2f1_nparray = np.frompyfunc(hyp2f1,4,1)
-
 def InvMellinWaveFuncQ(s: complex, x: float) -> complex:
     """ Quark wave function for inverse Mellin transformation: x^(-s) for x>0 and 0 for x<0
 
@@ -133,89 +128,7 @@ def InvMellinWaveFuncG(s: complex, x: float) -> complex:
     '''
     return np.where(x>0, x**(-s+1), 0)
 
-def ConfWaveFuncQ(j: complex, x: float, xi: float) -> complex:
-    """Quark conformal wave function p_j(x,xi) 
-    
-    Check e.g. https://arxiv.org/pdf/hep-ph/0509204.pdf
 
-    Args:
-        j: conformal spin j (conformal spin is actually j+2 but anyway)
-        x: momentum fraction x
-        xi: skewness parameter xi
-
-    Returns:
-        quark conformal wave function p_j(x,xi)
-    """  
-
-    pDGLAP = np.where(x > xi, np.sin(np.pi * (j+1))/ np.pi * x**(-j-1) * np.array(hyp2f1_nparray( (j+1)/2, (j+2)/2, j+5/2, (xi/x) ** 2), dtype= complex)                           , 0)
-
-    pERBL = np.where(((x > -xi) & (x <= xi)), 2 ** (1+j) * gamma(5/2+j) / (gamma(1/2) * gamma(1+j)) * xi ** (-j-1) * (1+x/xi) * np.array(hyp2f1_nparray(-1-j,j+2,2, (x+xi)/(2*xi)), dtype= complex), 0)
-
-    return pDGLAP + pERBL
-
-def ConfWaveFuncQ_over_sinpij(j: complex, x: float, xi: float) -> complex:
-    """Quark conformal wave function p_j(x,xi)/sin(pi(j+1))
-    
-    Check e.g. https://arxiv.org/pdf/hep-ph/0509204.pdf
-
-    Args:
-        j: conformal spin j (conformal spin is actually j+2 but anyway)
-        x: momentum fraction x
-        xi: skewness parameter xi
-
-    Returns:
-        quark conformal wave function p_j(x,xi)
-    """
-    
-    pDGLAP = np.where(x > xi, 1/ np.pi * x**(-j-1) * np.array(hyp2f1_nparray( (j+1)/2, (j+2)/2, j+5/2, (xi/x) ** 2), dtype= complex)                           , 0)
-
-    pERBL = np.where(((x > -xi) & (x <= xi)), 1/np.sin(np.pi * (j+1)) * 2 ** (1+j) * gamma(5/2+j) / (gamma(1/2) * gamma(1+j)) * xi ** (-j-1) * (1+x/xi) * np.array(hyp2f1_nparray(-1-j,j+2,2, (x+xi)/(2*xi)), dtype= complex), 0)
-
-    return pDGLAP + pERBL
-
-def ConfWaveFuncG(j: complex, x: float, xi: float) -> complex:
-    """Gluon conformal wave function p_j(x,xi) 
-    
-    Check e.g. https://arxiv.org/pdf/hep-ph/0509204.pdf
-
-    Args:
-        j: conformal spin j (actually conformal spin is j+2 but anyway)
-        x: momentum fraction x
-        xi: skewness parameter xi
-
-    Returns:
-        gluon conformal wave function p_j(x,xi)
-    """ 
-    # An extra minus sign defined different from the orginal definition to absorb the extra minus sign of MB integral for gluon
-    Minus = -1
-
-    pDGLAP = np.where(x > xi,                Minus * np.sin(np.pi * j)/ np.pi * x**(-j) * np.array(hyp2f1_nparray( j/2, (j+1)/2, j+5/2, (xi/x) ** 2), dtype= complex)                                   , 0)
-
-    pERBL = np.where(((x > -xi) & (x <= xi)), Minus * 2 ** j * gamma(5/2+j) / (gamma(1/2) * gamma(j)) * xi ** (-j) * (1+x/xi) ** 2 * np.array((hyp2f1_nparray(-1-j,j+2,3, (x+xi)/(2*xi))), dtype= complex), 0)
-
-    return pDGLAP + pERBL
-
-def ConfWaveFuncG_over_sinpij(j: complex, x: float, xi: float) -> complex:
-    """Gluon conformal wave function p_j(x,xi)/sin(pi(j+1)) = Minus * p_j(x,xi)/sin(pi*j)
-    
-    Check e.g. https://arxiv.org/pdf/hep-ph/0509204.pdf
-
-    Args:
-        j: conformal spin j (actually conformal spin is j+2 but anyway)
-        x: momentum fraction x
-        xi: skewness parameter xi
-
-    Returns:
-        gluon conformal wave function p_j(x,xi)
-    """ 
-    # An extra minus sign defined different from the orginal definition to absorb the extra minus sign of MB integral for gluon
-    Minus = -1
-
-    pDGLAP = np.where(x > xi, 1/ np.pi * x**(-j) * np.array(hyp2f1_nparray( j/2, (j+1)/2, j+5/2, (xi/x) ** 2), dtype= complex)                                   , 0)
-
-    pERBL = np.where(((x > -xi) & (x <= xi)), 1/np.sin(np.pi * j) * 2 ** j * gamma(5/2+j) / (gamma(1/2) * gamma(j)) * xi ** (-j) * (1+x/xi) ** 2 * np.array((hyp2f1_nparray(-1-j,j+2,3, (x+xi)/(2*xi))), dtype= complex), 0)
-
-    return pDGLAP + pERBL
 """
 ***********************Observables***************************************
 """
@@ -478,9 +391,9 @@ class GPDobserv (object) :
                     + self.xi ** 2 * np.einsum('...ij,...j->...i', ConfWaveConv(j00+2), ConfFlavEv_xi2) \
                     + self.xi ** 4 * np.einsum('...ij,...j->...i', ConfWaveConv(j00+4), ConfFlavEv_xi4),flv)
             
-        reJ = 2 - 0.9
-        Max_imJ = 200
-        return 1/2*np.real(fixed_quadvec(lambda imJ : Integrand_Mellin_Barnes(reJ + 1j* imJ) + Integrand_Mellin_Barnes(reJ - 1j* imJ),0, Max_imJ, n=1500)) #+ np.real(GPD1()) + np.real(GPD0()) 
+        reJ = 1 - 0.2
+        Max_imJ = 180
+        return 1/2*np.real(fixed_quadvec(lambda imJ : Integrand_Mellin_Barnes(reJ + 1j* imJ) + Integrand_Mellin_Barnes(reJ - 1j* imJ),0, Max_imJ, n=800)) #+ np.real(GPD1()) + np.real(GPD0()) 
     
     def GFFj0(self, j: int, flv, ParaAll, p_order):
         """Generalized Form Factors A_{j0}(t) which is the xi^0 term of the nth (n= j+1) Mellin moment of GPD int dx x^j F(x,xi,t) for quark and int dx x^(j-1) F(x,xi,t) for gluon

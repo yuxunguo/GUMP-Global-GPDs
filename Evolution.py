@@ -797,6 +797,101 @@ def evolop(j: complex, nf: int, p: int, mu: float):
 
     return [evola0NS, evola0] # (N) and (N, 2, 2)
 
+"""
+    The following are the conformal wave functions defined according to https://arxiv.org/pdf/hep-ph/0509204.pdf
+"""
+
+# precision for the hypergeometric function
+mp.dps = 25
+
+hyp2f1_nparray = np.frompyfunc(hyp2f1,4,1)
+
+def ConfWaveFuncQ(j: complex, x: float, xi: float) -> complex:
+    """Quark conformal wave function p_j(x,xi) 
+    
+    Check e.g. https://arxiv.org/pdf/hep-ph/0509204.pdf
+
+    Args:
+        j: conformal spin j (conformal spin is actually j+2 but anyway)
+        x: momentum fraction x
+        xi: skewness parameter xi
+
+    Returns:
+        quark conformal wave function p_j(x,xi)
+    """  
+
+    pDGLAP = np.where(x > xi, np.sin(np.pi * (j+1))/ np.pi * x**(-j-1) * np.array(hyp2f1_nparray( (j+1)/2, (j+2)/2, j+5/2, (xi/x) ** 2), dtype= complex)                           , 0)
+
+    pERBL = np.where(((x > -xi) & (x <= xi)), 2 ** (1+j) * gamma(5/2+j) / (gamma(1/2) * gamma(1+j)) * xi ** (-j-1) * (1+x/xi) * np.array(hyp2f1_nparray(-1-j,j+2,2, (x+xi)/(2*xi)), dtype= complex), 0)
+
+    return pDGLAP + pERBL
+
+def ConfWaveFuncQ_over_sinpij(j: complex, x: float, xi: float) -> complex:
+    """Quark conformal wave function p_j(x,xi)/sin(pi(j+1))
+    
+    Check e.g. https://arxiv.org/pdf/hep-ph/0509204.pdf
+
+    Args:
+        j: conformal spin j (conformal spin is actually j+2 but anyway)
+        x: momentum fraction x
+        xi: skewness parameter xi
+
+    Returns:
+        quark conformal wave function p_j(x,xi)
+    """
+    
+    pDGLAP = np.where(x > xi, 1/ np.pi * x**(-j-1) * np.array(hyp2f1_nparray( (j+1)/2, (j+2)/2, j+5/2, (xi/x) ** 2), dtype= complex)                           , 0)
+
+    pERBL = np.where(((x > -xi) & (x <= xi)), 1/np.sin(np.pi * (j+1)) * 2 ** (1+j) * gamma(5/2+j) / (gamma(1/2) * gamma(1+j)) * xi ** (-j-1) * (1+x/xi) * np.array(hyp2f1_nparray(-1-j,j+2,2, (x+xi)/(2*xi)), dtype= complex), 0)
+
+    return pDGLAP + pERBL
+
+def ConfWaveFuncG(j: complex, x: float, xi: float) -> complex:
+    """Gluon conformal wave function p_j(x,xi) 
+    
+    Check e.g. https://arxiv.org/pdf/hep-ph/0509204.pdf
+
+    Args:
+        j: conformal spin j (actually conformal spin is j+2 but anyway)
+        x: momentum fraction x
+        xi: skewness parameter xi
+
+    Returns:
+        gluon conformal wave function p_j(x,xi)
+    """ 
+    # An extra minus sign defined different from the orginal definition to absorb the extra minus sign of MB integral for gluon
+    Minus = -1
+
+    pDGLAP = np.where(x > xi,                Minus * np.sin(np.pi * j)/ np.pi * x**(-j) * np.array(hyp2f1_nparray( j/2, (j+1)/2, j+5/2, (xi/x) ** 2), dtype= complex)                                   , 0)
+
+    pERBL = np.where(((x > -xi) & (x <= xi)), Minus * 2 ** j * gamma(5/2+j) / (gamma(1/2) * gamma(j)) * xi ** (-j) * (1+x/xi) ** 2 * np.array((hyp2f1_nparray(-1-j,j+2,3, (x+xi)/(2*xi))), dtype= complex), 0)
+
+    return pDGLAP + pERBL
+
+def ConfWaveFuncG_over_sinpij(j: complex, x: float, xi: float) -> complex:
+    """Gluon conformal wave function p_j(x,xi)/sin(pi(j+1)) = Minus * p_j(x,xi)/sin(pi*j)
+    
+    Check e.g. https://arxiv.org/pdf/hep-ph/0509204.pdf
+
+    Args:
+        j: conformal spin j (actually conformal spin is j+2 but anyway)
+        x: momentum fraction x
+        xi: skewness parameter xi
+
+    Returns:
+        gluon conformal wave function p_j(x,xi)
+    """ 
+
+    pDGLAP = np.where(x > xi, 1/ np.pi * x**(-j) * np.array(hyp2f1_nparray( j/2, (j+1)/2, j+5/2, (xi/x) ** 2), dtype= complex)                                   , 0)
+
+    pERBL = np.where(((x > -xi) & (x <= xi)), 1/np.sin(np.pi * j) * 2 ** j * gamma(5/2+j) / (gamma(1/2) * gamma(j)) * xi ** (-j) * (1+x/xi) ** 2 * np.array((hyp2f1_nparray(-1-j,j+2,3, (x+xi)/(2*xi))), dtype= complex), 0)
+
+    return pDGLAP + pERBL
+
+def ConfWaveFuncEvo(j: complex, x: float, xi: float, p: int):
+    return 0
+
+
 
 def Charge_Factor(particle:int):
     """The charge factors. For mesons it also multiplies with decay widths (f_m  is for meson m). Output is in evolution basis
@@ -832,8 +927,6 @@ def WilsonCoef(j: complex) -> complex:
         Leading-order Wilson coefficient (complex, could be an array)
     """
     return 2 ** (1+j) * gamma(5/2+j) / (gamma(3/2) * gamma(3+j))
-
-
 
 def WilsonCoef_DVCS_LO(j: complex) -> complex:
     """LO Wilson coefficient of DVCS in the evolution basis (qVal, q_du_plus, q_du_minus, qSigma, g)
