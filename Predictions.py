@@ -202,7 +202,7 @@ if __name__ == '__main__':
     print('Gluon PDF:')
     print(gpd3)
     print(gpd6)
-    
+    '''
     x=0.001
     Q0=3.
     _GPD_theo_2 = GPDobserv(x,x,0.0,Q0,-1)
@@ -221,6 +221,7 @@ if __name__ == '__main__':
     print('Gluon polarized PDF:')
     print(gpd3)
     print(gpd6)
+    '''
     '''
     print("For vector CFFs")
     x=0.001

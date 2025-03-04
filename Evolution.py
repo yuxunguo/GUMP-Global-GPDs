@@ -1231,10 +1231,8 @@ def Moment_Evo_LO_NSp1(j: np.array, nf: int, p: int, mu: float, ConfFlav: np.arr
     assert j.ndim == 1, "Check dimension of j, must be 1D array" # shape (N,)
     assert p == 1, "Check parity, it must be +1 for the vector case" 
     j0=j[0]
-    assert np.abs(j0) < 0.01, "Check value of j, this function accept j = [j0] with |j0|<0.01 only"
-    
-    
-    # Input pass all criteria, remove the potentially divergent moments:
+
+    # Input pass the criteria, remove the potentially divergent moments:
     ConfFlav = np.nan_to_num(ConfFlav)
     # flavor_trans (5, 5) ConfFlav (N, 5)
 

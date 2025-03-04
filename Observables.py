@@ -356,23 +356,24 @@ class GPDobserv (object) :
             ConfFlav     = Moment_Sum(j0, self.t, Para_Forward)
             ConfFlav_xi2 = Moment_Sum(j0, self.t, Para_xi2)
             ConfFlav_xi4 = Moment_Sum(j0, self.t, Para_xi4)
-
+            print("LO GPD j0")
+            print(ConfFlav)
             ConfFlav     = np.nan_to_num(ConfFlav)
             ConfFlav_xi2 = np.nan_to_num(ConfFlav_xi2)
             ConfFlav_xi4 = np.nan_to_num(ConfFlav_xi4)
-            
+            print(ConfFlav)
             ConfEv     = Moment_Evo_LO(j0, NFEFF, self.p, self.Q, ConfFlav)
             ConfEv_xi2 = Moment_Evo_LO(j0+2, NFEFF, self.p, self.Q, ConfFlav_xi2)
             ConfEv_xi4 = Moment_Evo_LO(j0+4, NFEFF, self.p, self.Q, ConfFlav_xi4)
-            
+            print(ConfEv)
             ConfEv = np.nan_to_num(ConfEv)
             ConfEv_xi2 = np.nan_to_num(ConfEv_xi2)
             ConfEv_xi4 = np.nan_to_num(ConfEv_xi4)
-            
+            print(ConfEv)
             ConfFlavEv     = np.einsum('...ij, ...j->...i', inv_flav_trans, ConfEv) #(N, 5)
             ConfFlavEv_xi2 = np.einsum('...ij, ...j->...i', inv_flav_trans, ConfEv_xi2)
             ConfFlavEv_xi4 = np.einsum('...ij, ...j->...i', inv_flav_trans, ConfEv_xi4)
-              
+            print(ConfFlavEv)
             return Flv_Intp(np.einsum('...ij,...j->...i', ConfWaveConv(j00), ConfFlavEv) \
                     + self.xi ** 2 * np.einsum('...ij,...j->...i', ConfWaveConv(j00+2), ConfFlavEv_xi2) \
                     + self.xi ** 4 * np.einsum('...ij,...j->...i', ConfWaveConv(j00+4), ConfFlavEv_xi4),flv)
@@ -491,19 +492,28 @@ class GPDobserv (object) :
             # j0 is for evolved moments and j00 is for wave function
             # The evolution kernel has numeric singular term at j=0 so it's shifted
             # The wave function is taken at j exactly 0 so it's truncated at x=xi and avoid further numeric issues.
-            
-            ConfEv     = GPD_Moment_Evo_NLO(j0, NFEFF, self.p, self.Q, self.t, self.xi, Para_Forward,0)
-            ConfEv_xi2 = GPD_Moment_Evo_NLO(j0+2, NFEFF, self.p, self.Q, self.t, self.xi, Para_xi2,2)
-            ConfEv_xi4 = GPD_Moment_Evo_NLO(j0+4, NFEFF, self.p, self.Q, self.t, self.xi, Para_xi4,4)
-            
+            ConfFlav     = Moment_Sum(j0, self.t, Para_Forward)
+            ConfFlav_xi2 = Moment_Sum(j0, self.t, Para_xi2)
+            ConfFlav_xi4 = Moment_Sum(j0, self.t, Para_xi4)
+            print("NLO GPD j0")
+            print(ConfFlav)
+            ConfFlav     = np.nan_to_num(ConfFlav)
+            ConfFlav_xi2 = np.nan_to_num(ConfFlav_xi2)
+            ConfFlav_xi4 = np.nan_to_num(ConfFlav_xi4)
+            print(ConfFlav)
+            ConfEv     = tPDF_Moment_Evo_NLO(j0, NFEFF, self.p, self.Q, ConfFlav)
+            ConfEv_xi2 = tPDF_Moment_Evo_NLO(j0+2, NFEFF, self.p, self.Q, ConfFlav_xi2)
+            ConfEv_xi4 = tPDF_Moment_Evo_NLO(j0+4, NFEFF, self.p, self.Q, ConfFlav_xi4)
+            print(ConfEv)
             ConfEv = np.nan_to_num(ConfEv)
             ConfEv_xi2 = np.nan_to_num(ConfEv_xi2)
             ConfEv_xi4 = np.nan_to_num(ConfEv_xi4)
-            
+            print(ConfEv)
             ConfFlavEv     = np.einsum('...ij, ...j->...i', inv_flav_trans, ConfEv) #(N, 5)
             ConfFlavEv_xi2 = np.einsum('...ij, ...j->...i', inv_flav_trans, ConfEv_xi2)
             ConfFlavEv_xi4 = np.einsum('...ij, ...j->...i', inv_flav_trans, ConfEv_xi4)
-              
+            print(ConfFlavEv)
+            
             return Flv_Intp(np.einsum('...ij,...j->...i', ConfWaveConv(j00), ConfFlavEv) \
                     + self.xi ** 2 * np.einsum('...ij,...j->...i', ConfWaveConv(j00+2), ConfFlavEv_xi2) \
                     + self.xi ** 4 * np.einsum('...ij,...j->...i', ConfWaveConv(j00+4), ConfFlavEv_xi4),flv)
