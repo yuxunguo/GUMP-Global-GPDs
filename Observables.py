@@ -6,7 +6,7 @@ import scipy as sp
 import numpy as np
 from scipy.integrate import quad_vec, fixed_quad
 from scipy.special import gamma
-from Evolution import Moment_Evo_LO,TFF_Evo_LO, CFF_Evo_LO, TFF_Evo_NLO_evWC, TFF_Evo_NLO_evMOM, CFF_Evo_NLO_evWC,CFF_Evo_NLO_evMOM, GPD_Moment_Evo_NLO,tPDF_Moment_Evo_NLO, fixed_quadvec, inv_flav_trans
+from Evolution import Moment_Evo_LO,Moment_Evo_LO_NSp1, TFF_Evo_LO, CFF_Evo_LO, TFF_Evo_NLO_evWC, TFF_Evo_NLO_evMOM, CFF_Evo_NLO_evWC,CFF_Evo_NLO_evMOM, GPD_Moment_Evo_NLO,tPDF_Moment_Evo_NLO, fixed_quadvec, inv_flav_trans
 from Parameters import Moment_Sum
 from Evolution import ConfWaveFuncQ, ConfWaveFuncG, ConfWaveFuncQ_over_sinpij, ConfWaveFuncG_over_sinpij
 
@@ -255,7 +255,9 @@ class GPDobserv (object) :
             f(x,xi,t) for given flavor flv
         """
         #[Para_Forward, Para_xi2, Para_xi4] = ParaAll
-
+        if (p_order == 2):
+            return self.GPDNLO_evMom(flv, ParaAll)
+        
         Para_Forward = ParaAll[..., 0, :, :, :]  # each (N, 5, 1, 5)
         Para_xi2     = ParaAll[..., 1, :, :, :]
         Para_xi4     = ParaAll[..., 2, :, :, :]
@@ -316,18 +318,10 @@ class GPDobserv (object) :
             ConfFlav_xi2 = Moment_Sum(j, self.t, Para_xi2)
             ConfFlav_xi4 = Moment_Sum(j, self.t, Para_xi4)
             
-            #Evolve the conformal moments for different p_order
-            if (p_order == 1):
-                ConfEv     = Moment_Evo_LO(j, NFEFF, self.p, self.Q, ConfFlav)
-                ConfEv_xi2 = Moment_Evo_LO(j+2, NFEFF, self.p, self.Q, ConfFlav_xi2)
-                ConfEv_xi4 = Moment_Evo_LO(j+4, NFEFF, self.p, self.Q, ConfFlav_xi4)
+            ConfEv     = Moment_Evo_LO(j, NFEFF, self.p, self.Q, ConfFlav)
+            ConfEv_xi2 = Moment_Evo_LO(j+2, NFEFF, self.p, self.Q, ConfFlav_xi2)
+            ConfEv_xi4 = Moment_Evo_LO(j+4, NFEFF, self.p, self.Q, ConfFlav_xi4)
                 
-            elif (p_order == 2):
-                ConfEv     = GPD_Moment_Evo_NLO(j, NFEFF, self.p, self.Q, self.t, self.xi, Para_Forward,0)
-                ConfEv_xi2 = GPD_Moment_Evo_NLO(j+2, NFEFF, self.p, self.Q, self.t, self.xi, Para_xi2,2)
-                ConfEv_xi4 = GPD_Moment_Evo_NLO(j+4, NFEFF, self.p, self.Q, self.t, self.xi, Para_xi4,4)
-                
-            # Inverse transform the evolved moments back to the flavor basis
             ConfFlavEv     = np.einsum('...ij, ...j->...i', inv_flav_trans, ConfEv) #(N, 5)
             ConfFlavEv_xi2 = np.einsum('...ij, ...j->...i', inv_flav_trans, ConfEv_xi2)
             ConfFlavEv_xi4 = np.einsum('...ij, ...j->...i', inv_flav_trans, ConfEv_xi4)
@@ -342,12 +336,6 @@ class GPDobserv (object) :
                         + self.xi ** 4 * np.einsum('...ij,...j->...i', ConfWaveConv(j+4), ConfFlavEv_xi4),flv)
                 
         
-        # Adding a j = 1 term because the contour do not enclose the j = 1 pole which should be the 1th conformal moment.
-        def GPD1():
-
-            eps= np.array([0.])
-            return (-1)*Integrand_Mellin_Barnes(1.+eps,over_pij = 0) # Note the residual theorem gives -(2 np.pi *1j)*1/(2*np.sin((j+1)*np.pi)) with residual (-1) at j=1;
-
         # Adding a j = 0 term because the contour do not enclose the j = 0 pole which should be the 0th conformal moment.
         def GPD0():
 
@@ -358,7 +346,7 @@ class GPDobserv (object) :
             #      
             #      The better choice is to model the leading moment terms separately, and fit them to other quantities since those terms are not well constrained by the CFF/TFF anyway.
 
-            eps= 10. **(-6) 
+            eps= 10. **(-5) 
             j0 = np.array([0.]) + eps
             j00 = np.array([0.])
             # j0 has been shifted with eps whereas j00 are not;
@@ -370,18 +358,16 @@ class GPDobserv (object) :
             ConfFlav_xi4 = Moment_Sum(j0, self.t, Para_xi4)
 
             ConfFlav     = np.nan_to_num(ConfFlav)
-            ConfFlav_xi2 = np.nan_to_num(ConfFlav_xi2) 
-            ConfFlav_xi4 = np.nan_to_num(ConfFlav_xi4)  
+            ConfFlav_xi2 = np.nan_to_num(ConfFlav_xi2)
+            ConfFlav_xi4 = np.nan_to_num(ConfFlav_xi4)
             
-            if (p_order == 1):
-                ConfEv     = Moment_Evo_LO(j0, NFEFF, self.p, self.Q, ConfFlav)
-                ConfEv_xi2 = Moment_Evo_LO(j0+2, NFEFF, self.p, self.Q, ConfFlav_xi2)
-                ConfEv_xi4 = Moment_Evo_LO(j0+4, NFEFF, self.p, self.Q, ConfFlav_xi4)
-            # Use tPDF_Moment_Evo_NLO since the off-diagonal piece only mixes lower moments into higher moments and the subtraction terms are the lowest moments
-            elif (p_order == 2):
-                ConfEv     = tPDF_Moment_Evo_NLO(j0, NFEFF, self.p, self.Q, ConfFlav)
-                ConfEv_xi2 = tPDF_Moment_Evo_NLO(j0+2, NFEFF, self.p, self.Q, ConfFlav_xi2)
-                ConfEv_xi4 = tPDF_Moment_Evo_NLO(j0+4, NFEFF, self.p, self.Q, ConfFlav_xi4)
+            ConfEv     = Moment_Evo_LO(j0, NFEFF, self.p, self.Q, ConfFlav)
+            ConfEv_xi2 = Moment_Evo_LO(j0+2, NFEFF, self.p, self.Q, ConfFlav_xi2)
+            ConfEv_xi4 = Moment_Evo_LO(j0+4, NFEFF, self.p, self.Q, ConfFlav_xi4)
+            
+            ConfEv = np.nan_to_num(ConfEv)
+            ConfEv_xi2 = np.nan_to_num(ConfEv_xi2)
+            ConfEv_xi4 = np.nan_to_num(ConfEv_xi4)
             
             ConfFlavEv     = np.einsum('...ij, ...j->...i', inv_flav_trans, ConfEv) #(N, 5)
             ConfFlavEv_xi2 = np.einsum('...ij, ...j->...i', inv_flav_trans, ConfEv_xi2)
@@ -393,7 +379,138 @@ class GPDobserv (object) :
             
         reJ = 1 - 0.2
         Max_imJ = 180
-        return 1/2*np.real(fixed_quadvec(lambda imJ : Integrand_Mellin_Barnes(reJ + 1j* imJ) + Integrand_Mellin_Barnes(reJ - 1j* imJ),0, Max_imJ, n=800)) #+ np.real(GPD1()) + np.real(GPD0()) 
+        return 1/2*np.real(fixed_quadvec(lambda imJ : Integrand_Mellin_Barnes(reJ + 1j* imJ) + Integrand_Mellin_Barnes(reJ - 1j* imJ),0, Max_imJ, n=800)) + np.real(GPD0()) 
+    
+    def GPDNLO_evMom(self, flv, ParaAll):
+        """GPD F(x, xi, t) in flavor space (flv = "u", "d", "S", "NS" or "g")
+        
+        Args:
+            flv (str): "u", "d", "S", "NS" or "g"
+            ParaAll: array as [Para_Forward, Para_xi2, Para_xi4]
+            
+                - Para_Forward = array as [Para_Forward_uV, Para_Forward_ubar, Para_Forward_dV, Para_Forward_dbar, Para_Forward_g]
+                  where Para_Forward_i is forward parameter sets for valence u quark (uV), sea u quark (ubar), valence d quark (dV), sea d quark (dbar) and gluon (g)
+                - Para_xi2 = array as [Para_xi2_uV, Para_xi2_ubar, Para_xi2_dV, Para_xi2_dbar, Para_xi2_g]
+                  where Para_xi2_i is xi^2 parameter sets for valence u quark (uV), sea u quark (ubar), valence d quark (dV), sea d quark (dbar) and gluon (g)
+                - Para_xi4 = array as [Para_xi4_uV, Para_xi4_ubar, Para_xi4_dV, Para_xi4_dbar, Para_xi4_g]
+                  where Para_xi4_i is xi^4 parameter sets for valence u quark (uV), sea u quark (ubar), valence d quark (dV), sea d quark (dbar) and gluon (g)
+            p_order: 1 for leading-order evolution (default); 2 for next-to-leading-order evolution ; higher order not implemented yet
+
+        Returns:
+            f(x,xi,t) for given flavor flv
+        """
+        
+        Para_Forward = ParaAll[..., 0, :, :, :]  # each (N, 5, 1, 5)
+        Para_xi2     = ParaAll[..., 1, :, :, :]
+        Para_xi4     = ParaAll[..., 2, :, :, :]
+
+        # The contour for Mellin-Barnes integral in terms of j not n.         
+        def ConfWaveConv(j: complex):
+            """
+            ConfWaveC = np.array([[ConfWaveFuncQ(j, self.x, self.xi), ConfWaveFuncQ(j, self.x, self.xi) - self.p * ConfWaveFuncQ(j, -self.x, self.xi),0,0,0],
+                                  [0,0,ConfWaveFuncQ(j, self.x, self.xi), ConfWaveFuncQ(j, self.x, self.xi) - self.p * ConfWaveFuncQ(j, -self.x, self.xi),0],
+                                  [0,0,0,0,ConfWaveFuncG(j, self.x, self.xi)+ self.p * ConfWaveFuncG(j, -self.x, self.xi)]])
+            """
+
+            helper1 = np.array([[1, 1, 0, 0, 0],
+                                [0, 0, 1, 1, 0],
+                                [0, 0, 0, 0, 0]])
+            helper2 = np.array([[0, -1, 0, 0, 0],
+                                [0, 0, 0, -1, 0],
+                                [0, 0, 0, 0, 0]])
+            helper3 = np.array([[0, 0, 0, 0, 0],
+                                [0, 0, 0, 0, 0],
+                                [0, 0, 0, 0, 1]])
+
+            ConfWaveC =np.einsum('..., ij->...ij', ConfWaveFuncQ(j, self.x, self.xi), helper1) \
+                     + np.einsum('... ,ij->...ij', self.p * ConfWaveFuncQ(j, -self.x, self.xi), helper2) \
+                     + np.einsum('... ,ij->...ij', ConfWaveFuncG(j, self.x, self.xi)+ self.p * ConfWaveFuncG(j, -self.x, self.xi), helper3)
+
+            return ConfWaveC
+        
+        def ConfWaveConv_over_sinpiji(j: complex):
+            """
+            This function exists for technical reasons:
+            
+            The 1/sin(pi*(j+1)) factor is exponentially suppressed on the imaginary axes on both side,
+            whereas the conformal partial wave function is exponentiall divergent.
+            So we absorb 1/sin(pi*(j+1)) factor into the conformal partial wave function in advance to avoid the overflow in the conformal wave function.
+            This is only need for Mellin-Barnes integral!
+            """
+            helper1 = np.array([[1, 1, 0, 0, 0],
+                                [0, 0, 1, 1, 0],
+                                [0, 0, 0, 0, 0]])
+            helper2 = np.array([[0, -1, 0, 0, 0],
+                                [0, 0, 0, -1, 0],
+                                [0, 0, 0, 0, 0]])
+            helper3 = np.array([[0, 0, 0, 0, 0],
+                                [0, 0, 0, 0, 0],
+                                [0, 0, 0, 0, 1]])
+
+            ConfWaveC =np.einsum('..., ij->...ij', ConfWaveFuncQ_over_sinpij(j, self.x, self.xi), helper1) \
+                     + np.einsum('... ,ij->...ij', self.p * ConfWaveFuncQ_over_sinpij(j, -self.x, self.xi), helper2) \
+                     + np.einsum('... ,ij->...ij', ConfWaveFuncG_over_sinpij(j, self.x, self.xi)+ self.p * ConfWaveFuncG_over_sinpij(j, -self.x, self.xi), helper3)
+
+            return ConfWaveC
+        
+        # Put in the extra 1/sin(pi*(j+1)) factor if over_pij = 1. Included (=1) by default
+        def Integrand_Mellin_Barnes(j: complex, over_pij: int = 1):
+
+            ConfEv     = GPD_Moment_Evo_NLO(j, NFEFF, self.p, self.Q, self.t, self.xi, Para_Forward,0)
+            ConfEv_xi2 = GPD_Moment_Evo_NLO(j+2, NFEFF, self.p, self.Q, self.t, self.xi, Para_xi2,2)
+            ConfEv_xi4 = GPD_Moment_Evo_NLO(j+4, NFEFF, self.p, self.Q, self.t, self.xi, Para_xi4,4)
+        
+            # Inverse transform the evolved moments back to the flavor basis
+            ConfFlavEv     = np.einsum('...ij, ...j->...i', inv_flav_trans, ConfEv) #(N, 5)
+            ConfFlavEv_xi2 = np.einsum('...ij, ...j->...i', inv_flav_trans, ConfEv_xi2)
+            ConfFlavEv_xi4 = np.einsum('...ij, ...j->...i', inv_flav_trans, ConfEv_xi4)
+            
+            if(over_pij == 1):
+                return Flv_Intp(np.einsum('...ij,...j->...i', ConfWaveConv_over_sinpiji(j), ConfFlavEv) \
+                        + self.xi ** 2 * np.einsum('...ij,...j->...i', ConfWaveConv_over_sinpiji(j+2), ConfFlavEv_xi2) \
+                        + self.xi ** 4 * np.einsum('...ij,...j->...i', ConfWaveConv_over_sinpiji(j+4), ConfFlavEv_xi4),flv)
+            else:
+                return Flv_Intp(np.einsum('...ij,...j->...i', ConfWaveConv(j), ConfFlavEv) \
+                        + self.xi ** 2 * np.einsum('...ij,...j->...i', ConfWaveConv(j+2), ConfFlavEv_xi2) \
+                        + self.xi ** 4 * np.einsum('...ij,...j->...i', ConfWaveConv(j+4), ConfFlavEv_xi4),flv)
+        # Adding a j = 0 term because the contour do not enclose the j = 0 pole which should be the 0th conformal moment.
+        
+        def GPD0():
+
+            #Note: Naively, this function simply returns Integrand_Mellin_Barnes([0.]) like the GPD1() above.
+            #      However, the zeroth moment is only defined for valence quark not sea quark or gluon
+            #      Thus there will be divergences in moment when j = 0.       
+            #      Here we use nan_to_num to set all the divergence to zero, such that the zero moment of the sea quark and gluon do not contribute to GPD.
+            #      
+            #      The better choice is to model the leading moment terms separately, and fit them to other quantities since those terms are not well constrained by the CFF/TFF anyway.
+
+            eps= 10. **(-5) 
+            j0 = np.array([0.]) + eps
+            j00 = np.array([0.])
+            # j0 has been shifted with eps whereas j00 are not;
+            # j0 is for evolved moments and j00 is for wave function
+            # The evolution kernel has numeric singular term at j=0 so it's shifted
+            # The wave function is taken at j exactly 0 so it's truncated at x=xi and avoid further numeric issues.
+            
+            ConfEv     = GPD_Moment_Evo_NLO(j0, NFEFF, self.p, self.Q, self.t, self.xi, Para_Forward,0)
+            ConfEv_xi2 = GPD_Moment_Evo_NLO(j0+2, NFEFF, self.p, self.Q, self.t, self.xi, Para_xi2,2)
+            ConfEv_xi4 = GPD_Moment_Evo_NLO(j0+4, NFEFF, self.p, self.Q, self.t, self.xi, Para_xi4,4)
+            
+            ConfEv = np.nan_to_num(ConfEv)
+            ConfEv_xi2 = np.nan_to_num(ConfEv_xi2)
+            ConfEv_xi4 = np.nan_to_num(ConfEv_xi4)
+            
+            ConfFlavEv     = np.einsum('...ij, ...j->...i', inv_flav_trans, ConfEv) #(N, 5)
+            ConfFlavEv_xi2 = np.einsum('...ij, ...j->...i', inv_flav_trans, ConfEv_xi2)
+            ConfFlavEv_xi4 = np.einsum('...ij, ...j->...i', inv_flav_trans, ConfEv_xi4)
+              
+            return Flv_Intp(np.einsum('...ij,...j->...i', ConfWaveConv(j00), ConfFlavEv) \
+                    + self.xi ** 2 * np.einsum('...ij,...j->...i', ConfWaveConv(j00+2), ConfFlavEv_xi2) \
+                    + self.xi ** 4 * np.einsum('...ij,...j->...i', ConfWaveConv(j00+4), ConfFlavEv_xi4),flv)
+        
+        reJ = 1 - 0.2
+        Max_imJ = 180
+        return 1/2*np.real(fixed_quadvec(lambda imJ : Integrand_Mellin_Barnes(reJ + 1j* imJ) + Integrand_Mellin_Barnes(reJ - 1j* imJ),0, Max_imJ, n=800)) + np.real(GPD0()) 
     
     def GFFj0(self, j: int, flv, ParaAll, p_order):
         """Generalized Form Factors A_{j0}(t) which is the xi^0 term of the nth (n= j+1) Mellin moment of GPD int dx x^j F(x,xi,t) for quark and int dx x^(j-1) F(x,xi,t) for gluon

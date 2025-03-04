@@ -889,6 +889,8 @@ def ConfWaveFuncG_over_sinpij(j: complex, x: float, xi: float) -> complex:
     return pDGLAP + pERBL
 
 def ConfWaveFuncEvo(j: complex, x: float, xi: float, p: int):
+    
+    
     return 0
 
 
@@ -1196,6 +1198,53 @@ def Moment_Evo_LO(j: np.array, nf: int, p: int, mu: float, ConfFlav: np.array) -
     # Taking the non-singlet and singlet parts of the conformal moments
     ConfNS = ConfEvoBasis[..., :3] # (N, 3)
     ConfS = ConfEvoBasis[..., -2:] # (N, 2)
+
+    # Calling evolution mulitiplier
+    [evons, evoa] = evolop(j, nf, p, mu) # (N) and (N, 2, 2)
+
+    # non-singlet part evolves multiplicatively
+    EvoConfNS = evons[..., np.newaxis] * ConfNS # (N, 3)
+    # singlet part mixes with the gluon
+    EvoConfS = np.einsum('...ij, ...j->...i', evoa, ConfS) # (N, 2)
+
+    # Recombing the non-singlet and singlet parts
+    EvoConf = np.concatenate((EvoConfNS, EvoConfS), axis=-1) # (N, 5)
+        
+    return EvoConf
+
+def Moment_Evo_LO_NSp1(j: np.array, nf: int, p: int, mu: float, ConfFlav: np.array) -> np.array:
+    """Leading order evolution of moments in the flavor space for non-singlet vector moments
+
+    Args:
+        j: conformal spin j (conformal spin is actually j+2 but anyway): shape (N,)
+        nf: number of effective fermions, scalar
+        p (int): 1 for vector-like GPD (Ht, Et), -1 for axial-vector-like GPDs (Ht, Et), scalars
+        mu: final evolution scale: array(N,), scalar
+        ConfFlav: uneolved conformal moments in flavor space ConfFlav = [ConfMoment_uV, ConfMoment_ubar, ConfMoment_dV, ConfMoment_dbar, ConfMoment_g] shape (N,5)
+
+    Returns:
+        Evolved conformal moments in the evolution basis (qVal, q_du_plus, q_du_minus, qSigma, g)
+        return shape (N, 5)
+    
+    This function deals with the j=0 singularity in the Moment_Evo_LO(). We only evaluate the j=0 contributions for the charge odd terms
+    """
+    assert j.ndim == 1, "Check dimension of j, must be 1D array" # shape (N,)
+    assert p == 1, "Check parity, it must be +1 for the vector case" 
+    j0=j[0]
+    assert np.abs(j0) < 0.01, "Check value of j, this function accept j = [j0] with |j0|<0.01 only"
+    
+    
+    # Input pass all criteria, remove the potentially divergent moments:
+    ConfFlav = np.nan_to_num(ConfFlav)
+    # flavor_trans (5, 5) ConfFlav (N, 5)
+
+    # Transform the unevolved moments to evolution basis
+    # ConfEvoBasis = np.einsum('...j,j', flav_trans, ConfFlav) # originally, output will be (5), I want it to be (N, 5)
+    ConfEvoBasis = np.einsum('ij, ...j->...i', flav_trans, ConfFlav) # shape (N, 5)
+
+    # Taking the non-singlet and singlet parts of the conformal moments
+    ConfNS = ConfEvoBasis[..., :3] # (N, 3)
+    ConfS = np.zeros_like(ConfEvoBasis[..., -2:]) # (N, 2)
 
     # Calling evolution mulitiplier
     [evons, evoa] = evolop(j, nf, p, mu) # (N) and (N, 2, 2)

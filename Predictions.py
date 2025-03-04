@@ -183,6 +183,44 @@ def compute_rratio(args):
 
 if __name__ == '__main__':
     pool = Pool()
+    
+    x=0.001
+    Q0=3.
+    _GPD_theo = GPDobserv(x,x,0.0,Q0,1)
+    gpd1 = (_GPD_theo.GPD('u',Para_spe,p_order= 1))
+    gpd2 = (_GPD_theo.GPD('d',Para_spe,p_order= 1))
+    gpd3 = (_GPD_theo.GPD('g',Para_spe,p_order= 1))
+    gpd4 = (_GPD_theo.GPD('u',Para_spe,p_order= 2))
+    gpd5 = (_GPD_theo.GPD('d',Para_spe,p_order= 2))
+    gpd6 = (_GPD_theo.GPD('g',Para_spe,p_order= 2))
+    print('Up quark PDF:')
+    print(gpd1)
+    print(gpd4)
+    print('Down quark PDF:')
+    print(gpd2)
+    print(gpd5)
+    print('Gluon PDF:')
+    print(gpd3)
+    print(gpd6)
+    
+    x=0.001
+    Q0=3.
+    _GPD_theo_2 = GPDobserv(x,x,0.0,Q0,-1)
+    gpd1 = (_GPD_theo_2.GPD('u',Para_spe_pol,p_order= 1))
+    gpd2 = (_GPD_theo_2.GPD('d',Para_spe_pol,p_order= 1))
+    gpd3 = (_GPD_theo_2.GPD('g',Para_spe_pol,p_order= 1))
+    gpd4 = (_GPD_theo_2.GPD('u',Para_spe_pol,p_order= 2))
+    gpd5 = (_GPD_theo_2.GPD('d',Para_spe_pol,p_order= 2))
+    gpd6 = (_GPD_theo_2.GPD('g',Para_spe_pol,p_order= 2))
+    print('Up quark polarized PDF:')
+    print(gpd1)
+    print(gpd4)
+    print('Down quark polarized PDF:')
+    print(gpd2)
+    print(gpd5)
+    print('Gluon polarized PDF:')
+    print(gpd3)
+    print(gpd6)
     '''
     print("For vector CFFs")
     x=0.001
@@ -234,7 +272,7 @@ if __name__ == '__main__':
 
     print(np.pi*(gpd1-gpd2+gpd3-gpd4))
     '''
-
+    '''
     x=0.0001
     _GPD_theo = GPDobserv(x,x,0.0,5.0,-1)
     _GPD_theo2 = GPDobserv(-x,x,0.0,5.0,-1)
@@ -247,7 +285,7 @@ if __name__ == '__main__':
     gpd3 = (_GPD_theo.GPD('d',Para_spe_pol))* (1/3) ** 2
     gpd4 = (_GPD_theo2.GPD('d',Para_spe_pol))* (1/3) ** 2
     print(np.pi*(gpd1+gpd2+gpd3+gpd4))
-
+    '''
     '''
     # Test of LO ImTFF and gluon GPD evolved to mu = 5 GeV
     x=0.0001
