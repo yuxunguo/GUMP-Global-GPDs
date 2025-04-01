@@ -219,7 +219,9 @@ if __name__ == '__main__':
     #
 
     # Comparing PDF with the global extraction of PDF
-    '''
+
+    os.makedirs(os.path.join(dir_path,"GUMP_Results"), exist_ok=True)
+    
     x = np.exp(np.linspace(np.log(0.0001), np.log(0.05), 100, dtype = float))
     
     pdflst = np.array([PDF_theo_s(x_i,0.,2.,1,'g',Para_spe, 2) for x_i in x ])
@@ -240,11 +242,12 @@ if __name__ == '__main__':
         csvWriter.writerows(np.transpose([x,gpdlst]))
     print(time.time()-ts)
 
+    '''
     # Ploting the R ratio
 
-    x = np.exp(np.linspace(np.log(0.0001), np.log(0.01), 20, dtype = float))
+    x = np.exp(np.linspace(np.log(0.0001), np.log(0.01), 80, dtype = float))
     
-    qlst = np.linspace(2,8, 20, dtype = float)
+    qlst = np.linspace(2,10, 80, dtype = float)
     
     xmesh, qmesh = np.meshgrid(x,qlst)
     
@@ -259,7 +262,7 @@ if __name__ == '__main__':
         csvWriter.writerows(np.transpose([xmeshflat,qmeshflat,rrat2dlst]))
     '''
     # Comparing the cross-sections
-    
+    '''
     DVjpsiPH1_xBtQ_theo = np.array(list(pool.map(partial(DVjpsiPxsec_theo_xBtQ, Para_Unp = Para_Unp, xsec_norm = jpsinorm, p_order = 2, muset = 1, flv = 'All'), DVJpsiPH1xsec_group_data))).flatten()
 
     DVjpsiPH1_xBtQ_theo_mu_1 = np.array(list(pool.map(partial(DVjpsiPxsec_theo_xBtQ, Para_Unp = Para_Unp, xsec_norm = jpsinorm, p_order = 2, muset = np.sqrt(0.5), flv = 'All'), DVJpsiPH1xsec_group_data))).flatten()
@@ -326,7 +329,7 @@ if __name__ == '__main__':
     with open(os.path.join(dir_path,"GUMP_Results/TFFqg12xb2.csv"),"w",newline='') as my_csv:
         csvWriter = csv.writer(my_csv,delimiter=',')
         csvWriter.writerows(np.transpose([qlst,TFFfull,TFFq1,TFFq2,TFFg1,TFFg2]))
-
+    '''
     
     '''
     x = np.exp(np.linspace(np.log(0.005), np.log(0.6), 100, dtype = float))
