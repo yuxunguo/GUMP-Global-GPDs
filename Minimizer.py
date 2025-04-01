@@ -1151,6 +1151,190 @@ def off_forward_fit(Paralst_Unp, Paralst_Pol):
     print("off forward fit finished...")
     return fit_off_forward
 
+
+def cost_dvmp_PDF(Norm_HuV,    alpha_HuV,    beta_HuV,    alphap_HuV, 
+                     Norm_Hubar,  alpha_Hubar,  beta_Hubar,  alphap_Hqbar,
+                     Norm_HdV,    alpha_HdV,    beta_HdV,    alphap_HdV,
+                     Norm_Hdbar,  alpha_Hdbar,  beta_Hdbar, 
+                     Norm_Hg,     alpha_Hg,     beta_Hg,     alphap_Hg,
+                     Norm_EuV,    alpha_EuV,    beta_EuV,    alphap_EuV,
+                     Norm_EdV,    R_E_Sea,      R_Hu_xi2,    R_Hd_xi2,    R_Hg_xi2,
+                     R_Eu_xi2,    R_Ed_xi2,     R_Eg_xi2,
+                     R_Hu_xi4,    R_Hd_xi4,     R_Hg_xi4,
+                     R_Eu_xi4,    R_Ed_xi4,     R_Eg_xi4,    bexp_HSea, bexp_Hg, Invm2_Hg, norm, norm2):
+
+    global Minuit_Counter, Time_Counter
+
+    time_now = time.time() - time_start
+    
+    if(time_now > Time_Counter * 600):
+        print('Runing Time:',round(time_now/60),'minutes. Cost function called total', Minuit_Counter, 'times.')
+        Time_Counter = Time_Counter + 1
+    
+    Minuit_Counter = Minuit_Counter + 1
+    Para_Unp_lst = [Norm_HuV,    alpha_HuV,    beta_HuV,    alphap_HuV, 
+                    Norm_Hubar,  alpha_Hubar,  beta_Hubar,  alphap_Hqbar,
+                    Norm_HdV,    alpha_HdV,    beta_HdV,    alphap_HdV,
+                    Norm_Hdbar,  alpha_Hdbar,  beta_Hdbar, 
+                    Norm_Hg,     alpha_Hg,     beta_Hg,     alphap_Hg,
+                    Norm_EuV,    alpha_EuV,    beta_EuV,    alphap_EuV,
+                    Norm_EdV,    R_E_Sea,      R_Hu_xi2,    R_Hd_xi2,    R_Hg_xi2,
+                    R_Eu_xi2,    R_Ed_xi2,     R_Eg_xi2,
+                    R_Hu_xi4,    R_Hd_xi4,     R_Hg_xi4,
+                    R_Eu_xi4,    R_Ed_xi4,     R_Eg_xi4,    bexp_HSea, bexp_Hg, Invm2_Hg, norm, norm2]
+
+    jpsinorm = Para_Unp_lst[-2]
+    jpsinormzeus = Para_Unp_lst[-1] 
+    Para_Unp_all = ParaManager_Unp(Para_Unp_lst[:-2])
+    
+    PDF_H_g_smallx_pred = PDF_theo(PDFg_smallx_data, Para=Para_Unp_all, p_order = 2)
+    cost_PDF_H_g_smallx = np.sum(((PDF_H_g_smallx_pred - PDFg_smallx_data['f'])/ PDFg_smallx_data['delta f']) ** 2 )
+    
+    return cost_PDF_H_g_smallx
+
+def dvmp_fit_PDF(Paralst_Unp):
+
+    [Norm_HuV_Init,    alpha_HuV_Init,    beta_HuV_Init,    alphap_HuV_Init, 
+     Norm_Hubar_Init,  alpha_Hubar_Init,  beta_Hubar_Init,  alphap_Hqbar_Init,
+     Norm_HdV_Init,    alpha_HdV_Init,    beta_HdV_Init,    alphap_HdV_Init,
+     Norm_Hdbar_Init,  alpha_Hdbar_Init,  beta_Hdbar_Init, 
+     Norm_Hg_Init,     alpha_Hg_Init,     beta_Hg_Init,     alphap_Hg_Init,
+     Norm_EuV_Init,    alpha_EuV_Init,    beta_EuV_Init,    alphap_EuV_Init,
+     Norm_EdV_Init,    R_E_Sea_Init,      R_Hu_xi2_Init,    R_Hd_xi2_Init,    R_Hg_xi2_Init,
+     R_Eu_xi2_Init,    R_Ed_xi2_Init,     R_Eg_xi2_Init,
+     R_Hu_xi4_Init,    R_Hd_xi4_Init,     R_Hg_xi4_Init,
+     R_Eu_xi4_Init,    R_Ed_xi4_Init,     R_Eg_xi4_Init,    bexp_HSea_Init, bexp_Hg_Init, Invm2_Hg_Init, norm_Init, norm2_Init] = Paralst_Unp
+
+    Invm2_Hg_Init = 0
+    #bexp_Hg_Init = 0
+    fit_dvmp_PDF = Minuit(cost_dvmp_PDF, Norm_HuV = Norm_HuV_Init,     alpha_HuV = alpha_HuV_Init,      beta_HuV = beta_HuV_Init,     alphap_HuV = alphap_HuV_Init, 
+                                            Norm_Hubar = Norm_Hubar_Init, alpha_Hubar = alpha_Hubar_Init,  beta_Hubar = beta_Hubar_Init, alphap_Hqbar = alphap_Hqbar_Init,
+                                            Norm_HdV = Norm_HdV_Init,     alpha_HdV = alpha_HdV_Init,      beta_HdV = beta_HdV_Init,     alphap_HdV = alphap_HdV_Init,
+                                            Norm_Hdbar = Norm_Hdbar_Init, alpha_Hdbar = alpha_Hdbar_Init,  beta_Hdbar = beta_Hdbar_Init, 
+                                            Norm_Hg = Norm_Hg_Init,       alpha_Hg = alpha_Hg_Init,        beta_Hg = beta_Hg_Init,       alphap_Hg = alphap_Hg_Init,
+                                            Norm_EuV = Norm_EuV_Init,     alpha_EuV = alpha_EuV_Init,      beta_EuV = beta_EuV_Init,     alphap_EuV = alphap_EuV_Init, 
+                                            Norm_EdV = Norm_EdV_Init,     R_E_Sea = R_E_Sea_Init,          R_Hu_xi2 = R_Hu_xi2_Init,     R_Hd_xi2 = R_Hd_xi2_Init,     R_Hg_xi2 = R_Hg_xi2_Init,
+                                            R_Eu_xi2 = R_Eu_xi2_Init,     R_Ed_xi2 = R_Ed_xi2_Init,        R_Eg_xi2 = R_Eg_xi2_Init,
+                                            R_Hu_xi4 = R_Hu_xi4_Init,     R_Hd_xi4 = R_Hd_xi4_Init,        R_Hg_xi4 = R_Hg_xi4_Init,
+                                            R_Eu_xi4 = R_Eu_xi4_Init,     R_Ed_xi4 = R_Ed_xi4_Init,        R_Eg_xi4 = R_Eg_xi4_Init,     bexp_HSea = bexp_HSea_Init, bexp_Hg = bexp_Hg_Init, Invm2_Hg = Invm2_Hg_Init, norm = norm_Init, norm2 = norm2_Init)
+    fit_dvmp_PDF.errordef = 1
+
+    fit_dvmp_PDF.fixed['bexp_HSea'] = True
+    
+    #fit_dvmp.fixed['bexp_Hg'] = True
+    #fit_dvmp.limits['Invm2_Hg'] = (0.1,10)
+    
+    fit_dvmp_PDF.fixed['Invm2_Hg'] = True
+    fit_dvmp_PDF.fixed['bexp_Hg'] = True
+    #fit_dvmp.limits['bexp_Hg']  = (0.1,4)
+    
+    fit_dvmp_PDF.limits['norm'] = (0.1,10)
+    fit_dvmp_PDF.fixed['norm'] = True
+    
+    #fit_dvmp.limits['norm2'] = (0.1,10)
+    fit_dvmp_PDF.fixed['norm2'] = True
+
+    fit_dvmp_PDF.fixed['Norm_HuV'] = True
+    fit_dvmp_PDF.fixed['alpha_HuV'] = True
+    fit_dvmp_PDF.fixed['beta_HuV'] = True
+    fit_dvmp_PDF.fixed['alphap_HuV'] = True
+    
+    #fit_dvmp.limits['Norm_Hubar']  = (0.2, 3)
+    #fit_dvmp.limits['alpha_Hubar']  = (1.02, 1.5)
+
+    fit_dvmp_PDF.fixed['Norm_Hubar'] = True
+    fit_dvmp_PDF.fixed['alpha_Hubar'] = True
+    fit_dvmp_PDF.fixed['beta_Hubar'] = True
+
+    fit_dvmp_PDF.fixed['alphap_Hqbar'] = True
+
+    fit_dvmp_PDF.fixed['Norm_HdV'] = True
+    fit_dvmp_PDF.fixed['alpha_HdV'] = True
+    fit_dvmp_PDF.fixed['beta_HdV'] = True
+    fit_dvmp_PDF.fixed['alphap_HdV'] = True
+    
+    #fit_dvmp.limits['Norm_Hdbar']  = (0, 10)
+
+    fit_dvmp_PDF.fixed['Norm_Hdbar'] = True
+    fit_dvmp_PDF.fixed['alpha_Hdbar'] = True
+    fit_dvmp_PDF.fixed['beta_Hdbar'] = True
+
+
+    fit_dvmp_PDF.limits['Norm_Hg']=(0,10)
+    fit_dvmp_PDF.limits['alpha_Hg']=(0,2)
+    fit_dvmp_PDF.fixed['beta_Hg'] = True
+    #fit_dvmp.limits['beta_Hg']=(1,10)
+
+   # fit_dvmp.fixed['Norm_Hg'] = True
+   # fit_dvmp.fixed['alpha_Hg'] = True
+   # fit_dvmp.fixed['beta_Hg'] = True
+
+    fit_dvmp_PDF.fixed['Norm_EuV'] = True
+    fit_dvmp_PDF.fixed['alpha_EuV'] = True
+    fit_dvmp_PDF.fixed['beta_EuV'] = True
+    fit_dvmp_PDF.fixed['alphap_EuV'] = True
+
+    fit_dvmp_PDF.fixed['Norm_EdV'] = True
+
+    fit_dvmp_PDF.fixed['alphap_Hg'] = True
+    #fit_dvmp.limits['alphap_Hg'] = (0,0.5)
+    
+    #fit_dvmp.limits['R_E_Sea']=(0,10)    
+
+    #fit_dvmp.limits['R_Hg_xi2'] = (-20,20)
+
+    fit_dvmp_PDF.fixed['R_E_Sea'] = True    
+    fit_dvmp_PDF.fixed['R_Hu_xi2'] = True
+    fit_dvmp_PDF.fixed['R_Hd_xi2'] = True     
+    fit_dvmp_PDF.fixed['R_Hg_xi2'] = True
+    fit_dvmp_PDF.fixed['R_Eu_xi2'] = True
+    fit_dvmp_PDF.fixed['R_Ed_xi2'] = True 
+    fit_dvmp_PDF.fixed['R_Eg_xi2'] = True
+    
+
+    fit_dvmp_PDF.fixed['R_Hg_xi4'] = True
+    fit_dvmp_PDF.fixed['R_Eg_xi4'] = True
+    
+
+    fit_dvmp_PDF.fixed['R_Hu_xi4']  = True 
+    fit_dvmp_PDF.fixed['R_Eu_xi4']  = True
+
+    fit_dvmp_PDF.fixed['R_Hd_xi4']  = True 
+    fit_dvmp_PDF.fixed['R_Ed_xi4']  = True
+    
+    
+    global Minuit_Counter, Time_Counter, time_start
+    Minuit_Counter = 0
+    Time_Counter = 1
+    time_start = time.time()
+    
+    fit_dvmp_PDF.migrad()
+    fit_dvmp_PDF.hesse()
+
+    ndof_dvmp = len(PDFg_smallx_data) - fit_dvmp_PDF.nfit 
+
+    time_end = time.time() -time_start
+
+    with open(os.path.join(dir_path,'GUMP_Output/dvmp_fit_PDF.txt'), 'w', encoding="utf-8") as f:
+        print('Total running time: %.1f minutes. Total call of cost function: %3d.\n' % ( time_end/60, fit_dvmp_PDF.nfcn), file=f)
+        print('The chi squared/d.o.f. is: %.2f / %3d ( = %.2f ).\n' % (fit_dvmp_PDF.fval, ndof_dvmp, fit_dvmp_PDF.fval/ndof_dvmp), file = f)
+        print('Below are the final output parameters from iMinuit:', file = f)
+        print(*fit_dvmp_PDF.values, sep=", ", file = f)
+        print(*fit_dvmp_PDF.errors, sep=", ", file = f)
+        print(fit_dvmp_PDF.params, file = f)
+
+    with open(os.path.join(dir_path,"GUMP_Output/dvmp_PDF_cov.csv"),"w", newline='', encoding="utf-8") as my_csv:
+        csvWriter = csv.writer(my_csv,delimiter=',')
+        csvWriter.writerows([*fit_dvmp_PDF.covariance])
+        
+    with open(os.path.join(dir_path,"GUMP_Params/Para_Unp.csv"),"w",newline='') as my_csv:
+        csvWriter = csv.writer(my_csv,delimiter=',')
+        csvWriter.writerow(list([*fit_dvmp_PDF.values]))
+        csvWriter.writerow(list([*fit_dvmp_PDF.errors]))
+  
+    print("dvmp PDF fit finished...")
+    return fit_dvmp_PDF
+
 def cost_dvmp(Norm_HuV,    alpha_HuV,    beta_HuV,    alphap_HuV, 
                      Norm_Hubar,  alpha_Hubar,  beta_Hubar,  alphap_Hqbar,
                      Norm_HdV,    alpha_HdV,    beta_HdV,    alphap_HdV,
@@ -1186,34 +1370,10 @@ def cost_dvmp(Norm_HuV,    alpha_HuV,    beta_HuV,    alphap_HuV,
     jpsinormzeus = Para_Unp_lst[-1] 
     Para_Unp_all = ParaManager_Unp(Para_Unp_lst[:-2])
     
-   # cost_DVrhoPZEUS_xBtQ = np.array(list(pool.map(partial(DVrhoPxsec_cost_xBtQ, Para_Unp = Para_Unp_all, xsec_norm = xsecnorm), DVrhoPZEUSxsec_group_data)))
-   # cost_DVrhoPZEUSxsec = np.sum(cost_DVrhoPZEUS_xBtQ)
-    
-   # cost_DVrhoPH1_xBtQ = np.array(list(pool.map(partial(DVrhoPxsec_cost_xBtQ, Para_Unp = Para_Unp_all, xsec_norm = 1), DVrhoPH1xsec_group_data)))
-   # cost_DVrhoPH1xsec = np.sum(cost_DVrhoPH1_xBtQ)
-   
-   # cost_DVrhoPH1_NLO_xBtQ = np.array(list(pool.map(partial(DVrhoPxsec_NLO_cost_xBtQ, Para_Unp = Para_Unp_all, xsec_norm = xsecnorm), DVrhoPH1xsec_group_data)))
-   # cost_DVrhoPH1xsec_NLO = np.sum(cost_DVrhoPH1_NLO_xBtQ)
-    
-   # cost_DVphiPZEUS_xBtQ = np.array(list(pool.map(partial(DVphiPxsec_cost_xBtQ, Para_Unp = Para_Unp_all), DVphiPZEUSxsec_group_data)))
-   # cost_DVphiPZEUSxsec = np.sum(cost_DVphiPZEUS_xBtQ)
-    
-   # cost_DVphiPH1_xBtQ = np.array(list(pool.map(partial(DVphiPxsec_cost_xBtQ, Para_Unp = Para_Unp_all), DVphiPH1xsec_group_data)))
-   # cost_DVphiPH1xsec = np.sum(cost_DVphiPH1_xBtQ)
-   
-    PDF_H_g_smallx_pred = PDF_theo(PDFg_smallx_data, Para=Para_Unp_all, p_order = 2)
-    cost_PDF_H_g_smallx = np.sum(((PDF_H_g_smallx_pred - PDFg_smallx_data['f'])/ PDFg_smallx_data['delta f']) ** 2 )
-
-   # cost_DVjpsiPZEUS_xBtQ = np.array(list(pool.map(partial(DVjpsiPxsec_cost_xBtQ, Para_Unp = Para_Unp_all), DVJpsiPZEUSxsec_group_data)))
-   # cost_DVjpsiPZEUSxsec = np.sum(cost_DVjpsiPZEUS_xBtQ)
-    
-    #cost_DVjpsiPZEUS_xBtQ = np.array(list(pool.map(partial(DVjpsiPxsec_cost_xBtQ, Para_Unp = Para_Unp_all, xsec_norm = jpsinormzeus, p_order = 2), DVJpsiPZEUSxsec_group_data)))
-    #cost_DVjpsiPZEUSxsec = np.sum(cost_DVjpsiPZEUS_xBtQ)
-    
     cost_DVjpsiPH1_xBtQ = np.array(list(pool.map(partial(DVjpsiPxsec_cost_xBtQ, Para_Unp = Para_Unp_all, xsec_norm = jpsinorm, p_order = 2), DVJpsiPH1xsec_group_data)))
     cost_DVjpsiPH1xsec = np.sum(cost_DVjpsiPH1_xBtQ)
 
-    return cost_PDF_H_g_smallx + cost_DVjpsiPH1xsec #+ cost_DVjpsiPZEUSxsec
+    return cost_DVjpsiPH1xsec #+ cost_DVjpsiPZEUSxsec
 
 def dvmp_fit(Paralst_Unp):
 
@@ -1283,8 +1443,10 @@ def dvmp_fit(Paralst_Unp):
 
     
 
-    fit_dvmp.limits['Norm_Hg']=(0,10)
-    fit_dvmp.limits['alpha_Hg']=(0,2)
+    #fit_dvmp.limits['Norm_Hg']=(0,10)
+    #fit_dvmp.limits['alpha_Hg']=(0,2)
+    fit_dvmp.fixed['Norm_Hg'] = True
+    fit_dvmp.fixed['alpha_Hg'] = True
     fit_dvmp.fixed['beta_Hg'] = True
     #fit_dvmp.limits['beta_Hg']=(1,10)
 
@@ -1334,11 +1496,11 @@ def dvmp_fit(Paralst_Unp):
     fit_dvmp.migrad()
     fit_dvmp.hesse()
 
-    ndof_dvmp = len(DVJpsiPH1xsec_data) + len(PDFg_smallx_data) - fit_dvmp.nfit 
+    ndof_dvmp = len(DVJpsiPH1xsec_data) - fit_dvmp.nfit 
 
     time_end = time.time() -time_start
 
-    with open(os.path.join(dir_path,'GUMP_Output/dvmp_fit_NLOPDF.txt'), 'w', encoding="utf-8") as f:
+    with open(os.path.join(dir_path,'GUMP_Output/dvmp_fit_NLO.txt'), 'w', encoding="utf-8") as f:
         print('Total running time: %.1f minutes. Total call of cost function: %3d.\n' % ( time_end/60, fit_dvmp.nfcn), file=f)
         print('The chi squared/d.o.f. is: %.2f / %3d ( = %.2f ).\n' % (fit_dvmp.fval, ndof_dvmp, fit_dvmp.fval/ndof_dvmp), file = f)
         print('Below are the final output parameters from iMinuit:', file = f)
@@ -1346,7 +1508,7 @@ def dvmp_fit(Paralst_Unp):
         print(*fit_dvmp.errors, sep=", ", file = f)
         print(fit_dvmp.params, file = f)
 
-    with open(os.path.join(dir_path,"GUMP_Output/dvmp_cov.csv"),"w", newline='', encoding="utf-8") as my_csv:
+    with open(os.path.join(dir_path,"GUMP_Output/dvmp_NLO_cov.csv"),"w", newline='', encoding="utf-8") as my_csv:
         csvWriter = csv.writer(my_csv,delimiter=',')
         csvWriter.writerows([*fit_dvmp.covariance])
         
@@ -1362,6 +1524,11 @@ if __name__ == '__main__':
     pool = Pool()
     time_start = time.time()
        
+    Paralst_Unp=pd.read_csv(os.path.join(dir_path,'GUMP_Params/Para_Unp.csv'), header=None).to_numpy()[0]
+    Paralst_Pol=pd.read_csv(os.path.join(dir_path,'GUMP_Params/Para_Pol.csv'), header=None).to_numpy()[0]
+    
+    fit_dvmp_PDF = dvmp_fit_PDF(Paralst_Unp)
+    
     Paralst_Unp=pd.read_csv(os.path.join(dir_path,'GUMP_Params/Para_Unp.csv'), header=None).to_numpy()[0]
     Paralst_Pol=pd.read_csv(os.path.join(dir_path,'GUMP_Params/Para_Pol.csv'), header=None).to_numpy()[0]
     
