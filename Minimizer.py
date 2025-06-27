@@ -35,7 +35,7 @@ PDF_H_smallx_data = PDF_smallx_data[PDF_smallx_data['spe']==0]
 PDFg_smallx_data = PDF_H_smallx_data[PDF_H_smallx_data['flv']=='g']
 PDFg_smallx_data = PDF_H_smallx_data[PDF_H_smallx_data['x'] > xB_small_Cut]
 
-tPDF_data = pd.read_csv(os.path.join(dir_path,'GUMPDATA/tPDFdata.csv'),     header = None, names = ['x', 't', 'Q', 'f', 'delta f', 'spe', 'flv'],        dtype = {'x': float, 't': float, 'Q': float, 'f': float, 'delta f': float,'spe': int, 'flv': str})
+tPDF_data = pd.read_csv(os.path.join(dir_path,'GUMPDATA/tPDFdata.csv'),     header = 0, names = ['x', 't', 'Q', 'f', 'delta f', 'spe', 'flv'],        dtype = {'x': float, 't': float, 'Q': float, 'f': float, 'delta f': float,'spe': int, 'flv': str})
 tPDF_data_H  = tPDF_data[tPDF_data['spe'] == 0]
 tPDF_data_H_g = tPDF_data_H[tPDF_data_H['flv'] == 'g']
 tPDF_data_H_g = tPDF_data_H[tPDF_data_H['x'] < xB_small_Cut]
@@ -496,27 +496,31 @@ def forward_H_fit(Paralst_Unp):
     # Parameters not used in DVCS fit
     fit_forw_H.fixed['bexp_Hg'] = True
     fit_forw_H.fixed['Invm2_Hg'] = True
-    fit_forw_H.fixed['Invm2_HuV'] = True
-    fit_forw_H.fixed['Invm2_HdV'] = True
+    #fit_forw_H.fixed['Invm2_HuV'] = True
+    #fit_forw_H.fixed['Invm2_HdV'] = True
     
     fit_forw_H.limits['alpha_HuV'] = (-2, 1.2)
-    fit_forw_H.limits['alpha_Hubar'] = (-2, 1.2)
+    fit_forw_H.limits['alpha_Hubar'] = (0, 1.2)
     fit_forw_H.limits['alpha_HdV'] = (-2, 1.2)
-    fit_forw_H.limits['alpha_Hdbar'] = (-2, 1.2)
-    fit_forw_H.limits['alpha_Hg'] = (-2, 1.2)
+    fit_forw_H.limits['alpha_Hdbar'] = (0, 1.2)
+    fit_forw_H.limits['alpha_Hg'] = (0, 1.2)
     fit_forw_H.limits['alpha_EuV'] = (-2, 1.2)
 
     # make the second set of parameters 'valence-like' bounded by small x <~ x **(-0.8)
-    fit_forw_H.limits['alpha_Hubar_2'] = (-2, 0.8)
-    fit_forw_H.limits['alpha_Hdbar_2'] = (-2, 0.8)
-    fit_forw_H.limits['alpha_Hg_2'] = (-2, 0.8)
+    fit_forw_H.limits['alpha_Hubar_2'] = (0, 0.8)
+    fit_forw_H.limits['alpha_Hdbar_2'] = (0, 0.8)
+    fit_forw_H.limits['alpha_Hg_2'] = (0, 0.8)
 
-    fit_forw_H.limits['beta_HuV'] = (0, 15)
-    fit_forw_H.limits['beta_Hubar'] = (0, 15)
-    fit_forw_H.limits['beta_HdV'] = (0, 15)
-    fit_forw_H.limits['beta_Hdbar'] = (0, 15)
-    fit_forw_H.limits['beta_Hg'] = (0, 15)    
-    fit_forw_H.limits['beta_EuV'] = (0, 15)
+    fit_forw_H.limits['beta_HuV'] = (0, 20)
+    fit_forw_H.limits['beta_Hubar'] = (0, 20)
+    fit_forw_H.limits['beta_HdV'] = (0, 20)
+    fit_forw_H.limits['beta_Hdbar'] = (0, 20)
+    fit_forw_H.limits['beta_Hg'] = (0, 20)    
+    fit_forw_H.limits['beta_EuV'] = (0, 20)
+    
+    fit_forw_H.limits['beta_Hubar_2'] = (0, 20)
+    fit_forw_H.limits['beta_Hdbar_2'] = (0, 20)
+    fit_forw_H.limits['beta_Hg_2'] = (0, 20)  
 
     fit_forw_H.fixed['alphap_Hqbar'] = True
     fit_forw_H.fixed['alphap_Hg'] = True
@@ -1402,8 +1406,8 @@ if __name__ == '__main__':
     pool = Pool()
     time_start = time.time()
 
-    #Paralst_Unp=pd.read_csv(os.path.join(dir_path,'GUMP_Params/Para_Unp.csv'), header=None).to_numpy()[0]
-    
+    Paralst_Unp=pd.read_csv(os.path.join(dir_path,'GUMP_Params/Para_Unp.csv'), header=None).to_numpy()[0]
+    '''
     Paralst_Unp=[4.9665670769938, 0.21860970434714266, 3.246358556758876, 2.3833751845935685, 0.0,
                  0.14072628185773314, 1.1689691567724871, 6.4390570288841396, 0.15,
                  0.14072628185773314, 1.1689691567724871, 6.4390570288841396, 
@@ -1417,6 +1421,7 @@ if __name__ == '__main__':
                  0.7985103392773935, 3.404262017724412, 0.0,
                  0.0, 0.0, 0.0170301969470947,
                  0.0, 0.0, 0.0, 3.44764738950069, 2.6278071872799003]
+    '''
     
     Paralst_Pol=pd.read_csv(os.path.join(dir_path,'GUMP_Params/Para_Pol.csv'), header=None).to_numpy()[0]
     
@@ -1425,10 +1430,10 @@ if __name__ == '__main__':
     
     fit_forward_H   = forward_H_fit(Paralst_Unp)
     Paralst_Unp     = np.array(fit_forward_H.values)
-
+    '''
     fit_forward_Ht  = forward_Ht_fit(Paralst_Pol)
     Paralst_Pol     = np.array(fit_forward_Ht.values)
-    '''
+
     fit_forward_E   = forward_E_fit(Paralst_Unp)
     Paralst_Unp     = np.array(fit_forward_E.values)
 

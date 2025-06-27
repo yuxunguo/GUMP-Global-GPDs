@@ -35,7 +35,7 @@ PDF_H_smallx_data = PDF_smallx_data[PDF_smallx_data['spe']==0]
 PDFg_smallx_data = PDF_H_smallx_data[PDF_H_smallx_data['flv']=='g']
 PDFg_smallx_data = PDF_H_smallx_data[PDF_H_smallx_data['x'] > xB_small_Cut]
 
-tPDF_data = pd.read_csv(os.path.join(dir_path,'GUMPDATA/tPDFdata.csv'),     header = None, names = ['x', 't', 'Q', 'f', 'delta f', 'spe', 'flv'],        dtype = {'x': float, 't': float, 'Q': float, 'f': float, 'delta f': float,'spe': int, 'flv': str})
+tPDF_data = pd.read_csv(os.path.join(dir_path,'GUMPDATA/tPDFdata.csv'),     header = 0, names = ['x', 't', 'Q', 'f', 'delta f', 'spe', 'flv'],        dtype = {'x': float, 't': float, 'Q': float, 'f': float, 'delta f': float,'spe': int, 'flv': str})
 tPDF_data_H  = tPDF_data[tPDF_data['spe'] == 0]
 tPDF_data_H_g = tPDF_data_H[tPDF_data_H['flv'] == 'g']
 tPDF_data_H_g = tPDF_data_H[tPDF_data_H['x'] < xB_small_Cut]
@@ -365,19 +365,19 @@ def DVMPxsec_cost_xBtQ(DVMPxsec_data_xBtQ: pd.DataFrame, Para_Unp, xsec_norm, me
     DVMP_pred_xBtQ = DVMPxsec_theo(DVMPxsec_data_xBtQ, [HTFF, ETFF], meson) * xsec_norm**2
     return np.sum(((DVMP_pred_xBtQ - DVMPxsec_data_xBtQ['f'])/ DVMPxsec_data_xBtQ['delta f']) ** 2 )
 
-def cost_forward_H(Norm_HuV,    alpha_HuV,    beta_HuV,    alphap_HuV, 
+def cost_forward_H(Norm_HuV,    alpha_HuV,    beta_HuV,    alphap_HuV,   Invm2_HuV,
                    Norm_Hubar,  alpha_Hubar,  beta_Hubar,  alphap_Hqbar,
                    Norm_Hubar_2,  alpha_Hubar_2,  beta_Hubar_2,
-                   Norm_HdV,    alpha_HdV,    beta_HdV,    alphap_HdV,
+                   Norm_HdV,    alpha_HdV,    beta_HdV,    alphap_HdV,   Invm2_HdV,
                    Norm_Hdbar,  alpha_Hdbar,  beta_Hdbar, 
                    Norm_Hdbar_2,  alpha_Hdbar_2,  beta_Hdbar_2,
-                   Norm_Hg,     alpha_Hg,     beta_Hg,     alphap_Hg,
+                   Norm_Hg,     alpha_Hg,     beta_Hg,     alphap_Hg,  Invm2_Hg,
                    Norm_Hg_2,     alpha_Hg_2,     beta_Hg_2,
                    Norm_EuV,    alpha_EuV,    beta_EuV,    alphap_EuV,
                    Norm_EdV,    R_E_Sea,      R_Hu_xi2,    R_Hd_xi2,    R_Hg_xi2,
                    R_Eu_xi2,    R_Ed_xi2,     R_Eg_xi2,
                    R_Hu_xi4,    R_Hd_xi4,     R_Hg_xi4,
-                   R_Eu_xi4,    R_Ed_xi4,     R_Eg_xi4,    bexp_HSea, bexp_Hg, Invm2_Hg):
+                   R_Eu_xi4,    R_Ed_xi4,     R_Eg_xi4,    bexp_HSea, bexp_Hg):
 
     # parameters not used in dvcs fit
     bexp_Hg = bexp_HSea
@@ -393,19 +393,19 @@ def cost_forward_H(Norm_HuV,    alpha_HuV,    beta_HuV,    alphap_HuV,
     
     Minuit_Counter = Minuit_Counter + 1
     
-    Paralst = [Norm_HuV,    alpha_HuV,    beta_HuV,    alphap_HuV, 
+    Paralst = [Norm_HuV,    alpha_HuV,    beta_HuV,    alphap_HuV,  Invm2_HuV,
                 Norm_Hubar,  alpha_Hubar,  beta_Hubar,  alphap_Hqbar,
                 Norm_Hubar_2,  alpha_Hubar_2,  beta_Hubar_2,
-                Norm_HdV,    alpha_HdV,    beta_HdV,    alphap_HdV,
+                Norm_HdV,    alpha_HdV,    beta_HdV,    alphap_HdV, Invm2_HdV,
                 Norm_Hdbar,  alpha_Hdbar,  beta_Hdbar, 
                 Norm_Hdbar_2,  alpha_Hdbar_2,  beta_Hdbar_2,
-                Norm_Hg,     alpha_Hg,     beta_Hg,     alphap_Hg,
+                Norm_Hg,     alpha_Hg,     beta_Hg,     alphap_Hg, Invm2_Hg,
                 Norm_Hg_2,     alpha_Hg_2,     beta_Hg_2,
                 Norm_EuV,    alpha_EuV,    beta_EuV,    alphap_EuV,
                 Norm_EdV,    R_E_Sea,      R_Hu_xi2,    R_Hd_xi2,    R_Hg_xi2,
                 R_Eu_xi2,    R_Ed_xi2,     R_Eg_xi2,
                 R_Hu_xi4,    R_Hd_xi4,     R_Hg_xi4,
-                R_Eu_xi4,    R_Ed_xi4,     R_Eg_xi4,    bexp_HSea, bexp_Hg, Invm2_Hg]
+                R_Eu_xi4,    R_Ed_xi4,     R_Eg_xi4,    bexp_HSea, bexp_Hg]
     
     Para_all = ParaManager_Unp(Paralst)
     # PDF_H_pred = np.array(list(pool.map(partial(PDF_theo, Para = Para_all), np.array(PDF_data_H))))
@@ -414,7 +414,7 @@ def cost_forward_H(Norm_HuV,    alpha_HuV,    beta_HuV,    alphap_HuV,
     
     PDF_data_Hpred = PDF_data_H.copy()
     PDF_data_Hpred['f pred'] = PDF_H_pred
-    PDF_data_Hpred.to_csv(os.path.join(dir_path,'GUMP_Results/PDFcomp2.csv'),index= False)
+    PDF_data_Hpred.to_csv(os.path.join(dir_path,'GUMP_Results/PDFcomp3.csv'),index= False)
     
     # tPDF_H_pred = np.array(list(pool.map(partial(tPDF_theo, Para = Para_all), np.array(tPDF_data_H))))
     tPDF_H_pred = tPDF_theo(tPDF_data_H, Para=Para_all)
@@ -422,15 +422,16 @@ def cost_forward_H(Norm_HuV,    alpha_HuV,    beta_HuV,    alphap_HuV,
 
     tPDF_data_Hpred = tPDF_data_H.copy()
     tPDF_data_Hpred['f pred'] = tPDF_H_pred
-    tPDF_data_Hpred.to_csv(os.path.join(dir_path,'GUMP_Results/tPDFcomp2.csv'),index= False)
+    tPDF_data_Hpred.to_csv(os.path.join(dir_path,'GUMP_Results/tPDFcomp3.csv'),index= False)
     # GFF_H_pred = np.array(list(pool.map(partial(GFF_theo, Para = Para_all), np.array(GFF_data_H))))
     GFF_H_pred = GFF_theo(GFF_data_H, Para=Para_all)
     cost_GFF_H = np.sum(((GFF_H_pred - GFF_data_H['f'])/ GFF_data_H['delta f']) ** 2 )
 
     GFF_data_Hpred = GFF_data_H.copy()
     GFF_data_Hpred['fpred'] = GFF_H_pred
-    GFF_data_Hpred.to_csv(os.path.join(dir_path,'GUMP_Results/GFFcomp2.csv'),index= False)
-    return cost_PDF_H + cost_tPDF_H + cost_GFF_H
+    GFF_data_Hpred.to_csv(os.path.join(dir_path,'GUMP_Results/GFFcomp3.csv'),index= False)
+    
+    return cost_PDF_H/len(PDF_H_pred), cost_GFF_H/len(GFF_H_pred), cost_tPDF_H/len(tPDF_H_pred)
 
 def cost_forward_E(Norm_HuV,    alpha_HuV,    beta_HuV,    alphap_HuV, 
                    Norm_Hubar,  alpha_Hubar,  beta_Hubar,  alphap_Hqbar,
@@ -675,33 +676,33 @@ if __name__ == '__main__':
     Paralst_Unp=pd.read_csv(os.path.join(dir_path,'GUMP_Params/Para_Unp.csv'), header=None).to_numpy()[0]
     Paralst_Pol=pd.read_csv(os.path.join(dir_path,'GUMP_Params/Para_Pol.csv'), header=None).to_numpy()[0]
     
-    [Norm_HuV_Init,    alpha_HuV_Init,    beta_HuV_Init,    alphap_HuV_Init, 
+    [Norm_HuV_Init,    alpha_HuV_Init,    beta_HuV_Init,    alphap_HuV_Init, Invm2_HuV_Init,
      Norm_Hubar_Init,  alpha_Hubar_Init,  beta_Hubar_Init,  alphap_Hqbar_Init,
      Norm_Hubar_2_Init,  alpha_Hubar_2_Init,  beta_Hubar_2_Init,
-     Norm_HdV_Init,    alpha_HdV_Init,    beta_HdV_Init,    alphap_HdV_Init,
+     Norm_HdV_Init,    alpha_HdV_Init,    beta_HdV_Init,    alphap_HdV_Init, Invm2_HdV_Init,
      Norm_Hdbar_Init,  alpha_Hdbar_Init,  beta_Hdbar_Init, 
      Norm_Hdbar_2_Init,  alpha_Hdbar_2_Init,  beta_Hdbar_2_Init, 
-     Norm_Hg_Init,     alpha_Hg_Init,     beta_Hg_Init,     alphap_Hg_Init,
+     Norm_Hg_Init,     alpha_Hg_Init,     beta_Hg_Init,     alphap_Hg_Init, Invm2_Hg_Init,
      Norm_Hg_2_Init,     alpha_Hg_2_Init,     beta_Hg_2_Init,
      Norm_EuV_Init,    alpha_EuV_Init,    beta_EuV_Init,    alphap_EuV_Init,
      Norm_EdV_Init,    R_E_Sea_Init,      R_Hu_xi2_Init,    R_Hd_xi2_Init,    R_Hg_xi2_Init,
      R_Eu_xi2_Init,    R_Ed_xi2_Init,     R_Eg_xi2_Init,
      R_Hu_xi4_Init,    R_Hd_xi4_Init,     R_Hg_xi4_Init,
-     R_Eu_xi4_Init,    R_Ed_xi4_Init,     R_Eg_xi4_Init,    bexp_HSea_Init, bexp_Hg_Init, Invm2_Hg_Init] = Paralst_Unp
+     R_Eu_xi4_Init,    R_Ed_xi4_Init,     R_Eg_xi4_Init,    bexp_HSea_Init, bexp_Hg_Init] = Paralst_Unp
 
-    cost_forward_H(Norm_HuV = Norm_HuV_Init,     alpha_HuV = alpha_HuV_Init,      beta_HuV = beta_HuV_Init,     alphap_HuV = alphap_HuV_Init, 
+    print(cost_forward_H(Norm_HuV = Norm_HuV_Init,     alpha_HuV = alpha_HuV_Init,      beta_HuV = beta_HuV_Init,     alphap_HuV = alphap_HuV_Init, Invm2_HuV = Invm2_HuV_Init,
                     Norm_Hubar = Norm_Hubar_Init, alpha_Hubar = alpha_Hubar_Init,  beta_Hubar = beta_Hubar_Init, alphap_Hqbar = alphap_Hqbar_Init,
                     Norm_Hubar_2 = Norm_Hubar_2_Init, alpha_Hubar_2 = alpha_Hubar_2_Init,  beta_Hubar_2 = beta_Hubar_2_Init,
-                    Norm_HdV = Norm_HdV_Init,     alpha_HdV = alpha_HdV_Init,      beta_HdV = beta_HdV_Init,     alphap_HdV = alphap_HdV_Init,
+                    Norm_HdV = Norm_HdV_Init,     alpha_HdV = alpha_HdV_Init,      beta_HdV = beta_HdV_Init,     alphap_HdV = alphap_HdV_Init, Invm2_HdV = Invm2_HdV_Init,
                     Norm_Hdbar = Norm_Hdbar_Init, alpha_Hdbar = alpha_Hdbar_Init,  beta_Hdbar = beta_Hdbar_Init, 
                     Norm_Hdbar_2 = Norm_Hdbar_2_Init, alpha_Hdbar_2 = alpha_Hdbar_2_Init,  beta_Hdbar_2 = beta_Hdbar_2_Init, 
-                    Norm_Hg = Norm_Hg_Init,       alpha_Hg = alpha_Hg_Init,        beta_Hg = beta_Hg_Init,       alphap_Hg = alphap_Hg_Init,
+                    Norm_Hg = Norm_Hg_Init,       alpha_Hg = alpha_Hg_Init,        beta_Hg = beta_Hg_Init,       alphap_Hg = alphap_Hg_Init, Invm2_Hg = Invm2_Hg_Init,
                     Norm_Hg_2 = Norm_Hg_2_Init,       alpha_Hg_2 = alpha_Hg_2_Init,        beta_Hg_2 = beta_Hg_2_Init,
                     Norm_EuV = Norm_EuV_Init,     alpha_EuV = alpha_EuV_Init,      beta_EuV = beta_EuV_Init,     alphap_EuV = alphap_EuV_Init, 
                     Norm_EdV = Norm_EdV_Init,     R_E_Sea = R_E_Sea_Init,          R_Hu_xi2 = R_Hu_xi2_Init,     R_Hd_xi2 = R_Hd_xi2_Init,     R_Hg_xi2 = R_Hg_xi2_Init,
                     R_Eu_xi2 = R_Eu_xi2_Init,     R_Ed_xi2 = R_Ed_xi2_Init,        R_Eg_xi2 = R_Eg_xi2_Init,
                     R_Hu_xi4 = R_Hu_xi4_Init,     R_Hd_xi4 = R_Hd_xi4_Init,        R_Hg_xi4 = R_Hg_xi4_Init,
-                    R_Eu_xi4 = R_Eu_xi4_Init,     R_Ed_xi4 = R_Ed_xi4_Init,        R_Eg_xi4 = R_Eg_xi4_Init,     bexp_HSea = bexp_HSea_Init,   bexp_Hg = bexp_Hg_Init, Invm2_Hg = Invm2_Hg_Init)
+                    R_Eu_xi4 = R_Eu_xi4_Init,     R_Ed_xi4 = R_Ed_xi4_Init,        R_Eg_xi4 = R_Eg_xi4_Init,     bexp_HSea = bexp_HSea_Init,   bexp_Hg = bexp_Hg_Init))
 
     '''
     fit_forward_Ht  = forward_Ht_fit(Paralst_Pol)
