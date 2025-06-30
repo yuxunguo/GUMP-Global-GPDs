@@ -109,7 +109,9 @@ def hminus_pureDVCS(y: float, xB: float, t: float, Q: float, phi: float):
     Returns:
         h (float): kinematical variables for pure DVCS 
     """ 
-    return (Q**4*(Q**2 + t*(-1 + 2*xB))*(-2 + y))/(2.*Sqrt((Q**2 + t)**2)*(Q**2 + 4*M**2*xB**2)*y) + (2*Q**3*(Q**2 + t*xB)*Sqrt(-((M**2*xB**2*(M**2*t**2*xB**2 + Q**2*t*xB*(t + 2*M**2*xB - t*xB) + Q**4*(t - t*xB + M**2*xB**2)))/((Q**3 + Q*t*xB)**2*(Q**2 + 4*M**2*xB**2))))*Sqrt(1 - y - (M**2*xB**2*y**2)/Q**2)*Cos(phi))/(M*Sqrt((Q**2 + t)**2)*xB*Sqrt(1 + (4*M**2*xB**2)/Q**2)*y)
+    # a minus factor due a mistake in the definition of eq. (3.38) of https://inspirehep.net/literature/1925449
+    minus = -1
+    return minus*((Q**4*(Q**2 + t*(-1 + 2*xB))*(-2 + y))/(2.*Sqrt((Q**2 + t)**2)*(Q**2 + 4*M**2*xB**2)*y) + (2*Q**3*(Q**2 + t*xB)*Sqrt(-((M**2*xB**2*(M**2*t**2*xB**2 + Q**2*t*xB*(t + 2*M**2*xB - t*xB) + Q**4*(t - t*xB + M**2*xB**2)))/((Q**3 + Q*t*xB)**2*(Q**2 + 4*M**2*xB**2))))*Sqrt(1 - y - (M**2*xB**2*y**2)/Q**2)*Cos(phi))/(M*Sqrt((Q**2 + t)**2)*xB*Sqrt(1 + (4*M**2*xB**2)/Q**2)*y))
 
 @njit
 def A_BH(y: float, xB: float, t: float, Q: float, phi: float):
@@ -752,16 +754,18 @@ def __dsigma_INT(y: float, xB: float, t: float, Q: float, phi: float, pol_index,
 
     Xi = xi(xB, t, Q)
     
+    minus = -1
+    
     # For unpolarized/longitudinally polarized target, integrate over dphi_S gives an extra factor of 2 * pi.
 
     if(pol_index == 0):
         return 2 * Pi * prefac_INT * Real(A_INT_unp(y, xB, t, Q, phi) * (HCFF * F1_FF(t) - t/ (4* M ** 2) * ECFF * F2_FF(t)) + B_INT_unp(y, xB, t, Q, phi) * (F1_FF(t) + F2_FF(t)) * (HCFF + ECFF) + C_INT_unp(y, xB, t, Q, phi) * (F1_FF(t) + F2_FF(t)) * HtCFF )
 
     if(pol_index == 1):
-        return 2 * Pi * prefac_INT * Imag(A_INT_pol(y, xB, t, Q, phi) * (HCFF * F1_FF(t) - t/ (4* M ** 2) * ECFF * F2_FF(t)) + B_INT_pol(y, xB, t, Q, phi) * (F1_FF(t) + F2_FF(t)) * (HCFF + ECFF) + C_INT_pol(y, xB, t, Q, phi) * (F1_FF(t) + F2_FF(t)) * HtCFF )
+        return minus * 2 * Pi * prefac_INT * Imag(A_INT_pol(y, xB, t, Q, phi) * (HCFF * F1_FF(t) - t/ (4* M ** 2) * ECFF * F2_FF(t)) + B_INT_pol(y, xB, t, Q, phi) * (F1_FF(t) + F2_FF(t)) * (HCFF + ECFF) + C_INT_pol(y, xB, t, Q, phi) * (F1_FF(t) + F2_FF(t)) * HtCFF )
 
     if(pol_index == 2):
-        return 2 * Pi * prefac_INT * Imag(At_INT_unp(y, xB, t, Q, phi) * ( F1_FF(t) * (HtCFF - Xi ** 2/ (1 + Xi) * EtCFF) - F2_FF(t) * t/ (4 * M ** 2) * Xi* EtCFF ) + Bt_INT_unp(y, xB, t, Q, phi) * (F1_FF(t) + F2_FF(t)) * (HtCFF  + Xi/ (1 + Xi ) * EtCFF) - Ct_INT_unp(y, xB, t, Q, phi) * (F1_FF(t) + F2_FF(t)) * (HCFF  + Xi/ (1 + Xi ) * ECFF)  )
+        return minus * 2 * Pi * prefac_INT * Imag(At_INT_unp(y, xB, t, Q, phi) * ( F1_FF(t) * (HtCFF - Xi ** 2/ (1 + Xi) * EtCFF) - F2_FF(t) * t/ (4 * M ** 2) * Xi* EtCFF ) + Bt_INT_unp(y, xB, t, Q, phi) * (F1_FF(t) + F2_FF(t)) * (HtCFF  + Xi/ (1 + Xi ) * EtCFF) - Ct_INT_unp(y, xB, t, Q, phi) * (F1_FF(t) + F2_FF(t)) * (HCFF  + Xi/ (1 + Xi ) * ECFF)  )
 
     if(pol_index == 3):
         return 2 * Pi * prefac_INT * (-1) * Real(At_INT_pol(y, xB, t, Q, phi) * ( F1_FF(t) * (HtCFF - Xi ** 2/ (1 + Xi) * EtCFF) - F2_FF(t) * t/ (4 * M ** 2) * Xi* EtCFF ) + Bt_INT_pol(y, xB, t, Q, phi) * (F1_FF(t) + F2_FF(t)) * (HtCFF  + Xi/ (1 + Xi ) * EtCFF) - Ct_INT_pol(y, xB, t, Q, phi) * (F1_FF(t) + F2_FF(t)) * (HCFF  + Xi/ (1 + Xi ) * ECFF)  )
@@ -795,8 +799,10 @@ print(At_BH_Tin(0.2, 0.1, -0.1, 2, 3.14/2))
 print(Bt_BH_Tin(0.2, 0.1, -0.1, 2, 3.14/2))
 print(At_BH_Tout(0.2, 0.1, -0.1, 2, 3.14/2))
 print(Bt_BH_Tout(0.2, 0.1, -0.1, 2, 3.14/2))
+
 print(h_pureDVCS(0.2, 0.1, -0.1, 2, 3.14/2))
 print(hminus_pureDVCS(0.2, 0.1, -0.1, 2, 3.14/2))
+
 print(A_INT_unp(0.2, 0.1, -0.1, 2, 3.14/2))
 print(B_INT_unp(0.2, 0.1, -0.1, 2, 3.14/2))
 print(C_INT_unp(0.2, 0.1, -0.1, 2, 3.14/2))
@@ -809,7 +815,8 @@ print(C_INT_pol(0.2, 0.1, -0.1, 2, 3.14/2))
 print(At_INT_pol(0.2, 0.1, -0.1, 2, 3.14/2))
 print(Bt_INT_pol(0.2, 0.1, -0.1, 2, 3.14/2))
 print(Ct_INT_pol(0.2, 0.1, -0.1, 2, 3.14/2))
-
+"""
+"""
 print(dsigma_DVCS(0.49624,0.34,-0.17,Sqrt(1.82),Pi/3, "UU", -4.19 + 2.67 * 1j, -3.49 + 0.785 * 1j,1.73 + 4.32 *1j,21 + 52*1j ))
 print(dsigma_INT(0.49624,0.34,-0.17,Sqrt(1.82),Pi/3, "UU", -4.19 + 2.67 * 1j, -3.49 + 0.785 * 1j,1.73 + 4.32 *1j,21 + 52*1j ))
 print(dsigma_INT(0.49624,0.34,-0.17,Sqrt(1.82),Pi/2, "LU", -4.19 + 2.67 * 1j, -3.49 + 0.785 * 1j,1.73 + 4.32 *1j,21 + 52*1j ))
