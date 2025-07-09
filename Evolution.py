@@ -573,7 +573,7 @@ def rmudep(nf, lamj, lamk, mu):
     R = np.array(R)
     #print(R)
     Rpow = (1/R)[..., np.newaxis, np.newaxis, np.newaxis]**(b11/b0) # shape (N,2,2)
-    #print((np.ones_like(Rpow) - Rpow) / b11)
+    #print((np.ones_like(Rpow) - Rpow))
     return (np.ones_like(Rpow) - Rpow) / b11 # shape (N,2,2)
 
 def amuindep(j: complex, nf: int, p: int, prty: int = 1):

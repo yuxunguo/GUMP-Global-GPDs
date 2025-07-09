@@ -1,28 +1,18 @@
 from Parameters import ParaManager_Unp, ParaManager_Pol
 from Observables import GPDobserv
-from DVCS_xsec import dsigma_TOT, dsigma_DVCS_HERA, M
+#from DVCS_xsec import dsigma_DVCS_TOT, dsigma_DVCS_HERA, M
 import numpy as np
 import pandas as pd
 import csv 
 from Minimizer import PDF_theo, tPDF_theo, GFF_theo, CFF_theo
-from Minimizer import DVCSxsec_theo, DVCSxsec_cost_xBtQ, DVCSxsec_HERA_theo, DVJpsiPH1xsec_group_data
+#from Minimizer import DVCSxsec_theo, DVCSxsec_cost_xBtQ, DVCSxsec_HERA_theo, DVJpsiPH1xsec_group_data
 from multiprocessing import Pool
 import time
-from DVMP_xsec import dsigma_dt, M_jpsi
+from DVMP_xsec import dsigma_DVMP_dt, M_jpsi
 from Evolution import AlphaS
 from functools import partial
 import os
 dir_path = os.path.dirname(os.path.realpath(__file__))
-
-
-Paralst_Unp=pd.read_csv(os.path.join(dir_path,'GUMP_Params/Para_Unp.csv'), header=None).to_numpy()[0]
-Paralst_Pol=pd.read_csv(os.path.join(dir_path,'GUMP_Params/Para_Pol.csv'), header=None).to_numpy()[0]
-
-jpsinorm = Paralst_Unp[-2]
-
-Para_Unp = ParaManager_Unp(np.array(Paralst_Unp[:-2]))
-Para_Pol = ParaManager_Pol(np.array(Paralst_Pol))
-Para_All = np.concatenate([Para_Unp, Para_Pol], axis=0)
 
 def PDF_theo_s(x, t, Q, p, flv, Para, p_order):
     _PDF_theo = GPDobserv(x, 0, t, Q, p)
@@ -66,7 +56,7 @@ def DVMPxsec_theo(DVMPxsec_input: pd.DataFrame, TFF_input: np.array, meson:int):
     Q = DVMPxsec_input['Q'].to_numpy()    
     [HTFF, ETFF] = TFF_input
 
-    return dsigma_dt(y, xB, t, Q, meson, HTFF, ETFF)
+    return dsigma_DVMP_dt(y, xB, t, Q, meson, HTFF, ETFF)
 
 def DVMPxsec_cost_xBtQ(DVMPxsec_data_xBtQ: pd.DataFrame, Para_Unp, xsec_norm, meson:int, p_order=2):
 
@@ -172,6 +162,14 @@ def DVCSxsec(y, xB, t, Q, phi, pol):
     [HCFF, ECFF, HtCFF, EtCFF] = CFF(xB, t, Q)
     return dsigma_TOT(y, xB, t, Q, phi, pol, HCFF, ECFF, HtCFF, EtCFF)
 """
+
+Paralst_Unp=pd.read_csv(os.path.join(dir_path,'GUMP_Params/Para_Unp.csv'), header=None).to_numpy()[0]
+Paralst_Pol=pd.read_csv(os.path.join(dir_path,'GUMP_Params/Para_Pol.csv'), header=None).to_numpy()[0]
+
+Para_Unp = ParaManager_Unp(np.array(Paralst_Unp))
+Para_Pol = ParaManager_Pol(np.array(Paralst_Pol))
+Para_All = np.concatenate([Para_Unp, Para_Pol], axis=0)
+
 Para_spe = Para_All[0]
 Para_spe_pol = Para_All[2]
 def compute_gpd(x_i):
@@ -183,7 +181,7 @@ def compute_rratio(args):
 
 if __name__ == '__main__':
     pool = Pool()
-    
+    '''
     x=0.1
     Q0=2.
     _GPD_theo = GPDobserv(x,x,0.0,Q0,1)
@@ -221,6 +219,7 @@ if __name__ == '__main__':
     print(f'Gluon GPD at mu={Q0} GeV and x=xi={x}:')
     print(gpd3)
     print(gpd6)
+    '''
     '''
     x=0.001
     Q0=3.
@@ -341,21 +340,35 @@ if __name__ == '__main__':
     # Plotting results of the paper
     #
     
-    '''
+
     # Comparing PDF with the global extraction of PDF
 
     os.makedirs(os.path.join(dir_path,"GUMP_Results"), exist_ok=True)
     
-    x = np.exp(np.linspace(np.log(0.0001), np.log(0.05), 100, dtype = float))
+    x = np.exp(np.linspace(np.log(0.0005), np.log(0.6), 100, dtype = float))
+
+    updflst = np.array([PDF_theo_s(x_i,0.,2.,1,'u',Para_spe, 2) for x_i in x ])
+    ubarpdflst = np.array([-PDF_theo_s(-x_i,0.,2.,1,'u',Para_spe, 2) for x_i in x ])
+    dpdflst = np.array([PDF_theo_s(x_i,0.,2.,1,'d',Para_spe, 2) for x_i in x ])
+    dbarpdflst = np.array([-PDF_theo_s(-x_i,0.,2.,1,'d',Para_spe, 2) for x_i in x ])
+    gpdflst = np.array([PDF_theo_s(x_i,0.,2.,1,'g',Para_spe, 2) for x_i in x ])
     
-    pdflst = np.array([PDF_theo_s(x_i,0.,2.,1,'g',Para_spe, 2) for x_i in x ])
-    
-    with open(os.path.join(dir_path,"GUMP_Results/Smallx_PDF.csv"),"w",newline='') as my_csv:
+    with open(os.path.join(dir_path,"GUMP_Results/testPDF2.csv"),"w",newline='') as my_csv:
         csvWriter = csv.writer(my_csv,delimiter=',')
-        csvWriter.writerows(np.transpose([x,pdflst]))
+        csvWriter.writerows(np.transpose([x,updflst,ubarpdflst,dpdflst,dbarpdflst,gpdflst]))
+
+    uppdflst = np.array([PDF_theo_s(x_i,0.,2.,1,'u',Para_spe_pol, 2) for x_i in x ])
+    ubarppdflst = np.array([PDF_theo_s(-x_i,0.,2.,1,'u',Para_spe_pol, 2) for x_i in x ])
+    dppdflst = np.array([PDF_theo_s(x_i,0.,2.,1,'d',Para_spe_pol, 2) for x_i in x ])
+    dbarppdflst = np.array([PDF_theo_s(-x_i,0.,2.,1,'d',Para_spe_pol, 2) for x_i in x ])
+    gppdflst = np.array([PDF_theo_s(x_i,0.,2.,1,'g',Para_spe_pol, 2) for x_i in x ])
+    
+    with open(os.path.join(dir_path,"GUMP_Results/testPPDF2.csv"),"w",newline='') as my_csv:
+        csvWriter = csv.writer(my_csv,delimiter=',')
+        csvWriter.writerows(np.transpose([x,uppdflst,ubarppdflst,dppdflst,dbarppdflst,gppdflst]))
         
     # Comparing GPD with the global extraction of PDF
-
+    '''
     ts=time.time()
     x = np.exp(np.linspace(np.log(0.0014), np.log(0.05), 320, dtype = float))
     

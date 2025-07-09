@@ -345,17 +345,22 @@ class GPDobserv (object) :
             #      This will be taken care of by the Moment_Evo_LO_NSp1() function that evolve the NS part of the moments only (charge even contributions are zero)
             #      
             #      The better choice is to model the leading moment terms separately, and fit them to other quantities since those terms are not well constrained by the CFF/TFF anyway.
-
-            j0 = np.array([0.]) 
+            eps = 10. ** (-6)
+            j0 = np.array([0.]) + eps
 
             ConfFlav     = Moment_Sum(j0, self.t, Para_Forward)
             ConfFlav_xi2 = Moment_Sum(j0, self.t, Para_xi2)
             ConfFlav_xi4 = Moment_Sum(j0, self.t, Para_xi4)
-
-            ConfEv     = Moment_Evo_LO_NSp1(j0, NFEFF, self.p, self.Q, ConfFlav)
-            ConfEv_xi2 = Moment_Evo_LO_NSp1(j0+2, NFEFF, self.p, self.Q, ConfFlav_xi2)
-            ConfEv_xi4 = Moment_Evo_LO_NSp1(j0+4, NFEFF, self.p, self.Q, ConfFlav_xi4)
             
+            if(self.p == 1):
+                ConfEv     = Moment_Evo_LO_NSp1(j0, NFEFF, self.p, self.Q, ConfFlav)
+                ConfEv_xi2 = Moment_Evo_LO_NSp1(j0+2, NFEFF, self.p, self.Q, ConfFlav_xi2)
+                ConfEv_xi4 = Moment_Evo_LO_NSp1(j0+4, NFEFF, self.p, self.Q, ConfFlav_xi4)
+            else:
+                ConfEv     = Moment_Evo_LO(j0, NFEFF, self.p, self.Q, ConfFlav)
+                ConfEv_xi2 = Moment_Evo_LO(j0+2, NFEFF, self.p, self.Q, ConfFlav_xi2)
+                ConfEv_xi4 = Moment_Evo_LO(j0+4, NFEFF, self.p, self.Q, ConfFlav_xi4)
+                
             ConfFlavEv     = np.einsum('...ij, ...j->...i', inv_flav_trans, ConfEv) #(N, 5)
             ConfFlavEv_xi2 = np.einsum('...ij, ...j->...i', inv_flav_trans, ConfEv_xi2)
             ConfFlavEv_xi4 = np.einsum('...ij, ...j->...i', inv_flav_trans, ConfEv_xi4)
@@ -470,17 +475,22 @@ class GPDobserv (object) :
             #      This will be taken care of by the tPDF_Moment_Evo_NLO_NSp1() function that evolve the NS part of the moments only (charge even contributions are zero)
             #      
             #      The better choice is to model the leading moment terms separately, and fit them to other quantities since those terms are not well constrained by the CFF/TFF anyway.
-
-            j0 = np.array([0.]) 
+            eps = 10. ** (-6)
+            j0 = np.array([0.]) + eps
 
             ConfFlav     = Moment_Sum(j0, self.t, Para_Forward)
             ConfFlav_xi2 = Moment_Sum(j0, self.t, Para_xi2)
             ConfFlav_xi4 = Moment_Sum(j0, self.t, Para_xi4)
-
-            ConfEv     = tPDF_Moment_Evo_NLO_NSp1(j0, NFEFF, self.p, self.Q, ConfFlav)
-            ConfEv_xi2 = tPDF_Moment_Evo_NLO_NSp1(j0+2, NFEFF, self.p, self.Q, ConfFlav_xi2)
-            ConfEv_xi4 = tPDF_Moment_Evo_NLO_NSp1(j0+4, NFEFF, self.p, self.Q, ConfFlav_xi4)
-
+            
+            if(self.p == 1):
+                ConfEv     = tPDF_Moment_Evo_NLO_NSp1(j0, NFEFF, self.p, self.Q, ConfFlav)
+                ConfEv_xi2 = tPDF_Moment_Evo_NLO_NSp1(j0+2, NFEFF, self.p, self.Q, ConfFlav_xi2)
+                ConfEv_xi4 = tPDF_Moment_Evo_NLO_NSp1(j0+4, NFEFF, self.p, self.Q, ConfFlav_xi4)
+            else:
+                ConfEv     = tPDF_Moment_Evo_NLO(j0, NFEFF, self.p, self.Q, ConfFlav)
+                ConfEv_xi2 = tPDF_Moment_Evo_NLO(j0+2, NFEFF, self.p, self.Q, ConfFlav_xi2)
+                ConfEv_xi4 = tPDF_Moment_Evo_NLO(j0+4, NFEFF, self.p, self.Q, ConfFlav_xi4)
+                
             ConfFlavEv     = np.einsum('...ij, ...j->...i', inv_flav_trans, ConfEv) #(N, 5)
             ConfFlavEv_xi2 = np.einsum('...ij, ...j->...i', inv_flav_trans, ConfEv_xi2)
             ConfFlavEv_xi4 = np.einsum('...ij, ...j->...i', inv_flav_trans, ConfEv_xi4)
@@ -503,23 +513,11 @@ class GPDobserv (object) :
 
         # j, flv both have shape (N)
         # ParaAll: (N, 3, 5, 1, 5)
-
-        '''
-        Para_Forward = ParaAll[0]
+        eps = 10. ** (-6)
+        j_arr_float = np.array([float(j)])
         
-        GFF_trans = np.array([[1,1 - self.p * (-1) ** j,0,0,0],
-                              [0,0,1,1 - self.p * (-1) ** j,0],
-                              [0,0,0,0,(1 - self.p * (-1) ** j)/2]])
-
-        ConfFlav = np.array( list(map(lambda paraset: Moment_Sum(j, self.t, paraset), Para_Forward)) )
-
-        if (j == 0):
-            if(self.p == 1):
-                return Flv_Intp( np.array([ConfFlav[0],ConfFlav[2],ConfFlav[4]]) , flv)
-        
-        return Flv_Intp(np.einsum('...j,j', GFF_trans, Moment_Evo(j, NFEFF, self.p, self.Q, ConfFlav)), flv)
-        '''
-        eps= 10. **(-6) 
+        if(j==0):
+            j_arr_float = j_arr_float + eps
         
         Para_Forward = ParaAll[..., 0, :, :, :]  # (N, 5, 1, 5)
         _helper1 = np.array([[1, 1, 0, 0, 0],
@@ -529,21 +527,24 @@ class GPDobserv (object) :
                              [0, 0, 0, -1, 0],
                              [0, 0, 0, 0, -1/2]])
         GFF_trans = np.einsum('... , ij->...ij', self.p * (-1)**j, _helper2) + _helper1  # (N, 3, 5)
-        ConfFlav = Moment_Sum(j, self.t, Para_Forward) # (N, 5)
-        ConfFlav = np.nan_to_num(ConfFlav)
-        #print(ConfFlav)
         
-        if (p_order == 1):
-            ConfEv = Moment_Evo_LO(np.array([j+eps]), NFEFF, self.p, self.Q, ConfFlav)[0]
-        elif (p_order == 2):
-            ConfEv = tPDF_Moment_Evo_NLO(np.array([j+eps]), NFEFF, self.p, self.Q, ConfFlav)[0]
-            
-        #print(ConfEv)
+        ConfFlav = Moment_Sum(j_arr_float, self.t, Para_Forward)
+
+        if (j==0) and (self.p == 1):
+            if (p_order == 1):
+                ConfEv = Moment_Evo_LO_NSp1(j_arr_float, NFEFF, self.p, self.Q, ConfFlav)[0]
+            elif (p_order == 2):
+                ConfEv = tPDF_Moment_Evo_NLO_NSp1(j_arr_float, NFEFF, self.p, self.Q, ConfFlav)[0]
+        else:
+            if (p_order == 1):
+                ConfEv = Moment_Evo_LO(j_arr_float, NFEFF, self.p, self.Q, ConfFlav)[0]
+            elif (p_order == 2):
+                ConfEv = tPDF_Moment_Evo_NLO(j_arr_float, NFEFF, self.p, self.Q, ConfFlav)[0]
+
         # Inverse transform the evolved moments back to the flavor basis
         EvoConfFlav = np.einsum('...ij, ...j->...i', inv_flav_trans, ConfEv) #(N, 5)
-        #print(EvoConfFlav)
         result = Flv_Intp(np.einsum('...ij, ...j->...i', GFF_trans, EvoConfFlav), flv) # (N_~mask)
-    
+        
         return np.real(result)
     
     def CFF(self, ParaAll, muf, p_order = 1, flv = 'All'):

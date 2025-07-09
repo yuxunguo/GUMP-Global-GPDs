@@ -38,16 +38,19 @@ def ParaManager_Unp(Paralst: np.array):
         Paralunp (np.ndrray): shape (2,3,5,n1,n2) 
     """
 
-    [Norm_HuV,    alpha_HuV,    beta_HuV,    alphap_HuV, 
+    [Norm_HuV,    alpha_HuV,    beta_HuV,    alphap_HuV, Invm2_HuV,
      Norm_Hubar,  alpha_Hubar,  beta_Hubar,  alphap_Hqbar,
-     Norm_HdV,    alpha_HdV,    beta_HdV,    alphap_HdV,
+     Norm_Hubar_2,  alpha_Hubar_2,  beta_Hubar_2,
+     Norm_HdV,    alpha_HdV,    beta_HdV,    alphap_HdV, Invm2_HdV,
      Norm_Hdbar,  alpha_Hdbar,  beta_Hdbar, 
-     Norm_Hg,     alpha_Hg,     beta_Hg,     alphap_Hg,
+     Norm_Hdbar_2,  alpha_Hdbar_2,  beta_Hdbar_2,
+     Norm_Hg,     alpha_Hg,     beta_Hg,     alphap_Hg, Invm2_Hg,
+     Norm_Hg_2,     alpha_Hg_2,     beta_Hg_2,
      Norm_EuV,    alpha_EuV,    beta_EuV,    alphap_EuV,
      Norm_EdV,    R_E_Sea,      R_Hu_xi2,    R_Hd_xi2,    R_Hg_xi2,
      R_Eu_xi2,    R_Ed_xi2,     R_Eg_xi2,
      R_Hu_xi4,    R_Hd_xi4,     R_Hg_xi4,
-     R_Eu_xi4,    R_Ed_xi4,     R_Eg_xi4,    bexp_HSea, bexp_Hg, Invm2_Hg] = Paralst
+     R_Eu_xi4,    R_Ed_xi4,     R_Eg_xi4,    bexp_HSea, bexp_Hg] = Paralst
     
     #R_E_Sea = 0
     #R_Hu_xi4 = 0
@@ -56,13 +59,13 @@ def ParaManager_Unp(Paralst: np.array):
     #R_Ed_xi4 = 0
     # Ansatz_Place_Holder here is used such that it doesn't contribute to the moments, but serve a place holder 
     # To activate the second (or more) ansatz but only for gluons, we use place holder to keep the shape regular.
-    Ansatz_Place_Holder = [0,1,1,0,0,0]
+    Ansatz_Place_Holder = [0,0,1,0,0,0]
     # Initial forward parameters for the H of (uV, ubar, dV, dbar,g) distributions
-    H_uV =   np.array([[Norm_HuV,   alpha_HuV,   beta_HuV,   alphap_HuV,   0,         0], Ansatz_Place_Holder])
-    H_ubar = np.array([[Norm_Hubar, alpha_Hubar, beta_Hubar, alphap_Hqbar, bexp_HSea, 0], Ansatz_Place_Holder])
-    H_dV =   np.array([[Norm_HdV,   alpha_HdV,   beta_HdV,   alphap_HdV,   0,         0], Ansatz_Place_Holder])
-    H_dbar = np.array([[Norm_Hdbar, alpha_Hdbar, beta_Hdbar, alphap_Hqbar, bexp_HSea, 0], Ansatz_Place_Holder])
-    H_g =    np.array([[Norm_Hg,    alpha_Hg,    beta_Hg,    alphap_Hg,    bexp_Hg,   Invm2_Hg], Ansatz_Place_Holder])
+    H_uV =   np.array([[Norm_HuV,   alpha_HuV,   beta_HuV,   alphap_HuV,   0,         Invm2_HuV], Ansatz_Place_Holder])
+    H_ubar = np.array([[Norm_Hubar, alpha_Hubar, beta_Hubar, alphap_Hqbar, bexp_HSea, 0        ], [Norm_Hubar_2, alpha_Hubar_2, beta_Hubar_2, alphap_Hqbar, bexp_HSea, 0]])
+    H_dV =   np.array([[Norm_HdV,   alpha_HdV,   beta_HdV,   alphap_HdV,   0,         Invm2_HdV], Ansatz_Place_Holder])
+    H_dbar = np.array([[Norm_Hdbar, alpha_Hdbar, beta_Hdbar, alphap_Hqbar, bexp_HSea, 0        ], [Norm_Hdbar_2, alpha_Hdbar_2, beta_Hdbar_2, alphap_Hqbar, bexp_HSea, 0]])
+    H_g =    np.array([[Norm_Hg,    alpha_Hg,    beta_Hg,    alphap_Hg,    bexp_Hg,   Invm2_Hg ], [Norm_Hg_2,    alpha_Hg_2,    beta_Hg_2,    alphap_Hg,    bexp_Hg,   Invm2_Hg]])
 
     # Initial xi^2 parameters for the H of (uV, ubar, dV, dbar,g) distributions
     """
@@ -159,7 +162,7 @@ def ParaManager_Pol(Paralst: np.array):
     
     # Ansatz_Place_Holder here is used such that it doesn't contribute to the moments, but serve a place holder 
     # To activate the second (or more) ansatz but only for gluons, we use place holder to keep the shape regular.
-    Ansatz_Place_Holder = [0,1,1,0,0,0]
+    Ansatz_Place_Holder = [0,0,1,0,0,0]
     # Initial forward parameters for the Ht of (uV, ubar, dV, dbar,g) distributions
 
     Ht_uV =   np.array([[Norm_HtuV,   alpha_HtuV,   beta_HtuV,   alphap_HtuV,   0,          0], Ansatz_Place_Holder])
@@ -273,8 +276,7 @@ def ConfMoment(j: complex, t: float, ParaSets: np.ndarray):
     j = np.reshape(j, j_new_shape)
 
     # Currently with KM ansatz and dipole residual
-
-    return norm * beta_loggamma (j + 1 - alpha, 1 + beta) * (j + 1  - alpha)/ (j + 1 - alpha - alphap * t) * np.exp(t*bexp) * (1 - t * invm2 ) ** (-3)
+    return norm * beta_loggamma (j + 1 - alpha, 1 + beta) * (j + 1  - alpha)/ (j + 1 - alpha - alphap * t) * np.exp(t*bexp) * (1 - t * invm2 ) ** (-2)
     # (N) or (N, m1) or (N, m1, m2) .... depends on usage
     # For the recommended usage, the output is (N, 5, init_NumofAnsatz)
 
