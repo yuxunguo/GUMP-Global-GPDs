@@ -65,7 +65,7 @@ def ParaManager_Unp(Paralst: np.array):
     H_ubar = np.array([[Norm_Hubar, alpha_Hubar, beta_Hubar, alphap_Hqbar, bexp_HSea, 0        ], [Norm_Hubar_2, alpha_Hubar_2, beta_Hubar_2, alphap_Hqbar, bexp_HSea, 0]])
     H_dV =   np.array([[Norm_HdV,   alpha_HdV,   beta_HdV,   alphap_HdV,   0,         Invm2_HdV], Ansatz_Place_Holder])
     H_dbar = np.array([[Norm_Hdbar, alpha_Hdbar, beta_Hdbar, alphap_Hqbar, bexp_HSea, 0        ], [Norm_Hdbar_2, alpha_Hdbar_2, beta_Hdbar_2, alphap_Hqbar, bexp_HSea, 0]])
-    H_g =    np.array([[Norm_Hg,    alpha_Hg,    beta_Hg,    alphap_Hg,    bexp_Hg,   Invm2_Hg ], [Norm_Hg_2,    alpha_Hg_2,    beta_Hg_2,    alphap_Hg,    bexp_Hg,   Invm2_Hg]])
+    H_g =    np.array([[Norm_Hg,    alpha_Hg,    beta_Hg,    alphap_Hg,    bexp_Hg,   Invm2_Hg ], [Norm_Hg_2,    alpha_Hg_2,    beta_Hg_2,    alphap_Hg,    bexp_Hg,   0]])
 
     # Initial xi^2 parameters for the H of (uV, ubar, dV, dbar,g) distributions
     """
@@ -276,7 +276,7 @@ def ConfMoment(j: complex, t: float, ParaSets: np.ndarray):
     j = np.reshape(j, j_new_shape)
 
     # Currently with KM ansatz and dipole residual
-    return norm * beta_loggamma (j + 1 - alpha, 1 + beta) * (j + 1  - alpha)/ (j + 1 - alpha - alphap * t) * np.exp(t*bexp) * (1 - t * invm2 ) ** (-2)
+    return norm * beta_loggamma (j + 1 - alpha - alphap * t, 1 + beta) * np.exp(t*bexp) * (1 - t * invm2 ) ** (-2)
     # (N) or (N, m1) or (N, m1, m2) .... depends on usage
     # For the recommended usage, the output is (N, 5, init_NumofAnsatz)
 
