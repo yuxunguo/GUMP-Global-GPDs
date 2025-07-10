@@ -511,12 +511,13 @@ def forward_H_fit(Paralst_Unp):
                                         R_Hu_xi4 = R_Hu_xi4_Init,     R_Hd_xi4 = R_Hd_xi4_Init,        R_Hg_xi4 = R_Hg_xi4_Init,
                                         R_Eu_xi4 = R_Eu_xi4_Init,     R_Ed_xi4 = R_Ed_xi4_Init,        R_Eg_xi4 = R_Eg_xi4_Init,     bexp_HSea = bexp_HSea_Init,   bexp_Hg = bexp_Hg_Init)
     fit_forw_H.errordef = 1
+    fit_forw_H.tol = 0.2
     
     # Parameters not used in DVCS fit
     fit_forw_H.fixed['bexp_Hg'] = True
     fit_forw_H.fixed['Invm2_Hg'] = True
-    fit_forw_H.fixed['Invm2_HuV'] = True
-    fit_forw_H.fixed['Invm2_HdV'] = True
+    #fit_forw_H.fixed['Invm2_HuV'] = True
+    #fit_forw_H.fixed['Invm2_HdV'] = True
     
     fit_forw_H.limits['alpha_HuV'] = (-2, 1.2)
     fit_forw_H.limits['alpha_Hubar'] = (0, 1.2)
@@ -543,6 +544,9 @@ def forward_H_fit(Paralst_Unp):
 
     fit_forw_H.limits['alphap_HuV'] = (0,5)
     fit_forw_H.limits['alphap_HdV'] = (0,5)
+    
+    #fit_forw_H.fixed['alphap_HuV'] = True
+    #fit_forw_H.fixed['alphap_HdV'] = True
     
     fit_forw_H.fixed['alphap_Hqbar'] = True
     fit_forw_H.fixed['alphap_Hg'] = True
@@ -664,7 +668,7 @@ def forward_E_fit(Paralst_Unp):
     fit_forw_E.fixed['beta_Hubar'] = True
     fit_forw_E.fixed['alphap_Hqbar'] = True
     
-    fit_forw_E.fixed['Norm_Huba_2'] = True
+    fit_forw_E.fixed['Norm_Hubar_2'] = True
     fit_forw_E.fixed['alpha_Hubar_2'] = True
     fit_forw_E.fixed['beta_Hubar_2'] = True
     
@@ -728,6 +732,12 @@ def forward_E_fit(Paralst_Unp):
         csvWriter = csv.writer(my_csv,delimiter=',')
         csvWriter.writerows([*fit_forw_E.covariance])
 
+    with open(os.path.join(dir_path,"GUMP_Params/Para_Unp.csv"),"w",newline='') as my_csv:
+        csvWriter = csv.writer(my_csv,delimiter=',')
+        csvWriter.writerow(list([*fit_forw_E.values]))
+        csvWriter.writerow(list([*fit_forw_E.errors]))
+        
+        
     print("E fit finished...")
     return fit_forw_E
 
@@ -1000,6 +1010,11 @@ def forward_Et_fit(Paralst_Pol):
         csvWriter = csv.writer(my_csv,delimiter=',')
         csvWriter.writerows([*fit_forw_Et.covariance])
 
+    with open(os.path.join(dir_path,"GUMP_Params/Para_Pol.csv"),"w",newline='') as my_csv:
+        csvWriter = csv.writer(my_csv,delimiter=',')
+        csvWriter.writerow(list([*fit_forw_Et.values]))
+        csvWriter.writerow(list([*fit_forw_Et.errors]))
+        
     print("Et fit finished...")
     return fit_forw_Et
 
@@ -1445,8 +1460,8 @@ if __name__ == '__main__':
     pool = Pool()
     time_start = time.time()
 
-    #Paralst_Unp=pd.read_csv(os.path.join(dir_path,'GUMP_Params/Para_Unp.csv'), header=None).to_numpy()[0]
-
+    Paralst_Unp=pd.read_csv(os.path.join(dir_path,'GUMP_Params/Para_Unp.csv'), header=None).to_numpy()[0]
+    '''
     Paralst_Unp=[4.9783026598090565,0.21669229220969788,3.2451024750977018,2.073688191476637,0.,
                     0.11362205494289922,1.1999999979872766,6.1105225617483105,0.15,
                     0.5294258022423997,0.26836299192918506,19.999999999173667,
@@ -1460,8 +1475,7 @@ if __name__ == '__main__':
                     0.7985103392773935,3.404262017724412,0.0,
                     0.0,0.0,0.0170301969470947,
                     0.0,0.0,0.0,3.44764738950069,2.6278071872799003]
-
-    
+    '''
     Paralst_Pol=pd.read_csv(os.path.join(dir_path,'GUMP_Params/Para_Pol.csv'), header=None).to_numpy()[0]
     
     Para_Unp = ParaManager_Unp(Paralst_Unp)
@@ -1469,16 +1483,16 @@ if __name__ == '__main__':
     
     fit_forward_H   = forward_H_fit(Paralst_Unp)
     Paralst_Unp     = np.array(fit_forward_H.values)
+
+    #fit_forward_Ht  = forward_Ht_fit(Paralst_Pol)
+    #Paralst_Pol     = np.array(fit_forward_Ht.values)
+
+    #fit_forward_E   = forward_E_fit(Paralst_Unp)
+    #Paralst_Unp     = np.array(fit_forward_E.values)
+
+    #fit_forward_Et  = forward_Et_fit(Paralst_Pol)
+    #Paralst_Pol     = np.array(fit_forward_Et.values)
     '''
-    fit_forward_Ht  = forward_Ht_fit(Paralst_Pol)
-    Paralst_Pol     = np.array(fit_forward_Ht.values)
-
-    fit_forward_E   = forward_E_fit(Paralst_Unp)
-    Paralst_Unp     = np.array(fit_forward_E.values)
-
-    fit_forward_Et  = forward_Et_fit(Paralst_Pol)
-    Paralst_Pol     = np.array(fit_forward_Et.values)
-    
     fit_off_forward = off_forward_fit(Paralst_Unp, Paralst_Pol)
     '''
     '''

@@ -545,8 +545,12 @@ def cost_forward_Et(Norm_HtuV,   alpha_HtuV,   beta_HtuV,   alphap_HtuV,
     # GFF_Et_pred = np.array(list(pool.map(partial(GFF_theo, Para = Para_all), np.array(GFF_data_Et))))
     GFF_Et_pred = GFF_theo(GFF_data_Et, Para=Para_all)
     cost_GFF_Et = np.sum(((GFF_Et_pred - GFF_data_Et['f'])/ GFF_data_Et['delta f']) ** 2 )
-
-    return cost_PDF_Et + cost_tPDF_Et + cost_GFF_Et
+    
+    GFF_data_Etpred = GFF_data_Et.copy()
+    GFF_data_Etpred['fpred'] = GFF_Et_pred
+    GFF_data_Etpred.to_csv(os.path.join(dir_path,'GUMP_Results/GFFEtcomp.csv'),index= False)
+    
+    return cost_PDF_Et, cost_tPDF_Et, cost_GFF_Et/len(GFF_Et_pred)
 
 def cost_off_forward(Norm_HuV,    alpha_HuV,    beta_HuV,    alphap_HuV, 
                      Norm_Hubar,  alpha_Hubar,  beta_Hubar,  alphap_Hqbar,
@@ -689,7 +693,19 @@ if __name__ == '__main__':
      R_Eu_xi2_Init,    R_Ed_xi2_Init,     R_Eg_xi2_Init,
      R_Hu_xi4_Init,    R_Hd_xi4_Init,     R_Hg_xi4_Init,
      R_Eu_xi4_Init,    R_Ed_xi4_Init,     R_Eg_xi4_Init,    bexp_HSea_Init, bexp_Hg_Init] = Paralst_Unp
-
+    
+    [Norm_HtuV_Init,   alpha_HtuV_Init,   beta_HtuV_Init,   alphap_HtuV_Init, 
+     Norm_Htubar_Init, alpha_Htubar_Init, beta_Htubar_Init, alphap_Htqbar_Init,
+     Norm_HtdV_Init,   alpha_HtdV_Init,   beta_HtdV_Init,   alphap_HtdV_Init,
+     Norm_Htdbar_Init, alpha_Htdbar_Init, beta_Htdbar_Init, 
+     Norm_Htg_Init,    alpha_Htg_Init,    beta_Htg_Init,    alphap_Htg_Init,
+     Norm_EtuV_Init,   alpha_EtuV_Init,   beta_EtuV_Init,   alphap_EtuV_Init,
+     Norm_EtdV_Init,   R_Et_Sea_Init,     R_Htu_xi2_Init,   R_Htd_xi2_Init,    R_Htg_xi2_Init,
+     R_Etu_xi2_Init,   R_Etd_xi2_Init,    R_Etg_xi2_Init,
+     R_Htu_xi4_Init,   R_Htd_xi4_Init,    R_Htg_xi4_Init,
+     R_Etu_xi4_Init,   R_Etd_xi4_Init,    R_Etg_xi4_Init,   bexp_HtSea_Init] = Paralst_Pol
+    
+    '''
     print(cost_forward_H(Norm_HuV = Norm_HuV_Init,     alpha_HuV = alpha_HuV_Init,      beta_HuV = beta_HuV_Init,     alphap_HuV = alphap_HuV_Init, Invm2_HuV = Invm2_HuV_Init,
                     Norm_Hubar = Norm_Hubar_Init, alpha_Hubar = alpha_Hubar_Init,  beta_Hubar = beta_Hubar_Init, alphap_Hqbar = alphap_Hqbar_Init,
                     Norm_Hubar_2 = Norm_Hubar_2_Init, alpha_Hubar_2 = alpha_Hubar_2_Init,  beta_Hubar_2 = beta_Hubar_2_Init,
@@ -703,21 +719,17 @@ if __name__ == '__main__':
                     R_Eu_xi2 = R_Eu_xi2_Init,     R_Ed_xi2 = R_Ed_xi2_Init,        R_Eg_xi2 = R_Eg_xi2_Init,
                     R_Hu_xi4 = R_Hu_xi4_Init,     R_Hd_xi4 = R_Hd_xi4_Init,        R_Hg_xi4 = R_Hg_xi4_Init,
                     R_Eu_xi4 = R_Eu_xi4_Init,     R_Ed_xi4 = R_Ed_xi4_Init,        R_Eg_xi4 = R_Eg_xi4_Init,     bexp_HSea = bexp_HSea_Init,   bexp_Hg = bexp_Hg_Init))
+    '''
+    print(cost_forward_Et(Norm_HtuV = Norm_HtuV_Init,     alpha_HtuV = alpha_HtuV_Init,      beta_HtuV = beta_HtuV_Init,     alphap_HtuV = alphap_HtuV_Init, 
+                            Norm_Htubar = Norm_Htubar_Init, alpha_Htubar = alpha_Htubar_Init,  beta_Htubar = beta_Htubar_Init, alphap_Htqbar = alphap_Htqbar_Init,
+                            Norm_HtdV = Norm_HtdV_Init,     alpha_HtdV = alpha_HtdV_Init,      beta_HtdV = beta_HtdV_Init,     alphap_HtdV = alphap_HtdV_Init,
+                            Norm_Htdbar = Norm_Htdbar_Init, alpha_Htdbar = alpha_Htdbar_Init,  beta_Htdbar = beta_Htdbar_Init, 
+                            Norm_Htg = Norm_Htg_Init,       alpha_Htg = alpha_Htg_Init,        beta_Htg = beta_Htg_Init,       alphap_Htg = alphap_Htg_Init,
+                            Norm_EtuV = Norm_EtuV_Init,     alpha_EtuV = alpha_EtuV_Init,      beta_EtuV = beta_EtuV_Init,     alphap_EtuV = alphap_EtuV_Init,
+                            Norm_EtdV = Norm_EtdV_Init,     R_Et_Sea = R_Et_Sea_Init,          R_Htu_xi2 = R_Htu_xi2_Init,     R_Htd_xi2 = R_Htd_xi2_Init,     R_Htg_xi2 = R_Htg_xi2_Init,
+                            R_Etu_xi2 = R_Etu_xi2_Init,     R_Etd_xi2 = R_Etd_xi2_Init,        R_Etg_xi2 = R_Etg_xi2_Init,
+                            R_Htu_xi4 = R_Htu_xi4_Init,     R_Htd_xi4 = R_Htd_xi4_Init,        R_Htg_xi4 = R_Htg_xi4_Init,
+                            R_Etu_xi4 = R_Etu_xi4_Init,     R_Etd_xi4 = R_Etd_xi4_Init,        R_Etg_xi4 = R_Etg_xi4_Init,     bexp_HtSea = bexp_HtSea_Init))
 
-    '''
-    fit_forward_Ht  = forward_Ht_fit(Paralst_Pol)
-    Paralst_Pol     = np.array(fit_forward_Ht.values)
 
-    fit_forward_E   = forward_E_fit(Paralst_Unp)
-    Paralst_Unp     = np.array(fit_forward_E.values)
-
-    fit_forward_Et  = forward_Et_fit(Paralst_Pol)
-    Paralst_Pol     = np.array(fit_forward_Et.values)
-    
-    fit_off_forward = off_forward_fit(Paralst_Unp, Paralst_Pol)
-    '''
-    '''
-    Paralst_Unp_Ext2 = np.concatenate((Paralst_Unp, np.array([norm1,norm2])))
-    fit_dvmp = dvmp_fit(Paralst_Unp_Ext2)
-    '''
 
