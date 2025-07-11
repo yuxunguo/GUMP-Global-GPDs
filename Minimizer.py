@@ -519,6 +519,9 @@ def forward_H_fit(Paralst_Unp):
     #fit_forw_H.fixed['Invm2_HuV'] = True
     #fit_forw_H.fixed['Invm2_HdV'] = True
     
+    fit_forw_H.limits['Invm2_HuV'] = (0, 3)
+    fit_forw_H.limits['Invm2_HdV'] = (0, 3)
+    
     fit_forw_H.limits['alpha_HuV'] = (-2, 1.2)
     fit_forw_H.limits['alpha_Hubar'] = (0, 1.2)
     fit_forw_H.limits['alpha_HdV'] = (-2, 1.2)
@@ -542,8 +545,8 @@ def forward_H_fit(Paralst_Unp):
     fit_forw_H.limits['beta_Hdbar_2'] = (0, 20)
     fit_forw_H.limits['beta_Hg_2'] = (0, 20)  
 
-    fit_forw_H.limits['alphap_HuV'] = (0,5)
-    fit_forw_H.limits['alphap_HdV'] = (0,5)
+    fit_forw_H.limits['alphap_HuV'] = (0,3)
+    fit_forw_H.limits['alphap_HdV'] = (0,3)
     
     #fit_forw_H.fixed['alphap_HuV'] = True
     #fit_forw_H.fixed['alphap_HdV'] = True
