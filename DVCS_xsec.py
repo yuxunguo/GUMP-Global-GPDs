@@ -567,6 +567,28 @@ def dsigma_DVCS_TOT(y: float, xB: float, t: float, Q: float, phi: float, pol, HC
     """
     return dsigma_BH(y, xB, t, Q, phi, pol) + dsigma_DVCS(y, xB, t, Q, phi, pol, HCFF, ECFF, HtCFF, EtCFF) + dsigma_INT(y, xB, t, Q, phi, pol, HCFF, ECFF, HtCFF, EtCFF)
 
+
+def Asymmetry_DVCS_TOT(y: float, xB: float, t: float, Q: float, phi: float, pol, HCFF: complex, ECFF: complex, HtCFF: complex, EtCFF: complex):
+    """ DVCS singlet/double spin asymmetries, defined by the ratio of the corresponding polarized total cross-sections to the unpolarized one.
+
+    Args:
+        y (float): Beam energy lost parameter
+        xB (float): x_bjorken
+        t (float): _description_
+        Q (float): momentum transfer squared
+        phi (float): azimuthal angel
+        pol (_type_): polarization configuration
+        HCFF (complex): Compton form factor H 
+        ECFF (complex): Compton form factor E
+        HtCFF (complex): Compton form factor Ht 
+        EtCFF (complex): Compton form factor Et
+
+    Returns:
+        total differential cross-sections dsigma (float)
+    """
+    unp_pol = "UU"
+    return dsigma_DVCS_TOT(y,xB,t,Q,phi,pol,HCFF,ECFF,HtCFF,EtCFF) / dsigma_DVCS_TOT(y,xB,t,Q,phi,unp_pol,HCFF,ECFF,HtCFF,EtCFF)
+
 # The total cross-section integrated over phi
 def dsigma_DVCS_HERA(y: float, xB: float, t: float, Q: float, pol, HCFF: complex, ECFF: complex, HtCFF: complex, EtCFF: complex):
     """cross-sections of virtual photon and proton scattering check for instance https://arxiv.org/abs/2310.13837
