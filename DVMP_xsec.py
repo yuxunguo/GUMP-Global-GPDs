@@ -68,12 +68,16 @@ def RrhoZEUSnH1_total_err():
     syst_errors_pos=RrhoZEUSnH1['syst_pos'].to_numpy()
     syst_errors_neg=RrhoZEUSnH1['syst_neg'].to_numpy()
 
-    # Combining +/– errors in quadrature to get symmetric stat & syst errors,
-    # then combining those to get a total uncertainty:
-        
-    stat_errors = np.sqrt(stat_errors_pos**2 + stat_errors_neg**2)/np.sqrt(2)
-    syst_errors = np.sqrt(syst_errors_pos**2 + syst_errors_neg**2)/np.sqrt(2)
-    tot_errors  = np.sqrt(stat_errors**2 + syst_errors**2)
+
+
+    # Taking the maximum of the +/– errors 
+    stat_errors = np.maximum(stat_errors_pos, stat_errors_neg)
+    syst_errors = np.maximum(syst_errors_pos, syst_errors_neg)
+
+    # Combining the symmetric stat and syst errors in quadrature for total uncertainty
+    tot_errors = np.sqrt(stat_errors**2 + syst_errors**2)
+
+
     RrhoZEUSnH1['tot_err'] = tot_errors
     RrhoZEUSnH1.to_csv(os.path.join(dir_path,'GUMPDATA/DVMP_HERA/R_rho_ZEUSnH1_w_err.csv'),index=False,header = None)
     
