@@ -1,6 +1,6 @@
 from Parameters import ParaManager_Unp, ParaManager_Pol
 from Observables import GPDobserv
-from DVCS_xsec import dsigma_DVCS_TOT, dsigma_DVCS_HERA, M
+from DVCS_xsec import dsigma_DVCS_TOT, Asymmetry_DVCS_TOT, dsigma_DVCS_HERA, M
 from DVMP_xsec import dsigma_DVMP_dt,dsigmaL_DVMP_dt, M_jpsi,epsilon, R_fitted
 from multiprocessing import Pool
 from functools import partial
@@ -63,7 +63,7 @@ GFF_Gluon_data_Et = GFF_Gluon_data[GFF_Gluon_data['spe'] == 3]
 ************************ DVCS data preprocessing ****************************
 """
 
-DVCSxsec_data = pd.read_csv(os.path.join(dir_path,'GUMPDATA/DVCSxsec.csv'), header = None, names = ['y', 'xB', 't', 'Q', 'phi', 'f', 'delta f', 'pol'] , dtype = {'y': float, 'xB': float, 't': float, 'Q': float, 'phi': float, 'f': float, 'delta f': float, 'pol': str})
+DVCSxsec_data = pd.read_csv(os.path.join(dir_path,'GUMPDATA/DVCSxsec.csv'), header = 0, names = ['y', 'xB', 't', 'Q', 'phi', 'f', 'delta f', 'pol'] , dtype = {'y': float, 'xB': float, 't': float, 'Q': float, 'phi': float, 'f': float, 'delta f': float, 'pol': str})
 DVCSxsec_data_invalid = DVCSxsec_data[DVCSxsec_data['t']*(DVCSxsec_data['xB']-1) - M ** 2 * DVCSxsec_data['xB'] ** 2 < 0]
 DVCSxsec_data = DVCSxsec_data[(DVCSxsec_data['Q'] > Q_threshold) & (DVCSxsec_data['xB'] < xB_Cut) & (DVCSxsec_data['t']*(DVCSxsec_data['xB']-1) - M ** 2 * DVCSxsec_data['xB'] ** 2 > 0)]
 xBtQlst = DVCSxsec_data.drop_duplicates(subset = ['xB', 't', 'Q'], keep = 'first')[['xB','t','Q']].values.tolist()
@@ -74,6 +74,12 @@ DVCSxsec_HERA_data_invalid = DVCSxsec_HERA_data[DVCSxsec_HERA_data['t']*(DVCSxse
 DVCSxsec_HERA_data = DVCSxsec_HERA_data[(DVCSxsec_HERA_data['Q'] > Q_threshold) & (DVCSxsec_HERA_data['xB'] < xB_Cut) & (DVCSxsec_HERA_data['t']*(DVCSxsec_HERA_data['xB']-1) - M ** 2 * DVCSxsec_HERA_data['xB'] ** 2 > 0)]
 xBtQlst_HERA = DVCSxsec_HERA_data.drop_duplicates(subset = ['xB', 't', 'Q'], keep = 'first')[['xB','t','Q']].values.tolist()
 DVCSxsec_HERA_group_data = list(map(lambda set: DVCSxsec_HERA_data[(DVCSxsec_HERA_data['xB'] == set[0]) & (DVCSxsec_HERA_data['t'] == set[1]) & ((DVCSxsec_HERA_data['Q'] == set[2]))], xBtQlst_HERA))
+
+DVCSAsym_data = pd.read_csv(os.path.join(dir_path,'GUMPDATA/DVCSAsym.csv'), header = 0, names = ['y', 'xB', 't', 'Q', 'phi', 'f', 'delta f', 'pol'] , dtype = {'y': float, 'xB': float, 't': float, 'Q': float, 'phi': float, 'f': float, 'delta f': float, 'pol': str})
+DVCSAsym_data_invalid = DVCSAsym_data[DVCSAsym_data['t']*(DVCSAsym_data['xB']-1) - M ** 2 * DVCSAsym_data['xB'] ** 2 < 0]
+DVCSAsym_data = DVCSAsym_data[(DVCSAsym_data['Q'] > Q_threshold) & (DVCSAsym_data['xB'] < xB_Cut) & (DVCSAsym_data['t']*(DVCSAsym_data['xB']-1) - M ** 2 * DVCSAsym_data['xB'] ** 2 > 0)]
+AsymxBtQlst = DVCSAsym_data.drop_duplicates(subset = ['xB', 't', 'Q'], keep = 'first')[['xB','t','Q']].values.tolist()
+DVCSAsym_group_data = list(map(lambda set: DVCSAsym_data[(DVCSAsym_data['xB'] == set[0]) & (DVCSAsym_data['t'] == set[1]) & ((DVCSAsym_data['Q'] == set[2]))], AsymxBtQlst))
 
 """
 ************************ DVMP for rho data preprocessing ****************************
@@ -312,6 +318,27 @@ def DVCSxsec_cost_xBtQ(DVCSxsec_data_xBtQ: pd.DataFrame, Para_Unp, Para_Pol):
     # DVCS_pred_xBtQ = np.array(list(map(partial(DVCSxsec_theo, CFF_input = [HCFF, ECFF, HtCFF, EtCFF]), np.array(DVCSxsec_data_xBtQ))))
     DVCS_pred_xBtQ = DVCSxsec_theo(DVCSxsec_data_xBtQ, CFF_input = [HCFF, ECFF, HtCFF, EtCFF])
     return np.sum(((DVCS_pred_xBtQ - DVCSxsec_data_xBtQ['f'])/ DVCSxsec_data_xBtQ['delta f']) ** 2 )
+
+def DVCSAsym_theo(DVCSAsym_input: pd.DataFrame, CFF_input: np.array):
+    # CFF_input is a list of np.arrays
+    # [y, xB, t, Q, phi, f, delta_f, pol] = DVCSxsec_input    
+
+    y = DVCSAsym_input['y'].to_numpy()
+    xB = DVCSAsym_input['xB'].to_numpy()
+    t = DVCSAsym_input['t'].to_numpy()
+    Q = DVCSAsym_input['Q'].to_numpy()
+    phi = DVCSAsym_input['phi'].to_numpy()
+    pol = DVCSAsym_input['pol'].to_numpy()
+
+    [HCFF, ECFF, HtCFF, EtCFF] = CFF_input # each of them have shape (N); scalar is also OK if we use 
+    return Asymmetry_DVCS_TOT(y, xB, t, Q, phi, pol, HCFF, ECFF, HtCFF, EtCFF)
+
+def DVCSAsym_cost_xBtQ(DVCSAsym_data_xBtQ: pd.DataFrame, Para_Unp, Para_Pol):
+    [xB, t, Q] = [DVCSAsym_data_xBtQ['xB'].iat[0], DVCSAsym_data_xBtQ['t'].iat[0], DVCSAsym_data_xBtQ['Q'].iat[0]] 
+    [HCFF, ECFF, HtCFF, EtCFF] = CFF_theo(xB, t, Q, Para_Unp, Para_Pol) # scalar for each of them
+    DVCS_Asym_pred_xBtQ = DVCSAsym_theo(DVCSAsym_data_xBtQ, CFF_input = [HCFF, ECFF, HtCFF, EtCFF])
+    
+    return np.sum(((DVCS_Asym_pred_xBtQ - DVCSAsym_data_xBtQ['f'])/ DVCSAsym_data_xBtQ['delta f']) ** 2 )
 
 def DVCSxsec_HERA_theo(DVCSxsec_HERA_input: pd.DataFrame, CFF_input: np.array):
     #[y, xB, t, Q, f, delta_f, pol]  = DVCSxsec_data_HERA
@@ -1462,23 +1489,8 @@ def dvmp_fit(Paralst_Unp):
 if __name__ == '__main__':
     pool = Pool()
     time_start = time.time()
-
+    #'''
     Paralst_Unp=pd.read_csv(os.path.join(dir_path,'GUMP_Params/Para_Unp.csv'), header=None).to_numpy()[0]
-    '''
-    Paralst_Unp=[4.9783026598090565,0.21669229220969788,3.2451024750977018,2.073688191476637,0.,
-                    0.11362205494289922,1.1999999979872766,6.1105225617483105,0.15,
-                    0.5294258022423997,0.26836299192918506,19.999999999173667,
-                    3.287513778401589,0.18122034760885652,4.275173230754926,-0.04985311294424019,0.,
-                    0.11373200572423167,1.1999999900890543,9.410612252867077,
-                    1.188611851720507,0.2631512013300849,9.34859905285196,
-                    3.053952223033603,1.0098418150531911,16.887350785611666,0.1788467543889345,0.0,
-                    5.995457044886667,0.5684322785310979,8.065792136589494,
-                    0.1813228421702434,0.9068471909677752,1.1018931174030364,0.4607676086634599,
-                    -0.2234140495430452,0.7683213780361391,0.2294870191330873,-2.638627981453611,0.5699281532127416,
-                    0.7985103392773935,3.404262017724412,0.0,
-                    0.0,0.0,0.0170301969470947,
-                    0.0,0.0,0.0,3.44764738950069,2.6278071872799003]
-    '''
     Paralst_Pol=pd.read_csv(os.path.join(dir_path,'GUMP_Params/Para_Pol.csv'), header=None).to_numpy()[0]
     
     Para_Unp = ParaManager_Unp(Paralst_Unp)
@@ -1487,17 +1499,20 @@ if __name__ == '__main__':
     fit_forward_H   = forward_H_fit(Paralst_Unp)
     Paralst_Unp     = np.array(fit_forward_H.values)
 
-    #fit_forward_Ht  = forward_Ht_fit(Paralst_Pol)
-    #Paralst_Pol     = np.array(fit_forward_Ht.values)
+    fit_forward_Ht  = forward_Ht_fit(Paralst_Pol)
+    Paralst_Pol     = np.array(fit_forward_Ht.values)
 
-    #fit_forward_E   = forward_E_fit(Paralst_Unp)
-    #Paralst_Unp     = np.array(fit_forward_E.values)
+    fit_forward_E   = forward_E_fit(Paralst_Unp)
+    Paralst_Unp     = np.array(fit_forward_E.values)
 
-    #fit_forward_Et  = forward_Et_fit(Paralst_Pol)
-    #Paralst_Pol     = np.array(fit_forward_Et.values)
-    '''
-    fit_off_forward = off_forward_fit(Paralst_Unp, Paralst_Pol)
-    '''
+    fit_forward_Et  = forward_Et_fit(Paralst_Pol)
+    Paralst_Pol     = np.array(fit_forward_Et.values)
+    
+    print(Paralst_Unp)
+    print(Paralst_Pol)
+    #'''
+    #fit_off_forward = off_forward_fit(Paralst_Unp, Paralst_Pol)
+    #'''
     '''
     Paralst_Unp_Ext2 = np.concatenate((Paralst_Unp, np.array([norm1,norm2])))
     fit_dvmp = dvmp_fit(Paralst_Unp_Ext2)
