@@ -9,7 +9,7 @@ Note:
 """
 # from cmath import exp
 # from scipy.special import loggamma as clngamma
-#from this import d
+# from this import d
 
 import numpy as np
 from Parameters import Moment_Sum
@@ -19,6 +19,14 @@ from mpmath import mp, hyp2f1
 from typing import Tuple, Union
 from numba import vectorize, njit
 import functools
+from joblib import Memory
+import os
+
+cache_dir = "./_joblib_cache_"
+if not os.path.exists(cache_dir):
+    os.makedirs(cache_dir)
+
+memory = Memory(location=cache_dir, verbose=0)
 
 """
 ***********************QCD constants***************************************
@@ -1392,7 +1400,8 @@ def np_cache_DVMP_Wilson_Coef(function):
 
     return wrapper
 
-@np_cache_DVMP_Wilson_Coef
+#@np_cache_DVMP_Wilson_Coef
+@memory.cache
 def DVMP_WCoef_Evo_NLO(j: np.array, nf: int, p: int, Q: float, meson: int, muf: float) -> Tuple[np.ndarray, np.ndarray]:
     """Next-to-leading order evolution of the DVMP Wilson coefficient (Evolved Wilson coefficient method)
 
@@ -1600,7 +1609,8 @@ def np_cache_DVCS_Wilson_Coef(function):
 
     return wrapper
 
-@np_cache_DVCS_Wilson_Coef
+#@np_cache_DVCS_Wilson_Coef
+@memory.cache
 def DVCS_WCoef_Evo_NLO(j: np.array, nf: int, p: int, Q: float, muf: float) -> Tuple[np.ndarray, np.ndarray]:
     """Next-to-leading order evolution of the DVCS Wilson coefficient (Evolved Wilson coefficient method)
 
@@ -2089,7 +2099,6 @@ def CFF_Evo_NLO_evMOM(j: np.array, nf: int, p: int, Q: float, t: float, xi: floa
     EvoConf = np.concatenate((NS_full, S_full), axis=-1) # (N, 5)     
 
     return EvoConf
-'''***********************************************'''
 
 def GPD_Moment_Evo_NLO(j: np.array, nf: int, p: int, mu: float, t: float, xi: complex, Para: np.array, momshift: int) -> np.array:
     """Next-to-leading order evolved conformal moments in the evolution basis (Evolved moment method)
@@ -2163,7 +2172,6 @@ def np_cache_tPDF_moment(function):
     wrapper.cache_clear = cache_clear
 
     return wrapper
-
 
 @np_cache_tPDF_moment
 def tPDF_Moment_Evo_NLO(j: np.array, nf: int, p: int, mu: float, ConfFlav: np.array) -> np.array:

@@ -63,9 +63,9 @@ GFF_Gluon_data_Et = GFF_Gluon_data[GFF_Gluon_data['spe'] == 3]
 ************************ DVCS data preprocessing ****************************
 """
 
-DVCSxsec_data = pd.read_csv(os.path.join(dir_path,'GUMPDATA/DVCSxsec.csv'), header = 0, names = ['y', 'xB', 't', 'Q', 'phi', 'f', 'delta f', 'pol'] , dtype = {'y': float, 'xB': float, 't': float, 'Q': float, 'phi': float, 'f': float, 'delta f': float, 'pol': str})
+DVCSxsec_data = pd.read_csv(os.path.join(dir_path,'GUMPDATA/DVCSxsec_Old.csv'), header = None, names = ['y', 'xB', 't', 'Q', 'phi', 'f', 'delta f', 'pol'] , dtype = {'y': float, 'xB': float, 't': float, 'Q': float, 'phi': float, 'f': float, 'delta f': float, 'pol': str})
 DVCSxsec_data_invalid = DVCSxsec_data[DVCSxsec_data['t']*(DVCSxsec_data['xB']-1) - M ** 2 * DVCSxsec_data['xB'] ** 2 < 0]
-DVCSxsec_data = DVCSxsec_data[(DVCSxsec_data['Q'] > Q_threshold) & (DVCSxsec_data['xB'] < xB_Cut) & (DVCSxsec_data['t']*(DVCSxsec_data['xB']-1) - M ** 2 * DVCSxsec_data['xB'] ** 2 > 0)]
+DVCSxsec_data = DVCSxsec_data[(DVCSxsec_data['Q'] > Q_threshold) & (DVCSxsec_data['xB'] < xB_Cut) & (DVCSxsec_data['t']*(DVCSxsec_data['xB']-1) - M ** 2 * DVCSxsec_data['xB'] ** 2 > 0) & (DVCSxsec_data['delta f']>0) & ((DVCSxsec_data['f']>0) | (DVCSxsec_data['pol']!='UU'))]
 xBtQlst = DVCSxsec_data.drop_duplicates(subset = ['xB', 't', 'Q'], keep = 'first')[['xB','t','Q']].values.tolist()
 DVCSxsec_group_data = list(map(lambda set: DVCSxsec_data[(DVCSxsec_data['xB'] == set[0]) & (DVCSxsec_data['t'] == set[1]) & ((DVCSxsec_data['Q'] == set[2]))], xBtQlst))
 
@@ -77,7 +77,7 @@ DVCSxsec_HERA_group_data = list(map(lambda set: DVCSxsec_HERA_data[(DVCSxsec_HER
 
 DVCSAsym_data = pd.read_csv(os.path.join(dir_path,'GUMPDATA/DVCSAsym.csv'), header = 0, names = ['y', 'xB', 't', 'Q', 'phi', 'f', 'delta f', 'pol'] , dtype = {'y': float, 'xB': float, 't': float, 'Q': float, 'phi': float, 'f': float, 'delta f': float, 'pol': str})
 DVCSAsym_data_invalid = DVCSAsym_data[DVCSAsym_data['t']*(DVCSAsym_data['xB']-1) - M ** 2 * DVCSAsym_data['xB'] ** 2 < 0]
-DVCSAsym_data = DVCSAsym_data[(DVCSAsym_data['Q'] > Q_threshold) & (DVCSAsym_data['xB'] < xB_Cut) & (DVCSAsym_data['t']*(DVCSAsym_data['xB']-1) - M ** 2 * DVCSAsym_data['xB'] ** 2 > 0)]
+DVCSAsym_data = DVCSAsym_data[(DVCSAsym_data['Q'] > Q_threshold) & (DVCSAsym_data['xB'] < xB_Cut) & (DVCSAsym_data['t']*(DVCSAsym_data['xB']-1) - M ** 2 * DVCSAsym_data['xB'] ** 2 > 0) & DVCSAsym_data['delta f']>0]
 AsymxBtQlst = DVCSAsym_data.drop_duplicates(subset = ['xB', 't', 'Q'], keep = 'first')[['xB','t','Q']].values.tolist()
 DVCSAsym_group_data = list(map(lambda set: DVCSAsym_data[(DVCSAsym_data['xB'] == set[0]) & (DVCSAsym_data['t'] == set[1]) & ((DVCSAsym_data['Q'] == set[2]))], AsymxBtQlst))
 
@@ -284,15 +284,15 @@ def GFF_theo(GFF_input: pd.DataFrame, Para: np.array, p_order = 2):
     
     return np.array(result)
 
-def CFF_theo(xB, t, Q, Para_Unp, Para_Pol):
+def CFF_theo(xB, t, Q, Para_Unp, Para_Pol, porder = 2):
     x = 0
     xi = (1/(2 - xB) - (2*t*(-1 + xB))/(Q**2*(-2 + xB)**2))*xB
     H_E = GPDobserv(x, xi, t, Q, 1)
     Ht_Et = GPDobserv(x, xi, t, Q, -1)
-    HCFF = H_E.CFF(Para_Unp[..., 0, :, :, :, :], Q)
-    ECFF = H_E.CFF(Para_Unp[..., 1, :, :, :, :], Q)
-    HtCFF = Ht_Et.CFF(Para_Pol[..., 0, :, :, :, :], Q)
-    EtCFF = Ht_Et.CFF(Para_Pol[..., 1, :, :, :, :], Q)
+    HCFF = H_E.CFF(Para_Unp[..., 0, :, :, :, :], Q, p_order = porder)
+    ECFF = H_E.CFF(Para_Unp[..., 1, :, :, :, :], Q, p_order = porder)
+    HtCFF = Ht_Et.CFF(Para_Pol[..., 0, :, :, :, :], Q, p_order = porder)
+    EtCFF = Ht_Et.CFF(Para_Pol[..., 1, :, :, :, :], Q, p_order = porder)
 
     return [ HCFF, ECFF, HtCFF, EtCFF ] # this can be a list of arrays of shape (N)
     # return np.stack([HCFF, ECFF, HtCFF, EtCFF], axis=-1)
@@ -312,9 +312,9 @@ def DVCSxsec_theo(DVCSxsec_input: pd.DataFrame, CFF_input: np.array):
     [HCFF, ECFF, HtCFF, EtCFF] = CFF_input # each of them have shape (N); scalar is also OK if we use 
     return dsigma_DVCS_TOT(y, xB, t, Q, phi, pol, HCFF, ECFF, HtCFF, EtCFF)
 
-def DVCSxsec_cost_xBtQ(DVCSxsec_data_xBtQ: pd.DataFrame, Para_Unp, Para_Pol):
+def DVCSxsec_cost_xBtQ(DVCSxsec_data_xBtQ: pd.DataFrame, Para_Unp, Para_Pol, P_order = 2):
     [xB, t, Q] = [DVCSxsec_data_xBtQ['xB'].iat[0], DVCSxsec_data_xBtQ['t'].iat[0], DVCSxsec_data_xBtQ['Q'].iat[0]] 
-    [HCFF, ECFF, HtCFF, EtCFF] = CFF_theo(xB, t, Q, Para_Unp, Para_Pol) # scalar for each of them
+    [HCFF, ECFF, HtCFF, EtCFF] = CFF_theo(xB, t, Q, Para_Unp, Para_Pol, porder= P_order) # scalar for each of them
     # DVCS_pred_xBtQ = np.array(list(map(partial(DVCSxsec_theo, CFF_input = [HCFF, ECFF, HtCFF, EtCFF]), np.array(DVCSxsec_data_xBtQ))))
     DVCS_pred_xBtQ = DVCSxsec_theo(DVCSxsec_data_xBtQ, CFF_input = [HCFF, ECFF, HtCFF, EtCFF])
     return np.sum(((DVCS_pred_xBtQ - DVCSxsec_data_xBtQ['f'])/ DVCSxsec_data_xBtQ['delta f']) ** 2 )
@@ -333,9 +333,9 @@ def DVCSAsym_theo(DVCSAsym_input: pd.DataFrame, CFF_input: np.array):
     [HCFF, ECFF, HtCFF, EtCFF] = CFF_input # each of them have shape (N); scalar is also OK if we use 
     return Asymmetry_DVCS_TOT(y, xB, t, Q, phi, pol, HCFF, ECFF, HtCFF, EtCFF)
 
-def DVCSAsym_cost_xBtQ(DVCSAsym_data_xBtQ: pd.DataFrame, Para_Unp, Para_Pol):
+def DVCSAsym_cost_xBtQ(DVCSAsym_data_xBtQ: pd.DataFrame, Para_Unp, Para_Pol, P_order = 2):
     [xB, t, Q] = [DVCSAsym_data_xBtQ['xB'].iat[0], DVCSAsym_data_xBtQ['t'].iat[0], DVCSAsym_data_xBtQ['Q'].iat[0]] 
-    [HCFF, ECFF, HtCFF, EtCFF] = CFF_theo(xB, t, Q, Para_Unp, Para_Pol) # scalar for each of them
+    [HCFF, ECFF, HtCFF, EtCFF] = CFF_theo(xB, t, Q, Para_Unp, Para_Pol, porder= P_order) # scalar for each of them
     DVCS_Asym_pred_xBtQ = DVCSAsym_theo(DVCSAsym_data_xBtQ, CFF_input = [HCFF, ECFF, HtCFF, EtCFF])
     
     return np.sum(((DVCS_Asym_pred_xBtQ - DVCSAsym_data_xBtQ['f'])/ DVCSAsym_data_xBtQ['delta f']) ** 2 )
@@ -353,9 +353,10 @@ def DVCSxsec_HERA_theo(DVCSxsec_HERA_input: pd.DataFrame, CFF_input: np.array):
     [HCFF, ECFF, HtCFF, EtCFF] = CFF_input
     return dsigma_DVCS_HERA(y, xB, t, Q, pol, HCFF, ECFF, HtCFF, EtCFF)
 
-def DVCSxsec_HERA_cost_xBtQ(DVCSxsec_HERA_data_xBtQ: pd.DataFrame, Para_Unp, Para_Pol):
+def DVCSxsec_HERA_cost_xBtQ(DVCSxsec_HERA_data_xBtQ: pd.DataFrame, Para_Unp, Para_Pol , P_order = 2):
+    
     [xB, t, Q] = [DVCSxsec_HERA_data_xBtQ['xB'].iat[0], DVCSxsec_HERA_data_xBtQ['t'].iat[0], DVCSxsec_HERA_data_xBtQ['Q'].iat[0]] 
-    [HCFF, ECFF, HtCFF, EtCFF] = CFF_theo(xB, t, Q, Para_Unp, Para_Pol) # scalar for each of them
+    [HCFF, ECFF, HtCFF, EtCFF] = CFF_theo(xB, t, Q, Para_Unp, Para_Pol, porder = P_order) # scalar for each of them
     # DVCS_pred_xBtQ = np.array(list(map(partial(DVCSxsec_theo, CFF_input = [HCFF, ECFF, HtCFF, EtCFF]), np.array(DVCSxsec_data_xBtQ))))
     DVCS_HERA_pred_xBtQ = DVCSxsec_HERA_theo(DVCSxsec_HERA_data_xBtQ, CFF_input = [HCFF, ECFF, HtCFF, EtCFF])
     return np.sum(((DVCS_HERA_pred_xBtQ - DVCSxsec_HERA_data_xBtQ['f'])/ DVCSxsec_HERA_data_xBtQ['delta f']) ** 2 )
@@ -1116,17 +1117,22 @@ def cost_off_forward(Norm_HuV,    alpha_HuV,    beta_HuV,    alphap_HuV,   Invm2
     Para_Unp_all = ParaManager_Unp(Para_Unp_lst)
     Para_Pol_all = ParaManager_Pol(Para_Pol_lst)
 
-    cost_DVCS_xBtQ = np.array(list(pool.map(partial(DVCSxsec_cost_xBtQ, Para_Unp = Para_Unp_all, Para_Pol = Para_Pol_all), DVCSxsec_group_data)))
+    cost_DVCS_xBtQ = np.array(list(pool.map(partial(DVCSxsec_cost_xBtQ, Para_Unp = Para_Unp_all, Para_Pol = Para_Pol_all, P_order = 2), DVCSxsec_group_data)))
     cost_DVCSxsec = np.sum(cost_DVCS_xBtQ)
     
-    cost_DVCS_HERA_xBtQ = np.array(list(pool.map(partial(DVCSxsec_HERA_cost_xBtQ, Para_Unp = Para_Unp_all, Para_Pol = Para_Pol_all), DVCSxsec_HERA_group_data)))
+    cost_DVCS_HERA_xBtQ = np.array(list(pool.map(partial(DVCSxsec_HERA_cost_xBtQ, Para_Unp = Para_Unp_all, Para_Pol = Para_Pol_all, P_order = 2), DVCSxsec_HERA_group_data)))
     cost_DVCSxsec_HERA = np.sum(cost_DVCS_HERA_xBtQ)
 
-    # DVCS_HERA_pred = np.array(list(pool.map(partial(DVCSxsec_HERA_theo, Para_Unp = Para_Unp_all, Para_Pol = Para_Pol_all), np.array(DVCS_HERA_data))))
-    #DVCS_HERA_pred = DVCSxsec_HERA_theo(DVCS_HERA_data, Para_Unp=Para_Unp_all, Para_Pol=Para_Pol_all)
-    #cost_DVCS_HERA = np.sum(((DVCS_HERA_pred - DVCS_HERA_data['f'])/ DVCS_HERA_data['delta f']) ** 2 )
+    #cost_DVCS_Asym_xBtQ = np.array(list(pool.map(partial(DVCSAsym_cost_xBtQ, Para_Unp = Para_Unp_all, Para_Pol = Para_Pol_all, P_order = 1), DVCSAsym_group_data)))
+    #cost_DVCSAsym = np.sum(cost_DVCS_Asym_xBtQ)
+    
+    cost_DVrhoPH1_xBtQ = np.array(list(pool.map(partial(DVMPxsec_cost_xBtQ, Para_Unp = Para_Unp_all, xsec_norm = 1, meson = 1, p_order = 2), DVrhoPH1xsecL_group_data)))
+    cost_DVrhoPH1_Lxsec = np.sum(cost_DVrhoPH1_xBtQ)
+        
+    cost_DVrhoPZEUS_xBtQ = np.array(list(pool.map(partial(DVMPxsec_cost_xBtQ, Para_Unp = Para_Unp_all, xsec_norm = 1, meson = 1, p_order = 2), DVrhoPZEUSxsecL_group_data)))
+    cost_DVrhoPZEUS_Lxsec = np.sum(cost_DVrhoPZEUS_xBtQ)
 
-    return  cost_DVCSxsec + cost_DVCSxsec_HERA
+    return  cost_DVCSxsec + cost_DVCSxsec_HERA + cost_DVrhoPH1_Lxsec + cost_DVrhoPZEUS_Lxsec # + cost_DVCSAsym
 
 def off_forward_fit(Paralst_Unp, Paralst_Pol):
 
@@ -1269,26 +1275,27 @@ def off_forward_fit(Paralst_Unp, Paralst_Pol):
     fit_off_forward.fixed['alphap_Hg'] = True
     fit_off_forward.fixed['alphap_Htg'] = True
 
-    fit_off_forward.fixed['R_Hg_xi2'] = True
-    fit_off_forward.fixed['R_Eg_xi2'] = True
-    fit_off_forward.fixed['R_Htg_xi2'] = True
-    fit_off_forward.fixed['R_Etg_xi2'] = True
+    #fit_off_forward.fixed['R_Hg_xi2'] = True
+    #fit_off_forward.fixed['R_Eg_xi2'] = True
+    #fit_off_forward.fixed['R_Htg_xi2'] = True
+    #fit_off_forward.fixed['R_Etg_xi2'] = True
 
-    fit_off_forward.fixed['R_Hg_xi4'] = True
-    fit_off_forward.fixed['R_Eg_xi4'] = True
+    #fit_off_forward.fixed['R_Hg_xi4'] = True
+    #fit_off_forward.fixed['R_Eg_xi4'] = True
+    #fit_off_forward.fixed['R_Hu_xi4']  = True 
+    #fit_off_forward.fixed['R_Eu_xi4']  = True
+    #fit_off_forward.fixed['R_Hd_xi4']  = True 
+    #fit_off_forward.fixed['R_Ed_xi4']  = True
+
+    #'''
     fit_off_forward.fixed['R_Htg_xi4'] = True
     fit_off_forward.fixed['R_Etg_xi4'] = True
-
-    fit_off_forward.fixed['R_Hu_xi4']  = True 
-    fit_off_forward.fixed['R_Eu_xi4']  = True
     fit_off_forward.fixed['R_Htu_xi4'] = True 
     fit_off_forward.fixed['R_Etu_xi4'] = True
-
-    fit_off_forward.fixed['R_Hd_xi4']  = True 
-    fit_off_forward.fixed['R_Ed_xi4']  = True
     fit_off_forward.fixed['R_Htd_xi4'] = True 
     fit_off_forward.fixed['R_Etd_xi4'] = True
-
+    #'''
+    
     global Minuit_Counter, Time_Counter, time_start
     Minuit_Counter = 0
     Time_Counter = 1
@@ -1298,9 +1305,9 @@ def off_forward_fit(Paralst_Unp, Paralst_Pol):
     fit_off_forward.hesse()
     
     print("off forward fit finished...")
-    
-    ndof_off_forward = len(DVCSxsec_data.index) + len(DVCSxsec_HERA_data.index) - fit_off_forward.nfit 
     time_end = time.time() -time_start
+    
+    ndof_off_forward = len(DVCSxsec_data.index) + len(DVCSxsec_HERA_data.index) + len(DVrhoPH1xsec_data.index) + len(DVrhoPZEUSxsec_data.index)- fit_off_forward.nfit 
 
     with open(os.path.join(dir_path,'GUMP_Output/off_forward_fit.txt'), 'w', encoding='utf-8') as f:
         print('Total running time: %.1f minutes. Total call of cost function: %3d.\n' % ( time_end/60, fit_off_forward.nfcn), file=f)
@@ -1310,209 +1317,27 @@ def off_forward_fit(Paralst_Unp, Paralst_Pol):
         print(*fit_off_forward.errors, sep=", ", file = f)
         print(fit_off_forward.params, file = f)
 
+    FitVals = list([*fit_off_forward.values])
+    FitErrs = list([*fit_off_forward.errors])
+    UnpLength = len(Paralst_Unp)
+    
+    with open(os.path.join(dir_path,"GUMP_Params/Para_Unp_Off_forward.csv"),"w",newline='') as my_csv:
+        csvWriter = csv.writer(my_csv,delimiter=',')
+        csvWriter.writerow(FitVals[:UnpLength])
+        csvWriter.writerow(FitErrs[:UnpLength])
+        print("off-forward fit unpolarized parameters saved to Para_Unp.csv")
+    
+    with open(os.path.join(dir_path,"GUMP_Params/Para_Pol_Off_forward.csv"),"w",newline='') as my_csv:
+        csvWriter = csv.writer(my_csv,delimiter=',')
+        csvWriter.writerow(FitVals[UnpLength:])
+        csvWriter.writerow(FitErrs[UnpLength:])
+        print("off-forward fit polarized parameters saved to Para_Pol.csv")
+
     with open(os.path.join(dir_path,"GUMP_Output/Off_forward_cov.csv"),"w",newline='') as my_csv:
         csvWriter = csv.writer(my_csv,delimiter=',')
         csvWriter.writerows([*fit_off_forward.covariance])
-          
-    return fit_off_forward
-
-def cost_dvmp(Norm_HuV,    alpha_HuV,    beta_HuV,    alphap_HuV, 
-                     Norm_Hubar,  alpha_Hubar,  beta_Hubar,  alphap_Hqbar,
-                     Norm_HdV,    alpha_HdV,    beta_HdV,    alphap_HdV,
-                     Norm_Hdbar,  alpha_Hdbar,  beta_Hdbar, 
-                     Norm_Hg,     alpha_Hg,     beta_Hg,     alphap_Hg,
-                     Norm_EuV,    alpha_EuV,    beta_EuV,    alphap_EuV,
-                     Norm_EdV,    R_E_Sea,      R_Hu_xi2,    R_Hd_xi2,    R_Hg_xi2,
-                     R_Eu_xi2,    R_Ed_xi2,     R_Eg_xi2,
-                     R_Hu_xi4,    R_Hd_xi4,     R_Hg_xi4,
-                     R_Eu_xi4,    R_Ed_xi4,     R_Eg_xi4,    bexp_HSea, bexp_Hg, Invm2_Hg, norm, norm2):
-
-    global Minuit_Counter, Time_Counter
-
-    time_now = time.time() - time_start
-    
-    if(time_now > Time_Counter * 600):
-        print('Runing Time:',round(time_now/60),'minutes. Cost function called total', Minuit_Counter, 'times.')
-        Time_Counter = Time_Counter + 1
-    
-    Minuit_Counter = Minuit_Counter + 1
-    Para_Unp_lst = [Norm_HuV,    alpha_HuV,    beta_HuV,    alphap_HuV, 
-                    Norm_Hubar,  alpha_Hubar,  beta_Hubar,  alphap_Hqbar,
-                    Norm_HdV,    alpha_HdV,    beta_HdV,    alphap_HdV,
-                    Norm_Hdbar,  alpha_Hdbar,  beta_Hdbar, 
-                    Norm_Hg,     alpha_Hg,     beta_Hg,     alphap_Hg,
-                    Norm_EuV,    alpha_EuV,    beta_EuV,    alphap_EuV,
-                    Norm_EdV,    R_E_Sea,      R_Hu_xi2,    R_Hd_xi2,    R_Hg_xi2,
-                    R_Eu_xi2,    R_Ed_xi2,     R_Eg_xi2,
-                    R_Hu_xi4,    R_Hd_xi4,     R_Hg_xi4,
-                    R_Eu_xi4,    R_Ed_xi4,     R_Eg_xi4,    bexp_HSea, bexp_Hg, Invm2_Hg, norm, norm2]
-
-    jpsinorm = Para_Unp_lst[-2]
-    jpsinormzeus = Para_Unp_lst[-1] 
-    Para_Unp_all = ParaManager_Unp(Para_Unp_lst[:-2])
-    
-    PDF_H_g_smallx_pred = PDF_theo(PDFg_smallx_data, Para=Para_Unp_all, p_order = 2)
-    cost_PDF_H_g_smallx = np.sum(((PDF_H_g_smallx_pred - PDFg_smallx_data['f'])/ PDFg_smallx_data['delta f']) ** 2 )
-
-    #cost_DVjpsiPH1_xBtQ = np.array(list(pool.map(partial(DVMPxsec_cost_xBtQ, Para_Unp = Para_Unp_all, xsec_norm = jpsinorm, meson = 3, p_order = 2), DVJpsiPH1xsec_group_data)))
-    #cost_DVjpsiPH1xsec = np.sum(cost_DVjpsiPH1_xBtQ)
-
-    cost_DVrhoPH1_xBtQ = np.array(list(pool.map(partial(DVMPxsec_cost_xBtQ, Para_Unp = Para_Unp_all, xsec_norm = 1, meson = 1, p_order = 2), DVrhoPH1xsecL_group_data)))
-    cost_DVrhoPZEUS_xBtQ = np.array(list(pool.map(partial(DVMPxsec_cost_xBtQ, Para_Unp = Para_Unp_all, xsec_norm = 1, meson = 1, p_order = 2), DVrhoPZEUSxsecL_group_data)))
-   
-    cost_DVrhoPH1_Lxsec = np.sum(cost_DVrhoPH1_xBtQ)
-    cost_DVrhoPZEUS_Lxsec = np.sum(cost_DVrhoPZEUS_xBtQ)
-
-
-    return cost_PDF_H_g_smallx + cost_DVrhoPH1_Lxsec + cost_DVrhoPZEUS_Lxsec
-
-def dvmp_fit(Paralst_Unp):
-
-    [Norm_HuV_Init,    alpha_HuV_Init,    beta_HuV_Init,    alphap_HuV_Init, 
-     Norm_Hubar_Init,  alpha_Hubar_Init,  beta_Hubar_Init,  alphap_Hqbar_Init,
-     Norm_HdV_Init,    alpha_HdV_Init,    beta_HdV_Init,    alphap_HdV_Init,
-     Norm_Hdbar_Init,  alpha_Hdbar_Init,  beta_Hdbar_Init, 
-     Norm_Hg_Init,     alpha_Hg_Init,     beta_Hg_Init,     alphap_Hg_Init,
-     Norm_EuV_Init,    alpha_EuV_Init,    beta_EuV_Init,    alphap_EuV_Init,
-     Norm_EdV_Init,    R_E_Sea_Init,      R_Hu_xi2_Init,    R_Hd_xi2_Init,    R_Hg_xi2_Init,
-     R_Eu_xi2_Init,    R_Ed_xi2_Init,     R_Eg_xi2_Init,
-     R_Hu_xi4_Init,    R_Hd_xi4_Init,     R_Hg_xi4_Init,
-     R_Eu_xi4_Init,    R_Ed_xi4_Init,     R_Eg_xi4_Init,    bexp_HSea_Init, bexp_Hg_Init, Invm2_Hg_Init, norm_Init, norm2_Init] = Paralst_Unp
-
-    Invm2_Hg_Init = 0
-    #bexp_Hg_Init = 0
-    fit_dvmp = Minuit(cost_dvmp, Norm_HuV = Norm_HuV_Init,     alpha_HuV = alpha_HuV_Init,      beta_HuV = beta_HuV_Init,     alphap_HuV = alphap_HuV_Init, 
-                                            Norm_Hubar = Norm_Hubar_Init, alpha_Hubar = alpha_Hubar_Init,  beta_Hubar = beta_Hubar_Init, alphap_Hqbar = alphap_Hqbar_Init,
-                                            Norm_HdV = Norm_HdV_Init,     alpha_HdV = alpha_HdV_Init,      beta_HdV = beta_HdV_Init,     alphap_HdV = alphap_HdV_Init,
-                                            Norm_Hdbar = Norm_Hdbar_Init, alpha_Hdbar = alpha_Hdbar_Init,  beta_Hdbar = beta_Hdbar_Init, 
-                                            Norm_Hg = Norm_Hg_Init,       alpha_Hg = alpha_Hg_Init,        beta_Hg = beta_Hg_Init,       alphap_Hg = alphap_Hg_Init,
-                                            Norm_EuV = Norm_EuV_Init,     alpha_EuV = alpha_EuV_Init,      beta_EuV = beta_EuV_Init,     alphap_EuV = alphap_EuV_Init, 
-                                            Norm_EdV = Norm_EdV_Init,     R_E_Sea = R_E_Sea_Init,          R_Hu_xi2 = R_Hu_xi2_Init,     R_Hd_xi2 = R_Hd_xi2_Init,     R_Hg_xi2 = R_Hg_xi2_Init,
-                                            R_Eu_xi2 = R_Eu_xi2_Init,     R_Ed_xi2 = R_Ed_xi2_Init,        R_Eg_xi2 = R_Eg_xi2_Init,
-                                            R_Hu_xi4 = R_Hu_xi4_Init,     R_Hd_xi4 = R_Hd_xi4_Init,        R_Hg_xi4 = R_Hg_xi4_Init,
-                                            R_Eu_xi4 = R_Eu_xi4_Init,     R_Ed_xi4 = R_Ed_xi4_Init,        R_Eg_xi4 = R_Eg_xi4_Init,     bexp_HSea = bexp_HSea_Init, bexp_Hg = bexp_Hg_Init, Invm2_Hg = Invm2_Hg_Init, norm = norm_Init, norm2 = norm2_Init)
-    fit_dvmp.errordef = 1
-
-    fit_dvmp.fixed['bexp_HSea'] = True
-    
-    #fit_dvmp.fixed['bexp_Hg'] = True
-    #fit_dvmp.limits['Invm2_Hg'] = (0.1,10)
-    
-    fit_dvmp.fixed['Invm2_Hg'] = True
-    fit_dvmp.limits['bexp_Hg']  = (0.1,4)
-    
-    #fit_dvmp.limits['norm'] = (0.1,10)
-    fit_dvmp.fixed['norm'] = True
-    
-    #fit_dvmp.limits['norm2'] = (0.1,10)
-    fit_dvmp.fixed['norm2'] = True
-
-    fit_dvmp.fixed['Norm_HuV'] = True
-    fit_dvmp.fixed['alpha_HuV'] = True
-    fit_dvmp.fixed['beta_HuV'] = True
-    fit_dvmp.fixed['alphap_HuV'] = True
-    
-    #fit_dvmp.limits['Norm_Hubar']  = (0.2, 3)
-    #fit_dvmp.limits['alpha_Hubar']  = (1.02, 1.5)
-
-    fit_dvmp.fixed['Norm_Hubar'] = True
-    fit_dvmp.fixed['alpha_Hubar'] = True
-    fit_dvmp.fixed['beta_Hubar'] = True
-
-    fit_dvmp.fixed['alphap_Hqbar'] = True
-
-    fit_dvmp.fixed['Norm_HdV'] = True
-    fit_dvmp.fixed['alpha_HdV'] = True
-    fit_dvmp.fixed['beta_HdV'] = True
-    fit_dvmp.fixed['alphap_HdV'] = True
-    
-    #fit_dvmp.limits['Norm_Hdbar']  = (0, 10)
-
-    fit_dvmp.fixed['Norm_Hdbar'] = True
-    fit_dvmp.fixed['alpha_Hdbar'] = True
-    fit_dvmp.fixed['beta_Hdbar'] = True
-
-    
-
-    fit_dvmp.limits['Norm_Hg']=(0,10)
-    fit_dvmp.limits['alpha_Hg']=(0,2)
-    fit_dvmp.fixed['beta_Hg'] = True
-    #fit_dvmp.limits['beta_Hg']=(1,10)
-
-   # fit_dvmp.fixed['Norm_Hg'] = True
-   # fit_dvmp.fixed['alpha_Hg'] = True
-   # fit_dvmp.fixed['beta_Hg'] = True
-
-    fit_dvmp.fixed['Norm_EuV'] = True
-    fit_dvmp.fixed['alpha_EuV'] = True
-    fit_dvmp.fixed['beta_EuV'] = True
-    fit_dvmp.fixed['alphap_EuV'] = True
-
-    fit_dvmp.fixed['Norm_EdV'] = True
-
-    #fit_dvmp.fixed['alphap_Hg'] = True
-    fit_dvmp.limits['alphap_Hg'] = (0,0.5)
-    
-    
-    fit_dvmp.limits['R_Hg_xi2'] = (-1,1)
-    fit_dvmp.limits['R_Hg_xi4'] = (-1,1)
-    #fit_dvmp.limits['R_Hu_xi2'] = (-1,1)
-    #fit_dvmp.limits['R_Hu_xi4'] = (-1,1)
-    #fit_dvmp.limits['R_Hd_xi2'] = (-1,1)
-    #fit_dvmp.limits['R_Hd_xi4'] = (-1,1)
-    
-    fit_dvmp.fixed['R_E_Sea']= True 
-    fit_dvmp.fixed['R_Hu_xi2'] = True
-    fit_dvmp.fixed['R_Hd_xi2'] = True 
-    
-    #fit_dvmp.limits['R_Hg_xi2'] = True
-    fit_dvmp.fixed['R_Eu_xi2'] = True 
-    fit_dvmp.fixed['R_Ed_xi2'] = True 
-    fit_dvmp.fixed['R_Eg_xi2'] = True
-  # fit_dvmp.fixed['R_Hg_xi2'] = True
-
-    #fit_dvmp.fixed['R_Hg_xi4'] = True
-    fit_dvmp.fixed['R_Eg_xi4'] = True
-    
-
-    fit_dvmp.fixed['R_Hu_xi4']  = True 
-    fit_dvmp.fixed['R_Eu_xi4']  = True
-
-    fit_dvmp.fixed['R_Hd_xi4']  = True 
-    fit_dvmp.fixed['R_Ed_xi4']  = True
-    
-    
-    global Minuit_Counter, Time_Counter, time_start
-    Minuit_Counter = 0
-    Time_Counter = 1
-    time_start = time.time()
-    
-    fit_dvmp.migrad()
-    fit_dvmp.hesse()
-
-    ndof_dvmp = len(DVrhoPZEUSxsecL_data)+len(DVrhoPH1xsecL_data) + len(PDFg_smallx_data) - fit_dvmp.nfit 
-
-    time_end = time.time() -time_start
-
-    with open(os.path.join(dir_path,'GUMP_Output/dvmp_fit_NLOPDF.txt'), 'w', encoding="utf-8") as f:
-        print('Total running time: %.1f minutes. Total call of cost function: %3d.\n' % ( time_end/60, fit_dvmp.nfcn), file=f)
-        print('The chi squared/d.o.f. is: %.2f / %3d ( = %.2f ).\n' % (fit_dvmp.fval, ndof_dvmp, fit_dvmp.fval/ndof_dvmp), file = f)
-        print('Below are the final output parameters from iMinuit:', file = f)
-        print(*fit_dvmp.values, sep=", ", file = f)
-        print(*fit_dvmp.errors, sep=", ", file = f)
-        print(fit_dvmp.params, file = f)
-
-    with open(os.path.join(dir_path,"GUMP_Output/dvmp_cov.csv"),"w", newline='', encoding="utf-8") as my_csv:
-        csvWriter = csv.writer(my_csv,delimiter=',')
-        csvWriter.writerows([*fit_dvmp.covariance])
         
-    with open(os.path.join(dir_path,"GUMP_Params/Para_Unp.csv"),"w",newline='') as my_csv:
-        csvWriter = csv.writer(my_csv,delimiter=',')
-        csvWriter.writerow(list([*fit_dvmp.values])[:-2])
-        csvWriter.writerow(list([*fit_dvmp.errors])[:-2])
-  
-    print("dvmp fit finished...")
-    return fit_dvmp
+    return fit_off_forward
 
 if __name__ == '__main__':
     pool = Pool()
@@ -1545,5 +1370,4 @@ if __name__ == '__main__':
 
     #Paralst_Unp_Ext2 = np.concatenate((Paralst_Unp, np.array([norm1,norm2])))
     #fit_dvmp = dvmp_fit(Paralst_Unp_Ext2)
-
 
