@@ -1,8 +1,6 @@
 """
 Not in use currently. Can be used to set config parameters.
 """
-
-#fixed order quadrature for the Mellin Barnes integral, Fix_Order_Quad = 1 by default for turning on
-Fixed_Order_Quad = 1
-#the highest order of polynomials
-n_Fixed_Order_Quad = 500
+# Turn it on (set to true) so the cost function will save the results to files
+# Only used after the fit is finished!
+Export_Mode = False
