@@ -1,0 +1,29 @@
+[project]
+name = "GUMPGPD"
+version = "0.1.0"
+description = "GPD analysis tools with DVCS, DVMP, lattice inputs, ... "
+readme = "README.md"
+requires-python = ">=3.8"
+license = {text = "MIT"}
+authors = [
+  { name = "Yuxun Guo", email = "youuungx@gmail.com" }
+]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Operating System :: OS Independent",
+]
+license-files = ["LICEN[CS]E*"]
+
+dependencies = [
+  "iminuit",
+  "joblib",
+  "mpmath",
+  "numba",
+  "numpy",
+  "pandas",
+  "scipy"
+]
+
+[build-system]
+requires = ["hatchling >= 1.26"]
+build-backend = "hatchling.build"
