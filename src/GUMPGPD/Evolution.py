@@ -12,7 +12,7 @@ Note:
 # from this import d
 
 import numpy as np
-from Parameters import Moment_Sum
+from GUMPGPD.Parameters import Moment_Sum
 from scipy.special import psi, zeta, gamma, loggamma, p_roots
 from math import factorial, log
 from mpmath import mp, hyp2f1

@@ -1,7 +1,7 @@
-from Parameters import ParaManager_Unp, ParaManager_Pol
-from Observables import GPDobserv
-from DVCS_xsec import dsigma_DVCS_TOT, Asymmetry_DVCS_TOT, dsigma_DVCS_HERA, M
-from DVMP_xsec import dsigma_DVMP_dt,dsigmaL_DVMP_dt, M_jpsi,epsilon, R_fitted
+from GUMPGPD.Parameters import ParaManager_Unp, ParaManager_Pol
+from GUMPGPD.Observables import GPDobserv
+from GUMPGPD.DVCS_xsec import dsigma_DVCS_TOT, Asymmetry_DVCS_TOT, dsigma_DVCS_HERA, M
+from GUMPGPD.DVMP_xsec import dsigma_DVMP_dt,dsigmaL_DVMP_dt, M_jpsi,epsilon, R_fitted
 from multiprocessing import Pool
 from functools import partial
 from iminuit import Minuit

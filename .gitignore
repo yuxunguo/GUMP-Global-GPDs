@@ -16,3 +16,6 @@ _joblib_cache_
 
 # GUMP-related test/working files 
 GUMP_Results/
+
+# PyPI dist files 
+dist/

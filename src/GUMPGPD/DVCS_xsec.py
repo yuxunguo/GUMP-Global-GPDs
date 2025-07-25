@@ -22,7 +22,6 @@ from numpy import pi as Pi
 from numpy import real as Real
 from numpy import imag as Imag
 from numpy import conjugate as Conjugate
-import warnings
 
 from numba import njit, vectorize
 

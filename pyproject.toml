@@ -1,6 +1,6 @@
 [project]
 name = "GUMPGPD"
-version = "0.1.0"
+version = "0.1.0-dev1"
 description = "GPD analysis tools with DVCS, DVMP, lattice inputs, ... "
 readme = "README.md"
 requires-python = ">=3.8"
