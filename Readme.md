@@ -10,5 +10,12 @@ This repository contains the source code for the **Generalized Parton Distributi
 - **Performance Note:**  
   Evaluating GPDs can be computationally intensive, as it involves QCD evolution in moment space and numerical contour integrals to transform back to the momentum fraction (x) space.
 
+## Usage
+
+- **For simple usage** install through pip by ```pip install gumpgpd``` (To be uploaded soon) check the script under ```/test``` for example usage.
+
+- **For modified package and developer**  download the whole branch and run ```pip install -e .``` to install locally (Make sure to ```pip uninstall gumpgpd``` to avoid conflicts if you install the pip version already)
+
+## Documentation
 For detailed documentation and further information, please visit:  
 [https://yuxunguo.github.io/GUMP-Global-GPDs/](https://yuxunguo.github.io/GUMP-Global-GPDs/)

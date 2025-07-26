@@ -10,9 +10,9 @@ Note:
 # from cmath import exp
 # from scipy.special import loggamma as clngamma
 # from this import d
+from .Parameters import Moment_Sum
 
 import numpy as np
-from GUMPGPD.Parameters import Moment_Sum
 from scipy.special import psi, zeta, gamma, loggamma, p_roots
 from math import factorial, log
 from mpmath import mp, hyp2f1
@@ -24,7 +24,8 @@ import os
 
 dir_path = os.path.dirname(os.path.realpath(__file__))
 
-cache_dir = os.path.join(dir_path, './_joblib_cache_')
+cache_dir = './_joblib_cache_'
+
 if not os.path.exists(cache_dir):
     os.makedirs(cache_dir)
 
@@ -1366,43 +1367,6 @@ def TFF_Evo_LO(j: np.array, nf: int, p: int, mu: float, ConfFlav: np.array, meso
 
     return EvoConf
 
-def np_cache_DVMP_Wilson_Coef(function):
-    @functools.wraps(function)
-    def wrapper(arr, nf, p, Q, meson, muset):
-        # Serialize the array and create a unique cache key
-        key = (
-            arr.tobytes(),  # Serialize the NumPy array
-            nf,             # Use integers and floats directly
-            p,
-            Q,
-            meson,
-            muset
-        )
-        
-        # Check if the result is in cache
-        if key in cache:
-            return cache[key]
-
-        # Compute and store the result in the cache
-        cache[key] = function(arr, nf, p, Q, meson, muset)
-        return cache[key]
-
-    # Cache dictionary
-    cache = {}
-
-    # Add cache management methods
-    def cache_info():
-        return {"size": len(cache)}
-
-    def cache_clear():
-        cache.clear()
-
-    wrapper.cache_info = cache_info
-    wrapper.cache_clear = cache_clear
-
-    return wrapper
-
-#@np_cache_DVMP_Wilson_Coef
 @memory.cache
 def DVMP_WCoef_Evo_NLO(j: np.array, nf: int, p: int, Q: float, meson: int, muf: float) -> Tuple[np.ndarray, np.ndarray]:
     """Next-to-leading order evolution of the DVMP Wilson coefficient (Evolved Wilson coefficient method)
@@ -1576,42 +1540,6 @@ def TFF_Evo_NLO_evWC(j: np.array, nf: int, p: int, Q: float, ConfFlav: np.array,
     
     return EvoConf
 
-def np_cache_DVCS_Wilson_Coef(function):
-    @functools.wraps(function)
-    def wrapper(arr, nf, p, Q, muset):
-        # Serialize the array and create a unique cache key
-        key = (
-            arr.tobytes(),  # Serialize the NumPy array
-            nf,             # Use integers and floats directly
-            p,
-            Q,
-            muset
-        )
-        
-        # Check if the result is in cache
-        if key in cache:
-            return cache[key]
-
-        # Compute and store the result in the cache
-        cache[key] = function(arr, nf, p, Q, muset)
-        return cache[key]
-
-    # Cache dictionary
-    cache = {}
-
-    # Add cache management methods
-    def cache_info():
-        return {"size": len(cache)}
-
-    def cache_clear():
-        cache.clear()
-
-    wrapper.cache_info = cache_info
-    wrapper.cache_clear = cache_clear
-
-    return wrapper
-
-#@np_cache_DVCS_Wilson_Coef
 @memory.cache
 def DVCS_WCoef_Evo_NLO(j: np.array, nf: int, p: int, Q: float, muf: float) -> Tuple[np.ndarray, np.ndarray]:
     """Next-to-leading order evolution of the DVCS Wilson coefficient (Evolved Wilson coefficient method)
@@ -2175,6 +2103,8 @@ def np_cache_tPDF_moment(function):
 
     return wrapper
 
+
+#@memory.cache
 @np_cache_tPDF_moment
 def tPDF_Moment_Evo_NLO(j: np.array, nf: int, p: int, mu: float, ConfFlav: np.array) -> np.array:
     """FORWARD Next-to-leading order evolved conformal moments in the evolution basis (Evolved moment method)    
@@ -2196,7 +2126,7 @@ def tPDF_Moment_Evo_NLO(j: np.array, nf: int, p: int, mu: float, ConfFlav: np.ar
     | Therefore, j has shape (N,) where N is the interpolating order of the fixed quad.
     | Other quantities must be broadcastable with j and thus they should be preferrably scalar
     """
-    
+
     assert j.ndim == 1, "Check dimension of j, must be 1D array" # shape (N,)
     
     # Transform the unevolved moments to evolution basis
@@ -2258,6 +2188,7 @@ def tPDF_Moment_Evo_NLO(j: np.array, nf: int, p: int, mu: float, ConfFlav: np.ar
 
     return EvoConf
 
+#@memory.cache
 @np_cache_tPDF_moment
 def tPDF_Moment_Evo_NLO_NSp1(j: np.array, nf: int, p: int, mu: float, ConfFlav: np.array) -> np.array:
     """FORWARD Next-to-leading order evolved conformal moments in the evolution basis (Evolved moment method)    

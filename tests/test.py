@@ -1,3 +1,4 @@
-from GUMPGPD import Minimizer as gp_mini
+import gumpgpd as gp
+from gumpgpd.Minimizer import *
+import numpy as np
 
-print(gp_mini.PDF_data)

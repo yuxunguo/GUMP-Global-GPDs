@@ -1,16 +1,17 @@
-from GUMPGPD.Parameters import ParaManager_Unp, ParaManager_Pol
-from GUMPGPD.Observables import GPDobserv
-from GUMPGPD.DVCS_xsec import dsigma_DVCS_TOT, Asymmetry_DVCS_TOT, dsigma_DVCS_HERA, M
-from GUMPGPD.DVMP_xsec import dsigma_DVMP_dt,dsigmaL_DVMP_dt, M_jpsi,epsilon, R_fitted
+from .Parameters import ParaManager_Unp, ParaManager_Pol
+from .Observables import GPDobserv
+from .DVCS_xsec import dsigma_DVCS_TOT, Asymmetry_DVCS_TOT, dsigma_DVCS_HERA, M
+from .DVMP_xsec import dsigma_DVMP_dt,dsigmaL_DVMP_dt, M_jpsi,epsilon, R_fitted
+from .config import Export_Mode
+from .Evolution import tPDF_Moment_Evo_NLO,  tPDF_Moment_Evo_NLO_NSp1
+
+from joblib import Parallel, delayed
 from multiprocessing import Pool
 from functools import partial
 from iminuit import Minuit
 import numpy as np
 import pandas as pd
-import time
-import csv
-import os
-from config import Export_Mode
+import time, csv, os, atexit
 
 dir_path = os.path.dirname(os.path.realpath(__file__))
 Minuit_Counter = 0
@@ -18,6 +19,10 @@ Time_Counter = 1
 Q_threshold = 1.9
 xB_Cut = 0.5
 xB_small_Cut = 0.0001
+
+"""
+************************ Some auxilary functions and variables for convience ****************************
+"""
 
 Paralst_Unp_Names = [
     "Norm_HuV", "alpha_HuV", "beta_HuV", "alphap_HuV", "Invm2_HuV",
@@ -68,9 +73,9 @@ def validate_params(params: dict, required_names: set):
 
 First_Write_Flag = {}
 
-def Export_Frame_Append(df, filename):
+def Export_Frame_Append(df, filename, export_path = '.'):
 
-    os.makedirs(os.path.join(dir_path, 'GUMP_Results'), exist_ok=True)
+    os.makedirs(os.path.join(export_path, 'GUMP_Results'), exist_ok=True)
     
     global First_Write_Flag
 
@@ -79,10 +84,29 @@ def Export_Frame_Append(df, filename):
     mode = 'w' if first_write else 'a'
     header = first_write
 
-    df.to_csv(os.path.join(dir_path,'GUMP_Results',filename), mode=mode, index=False, header=header)
+    df.to_csv(os.path.join(export_path,'GUMP_Results',filename), mode=mode, index=False, header=header)
 
     # Mark file as written
     First_Write_Flag[filename] = False
+
+_pool = None
+
+def _cleanup_pool():
+    global _pool
+    if _pool is not None:
+        _pool.close()
+        _pool.join()
+        _pool = None
+
+def get_pool(processes=None):
+    global _pool
+    if _pool is None:
+        _pool = Pool(processes)
+        atexit.register(_cleanup_pool)
+    return _pool
+
+def close_pool():
+    _cleanup_pool()
     
 """
 ************************ PDF and tPDFs data preprocessing ****************************
@@ -270,7 +294,6 @@ JpsiphotoH1xsec_data['Q'] = np.sqrt(JpsiphotoH1xsec_data['Q'])
 JpsiphotoH1xsec_data['t'] = -1 * JpsiphotoH1xsec_data['t']
 JpsiphotoH1xsec_data = JpsiphotoH1xsec_data[(JpsiphotoH1xsec_data['Q']>Q_threshold)]
 xBtQlst_JpsiphotoH1 = JpsiphotoH1xsec_data.drop_duplicates(subset = ['xB', 't', 'Q'], keep = 'first')[['xB','t','Q']].values.tolist()
-
 # Helper function for scalar computation
 def PDF_theo_scalar_helper(args):
     x_i, xi_i, t_i, Q_i, p_i, flv_i, Para_i, p_order = args
@@ -295,14 +318,34 @@ def PDF_theo(PDF_input: pd.DataFrame, Para: np.array, p_order = 2):
     args = [(x_i, xi_i, t_i, Q_i, p_i, flv_i, Para_i, p_order) 
             for x_i, xi_i, t_i, Q_i, p_i, flv_i, Para_i 
             in zip(xs, xis, ts, Qs, ps, flvs, Para_spe)]
-    
-    # Use multiprocessing Pool to parallelize the computation
+
+    # Use multiprocessing Pool to parallelize the computation'
+    pool = get_pool()
     PDF_input['pred f'] = list(pool.map(PDF_theo_scalar_helper, args))
     PDF_input['cost'] = ((PDF_input["pred f"]-PDF_input["f"])/PDF_input["delta f"])**2
     
     return PDF_input
 
+def PDF_theo_parallel(PDF_input: pd.DataFrame, Para: np.array, p_order = 2):
+    
+    PDF_input = PDF_input.copy()
+    
+    PDFMask = PDF_input.duplicated(subset=['t', 'Q','spe'], keep='first')
+    PDF_input_duplicate = PDF_input[PDFMask]
+    PDF_input_unique = PDF_input[~PDFMask]
+    
+    # Run the unique ones to precache and avoid conflicts in writing cache
+    PDF_input_unique = PDF_theo(PDF_input_unique, Para = Para, p_order = p_order)
+    # Run the duplicate ones can be calculated from the cache
+    PDF_input_duplicate = PDF_theo(PDF_input_duplicate, Para = Para, p_order = p_order)
+    
+    PDF_input_reconstructed = pd.concat([PDF_input_unique, PDF_input_duplicate])
+    
+    return PDF_input_reconstructed
+
 tPDF_theo = PDF_theo
+
+tPDF_theo_parallel = PDF_theo_parallel
 
 # Helper function for scalar computation
 def GFF_theo_scalar_helper(args):
@@ -332,10 +375,28 @@ def GFF_theo(GFF_input: pd.DataFrame, Para: np.array, p_order = 2):
             for j_i, t_i, Q_i, p_i, flv_i, Para_i 
             in zip(js, ts, Qs, ps, flvs, Para_spe)]
 
+    pool = get_pool()
     GFF_input['pred f'] = list(pool.map(GFF_theo_scalar_helper, args))
     GFF_input['cost'] = ((GFF_input["pred f"]-GFF_input["f"])/GFF_input["delta f"])**2
     
     return GFF_input
+
+def GFF_theo_parallel(GFF_input: pd.DataFrame, Para: np.array, p_order = 2):
+    
+    GFF_input = GFF_input.copy()
+    
+    GFFMask = GFF_input.duplicated(subset=['j','t','Q','spe'], keep='first')
+    GFF_input_duplicate = GFF_input[GFFMask]
+    GFF_input_unique = GFF_input[~GFFMask]
+
+    # Run the unique ones to precache and avoid conflicts in writing cache
+    GFF_input_unique = GFF_theo(GFF_input_unique, Para = Para, p_order = p_order)
+    # Run the duplicate ones can be calculated from the cache
+    GFF_input_duplicate = GFF_theo(GFF_input_duplicate, Para = Para, p_order = p_order)
+    
+    GFF_input_reconstructed = pd.concat([GFF_input_unique, GFF_input_duplicate])
+    
+    return GFF_input_reconstructed
 
 def CFF_theo(xB, t, Q, Para_Unp, Para_Pol, porder = 2):
     x = 0
@@ -493,7 +554,16 @@ def cost_forward_H(Norm_HuV,    alpha_HuV,    beta_HuV,    alphap_HuV,   Invm2_H
         Time_Counter = Time_Counter + 1
     
     Minuit_Counter = Minuit_Counter + 1
-    
+
+    # In general it's not necessary to flush the cache each call
+    # Here we know that the cached results will be useless after the parameters are changed
+    # So we remove the cached file every time the cost function is called to save space
+    # Not needed if the cached results doesn't depend on Para, e.g., using evolved Wilson coefficient method
+
+    #tPDF_Moment_Evo_NLO.clear()
+    #tPDF_Moment_Evo_NLO_NSp1.clear()
+
+    #PDF_H_pred = PDF_theo_parallel(PDF_data_H, Para=Para_Comb)
     PDF_H_pred = PDF_theo(PDF_data_H, Para=Para_Comb)
 
     if (Export_Mode == True):
@@ -503,7 +573,7 @@ def cost_forward_H(Norm_HuV,    alpha_HuV,    beta_HuV,    alphap_HuV,   Invm2_H
         
     return PDF_H_pred['cost'].sum() 
 
-def forward_H_fit(Paralst_Unp):
+def forward_H_fit(Paralst_Unp, export_path = '.'):
     
     assert Export_Mode == False, "Make sure the Export_Mode is set to False in config.py before fitting"
     
@@ -551,34 +621,36 @@ def forward_H_fit(Paralst_Unp):
     Minuit_Counter = 0
     Time_Counter = 1
     time_start = time.time()
-
+    
+    print("------------------------------------------")
+    print("H fit starts, update in 10 mins")
+    
     fit_forw_H.migrad()
     fit_forw_H.hesse()
     
-    print("H fit finished...")
-    
+    print("H fit finished, see summary in /GUMP_Output")
+
     ndof_H = len(PDF_data_H.index)  - fit_forw_H.nfit 
 
     time_end = time.time() -time_start
-
-    with open(os.path.join(dir_path,'GUMP_Output/H_forward_fit.txt'), 'w', encoding='utf-8') as f:
+    
+    os.makedirs(os.path.join(export_path, 'GUMP_Output'), exist_ok=True)
+    
+    with open(os.path.join(export_path,'GUMP_Output/H_forward_fit.txt'), 'w', encoding='utf-8') as f:
         print('Total running time: %.1f minutes. Total call of cost function: %3d.\n' % ( time_end/60, fit_forw_H.nfcn), file=f)
         print('The chi squared/d.o.f. is: %.2f / %3d ( = %.2f ).\n' % (fit_forw_H.fval, ndof_H, fit_forw_H.fval/ndof_H), file = f)
         print('Below are the final output parameters from iMinuit:', file = f)
         print(*fit_forw_H.values, sep=", ", file = f)
         print(*fit_forw_H.errors, sep=", ", file = f)
         print(fit_forw_H.params, file = f)
-
-    with open(os.path.join(dir_path,"GUMP_Output/H_forward_cov.csv"),"w",newline='') as my_csv:
+        
+    '''
+    with open(os.path.join(export_path,"GUMP_Output/H_forward_cov.csv"),"w",newline='') as my_csv:
         csvWriter = csv.writer(my_csv,delimiter=',')
         csvWriter.writerows([*fit_forw_H.covariance])
 
-    with open(os.path.join(dir_path,"GUMP_Params/Para_Unp.csv"),"w",newline='') as my_csv:
-        csvWriter = csv.writer(my_csv,delimiter=',')
-        csvWriter.writerow(list([*fit_forw_H.values]))
-        csvWriter.writerow(list([*fit_forw_H.errors]))
-        print("H fit parameters saved to Para_Unp.csv")
-        
+    '''
+
     return fit_forw_H
 
 def cost_forward_Ht(Norm_HtuV,   alpha_HtuV,   beta_HtuV,   alphap_HtuV, 
@@ -599,6 +671,16 @@ def cost_forward_Ht(Norm_HtuV,   alpha_HtuV,   beta_HtuV,   alphap_HtuV,
     # This is just to match the shape, the 1st Para_Unp_all corresponds to species = 0 and 1 should never be called for Ht fit
     Para_Comb = np.concatenate([Para_Pol_all, Para_Pol_all], axis=0)
     
+    # In general it's not necessary to flush the cache each call
+    # Here we know that the cached results will be useless after the parameters are changed
+    # So we remove the cached file every time the cost function is called to save space
+    # Not needed if the cached results doesn't depend on Para, e.g., using evolved Wilson coefficient method
+
+    #tPDF_Moment_Evo_NLO.clear()
+    #tPDF_Moment_Evo_NLO_NSp1.clear()
+    
+    #PDF_Ht_pred = PDF_theo_parallel(PDF_data_Ht, Para=Para_Comb)
+    
     PDF_Ht_pred = PDF_theo(PDF_data_Ht, Para=Para_Comb)
 
     if (Export_Mode == True):
@@ -608,7 +690,7 @@ def cost_forward_Ht(Norm_HtuV,   alpha_HtuV,   beta_HtuV,   alphap_HtuV,
 
     return PDF_Ht_pred['cost'].sum()
 
-def forward_Ht_fit(Paralst_Pol):
+def forward_Ht_fit(Paralst_Pol, export_path = '.'):
     
     assert Export_Mode == False, "Make sure the Export_Mode is set to False in config.py before fitting"
     
@@ -644,32 +726,32 @@ def forward_Ht_fit(Paralst_Pol):
     global time_start 
     time_start = time.time()
     
+    print("------------------------------------------")
+    print("Ht fit starts, update in 10 mins")
+    
     fit_forw_Ht.migrad()
     fit_forw_Ht.hesse()
-
-    print("Ht fit finished...")
     
-    ndof_Ht = len(PDF_data_Ht.index)  - fit_forw_Ht.nfit
+    print("Ht fit finished, see summary in /GUMP_Output")
 
-    time_end = time.time() -time_start    
-    with open(os.path.join(dir_path,'GUMP_Output/Ht_forward_fit.txt'), 'w', encoding='utf-8') as f:
+    ndof_Ht = len(PDF_data_Ht.index)  - fit_forw_Ht.nfit
+    time_end = time.time() -time_start 
+    
+    os.makedirs(os.path.join(export_path, 'GUMP_Output'), exist_ok=True)
+    
+    with open(os.path.join(export_path,'GUMP_Output/Ht_forward_fit.txt'), 'w', encoding='utf-8') as f:
         print('Total running time: %.1f minutes. Total call of cost function: %3d.\n' % ( time_end/60, fit_forw_Ht.nfcn), file=f)
         print('The chi squared/d.o.f. is: %.2f / %3d ( = %.2f ).\n' % (fit_forw_Ht.fval, ndof_Ht, fit_forw_Ht.fval/ndof_Ht), file = f)
         print('Below are the final output parameters from iMinuit:', file = f)
         print(*fit_forw_Ht.values, sep=", ", file = f)
         print(*fit_forw_Ht.errors, sep=", ", file = f)
         print(fit_forw_Ht.params, file = f)
-
-    with open(os.path.join(dir_path,"GUMP_Output/Ht_forward_cov.csv"),"w",newline='') as my_csv:
+        
+    '''
+    with open(os.path.join(export_path,"GUMP_Output/Ht_forward_cov.csv"),"w",newline='') as my_csv:
         csvWriter = csv.writer(my_csv,delimiter=',')
         csvWriter.writerows([*fit_forw_Ht.covariance])
-
-    with open(os.path.join(dir_path,"GUMP_Params/Para_Pol.csv"),"w",newline='') as my_csv:
-        csvWriter = csv.writer(my_csv,delimiter=',')
-        csvWriter.writerow(list([*fit_forw_Ht.values]))
-        csvWriter.writerow(list([*fit_forw_Ht.errors]))
-        print("Ht fit parameters saved to Para_Pol.csv")
-        
+    '''
     return fit_forw_Ht
 
 def cost_off_forward(Norm_HuV,    alpha_HuV,    beta_HuV,    alphap_HuV,   Invm2_HuV,
@@ -716,12 +798,19 @@ def cost_off_forward(Norm_HuV,    alpha_HuV,    beta_HuV,    alphap_HuV,   Invm2
     Para_Unp_all = ParaManager_Unp(Para_Unp_lst)
     Para_Pol_all = ParaManager_Pol(Para_Pol_lst)
     Para_Comb = np.concatenate([Para_Unp_all, Para_Pol_all], axis=0)
-    
+
+    pool = get_pool()
     DVCS_pred_xBtQ = pd.concat(list(pool.map(partial(DVCSxsec_cost_xBtQ, Para_Unp = Para_Unp_all, Para_Pol = Para_Pol_all, P_order = 2), DVCSxsec_group_data)), ignore_index=True)
     DVCS_HERA_pred_xBtQ = pd.concat(list(pool.map(partial(DVCSxsec_HERA_cost_xBtQ, Para_Unp = Para_Unp_all, Para_Pol = Para_Pol_all, P_order = 2), DVCSxsec_HERA_group_data)), ignore_index=True)
     DVrhoPH1_pred_xBtQ = pd.concat(list(pool.map(partial(DVMPxsec_cost_xBtQ, Para_Unp = Para_Unp_all, xsec_norm = 1, meson = 1, p_order = 2), DVrhoPH1xsecL_group_data)), ignore_index=True)
     DVrhoPZEUS_pred_xBtQ = pd.concat(list(pool.map(partial(DVMPxsec_cost_xBtQ, Para_Unp = Para_Unp_all, xsec_norm = 1, meson = 1, p_order = 2), DVrhoPZEUSxsecL_group_data)), ignore_index=True)
     
+    #tPDF_Moment_Evo_NLO.clear()
+    #tPDF_Moment_Evo_NLO_NSp1.clear()
+    
+    #tPDF_pred = tPDF_theo_parallel(tPDF_data, Para=Para_Comb)
+    #GFF_pred = GFF_theo_parallel(GFF_data, Para=Para_Comb)
+
     tPDF_pred = tPDF_theo(tPDF_data, Para=Para_Comb)
     GFF_pred = GFF_theo(GFF_data, Para=Para_Comb)
     
@@ -739,12 +828,12 @@ def cost_off_forward(Norm_HuV,    alpha_HuV,    beta_HuV,    alphap_HuV,   Invm2
         return [DVCS_pred_xBtQ['cost'].sum()/len(DVCS_pred_xBtQ.index), DVCS_HERA_pred_xBtQ['cost'].sum()/len(DVCS_HERA_pred_xBtQ.index),
                 DVrhoPH1_pred_xBtQ['cost'].sum()/len(DVrhoPH1_pred_xBtQ.index), DVrhoPZEUS_pred_xBtQ['cost'].sum()/len(DVrhoPZEUS_pred_xBtQ.index), # + cost_DVCSAsym
                 tPDF_pred['cost'].sum()/len(tPDF_pred.index), GFF_pred['cost'].sum()/len(GFF_pred.index)]
-        
+
     return  (DVCS_pred_xBtQ['cost'].sum() + DVCS_HERA_pred_xBtQ['cost'].sum() 
              + DVrhoPH1_pred_xBtQ['cost'].sum() + DVrhoPZEUS_pred_xBtQ['cost'].sum() # + cost_DVCSAsym
              + tPDF_pred['cost'].sum() + GFF_pred['cost'].sum())
 
-def off_forward_fit(Paralst_Unp, Paralst_Pol):
+def off_forward_fit(Paralst_Unp, Paralst_Pol, export_path = '.'):
 
     assert Export_Mode == False, "Make sure the Export_Mode is set to False in config.py before fitting"
     
@@ -802,17 +891,23 @@ def off_forward_fit(Paralst_Unp, Paralst_Pol):
     Time_Counter = 1
     time_start = time.time()
     
+    print("------------------------------------------")
+    print("off forward fit starts, update in 10 mins")
+    
     fit_off_forward.migrad()
     fit_off_forward.hesse()
     
-    print("off forward fit finished...")
+    print("off forward fit finished, see summary in /GUMP_Output")
+
     time_end = time.time() -time_start
     
     ndof_off_forward = (len(DVCSxsec_data.index) + len(DVCSxsec_HERA_data.index) 
                         + len(DVrhoPH1xsec_data.index) + len(DVrhoPZEUSxsec_data.index)
                          + len(tPDF_data.index) + len(GFF_data.index) - fit_off_forward.nfit)
 
-    with open(os.path.join(dir_path,'GUMP_Output/off_forward_fit.txt'), 'w', encoding='utf-8') as f:
+    os.makedirs(os.path.join(export_path, 'GUMP_Output'), exist_ok=True)
+    
+    with open(os.path.join(export_path,'GUMP_Output/off_forward_fit.txt'), 'w', encoding='utf-8') as f:
         print('Total running time: %.1f minutes. Total call of cost function: %3d.\n' % ( time_end/60, fit_off_forward.nfcn), file=f)
         print('The chi squared/d.o.f. is: %.2f / %3d ( = %.2f ).\n' % (fit_off_forward.fval, ndof_off_forward, fit_off_forward.fval/ndof_off_forward), file = f)
         print('Below are the final output parameters from iMinuit:', file = f)
@@ -820,64 +915,13 @@ def off_forward_fit(Paralst_Unp, Paralst_Pol):
         print(*fit_off_forward.errors, sep=", ", file = f)
         print(fit_off_forward.params, file = f)
 
-    FitVals = list([*fit_off_forward.values])
-    FitErrs = list([*fit_off_forward.errors])
-    UnpLength = len(Paralst_Unp)
-    
-    with open(os.path.join(dir_path,"GUMP_Params/Para_Unp_Off_forward.csv"),"w",newline='') as my_csv:
-        csvWriter = csv.writer(my_csv,delimiter=',')
-        csvWriter.writerow(FitVals[:UnpLength])
-        csvWriter.writerow(FitErrs[:UnpLength])
-        print("off-forward fit unpolarized parameters saved to Para_Unp_Off_forward.csv")
-    
-    with open(os.path.join(dir_path,"GUMP_Params/Para_Pol_Off_forward.csv"),"w",newline='') as my_csv:
-        csvWriter = csv.writer(my_csv,delimiter=',')
-        csvWriter.writerow(FitVals[UnpLength:])
-        csvWriter.writerow(FitErrs[UnpLength:])
-        print("off-forward fit polarized parameters saved to Para_Pol_Off_forward.csv")
-
-    with open(os.path.join(dir_path,"GUMP_Output/Off_forward_cov.csv"),"w",newline='') as my_csv:
+    '''
+    with open(os.path.join(export_path,"GUMP_Output/Off_forward_cov.csv"),"w",newline='') as my_csv:
         csvWriter = csv.writer(my_csv,delimiter=',')
         csvWriter.writerows([*fit_off_forward.covariance])
-        
+    '''
+    
     return fit_off_forward
 
-if __name__ == '__main__':
-    pool = Pool()
-    time_start = time.time()
-    
-    #'''
-    Paralst_Unp=pd.read_csv(os.path.join(dir_path,'GUMP_Params/Para_Unp.csv'), header=None).to_numpy()[0]
-    Paralst_Pol=pd.read_csv(os.path.join(dir_path,'GUMP_Params/Para_Pol.csv'), header=None).to_numpy()[0]
-    
-    Para_Unp = ParaManager_Unp(Paralst_Unp)
-    Para_Pol = ParaManager_Pol(Paralst_Pol)
-    
-    fit_forward_H   = forward_H_fit(Paralst_Unp)
-    Paralst_Unp     = np.array(fit_forward_H.values)
-
-    fit_forward_Ht  = forward_Ht_fit(Paralst_Pol)
-    Paralst_Pol     = np.array(fit_forward_Ht.values)
-
-    Paralst_Unp=pd.read_csv(os.path.join(dir_path,'GUMP_Params/Para_Unp.csv'), header=None).to_numpy()[0]
-    Paralst_Pol=pd.read_csv(os.path.join(dir_path,'GUMP_Params/Para_Pol.csv'), header=None).to_numpy()[0]
-    fit_off_forward = off_forward_fit(Paralst_Unp, Paralst_Pol)
-    #'''
-    #
-    # Below is for testing, set Export_Mode to True in config.py and run through to generate the outputs
-    #
-    
-    '''
-    Paralst_Unp=pd.read_csv(os.path.join(dir_path,'GUMP_Params/Para_Unp_Off_forward.csv'), header=None).to_numpy()[0]
-    Paralst_Pol=pd.read_csv(os.path.join(dir_path,'GUMP_Params/Para_Pol_Off_forward.csv'), header=None).to_numpy()[0]
-    #Paralst_Unp=pd.read_csv(os.path.join(dir_path,'GUMP_Params/Para_Unp.csv'), header=None).to_numpy()[0]
-    #Paralst_Pol=pd.read_csv(os.path.join(dir_path,'GUMP_Params/Para_Pol.csv'), header=None).to_numpy()[0]
-    
-    params_unp = dict(zip(Paralst_Unp_Names, Paralst_Unp))
-    params_pol = dict(zip(Paralst_Pol_Names, Paralst_Pol))
-    params = {**params_unp, **params_pol}
-
-    print(cost_forward_H(**params_unp))
-    print(cost_forward_Ht(**params_pol))
-    print(cost_off_forward(**params))
-    '''
+Paralst_Unp=pd.read_csv(os.path.join(dir_path,'GUMP_Params/Para_Unp.csv'), header=None).to_numpy()[0]
+Paralst_Pol=pd.read_csv(os.path.join(dir_path,'GUMP_Params/Para_Pol.csv'), header=None).to_numpy()[0]

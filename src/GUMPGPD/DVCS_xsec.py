@@ -4,16 +4,6 @@ In this module we have the DVCS cross-section formulas with twist-two Compton fo
 The five fold cross-section dsigma over dxB dt dQ dphi dphi_S will be calculated.
 
 """
-from scipy.integrate import quad_vec
-#The proton mass M = 0.938 GeV
-M = 0.938
-
-#The fine structure constant 
-alphaEM = 1 / 137.036
-
-#Conversion factor from GeV to nb for the cross-section
-conv = 389.9 * 1000
-
 import numpy as np
 from numpy import cos as Cos
 from numpy import sin as Sin
@@ -22,10 +12,17 @@ from numpy import pi as Pi
 from numpy import real as Real
 from numpy import imag as Imag
 from numpy import conjugate as Conjugate
-
 from numba import njit, vectorize
+from scipy.integrate import quad_vec
 
-#warnings.filterwarnings(action="error", category=np.ComplexWarning)
+#The proton mass M = 0.938 GeV
+M = 0.938
+
+#The fine structure constant 
+alphaEM = 1 / 137.036
+
+#Conversion factor from GeV to nb for the cross-section
+conv = 389.9 * 1000
 
 #The prefactor for cross-section given by some kinematics
 @njit 
