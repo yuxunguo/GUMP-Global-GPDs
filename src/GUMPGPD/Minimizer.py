@@ -889,6 +889,9 @@ def off_forward_fit(Paralst_Unp, Paralst_Pol, export_path = '.'):
         "Norm_HtdV", "alpha_HtdV", "beta_HtdV",
         "Norm_Htdbar", "alpha_Htdbar", "beta_Htdbar",
         "Norm_Htg", "alpha_Htg", "beta_Htg", "alphap_Htg",
+        #may be released
+        "R_Htg_xi2", "R_Etg_xi2",
+        
         "R_Htg_xi4", "R_Etg_xi4", "R_Htu_xi4", "R_Etu_xi4", "R_Htd_xi4", "R_Etd_xi4",
         ]
     

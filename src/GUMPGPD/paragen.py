@@ -6,9 +6,9 @@ dir_path = os.path.dirname(os.path.realpath(__file__))
 
 if __name__ == '__main__':
     
-    print('Test5')
+    print('Test6')
     time_start = time.time()
-    '''
+    #'''
     fit_forward_H   = forward_H_fit(Paralst_Unp)
     Paralst_Unp     = np.array(fit_forward_H.values)
     
@@ -26,7 +26,7 @@ if __name__ == '__main__':
         csvWriter.writerow(list([*fit_forward_Ht.values]))
         csvWriter.writerow(list([*fit_forward_Ht.errors]))
         print("Ht fit parameters saved to Para_Pol.csv")
-    '''
+    #'''
     fit_off_forward = off_forward_fit(Paralst_Unp, Paralst_Pol)
     
     FitVals = list([*fit_off_forward.values])
