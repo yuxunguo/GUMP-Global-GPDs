@@ -727,6 +727,10 @@ def forward_Ht_fit(Paralst_Pol, export_path = '.'):
     '''
     return fit_forw_Ht
 
+def simple_dispatch(task):
+    func, arg = task
+    return func(arg)
+
 def cost_off_forward(Norm_HuV,    alpha_HuV,    beta_HuV,    alphap_HuV,   Invm2_HuV,
                     Norm_Hubar,  alpha_Hubar,  beta_Hubar,  alphap_Hqbar,
                     Norm_Hubar_2,  alpha_Hubar_2,  beta_Hubar_2,
@@ -771,19 +775,53 @@ def cost_off_forward(Norm_HuV,    alpha_HuV,    beta_HuV,    alphap_HuV,   Invm2
     Para_Unp_all = ParaManager_Unp(Para_Unp_lst)
     Para_Pol_all = ParaManager_Pol(Para_Pol_lst)
     Para_Comb = np.concatenate([Para_Unp_all, Para_Pol_all], axis=0)
-
-    pool = get_pool()
-    DVCS_pred_xBtQ = pd.concat(list(pool.map(partial(DVCSxsec_cost_xBtQ, Para_Unp = Para_Unp_all, Para_Pol = Para_Pol_all, P_order = 2), DVCSxsec_group_data)), ignore_index=True)
-    DVCS_HERA_pred_xBtQ = pd.concat(list(pool.map(partial(DVCSxsec_HERA_cost_xBtQ, Para_Unp = Para_Unp_all, Para_Pol = Para_Pol_all, P_order = 2), DVCSxsec_HERA_group_data)), ignore_index=True)
-    DVrhoPH1_pred_xBtQ = pd.concat(list(pool.map(partial(DVMPxsec_cost_xBtQ, Para_Unp = Para_Unp_all, xsec_norm = 1, meson = 1, p_order = 2), DVrhoPH1xsecL_group_data)), ignore_index=True)
-    DVrhoPZEUS_pred_xBtQ = pd.concat(list(pool.map(partial(DVMPxsec_cost_xBtQ, Para_Unp = Para_Unp_all, xsec_norm = 1, meson = 1, p_order = 2), DVrhoPZEUSxsecL_group_data)), ignore_index=True)
     
     tPDF_pred = tPDF_theo(tPDF_data, Para=Para_Comb)
     GFF_pred = GFF_theo(GFF_data, Para=Para_Comb)
     
-    #DVCS_Asym_pred_xBtQ = pd.concat(list(pool.map(partial(DVCSAsym_cost_xBtQ, Para_Unp = Para_Unp_all, Para_Pol = Para_Pol_all, P_order = 2), DVCSAsym_group_data)), ignore_index=True)
+    pool = get_pool()
+    
 
+    # DVCS_pred_xBtQ = pd.concat(list(pool.map(partial(DVCSxsec_cost_xBtQ, Para_Unp = Para_Unp_all, Para_Pol = Para_Pol_all, P_order = 2), DVCSxsec_group_data)), ignore_index=True)
+    # DVCS_HERA_pred_xBtQ = pd.concat(list(pool.map(partial(DVCSxsec_HERA_cost_xBtQ, Para_Unp = Para_Unp_all, Para_Pol = Para_Pol_all, P_order = 2), DVCSxsec_HERA_group_data)), ignore_index=True)
+    # DVrhoPH1_pred_xBtQ = pd.concat(list(pool.map(partial(DVMPxsec_cost_xBtQ, Para_Unp = Para_Unp_all, xsec_norm = 1, meson = 1, p_order = 2), DVrhoPH1xsecL_group_data)), ignore_index=True)
+    # DVrhoPZEUS_pred_xBtQ = pd.concat(list(pool.map(partial(DVMPxsec_cost_xBtQ, Para_Unp = Para_Unp_all, xsec_norm = 1, meson = 1, p_order = 2), DVrhoPZEUSxsecL_group_data)), ignore_index=True)
+    # DVCS_Asym_pred_xBtQ = pd.concat(list(pool.map(partial(DVCSAsym_cost_xBtQ, Para_Unp = Para_Unp_all, Para_Pol = Para_Pol_all, P_order = 2), DVCSAsym_group_data)), ignore_index=True)
+
+    # Instead of initial a parallelization for each task (shown above)
+    # the following scripts collects them into a larger task
+    # This would reduce overhead (due to pickling, scheduling, etc.)
+    # Not necessary if each task is large (NOT the case here)
+    
+    f1 = partial(DVCSxsec_cost_xBtQ, Para_Unp=Para_Unp_all, Para_Pol=Para_Pol_all, P_order=2)
+    f2 = partial(DVCSxsec_HERA_cost_xBtQ, Para_Unp=Para_Unp_all, Para_Pol=Para_Pol_all, P_order=2)
+    f3 = partial(DVMPxsec_cost_xBtQ, Para_Unp=Para_Unp_all, xsec_norm=1, meson=1, p_order=2)
+    f4 = partial(DVMPxsec_cost_xBtQ, Para_Unp=Para_Unp_all, xsec_norm=1, meson=1, p_order=2)
+    
+    all_tasks_exp = (
+        [(f1, arg) for arg in DVCSxsec_group_data] +
+        [(f2, arg) for arg in DVCSxsec_HERA_group_data] +
+        [(f3, arg) for arg in DVrhoPH1xsecL_group_data] +
+        [(f4, arg) for arg in DVrhoPZEUSxsecL_group_data]
+    )
+    
+    all_results_exp = pool.map(simple_dispatch, all_tasks_exp)
+    
+    total_cost_exp = sum(df["cost"].sum() for df in all_results_exp if "cost" in df.columns)
+    
     if (Export_Mode == True):
+        n1 = len(DVCSxsec_group_data)
+        n2 = len(DVCSxsec_HERA_group_data)
+        n3 = len(DVrhoPH1xsecL_group_data)
+        n4 = len(DVrhoPZEUSxsecL_group_data)
+
+        i1, i2, i3 = n1, n1+n2, n1+n2+n3
+
+        DVCS_pred_xBtQ         = pd.concat(all_results_exp[:i1], ignore_index=True)
+        DVCS_HERA_pred_xBtQ    = pd.concat(all_results_exp[i1:i2], ignore_index=True)
+        DVrhoPH1_pred_xBtQ     = pd.concat(all_results_exp[i2:i3], ignore_index=True)
+        DVrhoPZEUS_pred_xBtQ   = pd.concat(all_results_exp[i3:], ignore_index=True)
+    
         Export_Frame_Append(DVCS_pred_xBtQ,"DVCSxsec.csv")
         Export_Frame_Append(DVCS_HERA_pred_xBtQ,"DVCSxsec_HERA.csv")
         Export_Frame_Append(DVrhoPH1_pred_xBtQ,"DVMPxsec.csv")
@@ -795,10 +833,14 @@ def cost_off_forward(Norm_HuV,    alpha_HuV,    beta_HuV,    alphap_HuV,   Invm2
         return [DVCS_pred_xBtQ['cost'].sum()/len(DVCS_pred_xBtQ.index), DVCS_HERA_pred_xBtQ['cost'].sum()/len(DVCS_HERA_pred_xBtQ.index),
                 DVrhoPH1_pred_xBtQ['cost'].sum()/len(DVrhoPH1_pred_xBtQ.index), DVrhoPZEUS_pred_xBtQ['cost'].sum()/len(DVrhoPZEUS_pred_xBtQ.index), # + cost_DVCSAsym
                 tPDF_pred['cost'].sum()/len(tPDF_pred.index), GFF_pred['cost'].sum()/len(GFF_pred.index)]
-
+    
+    return total_cost_exp + tPDF_pred['cost'].sum() + GFF_pred['cost'].sum()
+    
+    '''
     return  (DVCS_pred_xBtQ['cost'].sum() + DVCS_HERA_pred_xBtQ['cost'].sum() 
              + DVrhoPH1_pred_xBtQ['cost'].sum() + DVrhoPZEUS_pred_xBtQ['cost'].sum() # + cost_DVCSAsym
              + tPDF_pred['cost'].sum() + GFF_pred['cost'].sum())
+    '''
 
 def off_forward_fit(Paralst_Unp, Paralst_Pol, export_path = '.'):
 
