@@ -3,9 +3,7 @@ from .Observables import GPDobserv
 from .DVCS_xsec import dsigma_DVCS_TOT, Asymmetry_DVCS_TOT, dsigma_DVCS_HERA, M
 from .DVMP_xsec import dsigma_DVMP_dt,dsigmaL_DVMP_dt, M_jpsi,epsilon, R_fitted
 from .config import Export_Mode
-from .Evolution import tPDF_Moment_Evo_NLO,  tPDF_Moment_Evo_NLO_NSp1
 
-from joblib import Parallel, delayed
 from multiprocessing import Pool
 from functools import partial
 from iminuit import Minuit
@@ -107,7 +105,25 @@ def get_pool(processes=None):
 
 def close_pool():
     _cleanup_pool()
-    
+
+def group_by_unique(data, subset=['xB', 't', 'Q']):
+    """
+    Group a DataFrame by unique combinations of specified columns.
+
+    Parameters:
+        data (pd.DataFrame): The input DataFrame.
+        subset (List[str], optional): Columns to group by. Default is ['xB', 't', 'Q'].
+
+    Returns:
+        List[pd.DataFrame]: A list of DataFrames, each corresponding to a unique group.
+    """
+    unique_combinations = data.drop_duplicates(subset=subset, keep='first')[subset].values.tolist()
+    grouped_data = [
+        data[np.logical_and.reduce([data[col] == val for col, val in zip(subset, values)])]
+        for values in unique_combinations
+    ]
+    return grouped_data
+
 """
 ************************ PDF and tPDFs data preprocessing ****************************
 """
@@ -139,20 +155,17 @@ GFF_Gluon_data_Et = GFF_Gluon_data[GFF_Gluon_data['spe'] == 3]
 DVCSxsec_data = pd.read_csv(os.path.join(dir_path,'GUMPDATA/DVCSxsec_Old.csv'), header = None, names = ['y', 'xB', 't', 'Q', 'phi', 'f', 'delta f', 'pol'] , dtype = {'y': float, 'xB': float, 't': float, 'Q': float, 'phi': float, 'f': float, 'delta f': float, 'pol': str})
 DVCSxsec_data_invalid = DVCSxsec_data[DVCSxsec_data['t']*(DVCSxsec_data['xB']-1) - M ** 2 * DVCSxsec_data['xB'] ** 2 < 0]
 DVCSxsec_data = DVCSxsec_data[(DVCSxsec_data['Q'] > Q_threshold) & (DVCSxsec_data['xB'] < xB_Cut) & (DVCSxsec_data['t']*(DVCSxsec_data['xB']-1) - M ** 2 * DVCSxsec_data['xB'] ** 2 > 0) & (DVCSxsec_data['delta f']>0) & ((DVCSxsec_data['f']>0) | (DVCSxsec_data['pol']!='UU'))]
-xBtQlst = DVCSxsec_data.drop_duplicates(subset = ['xB', 't', 'Q'], keep = 'first')[['xB','t','Q']].values.tolist()
-DVCSxsec_group_data = list(map(lambda set: DVCSxsec_data[(DVCSxsec_data['xB'] == set[0]) & (DVCSxsec_data['t'] == set[1]) & ((DVCSxsec_data['Q'] == set[2]))], xBtQlst))
+DVCSxsec_group_data = group_by_unique(DVCSxsec_data)
 
 DVCSxsec_HERA_data = pd.read_csv(os.path.join(dir_path,'GUMPDATA/DVCSxsec_HERA.csv'), header = None, names = ['y', 'xB', 't', 'Q', 'f', 'delta f', 'pol'] , dtype = {'y': float, 'xB': float, 't': float, 'Q': float, 'f': float, 'delta f': float, 'pol': str})
 DVCSxsec_HERA_data_invalid = DVCSxsec_HERA_data[DVCSxsec_HERA_data['t']*(DVCSxsec_HERA_data['xB']-1) - M ** 2 * DVCSxsec_HERA_data['xB'] ** 2 < 0]
 DVCSxsec_HERA_data = DVCSxsec_HERA_data[(DVCSxsec_HERA_data['Q'] > Q_threshold) & (DVCSxsec_HERA_data['xB'] < xB_Cut) & (DVCSxsec_HERA_data['t']*(DVCSxsec_HERA_data['xB']-1) - M ** 2 * DVCSxsec_HERA_data['xB'] ** 2 > 0)]
-xBtQlst_HERA = DVCSxsec_HERA_data.drop_duplicates(subset = ['xB', 't', 'Q'], keep = 'first')[['xB','t','Q']].values.tolist()
-DVCSxsec_HERA_group_data = list(map(lambda set: DVCSxsec_HERA_data[(DVCSxsec_HERA_data['xB'] == set[0]) & (DVCSxsec_HERA_data['t'] == set[1]) & ((DVCSxsec_HERA_data['Q'] == set[2]))], xBtQlst_HERA))
+DVCSxsec_HERA_group_data = group_by_unique(DVCSxsec_HERA_data)
 
 DVCSAsym_data = pd.read_csv(os.path.join(dir_path,'GUMPDATA/DVCSAsym.csv'), header = 0, names = ['y', 'xB', 't', 'Q', 'phi', 'f', 'delta f', 'pol'] , dtype = {'y': float, 'xB': float, 't': float, 'Q': float, 'phi': float, 'f': float, 'delta f': float, 'pol': str})
 DVCSAsym_data_invalid = DVCSAsym_data[DVCSAsym_data['t']*(DVCSAsym_data['xB']-1) - M ** 2 * DVCSAsym_data['xB'] ** 2 < 0]
 DVCSAsym_data = DVCSAsym_data[(DVCSAsym_data['Q'] > Q_threshold) & (DVCSAsym_data['xB'] < xB_Cut) & (DVCSAsym_data['t']*(DVCSAsym_data['xB']-1) - M ** 2 * DVCSAsym_data['xB'] ** 2 > 0) & DVCSAsym_data['delta f']>0]
-AsymxBtQlst = DVCSAsym_data.drop_duplicates(subset = ['xB', 't', 'Q'], keep = 'first')[['xB','t','Q']].values.tolist()
-DVCSAsym_group_data = list(map(lambda set: DVCSAsym_data[(DVCSAsym_data['xB'] == set[0]) & (DVCSAsym_data['t'] == set[1]) & ((DVCSAsym_data['Q'] == set[2]))], AsymxBtQlst))
+DVCSAsym_group_data = group_by_unique(DVCSAsym_data)
 
 """
 ************************ DVMP for rho data preprocessing ****************************
@@ -194,29 +207,27 @@ DVrhoPZEUSxsec_data = pd.read_csv(os.path.join(dir_path,'GUMPDATA/DVMP_HERA/DVrh
 DVrhoPZEUSxsec_data['Q'] = np.sqrt(DVrhoPZEUSxsec_data['Q'])
 DVrhoPZEUSxsec_data['t'] = -1 * DVrhoPZEUSxsec_data['t']
 DVrhoPZEUSxsec_data = DVrhoPZEUSxsec_data[(DVrhoPZEUSxsec_data['Q']>Q_threshold)]
-xBtQlst_rhoZ = DVrhoPZEUSxsec_data.drop_duplicates(subset = ['xB', 't', 'Q'], keep = 'first')[['xB','t','Q']].values.tolist()
-DVrhoPZEUSxsec_group_data = list(map(lambda set: DVrhoPZEUSxsec_data[(DVrhoPZEUSxsec_data['xB'] == set[0]) & (DVrhoPZEUSxsec_data['t'] == set[1]) & ((DVrhoPZEUSxsec_data['Q'] == set[2]))], xBtQlst_rhoZ))
+DVrhoPZEUSxsec_group_data = group_by_unique(DVrhoPZEUSxsec_data)
 
 # Converting to longitudinal cross-sections
 DVrhoPZEUSxsecL_data = DVrhoPZEUSxsec_data.copy()
 dsigmaL_dt_ZEUS, dsigmaL_dt_err_ZEUS = DVMP_L_Error_Prop(DVrhoPZEUSxsecL_data, 1)
 DVrhoPZEUSxsecL_data['f'] = dsigmaL_dt_ZEUS
 DVrhoPZEUSxsecL_data['delta f'] = dsigmaL_dt_err_ZEUS
-DVrhoPZEUSxsecL_group_data = list(map(lambda set: DVrhoPZEUSxsecL_data[(DVrhoPZEUSxsecL_data['xB'] == set[0]) & (DVrhoPZEUSxsecL_data['t'] == set[1]) & ((DVrhoPZEUSxsecL_data['Q'] == set[2]))], xBtQlst_rhoZ))
+DVrhoPZEUSxsecL_group_data = group_by_unique(DVrhoPZEUSxsecL_data)
 
 DVrhoPH1xsec_data = pd.read_csv(os.path.join(dir_path,'GUMPDATA/DVMP_HERA/DVrhoPH1dt.csv'), header = None, names = ['y', 'xB', 't', 'Q', 'f', 'delta f'] , dtype = {'y': float, 'xB': float, 't': float, 'Q': float, 'f': float, 'delta f': float})
 DVrhoPH1xsec_data['Q'] = np.sqrt(DVrhoPH1xsec_data['Q'])
 DVrhoPH1xsec_data['t'] = -1 * DVrhoPH1xsec_data['t']
 DVrhoPH1xsec_data = DVrhoPH1xsec_data[(DVrhoPH1xsec_data['Q']>Q_threshold)]
-xBtQlst_rhoH = DVrhoPH1xsec_data.drop_duplicates(subset = ['xB', 't', 'Q'], keep = 'first')[['xB','t','Q']].values.tolist()
-DVrhoPH1xsec_group_data = list(map(lambda set: DVrhoPH1xsec_data[(DVrhoPH1xsec_data['xB'] == set[0]) & (DVrhoPH1xsec_data['t'] == set[1]) & ((DVrhoPH1xsec_data['Q'] == set[2]))], xBtQlst_rhoH))
+DVrhoPH1xsec_group_data = group_by_unique(DVrhoPH1xsec_data)
 
 # Converting to longitudinal cross-sections
 DVrhoPH1xsecL_data = DVrhoPH1xsec_data.copy()
 dsigmaL_dt_H1, dsigmaL_dt_err_H1 = DVMP_L_Error_Prop(DVrhoPH1xsecL_data, 1)
 DVrhoPH1xsecL_data['f'] = dsigmaL_dt_H1
 DVrhoPH1xsecL_data['delta f'] = dsigmaL_dt_err_H1
-DVrhoPH1xsecL_group_data = list(map(lambda set: DVrhoPH1xsecL_data[(DVrhoPH1xsecL_data['xB'] == set[0]) & (DVrhoPH1xsecL_data['t'] == set[1]) & ((DVrhoPH1xsecL_data['Q'] == set[2]))], xBtQlst_rhoH))
+DVrhoPH1xsecL_group_data = group_by_unique(DVrhoPH1xsecL_data)
 
 """
 ************************ DVMP for phi data preprocessing ****************************
@@ -226,15 +237,13 @@ DVphiPZEUSxsec_data = pd.read_csv(os.path.join(dir_path,'GUMPDATA/DVMP_HERA/DVph
 DVphiPZEUSxsec_data['Q'] = np.sqrt(DVphiPZEUSxsec_data['Q'])
 DVphiPZEUSxsec_data['t'] = -1 * DVphiPZEUSxsec_data['t']
 DVphiPZEUSxsec_data = DVphiPZEUSxsec_data[(DVphiPZEUSxsec_data['Q']>Q_threshold)]
-xBtQlst_phiZ = DVphiPZEUSxsec_data.drop_duplicates(subset = ['xB', 't', 'Q'], keep = 'first')[['xB','t','Q']].values.tolist()
-DVphiPZEUSxsec_group_data = list(map(lambda set: DVphiPZEUSxsec_data[(DVphiPZEUSxsec_data['xB'] == set[0]) & (DVphiPZEUSxsec_data['t'] == set[1]) & ((DVphiPZEUSxsec_data['Q'] == set[2]))], xBtQlst_phiZ))
+DVphiPZEUSxsec_group_data = group_by_unique(DVphiPZEUSxsec_data)
 
 DVphiPH1xsec_data = pd.read_csv(os.path.join(dir_path,'GUMPDATA/DVMP_HERA/DVphiPH1dt.csv'), header = None, names = ['y', 'xB', 't', 'Q', 'f', 'delta f'] , dtype = {'y': float, 'xB': float, 't': float, 'Q': float, 'f': float, 'delta f': float})
 DVphiPH1xsec_data['Q'] = np.sqrt(DVphiPH1xsec_data['Q'])
 DVphiPH1xsec_data['t'] = -1 * DVphiPH1xsec_data['t']
 DVphiPH1xsec_data = DVphiPH1xsec_data[(DVphiPH1xsec_data['Q']>Q_threshold)]
-xBtQlst_phiH = DVphiPH1xsec_data.drop_duplicates(subset = ['xB', 't', 'Q'], keep = 'first')[['xB','t','Q']].values.tolist()
-DVphiPH1xsec_group_data = list(map(lambda set: DVphiPH1xsec_data[(DVphiPH1xsec_data['xB'] == set[0]) & (DVphiPH1xsec_data['t'] == set[1]) & ((DVphiPH1xsec_data['Q'] == set[2]))], xBtQlst_phiH))
+DVphiPH1xsec_group_data = group_by_unique(DVphiPH1xsec_data)
 
 """
 ************************ DVMP for Jpsi data preprocessing ****************************
@@ -244,14 +253,13 @@ DVJpsiPH1xsec_data = pd.read_csv(os.path.join(dir_path,'GUMPDATA/DVMP_HERA/DVJps
 DVJpsiPH1xsec_data['Q'] = np.sqrt(DVJpsiPH1xsec_data['Q'])
 DVJpsiPH1xsec_data['t'] = -1 * DVJpsiPH1xsec_data['t']
 DVJpsiPH1xsec_data = DVJpsiPH1xsec_data[(DVJpsiPH1xsec_data['Q']>Q_threshold)]
-xBtQlst_JpsiH = DVJpsiPH1xsec_data.drop_duplicates(subset = ['xB', 't', 'Q'], keep = 'first')[['xB','t','Q']].values.tolist()
-DVJpsiPH1xsec_L_data = DVJpsiPH1xsec_data.copy()
+DVJpsiPH1xsec_group_data = group_by_unique(DVJpsiPH1xsec_data)
 
 '''
 For Jpsi we used NRQCD framework that predict the R ratio, the following code not in use
 
 R = sigma_L / sigma_T values hardcoded and used to convert data xsec simga_tot to sigma_L
-
+DVJpsiPH1xsec_L_data = DVJpsiPH1xsec_data.copy()
 R_H1 = DVJpsiPH1xsec_L_data['f'].copy()
 R_H1[(DVJpsiPH1xsec_L_data['Q']**2 > 1) & (DVJpsiPH1xsec_L_data['Q']**2 < 5)] = 0.052
 R_H1[(DVJpsiPH1xsec_L_data['Q']**2 > 5) & (DVJpsiPH1xsec_L_data['Q']**2 < 10)] = 0.23
@@ -294,6 +302,7 @@ JpsiphotoH1xsec_data['Q'] = np.sqrt(JpsiphotoH1xsec_data['Q'])
 JpsiphotoH1xsec_data['t'] = -1 * JpsiphotoH1xsec_data['t']
 JpsiphotoH1xsec_data = JpsiphotoH1xsec_data[(JpsiphotoH1xsec_data['Q']>Q_threshold)]
 xBtQlst_JpsiphotoH1 = JpsiphotoH1xsec_data.drop_duplicates(subset = ['xB', 't', 'Q'], keep = 'first')[['xB','t','Q']].values.tolist()
+
 # Helper function for scalar computation
 def PDF_theo_scalar_helper(args):
     x_i, xi_i, t_i, Q_i, p_i, flv_i, Para_i, p_order = args
@@ -326,6 +335,8 @@ def PDF_theo(PDF_input: pd.DataFrame, Para: np.array, p_order = 2):
     
     return PDF_input
 
+#Not in use, can be rewritten for GPD though
+'''
 def PDF_theo_parallel(PDF_input: pd.DataFrame, Para: np.array, p_order = 2):
     
     PDF_input = PDF_input.copy()
@@ -342,10 +353,8 @@ def PDF_theo_parallel(PDF_input: pd.DataFrame, Para: np.array, p_order = 2):
     PDF_input_reconstructed = pd.concat([PDF_input_unique, PDF_input_duplicate])
     
     return PDF_input_reconstructed
-
+'''
 tPDF_theo = PDF_theo
-
-tPDF_theo_parallel = PDF_theo_parallel
 
 # Helper function for scalar computation
 def GFF_theo_scalar_helper(args):
@@ -380,23 +389,6 @@ def GFF_theo(GFF_input: pd.DataFrame, Para: np.array, p_order = 2):
     GFF_input['cost'] = ((GFF_input["pred f"]-GFF_input["f"])/GFF_input["delta f"])**2
     
     return GFF_input
-
-def GFF_theo_parallel(GFF_input: pd.DataFrame, Para: np.array, p_order = 2):
-    
-    GFF_input = GFF_input.copy()
-    
-    GFFMask = GFF_input.duplicated(subset=['j','t','Q','spe'], keep='first')
-    GFF_input_duplicate = GFF_input[GFFMask]
-    GFF_input_unique = GFF_input[~GFFMask]
-
-    # Run the unique ones to precache and avoid conflicts in writing cache
-    GFF_input_unique = GFF_theo(GFF_input_unique, Para = Para, p_order = p_order)
-    # Run the duplicate ones can be calculated from the cache
-    GFF_input_duplicate = GFF_theo(GFF_input_duplicate, Para = Para, p_order = p_order)
-    
-    GFF_input_reconstructed = pd.concat([GFF_input_unique, GFF_input_duplicate])
-    
-    return GFF_input_reconstructed
 
 def CFF_theo(xB, t, Q, Para_Unp, Para_Pol, porder = 2):
     x = 0
@@ -555,15 +547,6 @@ def cost_forward_H(Norm_HuV,    alpha_HuV,    beta_HuV,    alphap_HuV,   Invm2_H
     
     Minuit_Counter = Minuit_Counter + 1
 
-    # In general it's not necessary to flush the cache each call
-    # Here we know that the cached results will be useless after the parameters are changed
-    # So we remove the cached file every time the cost function is called to save space
-    # Not needed if the cached results doesn't depend on Para, e.g., using evolved Wilson coefficient method
-
-    #tPDF_Moment_Evo_NLO.clear()
-    #tPDF_Moment_Evo_NLO_NSp1.clear()
-
-    #PDF_H_pred = PDF_theo_parallel(PDF_data_H, Para=Para_Comb)
     PDF_H_pred = PDF_theo(PDF_data_H, Para=Para_Comb)
 
     if (Export_Mode == True):
@@ -670,16 +653,6 @@ def cost_forward_Ht(Norm_HtuV,   alpha_HtuV,   beta_HtuV,   alphap_HtuV,
     Para_Pol_all = ParaManager_Pol(Para_Pol_lst)
     # This is just to match the shape, the 1st Para_Unp_all corresponds to species = 0 and 1 should never be called for Ht fit
     Para_Comb = np.concatenate([Para_Pol_all, Para_Pol_all], axis=0)
-    
-    # In general it's not necessary to flush the cache each call
-    # Here we know that the cached results will be useless after the parameters are changed
-    # So we remove the cached file every time the cost function is called to save space
-    # Not needed if the cached results doesn't depend on Para, e.g., using evolved Wilson coefficient method
-
-    #tPDF_Moment_Evo_NLO.clear()
-    #tPDF_Moment_Evo_NLO_NSp1.clear()
-    
-    #PDF_Ht_pred = PDF_theo_parallel(PDF_data_Ht, Para=Para_Comb)
     
     PDF_Ht_pred = PDF_theo(PDF_data_Ht, Para=Para_Comb)
 
@@ -805,12 +778,6 @@ def cost_off_forward(Norm_HuV,    alpha_HuV,    beta_HuV,    alphap_HuV,   Invm2
     DVrhoPH1_pred_xBtQ = pd.concat(list(pool.map(partial(DVMPxsec_cost_xBtQ, Para_Unp = Para_Unp_all, xsec_norm = 1, meson = 1, p_order = 2), DVrhoPH1xsecL_group_data)), ignore_index=True)
     DVrhoPZEUS_pred_xBtQ = pd.concat(list(pool.map(partial(DVMPxsec_cost_xBtQ, Para_Unp = Para_Unp_all, xsec_norm = 1, meson = 1, p_order = 2), DVrhoPZEUSxsecL_group_data)), ignore_index=True)
     
-    #tPDF_Moment_Evo_NLO.clear()
-    #tPDF_Moment_Evo_NLO_NSp1.clear()
-    
-    #tPDF_pred = tPDF_theo_parallel(tPDF_data, Para=Para_Comb)
-    #GFF_pred = GFF_theo_parallel(GFF_data, Para=Para_Comb)
-
     tPDF_pred = tPDF_theo(tPDF_data, Para=Para_Comb)
     GFF_pred = GFF_theo(GFF_data, Para=Para_Comb)
     

@@ -539,7 +539,6 @@ def projectors(n: complex, nf: int, p: int, prty: int = 1) -> Tuple[np.ndarray, 
     pr = np.stack([prp, prm], axis=-3) # (N, 2, 2, 2)
     return lam, pr # (N, 2) and (N, 2, 2, 2)
 
- 
 def outer_subtract(arr1,arr2):   
     """Perform the outer product of two array at the last dimension, each has shape (N,..., m)
     
@@ -759,6 +758,28 @@ def bmudep(mu, zn, zk, nf: int, p: int, NS: bool = False, prty: int = 1):
                     R**(-lamk/b0)) 
     return Bjk
 
+def np_cache_Evo(function):
+    
+    cache = {}
+
+    def serialize_array(arr: np.ndarray):
+        return (arr.tobytes(), arr.shape, str(arr.dtype))
+
+    @functools.wraps(function)
+    def wrapper(j: np.ndarray, nf: int, p: int, mu: float):
+        key = (
+            serialize_array(j),
+            nf,
+            p,
+            mu
+        )
+        if key not in cache:
+            cache[key] = function(j, nf, p, mu)
+        return cache[key]
+
+    return wrapper
+
+@np_cache_Evo
 def evolop(j: complex, nf: int, p: int, mu: float):
     """Leading order GPD evolution operator E(j, nf, mu)[a,b].
 
@@ -904,8 +925,6 @@ def ConfWaveFuncEvo(j: complex, x: float, xi: float, p: int):
     
     return 0
 
-
-
 def Charge_Factor(particle:int):
     """The charge factors. For mesons it also multiplies with decay widths (f_m  is for meson m). Output is in evolution basis
     
@@ -1036,7 +1055,6 @@ def WilsonCoef_DVMP_LO(j: complex, nf: int, muf: float,meson: int) -> complex:
 
     return np.einsum('j, j...->j...', Charge_Factor(meson), CWT)*(CF/NC) 
 
-  
 def WilsonCoef_DVMP_NLO(j: complex, k: complex, nf: int, Q: float, muf: float, meson: int, p:int):
     """NLO Wilson coefficient of DVMP in the evolution basis (qVal, q_du_plus, q_du_minus, qSigma, g)
   
@@ -1178,7 +1196,6 @@ def WilsonCoef_DVMP_NLO(j: complex, k: complex, nf: int, Q: float, muf: float, m
                 2/ CF / (j + 3) * 3 * 2 ** (1+j) * gamma(5/2+j) / (gamma(3/2) * gamma(3+j)) * (NC*CGNC + CF*CGCF + beta0(nf)*np.log(mufact2/mures2)/2)],dtype=complex) #+ beta0(nf)*np.log(mufact/mures)
 
     return  np.einsum('j, j...->j...', Charge_Factor(meson), CWT)*(CF/NC)    
-
 
 def Moment_Evo_LO(j: np.array, nf: int, p: int, mu: float, ConfFlav: np.array) -> np.array:
     """Leading order evolution of moments in the flavor space 
@@ -2065,47 +2082,79 @@ def GPD_Moment_Evo_NLO(j: np.array, nf: int, p: int, mu: float, t: float, xi: co
 
     return EvoConf
 
-def np_cache_tPDF_moment(function):
-    # Dictionary for caching
+@np_cache_Evo
+def diagonal_evolution_NLO(j: np.ndarray, nf: int, p: int, mu: float) -> Tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
+    """
+    Construct LO and diagonal NLO evolution operators for given j, nf, p, mu.
+    This function does NOT depend on the input conformal moments.
+
+    Args:
+        j: conformal spin array (N,)
+        nf: number of flavors
+        p: parity type (1 or -1)
+        mu: final evolution scale
+
+    Returns:
+        - evola0NS: NS LO evolution factor (N,)
+        - evola0: SG LO evolution operator (N, 2, 2)
+        - evola1NS_diag_plus: NS NLO diagonal evolution factor (N, 3)
+        - evola1_diag: SG NLO diagonal evolution operator (N, 2, 2)
+    """
+    
+    Alphafact = np.array(AlphaS(nloop_alphaS, nf, mu)) / np.pi / 2
+    R = np.array(AlphaS(nloop_alphaS, nf, mu) / AlphaS(nloop_alphaS, nf, Init_Scale_Q))
+    b0 = beta0(nf)
+
+    lam, pr = projectors(j + 1, nf, p)
+    pproj = amuindep(j, nf, p)
+    rmu1 = rmudep(nf, lam, lam, mu)
+    Rfact = R[..., np.newaxis] ** (-lam / b0)
+
+    evola0 = np.einsum('...aij,...a->...ij', pr, Rfact)
+    gam0NS = non_singlet_LO(j + 1, nf, p)
+    evola0NS = R ** (-gam0NS / b0)
+
+    # NS NLO
+    amuindepNS_stack = np.stack((
+        amuindepNS(j, nf, p, -1),
+        amuindepNS(j, nf, p, 1),
+        amuindepNS(j, nf, p, -1),
+    ), axis=-1)
+    evola1NS_diag_plus = np.einsum(
+        '...,...i->...i',
+        Alphafact * evola0NS * rmudepNS(nf, gam0NS, gam0NS, mu),
+        amuindepNS_stack
+    )
+
+    # SG NLO
+    evola1_diag_ab = np.einsum('kab,kabij->kabij', rmu1, pproj)
+    evola1_diag = np.einsum('...abij,...b,...->...ij', evola1_diag_ab, Rfact, Alphafact)
+
+    return evola0NS, evola0, evola1NS_diag_plus, evola1_diag
+
+def np_cache_tPDF_moment(func):
     cache = {}
 
-    def cached_wrapper(arr, nf, p, mu, ConfFlav):
-        # Serialize the arrays and create a unique cache key
+    def serialize(arr: np.ndarray):
+        return (arr.tobytes(), arr.shape, str(arr.dtype))
+
+    @functools.wraps(func)
+    def wrapper(arr, nf, p, mu, ConfFlav):
         key = (
-            arr.tobytes(),            # Serialize the NumPy array arr
-            nf,                       # Use integers and floats directly
+            serialize(arr),
+            nf,
             p,
             mu,
-            ConfFlav.tobytes()        # Serialize the NumPy array ConfFlav
+            serialize(ConfFlav)
         )
-        
-        # Check if the result is in the cache
         if key not in cache:
-            cache[key] = function(arr, nf, p, mu, ConfFlav)  # Compute and store in cache
-        
-        return cache[key]  # Return the cached result
+            cache[key] = func(arr, nf, p, mu, ConfFlav)
+        return cache[key]
 
-    @functools.wraps(function)
-    def wrapper(arr, nf, p, mu, ConfFlav):
-        return cached_wrapper(arr, nf, p, mu, ConfFlav)
-
-    # Cache info method: Returns the size of the cache
-    def cache_info():
-        return {'size': len(cache)}
-
-    # Cache clear method: Clears the cache
-    def cache_clear():
-        cache.clear()
-
-    # Attach the cache management methods to the wrapper
-    wrapper.cache_info = cache_info
-    wrapper.cache_clear = cache_clear
-
+    wrapper.cache_info = lambda: {'size': len(cache)}
+    wrapper.cache_clear = cache.clear
     return wrapper
 
-
-#@memory.cache
-@np_cache_tPDF_moment
 def tPDF_Moment_Evo_NLO(j: np.array, nf: int, p: int, mu: float, ConfFlav: np.array) -> np.array:
     """FORWARD Next-to-leading order evolved conformal moments in the evolution basis (Evolved moment method)    
     
@@ -2129,67 +2178,29 @@ def tPDF_Moment_Evo_NLO(j: np.array, nf: int, p: int, mu: float, ConfFlav: np.ar
 
     assert j.ndim == 1, "Check dimension of j, must be 1D array" # shape (N,)
     
-    # Transform the unevolved moments to evolution basis
-    ConfEvoBasis = np.einsum('ij, ...j->...i', flav_trans, ConfFlav) # shape (N, 5)
-    # Taking the non-singlet and singlet parts of the conformal moments
-    ConfNS = ConfEvoBasis[..., :3] # (N, 3)
-    ConfSG = ConfEvoBasis[..., -2:] # (N, 2)
-   
-    # Set up evolution operator for WCs
-    Alphafact = np.array(AlphaS(nloop_alphaS, nf, mu)) / np.pi / 2
-    R = AlphaS(nloop_alphaS, nf, mu)/AlphaS(nloop_alphaS, nf, Init_Scale_Q) # shape N
-    R = np.array(R)
-  
-    b0 = beta0(nf)
-    lam, pr = projectors(j+1, nf, p)
-    pproj = amuindep(j, nf, p)
-    
-    rmu1 = rmudep(nf, lam, lam, mu)
+    # Transform to evolution basis
+    ConfEvoBasis = np.einsum('ij, ...j->...i', flav_trans, ConfFlav)  # (N, 5)
+    ConfNS = ConfEvoBasis[..., :3]
+    ConfSG = ConfEvoBasis[..., -2:]
 
-    Rfact = R[...,np.newaxis]**(-lam/b0)  # LO evolution (alpha(mu)/alpha(mu0))^(-gamma/beta0)
+    # Call cached evolution operator constructor
+    evola0NS, evola0, evola1NS_diag_plus, evola1_diag = diagonal_evolution_NLO(j, nf, p, mu)
 
-    # S/G LO evolution operator
-    evola0 = np.einsum('...aij,...a->...ij', pr, Rfact)
-    
-    # NS LO evolution operator
-    gam0NS = non_singlet_LO(j+1, nf, p)
-    evola0NS = R**(-gam0NS/b0)
-    
-    # LO evolved moments
+    # Apply evolution operators
     confNS_ev0 = np.einsum('...,...i->...i',evola0NS, ConfNS)
-    confSG_ev0 = np.einsum('...ij,...j->...i',evola0,ConfSG) 
-    
-    # S/G diagonal NLO evolution operator    
-    evola1_diag_ab = np.einsum('kab,kabij->kabij', rmu1, pproj)
-    evola1_diag = np.einsum('...abij,...b,...->...ij', evola1_diag_ab, Rfact,Alphafact)
-    
-    # NS diagonal NLO evolution operator, note in evolution basis (qVal, q_du_plus, q_du_minus) has parity (-1,1,-1)
-    amuindepNS_stack = np.stack((amuindepNS(j,nf,p,-1),\
-                                 amuindepNS(j,nf,p,1), \
-                                 amuindepNS(j,nf,p,-1)), axis=-1)
+    confNS_ev1 = np.einsum('...i,...i->...i',evola1NS_diag_plus,ConfNS) # shape (N,3) and (N,3) to (N,3)
 
-    evola1NS_diag_plus = np.einsum('...,...i->...i',Alphafact * evola0NS * rmudepNS(nf, gam0NS, gam0NS, mu),amuindepNS_stack ) # shape (N,) and (N,3) to (N,3)
+    confSG_ev0 = np.einsum('...ij,...j->...i', evola0, ConfSG)
+    confSG_ev1 = np.einsum('...ij,...j->...i', evola1_diag, ConfSG)
 
-    # NLO NS diagonal evolutioon 
-    confNS_ev1_diag = np.einsum('...i,...i->...i',evola1NS_diag_plus,ConfNS) # shape (N,3) and (N,3) to (N,3)
-    # S/G diagonal NLO evolution operator    
-    confSG_ev1_diag = np.einsum('...ij,...j->...i',evola1_diag,ConfSG)
-    
-    # Combine the diagonal and off-diagonal pieces
-    confSG_ev1 = confSG_ev1_diag
-    confNS_ev1 = confNS_ev1_diag
-    
-    # LO plus NLO evolution    
     conf_ev_NS_tot = confNS_ev0 + confNS_ev1
     conf_ev_SG_tot = confSG_ev0 + confSG_ev1
 
-    # Recombing the non-singlet and singlet parts
-    EvoConf = np.concatenate((conf_ev_NS_tot, conf_ev_SG_tot), axis=-1) # (N, 5)    
+    # Recombine
+    EvoConf = np.concatenate((conf_ev_NS_tot, conf_ev_SG_tot), axis=-1)
 
     return EvoConf
 
-#@memory.cache
-@np_cache_tPDF_moment
 def tPDF_Moment_Evo_NLO_NSp1(j: np.array, nf: int, p: int, mu: float, ConfFlav: np.array) -> np.array:
     """FORWARD Next-to-leading order evolved conformal moments in the evolution basis (Evolved moment method)    
     
@@ -2213,49 +2224,27 @@ def tPDF_Moment_Evo_NLO_NSp1(j: np.array, nf: int, p: int, mu: float, ConfFlav: 
     | Other quantities must be broadcastable with j and thus they should be preferrably scalar
     """
     
-    assert j.ndim == 1, "Check dimension of j, must be 1D array" # shape (N,)
-    assert p == 1, "Check parity, it must be +1 for the vector case" 
-    # Input pass the criteria, remove the potentially divergent moments:
+    assert j.ndim == 1, "j must be 1D array"
+    assert p == 1, "Only p = +1 (vector case) is supported"
+
+    # Remove divergent or nan/inf inputs
     ConfFlav = np.nan_to_num(ConfFlav)
-    
-    # Transform the unevolved moments to evolution basis
-    ConfEvoBasis = np.einsum('ij, ...j->...i', flav_trans, ConfFlav) # shape (N, 5)
-    # Taking the non-singlet and singlet parts of the conformal moments
-    ConfNS = ConfEvoBasis[..., :3] # (N, 3)
-    ConfSG = ConfEvoBasis[..., -2:] # (N, 2)
-   
-    # Set up evolution operator for WCs
-    Alphafact = np.array(AlphaS(nloop_alphaS, nf, mu)) / np.pi / 2
-    R = AlphaS(nloop_alphaS, nf, mu)/AlphaS(nloop_alphaS, nf, Init_Scale_Q) # shape N
-    R = np.array(R)
-  
-    b0 = beta0(nf)
 
-    # NS LO evolution operator
-    gam0NS = non_singlet_LO(j+1, nf, p)
-    evola0NS = R**(-gam0NS/b0)
+    # Transform to evolution basis
+    ConfEvoBasis = np.einsum('ij, ...j->...i', flav_trans, ConfFlav)  # (N, 5)
+    ConfNS = ConfEvoBasis[..., :3]   # (N, 3)
     
-    # LO evolved moments
+    # Get only NS evolution operators
+    evola0NS, _, evola1NS_diag_plus, _ = diagonal_evolution_NLO(j, nf, p, mu)
+
+    # LO + NLO NS evolution
     confNS_ev0 = np.einsum('...,...i->...i',evola0NS, ConfNS)
-    
-    # NS diagonal NLO evolution operator, note in evolution basis (qVal, q_du_plus, q_du_minus) has parity (-1,1,-1)
-    amuindepNS_stack = np.stack((amuindepNS(j,nf,p,-1),\
-                                 amuindepNS(j,nf,p,1), \
-                                 amuindepNS(j,nf,p,-1)), axis=-1)
-
-    evola1NS_diag_plus = np.einsum('...,...i->...i',Alphafact * evola0NS * rmudepNS(nf, gam0NS, gam0NS, mu),amuindepNS_stack ) # shape (N,) and (N,3) to (N,3)
-
-    # NLO NS diagonal evolutioon 
-    confNS_ev1_diag = np.einsum('...i,...i->...i',evola1NS_diag_plus,ConfNS) # shape (N,3) and (N,3) to (N,3)
-
-    # Combine the diagonal and off-diagonal pieces
-    confNS_ev1 = confNS_ev1_diag
-    
-    # LO plus NLO evolution    
+    confNS_ev1 = np.einsum('...i,...i->...i',evola1NS_diag_plus,ConfNS) # shape (N,3) and (N,3) to (N,3)
     conf_ev_NS_tot = confNS_ev0 + confNS_ev1
-    conf_ev_SG_tot = np.zeros_like(ConfEvoBasis[..., -2:])
 
-    # Recombing the non-singlet and singlet parts
-    EvoConf = np.concatenate((conf_ev_NS_tot, conf_ev_SG_tot), axis=-1) # (N, 5)    
+    # No evolution for SG sector
+    conf_ev_SG_tot = np.zeros_like(ConfEvoBasis[..., -2:])  # shape (N, 2)
 
+    # Combine NS + SG into full evolution basis
+    EvoConf = np.concatenate((conf_ev_NS_tot, conf_ev_SG_tot), axis=-1)  # shape (N, 5)
     return EvoConf
