@@ -2,7 +2,7 @@ from .Parameters import ParaManager_Unp, ParaManager_Pol
 from .Observables import GPDobserv
 from .DVCS_xsec import dsigma_DVCS_TOT, Asymmetry_DVCS_TOT, dsigma_DVCS_HERA, M
 from .DVMP_xsec import dsigma_DVMP_dt,dsigmaL_DVMP_dt, M_jpsi,epsilon, R_fitted
-from .config import Export_Mode
+from . import config
 
 from multiprocessing import Pool
 from functools import partial
@@ -17,7 +17,7 @@ Time_Counter = 1
 Q_threshold = 1.9
 xB_Cut = 0.5
 xB_small_Cut = 0.0001
-
+time_start = time.time()
 """
 ************************ Some auxilary functions and variables for convience ****************************
 """
@@ -549,7 +549,7 @@ def cost_forward_H(Norm_HuV,    alpha_HuV,    beta_HuV,    alphap_HuV,   Invm2_H
 
     PDF_H_pred = PDF_theo(PDF_data_H, Para=Para_Comb)
 
-    if (Export_Mode == True):
+    if (config.Export_Mode == True):
         Export_Frame_Append(PDF_H_pred,"PDFcomp.csv")
         
         return PDF_H_pred['cost'].sum()/len(PDF_H_pred.index)
@@ -558,7 +558,7 @@ def cost_forward_H(Norm_HuV,    alpha_HuV,    beta_HuV,    alphap_HuV,   Invm2_H
 
 def forward_H_fit(Paralst_Unp, export_path = '.'):
     
-    assert Export_Mode == False, "Make sure the Export_Mode is set to False in config.py before fitting"
+    assert config.Export_Mode == False, "Make sure the Export_Mode is set to False in config.py before fitting"
     
     params_unp = dict(zip(Paralst_Unp_Names, Paralst_Unp))
     fit_forw_H = Minuit(cost_forward_H, **params_unp)
@@ -656,7 +656,7 @@ def cost_forward_Ht(Norm_HtuV,   alpha_HtuV,   beta_HtuV,   alphap_HtuV,
     
     PDF_Ht_pred = PDF_theo(PDF_data_Ht, Para=Para_Comb)
 
-    if (Export_Mode == True):
+    if (config.Export_Mode == True):
         Export_Frame_Append(PDF_Ht_pred,"PDFcomp.csv")
         
         return PDF_Ht_pred['cost'].sum()/len(PDF_Ht_pred.index)
@@ -665,7 +665,7 @@ def cost_forward_Ht(Norm_HtuV,   alpha_HtuV,   beta_HtuV,   alphap_HtuV,
 
 def forward_Ht_fit(Paralst_Pol, export_path = '.'):
     
-    assert Export_Mode == False, "Make sure the Export_Mode is set to False in config.py before fitting"
+    assert config.Export_Mode == False, "Make sure the Export_Mode is set to False in config.py before fitting"
     
     params_pol = dict(zip(Paralst_Pol_Names, Paralst_Pol))
     fit_forw_Ht = Minuit(cost_forward_Ht, **params_pol)
@@ -755,8 +755,6 @@ def cost_off_forward(Norm_HuV,    alpha_HuV,    beta_HuV,    alphap_HuV,   Invm2
                     R_Htu_xi4,   R_Htd_xi4,    R_Htg_xi4,
                     R_Etu_xi4,   R_Etd_xi4,    R_Etg_xi4,   bexp_HtSea):
     
-    global Export_Mode
-    
     params = locals()
     validate_params(params, set(Paralst_Unp_Names + Paralst_Pol_Names))
     Para_Unp_lst = [params[name] for name in Paralst_Unp_Names]
@@ -780,7 +778,6 @@ def cost_off_forward(Norm_HuV,    alpha_HuV,    beta_HuV,    alphap_HuV,   Invm2
     GFF_pred = GFF_theo(GFF_data, Para=Para_Comb)
     
     pool = get_pool()
-    
 
     # DVCS_pred_xBtQ = pd.concat(list(pool.map(partial(DVCSxsec_cost_xBtQ, Para_Unp = Para_Unp_all, Para_Pol = Para_Pol_all, P_order = 2), DVCSxsec_group_data)), ignore_index=True)
     # DVCS_HERA_pred_xBtQ = pd.concat(list(pool.map(partial(DVCSxsec_HERA_cost_xBtQ, Para_Unp = Para_Unp_all, Para_Pol = Para_Pol_all, P_order = 2), DVCSxsec_HERA_group_data)), ignore_index=True)
@@ -809,7 +806,7 @@ def cost_off_forward(Norm_HuV,    alpha_HuV,    beta_HuV,    alphap_HuV,   Invm2
     
     total_cost_exp = sum(df["cost"].sum() for df in all_results_exp if "cost" in df.columns)
     
-    if (Export_Mode == True):
+    if (config.Export_Mode == True):
         n1 = len(DVCSxsec_group_data)
         n2 = len(DVCSxsec_HERA_group_data)
         n3 = len(DVrhoPH1xsecL_group_data)
@@ -835,16 +832,220 @@ def cost_off_forward(Norm_HuV,    alpha_HuV,    beta_HuV,    alphap_HuV,   Invm2
                 tPDF_pred['cost'].sum()/len(tPDF_pred.index), GFF_pred['cost'].sum()/len(GFF_pred.index)]
     
     return total_cost_exp + tPDF_pred['cost'].sum() + GFF_pred['cost'].sum()
+
+def cost_off_forward_withHt(Norm_HuV,    alpha_HuV,    beta_HuV,    alphap_HuV,   Invm2_HuV,
+                    Norm_Hubar,  alpha_Hubar,  beta_Hubar,  alphap_Hqbar,
+                    Norm_Hubar_2,  alpha_Hubar_2,  beta_Hubar_2,
+                    Norm_HdV,    alpha_HdV,    beta_HdV,    alphap_HdV,   Invm2_HdV,
+                    Norm_Hdbar,  alpha_Hdbar,  beta_Hdbar, 
+                    Norm_Hdbar_2,  alpha_Hdbar_2,  beta_Hdbar_2,
+                    Norm_Hg,     alpha_Hg,     beta_Hg,     alphap_Hg,  Invm2_Hg,
+                    Norm_Hg_2,     alpha_Hg_2,     beta_Hg_2,
+                    Norm_EuV,    alpha_EuV,    beta_EuV,    alphap_EuV,
+                    Norm_EdV,    R_E_Sea,      R_Hu_xi2,    R_Hd_xi2,    R_Hg_xi2,
+                    R_Eu_xi2,    R_Ed_xi2,     R_Eg_xi2,
+                    R_Hu_xi4,    R_Hd_xi4,     R_Hg_xi4,
+                    R_Eu_xi4,    R_Ed_xi4,     R_Eg_xi4,    bexp_HSea, bexp_Hg,
+                    Norm_HtuV,   alpha_HtuV,   beta_HtuV,   alphap_HtuV, 
+                    Norm_Htubar, alpha_Htubar, beta_Htubar, alphap_Htqbar,
+                    Norm_HtdV,   alpha_HtdV,   beta_HtdV,   alphap_HtdV,
+                    Norm_Htdbar, alpha_Htdbar, beta_Htdbar, 
+                    Norm_Htg,    alpha_Htg,    beta_Htg,    alphap_Htg,
+                    Norm_EtuV,   alpha_EtuV,   beta_EtuV,   alphap_EtuV,
+                    Norm_EtdV,   R_Et_Sea,     R_Htu_xi2,   R_Htd_xi2,    R_Htg_xi2,
+                    R_Etu_xi2,   R_Etd_xi2,    R_Etg_xi2,
+                    R_Htu_xi4,   R_Htd_xi4,    R_Htg_xi4,
+                    R_Etu_xi4,   R_Etd_xi4,    R_Etg_xi4,   bexp_HtSea):
     
-    '''
-    return  (DVCS_pred_xBtQ['cost'].sum() + DVCS_HERA_pred_xBtQ['cost'].sum() 
-             + DVrhoPH1_pred_xBtQ['cost'].sum() + DVrhoPZEUS_pred_xBtQ['cost'].sum() # + cost_DVCSAsym
-             + tPDF_pred['cost'].sum() + GFF_pred['cost'].sum())
-    '''
+    params = locals()
+    validate_params(params, set(Paralst_Unp_Names + Paralst_Pol_Names))
+    Para_Unp_lst = [params[name] for name in Paralst_Unp_Names]
+    Para_Pol_lst = [params[name] for name in Paralst_Pol_Names]
+    
+    global Minuit_Counter, Time_Counter
+
+    time_now = time.time() - time_start
+    
+    if(time_now > Time_Counter * 600):
+        print('Runing Time:',round(time_now/60),'minutes. Cost function called total', Minuit_Counter, 'times.')
+        Time_Counter = Time_Counter + 1
+    
+    Minuit_Counter = Minuit_Counter + 1
+    
+    Para_Unp_all = ParaManager_Unp(Para_Unp_lst)
+    Para_Pol_all = ParaManager_Pol(Para_Pol_lst)
+    Para_Comb = np.concatenate([Para_Unp_all, Para_Pol_all], axis=0)
+    
+    tPDF_pred = tPDF_theo(tPDF_data, Para=Para_Comb)
+    GFF_pred = GFF_theo(GFF_data, Para=Para_Comb)
+    PDF_Ht_pred = PDF_theo(PDF_data_Ht, Para=Para_Comb)
+    
+    pool = get_pool()
+
+    # DVCS_pred_xBtQ = pd.concat(list(pool.map(partial(DVCSxsec_cost_xBtQ, Para_Unp = Para_Unp_all, Para_Pol = Para_Pol_all, P_order = 2), DVCSxsec_group_data)), ignore_index=True)
+    # DVCS_HERA_pred_xBtQ = pd.concat(list(pool.map(partial(DVCSxsec_HERA_cost_xBtQ, Para_Unp = Para_Unp_all, Para_Pol = Para_Pol_all, P_order = 2), DVCSxsec_HERA_group_data)), ignore_index=True)
+    # DVrhoPH1_pred_xBtQ = pd.concat(list(pool.map(partial(DVMPxsec_cost_xBtQ, Para_Unp = Para_Unp_all, xsec_norm = 1, meson = 1, p_order = 2), DVrhoPH1xsecL_group_data)), ignore_index=True)
+    # DVrhoPZEUS_pred_xBtQ = pd.concat(list(pool.map(partial(DVMPxsec_cost_xBtQ, Para_Unp = Para_Unp_all, xsec_norm = 1, meson = 1, p_order = 2), DVrhoPZEUSxsecL_group_data)), ignore_index=True)
+    # DVCS_Asym_pred_xBtQ = pd.concat(list(pool.map(partial(DVCSAsym_cost_xBtQ, Para_Unp = Para_Unp_all, Para_Pol = Para_Pol_all, P_order = 2), DVCSAsym_group_data)), ignore_index=True)
+
+    # Instead of initial a parallelization for each task (shown above)
+    # the following scripts collects them into a larger task
+    # This would reduce overhead (due to pickling, scheduling, etc.)
+    # Not necessary if each task is large (NOT the case here)
+    
+    f1 = partial(DVCSxsec_cost_xBtQ, Para_Unp=Para_Unp_all, Para_Pol=Para_Pol_all, P_order=2)
+    f2 = partial(DVCSxsec_HERA_cost_xBtQ, Para_Unp=Para_Unp_all, Para_Pol=Para_Pol_all, P_order=2)
+    f3 = partial(DVMPxsec_cost_xBtQ, Para_Unp=Para_Unp_all, xsec_norm=1, meson=1, p_order=2)
+    f4 = partial(DVMPxsec_cost_xBtQ, Para_Unp=Para_Unp_all, xsec_norm=1, meson=1, p_order=2)
+    
+    all_tasks_exp = (
+        [(f1, arg) for arg in DVCSxsec_group_data] +
+        [(f2, arg) for arg in DVCSxsec_HERA_group_data] +
+        [(f3, arg) for arg in DVrhoPH1xsecL_group_data] +
+        [(f4, arg) for arg in DVrhoPZEUSxsecL_group_data]
+    )
+    
+    all_results_exp = pool.map(simple_dispatch, all_tasks_exp)
+    
+    total_cost_exp = sum(df["cost"].sum() for df in all_results_exp if "cost" in df.columns)
+    
+    if (config.Export_Mode == True):
+        n1 = len(DVCSxsec_group_data)
+        n2 = len(DVCSxsec_HERA_group_data)
+        n3 = len(DVrhoPH1xsecL_group_data)
+        n4 = len(DVrhoPZEUSxsecL_group_data)
+
+        i1, i2, i3 = n1, n1+n2, n1+n2+n3
+
+        DVCS_pred_xBtQ         = pd.concat(all_results_exp[:i1], ignore_index=True)
+        DVCS_HERA_pred_xBtQ    = pd.concat(all_results_exp[i1:i2], ignore_index=True)
+        DVrhoPH1_pred_xBtQ     = pd.concat(all_results_exp[i2:i3], ignore_index=True)
+        DVrhoPZEUS_pred_xBtQ   = pd.concat(all_results_exp[i3:], ignore_index=True)
+    
+        Export_Frame_Append(DVCS_pred_xBtQ,"DVCSxsec.csv")
+        Export_Frame_Append(DVCS_HERA_pred_xBtQ,"DVCSxsec_HERA.csv")
+        Export_Frame_Append(DVrhoPH1_pred_xBtQ,"DVMPxsec.csv")
+        Export_Frame_Append(DVrhoPZEUS_pred_xBtQ,"DVMPxsec.csv")
+        
+        Export_Frame_Append(tPDF_pred,"tPDFcomp.csv")
+        Export_Frame_Append(GFF_pred,"GFFcomp.csv")
+        Export_Frame_Append(PDF_Ht_pred,"PDFcomp.csv")
+        
+        return [DVCS_pred_xBtQ['cost'].sum()/len(DVCS_pred_xBtQ.index), DVCS_HERA_pred_xBtQ['cost'].sum()/len(DVCS_HERA_pred_xBtQ.index),
+                DVrhoPH1_pred_xBtQ['cost'].sum()/len(DVrhoPH1_pred_xBtQ.index), DVrhoPZEUS_pred_xBtQ['cost'].sum()/len(DVrhoPZEUS_pred_xBtQ.index), # + cost_DVCSAsym
+                tPDF_pred['cost'].sum()/len(tPDF_pred.index), GFF_pred['cost'].sum()/len(GFF_pred.index), PDF_Ht_pred['cost'].sum()/len(PDF_Ht_pred.index)]
+    
+    return total_cost_exp + tPDF_pred['cost'].sum() + GFF_pred['cost'].sum() + PDF_Ht_pred['cost'].sum()
+
+def cost_off_forward_withH_withHt(Norm_HuV,    alpha_HuV,    beta_HuV,    alphap_HuV,   Invm2_HuV,
+                    Norm_Hubar,  alpha_Hubar,  beta_Hubar,  alphap_Hqbar,
+                    Norm_Hubar_2,  alpha_Hubar_2,  beta_Hubar_2,
+                    Norm_HdV,    alpha_HdV,    beta_HdV,    alphap_HdV,   Invm2_HdV,
+                    Norm_Hdbar,  alpha_Hdbar,  beta_Hdbar, 
+                    Norm_Hdbar_2,  alpha_Hdbar_2,  beta_Hdbar_2,
+                    Norm_Hg,     alpha_Hg,     beta_Hg,     alphap_Hg,  Invm2_Hg,
+                    Norm_Hg_2,     alpha_Hg_2,     beta_Hg_2,
+                    Norm_EuV,    alpha_EuV,    beta_EuV,    alphap_EuV,
+                    Norm_EdV,    R_E_Sea,      R_Hu_xi2,    R_Hd_xi2,    R_Hg_xi2,
+                    R_Eu_xi2,    R_Ed_xi2,     R_Eg_xi2,
+                    R_Hu_xi4,    R_Hd_xi4,     R_Hg_xi4,
+                    R_Eu_xi4,    R_Ed_xi4,     R_Eg_xi4,    bexp_HSea, bexp_Hg,
+                    Norm_HtuV,   alpha_HtuV,   beta_HtuV,   alphap_HtuV, 
+                    Norm_Htubar, alpha_Htubar, beta_Htubar, alphap_Htqbar,
+                    Norm_HtdV,   alpha_HtdV,   beta_HtdV,   alphap_HtdV,
+                    Norm_Htdbar, alpha_Htdbar, beta_Htdbar, 
+                    Norm_Htg,    alpha_Htg,    beta_Htg,    alphap_Htg,
+                    Norm_EtuV,   alpha_EtuV,   beta_EtuV,   alphap_EtuV,
+                    Norm_EtdV,   R_Et_Sea,     R_Htu_xi2,   R_Htd_xi2,    R_Htg_xi2,
+                    R_Etu_xi2,   R_Etd_xi2,    R_Etg_xi2,
+                    R_Htu_xi4,   R_Htd_xi4,    R_Htg_xi4,
+                    R_Etu_xi4,   R_Etd_xi4,    R_Etg_xi4,   bexp_HtSea):
+    
+    params = locals()
+    validate_params(params, set(Paralst_Unp_Names + Paralst_Pol_Names))
+    Para_Unp_lst = [params[name] for name in Paralst_Unp_Names]
+    Para_Pol_lst = [params[name] for name in Paralst_Pol_Names]
+    
+    global Minuit_Counter, Time_Counter
+
+    time_now = time.time() - time_start
+    
+    if(time_now > Time_Counter * 600):
+        print('Runing Time:',round(time_now/60),'minutes. Cost function called total', Minuit_Counter, 'times.')
+        Time_Counter = Time_Counter + 1
+    
+    Minuit_Counter = Minuit_Counter + 1
+    
+    Para_Unp_all = ParaManager_Unp(Para_Unp_lst)
+    Para_Pol_all = ParaManager_Pol(Para_Pol_lst)
+    Para_Comb = np.concatenate([Para_Unp_all, Para_Pol_all], axis=0)
+    
+    tPDF_pred = tPDF_theo(tPDF_data, Para=Para_Comb)
+    GFF_pred = GFF_theo(GFF_data, Para=Para_Comb)
+    PDF_H_pred = PDF_theo(PDF_data_H, Para=Para_Comb)
+    PDF_Ht_pred = PDF_theo(PDF_data_Ht, Para=Para_Comb)
+    
+    pool = get_pool()
+
+    # DVCS_pred_xBtQ = pd.concat(list(pool.map(partial(DVCSxsec_cost_xBtQ, Para_Unp = Para_Unp_all, Para_Pol = Para_Pol_all, P_order = 2), DVCSxsec_group_data)), ignore_index=True)
+    # DVCS_HERA_pred_xBtQ = pd.concat(list(pool.map(partial(DVCSxsec_HERA_cost_xBtQ, Para_Unp = Para_Unp_all, Para_Pol = Para_Pol_all, P_order = 2), DVCSxsec_HERA_group_data)), ignore_index=True)
+    # DVrhoPH1_pred_xBtQ = pd.concat(list(pool.map(partial(DVMPxsec_cost_xBtQ, Para_Unp = Para_Unp_all, xsec_norm = 1, meson = 1, p_order = 2), DVrhoPH1xsecL_group_data)), ignore_index=True)
+    # DVrhoPZEUS_pred_xBtQ = pd.concat(list(pool.map(partial(DVMPxsec_cost_xBtQ, Para_Unp = Para_Unp_all, xsec_norm = 1, meson = 1, p_order = 2), DVrhoPZEUSxsecL_group_data)), ignore_index=True)
+    # DVCS_Asym_pred_xBtQ = pd.concat(list(pool.map(partial(DVCSAsym_cost_xBtQ, Para_Unp = Para_Unp_all, Para_Pol = Para_Pol_all, P_order = 2), DVCSAsym_group_data)), ignore_index=True)
+
+    # Instead of initial a parallelization for each task (shown above)
+    # the following scripts collects them into a larger task
+    # This would reduce overhead (due to pickling, scheduling, etc.)
+    # Not necessary if each task is large (NOT the case here)
+    
+    f1 = partial(DVCSxsec_cost_xBtQ, Para_Unp=Para_Unp_all, Para_Pol=Para_Pol_all, P_order=2)
+    f2 = partial(DVCSxsec_HERA_cost_xBtQ, Para_Unp=Para_Unp_all, Para_Pol=Para_Pol_all, P_order=2)
+    f3 = partial(DVMPxsec_cost_xBtQ, Para_Unp=Para_Unp_all, xsec_norm=1, meson=1, p_order=2)
+    f4 = partial(DVMPxsec_cost_xBtQ, Para_Unp=Para_Unp_all, xsec_norm=1, meson=1, p_order=2)
+    
+    all_tasks_exp = (
+        [(f1, arg) for arg in DVCSxsec_group_data] +
+        [(f2, arg) for arg in DVCSxsec_HERA_group_data] +
+        [(f3, arg) for arg in DVrhoPH1xsecL_group_data] +
+        [(f4, arg) for arg in DVrhoPZEUSxsecL_group_data]
+    )
+    
+    all_results_exp = pool.map(simple_dispatch, all_tasks_exp)
+    
+    total_cost_exp = sum(df["cost"].sum() for df in all_results_exp if "cost" in df.columns)
+    
+    if (config.Export_Mode == True):
+        n1 = len(DVCSxsec_group_data)
+        n2 = len(DVCSxsec_HERA_group_data)
+        n3 = len(DVrhoPH1xsecL_group_data)
+        n4 = len(DVrhoPZEUSxsecL_group_data)
+
+        i1, i2, i3 = n1, n1+n2, n1+n2+n3
+
+        DVCS_pred_xBtQ         = pd.concat(all_results_exp[:i1], ignore_index=True)
+        DVCS_HERA_pred_xBtQ    = pd.concat(all_results_exp[i1:i2], ignore_index=True)
+        DVrhoPH1_pred_xBtQ     = pd.concat(all_results_exp[i2:i3], ignore_index=True)
+        DVrhoPZEUS_pred_xBtQ   = pd.concat(all_results_exp[i3:], ignore_index=True)
+    
+        Export_Frame_Append(DVCS_pred_xBtQ,"DVCSxsec.csv")
+        Export_Frame_Append(DVCS_HERA_pred_xBtQ,"DVCSxsec_HERA.csv")
+        Export_Frame_Append(DVrhoPH1_pred_xBtQ,"DVMPxsec.csv")
+        Export_Frame_Append(DVrhoPZEUS_pred_xBtQ,"DVMPxsec.csv")
+        
+        Export_Frame_Append(tPDF_pred,"tPDFcomp.csv")
+        Export_Frame_Append(GFF_pred,"GFFcomp.csv")
+        Export_Frame_Append(PDF_H_pred,"PDFcomp.csv")
+        Export_Frame_Append(PDF_Ht_pred,"PDFcomp.csv")
+        
+        return [DVCS_pred_xBtQ['cost'].sum()/len(DVCS_pred_xBtQ.index), DVCS_HERA_pred_xBtQ['cost'].sum()/len(DVCS_HERA_pred_xBtQ.index),
+                DVrhoPH1_pred_xBtQ['cost'].sum()/len(DVrhoPH1_pred_xBtQ.index), DVrhoPZEUS_pred_xBtQ['cost'].sum()/len(DVrhoPZEUS_pred_xBtQ.index), # + cost_DVCSAsym
+                tPDF_pred['cost'].sum()/len(tPDF_pred.index), GFF_pred['cost'].sum()/len(GFF_pred.index), PDF_H_pred['cost'].sum()/len(PDF_H_pred.index), PDF_Ht_pred['cost'].sum()/len(PDF_Ht_pred.index)]
+    
+    return total_cost_exp + tPDF_pred['cost'].sum() + GFF_pred['cost'].sum() + PDF_H_pred['cost'].sum() + PDF_Ht_pred['cost'].sum()
 
 def off_forward_fit(Paralst_Unp, Paralst_Pol, export_path = '.'):
 
-    assert Export_Mode == False, "Make sure the Export_Mode is set to False in config.py before fitting"
+    assert config.Export_Mode == False, "Make sure the Export_Mode is set to False in config.py before fitting"
     
     # Create dictionaries by zipping names and values
     params_unp = dict(zip(Paralst_Unp_Names, Paralst_Unp))
@@ -859,39 +1060,42 @@ def off_forward_fit(Paralst_Unp, Paralst_Pol, export_path = '.'):
     fit_off_forward.limits['Invm2_HuV'] = (0,3)
     fit_off_forward.limits['alphap_HdV'] = (0,3)
     fit_off_forward.limits['Invm2_HdV'] = (0,3)
+    fit_off_forward.limits['alphap_Hqbar'] = (0,3)
+    fit_off_forward.limits['alphap_Hg'] = (0,3)
+    fit_off_forward.limits['Invm2_Hg'] = (0,3)
     
     fit_off_forward.limits['alpha_EuV'] = (-2, 1.2)
     fit_off_forward.limits['alphap_EuV'] = (0,3)
     
     fit_off_forward.limits['bexp_Hg']  = (0, 10)
     fit_off_forward.limits['bexp_HSea']  = (0, 10)
-    
+
     fit_off_forward.limits['alphap_HtuV'] = (0,3)
     fit_off_forward.limits['alphap_HtdV'] = (0,3)
     
+    
     fit_off_forward.limits['alpha_EtuV'] = (-2, 0.8)
     fit_off_forward.limits['beta_EtuV'] = (0, 15)
-    
     fit_off_forward.limits['bexp_HtSea'] = (0, 10)
     
     fixed_params = [
         "Norm_HuV", "alpha_HuV", "beta_HuV", 
-        "Norm_Hubar", "alpha_Hubar", "beta_Hubar", "alphap_Hqbar",
+        "Norm_Hubar", "alpha_Hubar", "beta_Hubar", 
         "Norm_Hubar_2", "alpha_Hubar_2", "beta_Hubar_2",
         "Norm_HdV", "alpha_HdV", "beta_HdV", 
         "Norm_Hdbar", "alpha_Hdbar", "beta_Hdbar",
         "Norm_Hdbar_2", "alpha_Hdbar_2", "beta_Hdbar_2",
-        "Norm_Hg", "alpha_Hg", "beta_Hg", "alphap_Hg", "Invm2_Hg",
+        "Norm_Hg", "alpha_Hg", "beta_Hg", 
         "Norm_Hg_2", "alpha_Hg_2", "beta_Hg_2",
-        
+        "alphap_Hqbar", "alphap_Hg",
+        "Invm2_Hg",
         "Norm_HtuV", "alpha_HtuV", "beta_HtuV",
-        "Norm_Htubar", "alpha_Htubar", "beta_Htubar", "alphap_Htqbar",
+        "Norm_Htubar", "alpha_Htubar", "beta_Htubar", 
         "Norm_HtdV", "alpha_HtdV", "beta_HtdV",
         "Norm_Htdbar", "alpha_Htdbar", "beta_Htdbar",
-        "Norm_Htg", "alpha_Htg", "beta_Htg", "alphap_Htg",
-        #may be released
+        "Norm_Htg", "alpha_Htg", "beta_Htg", 
+        "alphap_Htqbar", "alphap_Htg",
         "R_Htg_xi2", "R_Etg_xi2",
-        
         "R_Htg_xi4", "R_Etg_xi4", "R_Htu_xi4", "R_Etu_xi4", "R_Htd_xi4", "R_Etd_xi4",
         ]
     
@@ -932,8 +1136,245 @@ def off_forward_fit(Paralst_Unp, Paralst_Pol, export_path = '.'):
         csvWriter = csv.writer(my_csv,delimiter=',')
         csvWriter.writerows([*fit_off_forward.covariance])
     '''
+    return fit_off_forward
+
+def off_forward_fit_withHt(Paralst_Unp, Paralst_Pol, export_path = '.'):
+
+    assert config.Export_Mode == False, "Make sure the Export_Mode is set to False in config.py before fitting"
+    
+    # Create dictionaries by zipping names and values
+    params_unp = dict(zip(Paralst_Unp_Names, Paralst_Unp))
+    params_pol = dict(zip(Paralst_Pol_Names, Paralst_Pol))
+    params = {**params_unp, **params_pol}
+
+    fit_off_forward = Minuit(cost_off_forward_withHt, **params)
+    
+    fit_off_forward.errordef = 1
+
+    fit_off_forward.limits['alphap_HuV'] = (0,3)
+    fit_off_forward.limits['Invm2_HuV'] = (0,3)
+    fit_off_forward.limits['alphap_HdV'] = (0,3)
+    fit_off_forward.limits['Invm2_HdV'] = (0,3)
+    
+    fit_off_forward.limits['alpha_EuV'] = (-2, 1.2)
+    fit_off_forward.limits['alphap_EuV'] = (0,3)
+    
+    fit_off_forward.limits['bexp_Hg']  = (0, 10)
+    fit_off_forward.limits['bexp_HSea']  = (0, 10)
+    
+    fit_off_forward.limits['alpha_HtuV'] = (-2, 1.2)
+    fit_off_forward.limits['alpha_Htubar'] = (-2, 1.2)
+    fit_off_forward.limits['alpha_HtdV'] = (-2, 1.2)
+    fit_off_forward.limits['alpha_Htdbar'] = (-2, 1.2)
+    fit_off_forward.limits['alpha_Htg'] = (-2, 1.2)
+    fit_off_forward.limits['alpha_EtuV'] = (-2, 1.2)
+
+    fit_off_forward.limits['beta_HtuV'] = (0, 15)
+    fit_off_forward.limits['beta_Htubar'] = (0, 15)
+    fit_off_forward.limits['beta_HtdV'] = (0, 15)
+    fit_off_forward.limits['beta_Htdbar'] = (0, 15)
+    fit_off_forward.limits['beta_Htg'] = (0, 15)
+    fit_off_forward.limits['beta_EtuV'] = (0, 15)
+    
+    fit_off_forward.limits['alphap_HtuV'] = (0,3)
+    fit_off_forward.limits['alphap_HtdV'] = (0,3)
+    
+    fit_off_forward.limits['alpha_EtuV'] = (-2, 0.8)
+    fit_off_forward.limits['beta_EtuV'] = (0, 15)
+    
+    fit_off_forward.limits['bexp_HtSea'] = (0, 10)
+    
+    fixed_params = [
+        "Norm_HuV", "alpha_HuV", "beta_HuV", 
+        "Norm_Hubar", "alpha_Hubar", "beta_Hubar", 
+        "Norm_Hubar_2", "alpha_Hubar_2", "beta_Hubar_2",
+        "Norm_HdV", "alpha_HdV", "beta_HdV", 
+        "Norm_Hdbar", "alpha_Hdbar", "beta_Hdbar",
+        "Norm_Hdbar_2", "alpha_Hdbar_2", "beta_Hdbar_2",
+        "Norm_Hg", "alpha_Hg", "beta_Hg", 
+        "Norm_Hg_2", "alpha_Hg_2", "beta_Hg_2",
+        "alphap_Hqbar", "alphap_Hg", "Invm2_Hg",
+        #"Norm_HtuV", "alpha_HtuV", "beta_HtuV",
+        #"Norm_Htubar", "alpha_Htubar", "beta_Htubar", 
+        #"Norm_HtdV", "alpha_HtdV", "beta_HtdV",
+        #"Norm_Htdbar", "alpha_Htdbar", "beta_Htdbar",
+        #"Norm_Htg", "alpha_Htg", "beta_Htg",
+        "alphap_Htqbar", "alphap_Htg",
+        "R_Htg_xi2", "R_Etg_xi2",
+        "R_Htg_xi4", "R_Etg_xi4", "R_Htu_xi4", "R_Etu_xi4", "R_Htd_xi4", "R_Etd_xi4",
+        ]
+    
+    for param in fixed_params:
+        fit_off_forward.fixed[param] = True
+    
+    global Minuit_Counter, Time_Counter, time_start
+    Minuit_Counter = 0
+    Time_Counter = 1
+    time_start = time.time()
+    
+    print("------------------------------------------")
+    print("off forward fit starts, update in 10 mins")
+    
+    fit_off_forward.migrad()
+    fit_off_forward.hesse()
+    
+    print("off forward fit finished, see summary in /GUMP_Output")
+
+    time_end = time.time() -time_start
+    
+    ndof_off_forward = (len(DVCSxsec_data.index) + len(DVCSxsec_HERA_data.index) 
+                        + len(DVrhoPH1xsec_data.index) + len(DVrhoPZEUSxsec_data.index)
+                         + len(tPDF_data.index) + len(GFF_data.index) + len(PDF_data_Ht.index) - fit_off_forward.nfit)
+
+    os.makedirs(os.path.join(export_path, 'GUMP_Output'), exist_ok=True)
+    
+    with open(os.path.join(export_path,'GUMP_Output/off_forward_fit_withHt.txt'), 'w', encoding='utf-8') as f:
+        print('Total running time: %.1f minutes. Total call of cost function: %3d.\n' % ( time_end/60, fit_off_forward.nfcn), file=f)
+        print('The chi squared/d.o.f. is: %.2f / %3d ( = %.2f ).\n' % (fit_off_forward.fval, ndof_off_forward, fit_off_forward.fval/ndof_off_forward), file = f)
+        print('Below are the final output parameters from iMinuit:', file = f)
+        print(*fit_off_forward.values, sep=", ", file = f)
+        print(*fit_off_forward.errors, sep=", ", file = f)
+        print(fit_off_forward.params, file = f)
+
+    '''
+    with open(os.path.join(export_path,"GUMP_Output/Off_forward_cov.csv"),"w",newline='') as my_csv:
+        csvWriter = csv.writer(my_csv,delimiter=',')
+        csvWriter.writerows([*fit_off_forward.covariance])
+    '''
+    
+    return fit_off_forward
+
+def off_forward_fit_withH_withHt(Paralst_Unp, Paralst_Pol, export_path = '.'):
+
+    assert config.Export_Mode == False, "Make sure the Export_Mode is set to False in config.py before fitting"
+    
+    # Create dictionaries by zipping names and values
+    params_unp = dict(zip(Paralst_Unp_Names, Paralst_Unp))
+    params_pol = dict(zip(Paralst_Pol_Names, Paralst_Pol))
+    params = {**params_unp, **params_pol}
+
+    fit_off_forward = Minuit(cost_off_forward_withH_withHt, **params)
+    
+    fit_off_forward.errordef = 1
+
+    fit_off_forward.limits['alpha_HuV'] = (-2, 1.2)
+    fit_off_forward.limits['alpha_Hubar'] = (0, 1.2)
+    fit_off_forward.limits['alpha_HdV'] = (-2, 1.2)
+    fit_off_forward.limits['alpha_Hdbar'] = (0, 1.2)
+    fit_off_forward.limits['alpha_Hg'] = (0, 1.2)
+    fit_off_forward.limits['alpha_EuV'] = (-2, 1.2)
+
+    # make the second set of parameters 'valence-like' bounded by small x <~ x **(-0.8)
+    fit_off_forward.limits['alpha_Hubar_2'] = (0, 0.8)
+    fit_off_forward.limits['alpha_Hdbar_2'] = (0, 0.8)
+    fit_off_forward.limits['alpha_Hg_2'] = (0, 0.8)
+
+    fit_off_forward.limits['beta_HuV'] = (0, 20)
+    fit_off_forward.limits['beta_Hubar'] = (0, 20)
+    fit_off_forward.limits['beta_HdV'] = (0, 20)
+    fit_off_forward.limits['beta_Hdbar'] = (0, 20)
+    fit_off_forward.limits['beta_Hg'] = (0, 20)    
+    fit_off_forward.limits['beta_EuV'] = (0, 20)
+    
+    fit_off_forward.limits['beta_Hubar_2'] = (0, 20)
+    fit_off_forward.limits['beta_Hdbar_2'] = (0, 20)
+    fit_off_forward.limits['beta_Hg_2'] = (0, 20) 
+    
+    fit_off_forward.limits['alphap_HuV'] = (0,3)
+    fit_off_forward.limits['Invm2_HuV'] = (0,3)
+    fit_off_forward.limits['alphap_HdV'] = (0,3)
+    fit_off_forward.limits['Invm2_HdV'] = (0,3)
+    
+    fit_off_forward.limits['alpha_EuV'] = (-2, 1.2)
+    fit_off_forward.limits['alphap_EuV'] = (0,3)
+    
+    fit_off_forward.limits['bexp_Hg']  = (0, 10)
+    fit_off_forward.limits['bexp_HSea']  = (0, 10)
+    
+    fit_off_forward.limits['alpha_HtuV'] = (-2, 1.2)
+    fit_off_forward.limits['alpha_Htubar'] = (-2, 1.2)
+    fit_off_forward.limits['alpha_HtdV'] = (-2, 1.2)
+    fit_off_forward.limits['alpha_Htdbar'] = (-2, 1.2)
+    fit_off_forward.limits['alpha_Htg'] = (-2, 1.2)
+    fit_off_forward.limits['alpha_EtuV'] = (-2, 1.2)
+
+    fit_off_forward.limits['beta_HtuV'] = (0, 15)
+    fit_off_forward.limits['beta_Htubar'] = (0, 15)
+    fit_off_forward.limits['beta_HtdV'] = (0, 15)
+    fit_off_forward.limits['beta_Htdbar'] = (0, 15)
+    fit_off_forward.limits['beta_Htg'] = (0, 15)
+    fit_off_forward.limits['beta_EtuV'] = (0, 15)
+    
+    fit_off_forward.limits['alphap_HtuV'] = (0,3)
+    fit_off_forward.limits['alphap_HtdV'] = (0,3)
+    
+    fit_off_forward.limits['alpha_EtuV'] = (-2, 0.8)
+    fit_off_forward.limits['beta_EtuV'] = (0, 15)
+    
+    fit_off_forward.limits['bexp_HtSea'] = (0, 10)
+    
+    fixed_params = [
+        #"Norm_HuV", "alpha_HuV", "beta_HuV", 
+        #"Norm_Hubar", "alpha_Hubar", "beta_Hubar", 
+        #"Norm_Hubar_2", "alpha_Hubar_2", "beta_Hubar_2",
+        #"Norm_HdV", "alpha_HdV", "beta_HdV", 
+        #"Norm_Hdbar", "alpha_Hdbar", "beta_Hdbar",
+        #"Norm_Hdbar_2", "alpha_Hdbar_2", "beta_Hdbar_2",
+        #"Norm_Hg", "alpha_Hg", "beta_Hg", 
+        #"Norm_Hg_2", "alpha_Hg_2", "beta_Hg_2",
+        "alphap_Hqbar", "alphap_Hg", "Invm2_Hg",
+        #"Norm_HtuV", "alpha_HtuV", "beta_HtuV",
+        #"Norm_Htubar", "alpha_Htubar", "beta_Htubar", 
+        #"Norm_HtdV", "alpha_HtdV", "beta_HtdV",
+        #"Norm_Htdbar", "alpha_Htdbar", "beta_Htdbar",
+        #"Norm_Htg", "alpha_Htg", "beta_Htg",
+        "alphap_Htqbar", "alphap_Htg",
+        "R_Htg_xi2", "R_Etg_xi2",
+        "R_Htg_xi4", "R_Etg_xi4", "R_Htu_xi4", "R_Etu_xi4", "R_Htd_xi4", "R_Etd_xi4",
+        ]
+    
+    for param in fixed_params:
+        fit_off_forward.fixed[param] = True
+    
+    global Minuit_Counter, Time_Counter, time_start
+    Minuit_Counter = 0
+    Time_Counter = 1
+    time_start = time.time()
+    
+    print("------------------------------------------")
+    print("off forward fit starts, update in 10 mins")
+    
+    fit_off_forward.migrad()
+    fit_off_forward.hesse()
+    
+    print("off forward fit finished, see summary in /GUMP_Output")
+
+    time_end = time.time() -time_start
+    
+    ndof_off_forward = (len(DVCSxsec_data.index) + len(DVCSxsec_HERA_data.index) 
+                        + len(DVrhoPH1xsec_data.index) + len(DVrhoPZEUSxsec_data.index)
+                         + len(tPDF_data.index) + len(GFF_data.index) + len(PDF_data_H.index)+ len(PDF_data_Ht.index) - fit_off_forward.nfit)
+
+    os.makedirs(os.path.join(export_path, 'GUMP_Output'), exist_ok=True)
+    
+    with open(os.path.join(export_path,'GUMP_Output/off_forward_fit_withH_withHt.txt'), 'w', encoding='utf-8') as f:
+        print('Total running time: %.1f minutes. Total call of cost function: %3d.\n' % ( time_end/60, fit_off_forward.nfcn), file=f)
+        print('The chi squared/d.o.f. is: %.2f / %3d ( = %.2f ).\n' % (fit_off_forward.fval, ndof_off_forward, fit_off_forward.fval/ndof_off_forward), file = f)
+        print('Below are the final output parameters from iMinuit:', file = f)
+        print(*fit_off_forward.values, sep=", ", file = f)
+        print(*fit_off_forward.errors, sep=", ", file = f)
+        print(fit_off_forward.params, file = f)
+
+    '''
+    with open(os.path.join(export_path,"GUMP_Output/Off_forward_cov.csv"),"w",newline='') as my_csv:
+        csvWriter = csv.writer(my_csv,delimiter=',')
+        csvWriter.writerows([*fit_off_forward.covariance])
+    '''
     
     return fit_off_forward
 
 Paralst_Unp=pd.read_csv(os.path.join(dir_path,'GUMP_Params/Para_Unp.csv'), header=None).to_numpy()[0]
 Paralst_Pol=pd.read_csv(os.path.join(dir_path,'GUMP_Params/Para_Pol.csv'), header=None).to_numpy()[0]
+
+Paralst_Unp_off_forward=pd.read_csv(os.path.join(dir_path,'GUMP_Params/Para_Unp_Off_forward.csv'), header=None).to_numpy()[0]
+Paralst_Pol_off_forward=pd.read_csv(os.path.join(dir_path,'GUMP_Params/Para_Pol_Off_forward.csv'), header=None).to_numpy()[0]
