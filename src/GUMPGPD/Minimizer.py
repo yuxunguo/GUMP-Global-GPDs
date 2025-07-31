@@ -140,13 +140,7 @@ tPDF_data = pd.read_csv(os.path.join(dir_path,'GUMPDATA/tPDFdata.csv'),     head
 ************************ GFF data preprocessing ****************************
 """
 
-GFF_data = pd.read_csv(os.path.join(dir_path,'GUMPDATA/GFFdata_Quark.csv'),       header = 0, names = ['j', 't', 'Q', 'f', 'delta f', 'spe', 'flv'],        dtype = {'j': int, 't': float, 'Q': float, 'f': float, 'delta f': float,'spe': int, 'flv': str})
-
-GFF_Gluon_data = pd.read_csv(os.path.join(dir_path,'GUMPDATA/GFFdata_Gluon.csv'),       header = None, names = ['j', 't', 'Q', 'f', 'delta f', 'spe', 'flv'],        dtype = {'j': int, 't': float, 'Q': float, 'f': float, 'delta f': float,'spe': int, 'flv': str})
-GFF_Gluon_data_H  = GFF_Gluon_data[GFF_Gluon_data['spe'] == 0]
-GFF_Gluon_data_E  = GFF_Gluon_data[GFF_Gluon_data['spe'] == 1]
-GFF_Gluon_data_Ht = GFF_Gluon_data[GFF_Gluon_data['spe'] == 2]
-GFF_Gluon_data_Et = GFF_Gluon_data[GFF_Gluon_data['spe'] == 3]
+GFF_data = pd.read_csv(os.path.join(dir_path,'GUMPDATA/GFFdata.csv'),       header = 0, names = ['j', 't', 'Q', 'f', 'delta f', 'spe', 'flv'],        dtype = {'j': int, 't': float, 'Q': float, 'f': float, 'delta f': float,'spe': int, 'flv': str})
 
 """
 ************************ DVCS data preprocessing ****************************
@@ -998,10 +992,10 @@ def cost_off_forward_withH_withHt(Norm_HuV,    alpha_HuV,    beta_HuV,    alphap
     # This would reduce overhead (due to pickling, scheduling, etc.)
     # Not necessary if each task is large (NOT the case here)
     
-    f1 = partial(DVCSxsec_cost_xBtQ, Para_Unp=Para_Unp_all, Para_Pol=Para_Pol_all, P_order=2)
-    f2 = partial(DVCSxsec_HERA_cost_xBtQ, Para_Unp=Para_Unp_all, Para_Pol=Para_Pol_all, P_order=2)
-    f3 = partial(DVMPxsec_cost_xBtQ, Para_Unp=Para_Unp_all, xsec_norm=1, meson=1, p_order=2)
-    f4 = partial(DVMPxsec_cost_xBtQ, Para_Unp=Para_Unp_all, xsec_norm=1, meson=1, p_order=2)
+    f1 = partial(DVCSxsec_cost_xBtQ, Para_Unp=Para_Unp_all, Para_Pol=Para_Pol_all, P_order=1)
+    f2 = partial(DVCSxsec_HERA_cost_xBtQ, Para_Unp=Para_Unp_all, Para_Pol=Para_Pol_all, P_order=1)
+    f3 = partial(DVMPxsec_cost_xBtQ, Para_Unp=Para_Unp_all, xsec_norm=1, meson=1, p_order=1)
+    f4 = partial(DVMPxsec_cost_xBtQ, Para_Unp=Para_Unp_all, xsec_norm=1, meson=1, p_order=1)
     
     all_tasks_exp = (
         [(f1, arg) for arg in DVCSxsec_group_data] +
@@ -1357,7 +1351,7 @@ def off_forward_fit_withH_withHt(Paralst_Unp, Paralst_Pol, export_path = '.'):
 
     os.makedirs(os.path.join(export_path, 'GUMP_Output'), exist_ok=True)
     
-    with open(os.path.join(export_path,'GUMP_Output/off_forward_fit_withH_withHt.txt'), 'w', encoding='utf-8') as f:
+    with open(os.path.join(export_path,'GUMP_Output/off_forward_fit_withH_withHt_LO.txt'), 'w', encoding='utf-8') as f:
         print('Total running time: %.1f minutes. Total call of cost function: %3d.\n' % ( time_end/60, fit_off_forward.nfcn), file=f)
         print('The chi squared/d.o.f. is: %.2f / %3d ( = %.2f ).\n' % (fit_off_forward.fval, ndof_off_forward, fit_off_forward.fval/ndof_off_forward), file = f)
         print('Below are the final output parameters from iMinuit:', file = f)
@@ -1378,3 +1372,4 @@ Paralst_Pol=pd.read_csv(os.path.join(dir_path,'GUMP_Params/Para_Pol.csv'), heade
 
 Paralst_Unp_off_forward=pd.read_csv(os.path.join(dir_path,'GUMP_Params/Para_Unp_Off_forward.csv'), header=None).to_numpy()[0]
 Paralst_Pol_off_forward=pd.read_csv(os.path.join(dir_path,'GUMP_Params/Para_Pol_Off_forward.csv'), header=None).to_numpy()[0]
+
