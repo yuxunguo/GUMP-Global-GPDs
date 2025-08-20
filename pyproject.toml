@@ -1,5 +1,5 @@
 [project]
-name = "GUMPGPD"
+name = "gumpgpd"
 version = "0.1.0-dev5"
 description = "GPD analysis tools with DVCS, DVMP, lattice inputs, ... "
 readme = "README.md"
