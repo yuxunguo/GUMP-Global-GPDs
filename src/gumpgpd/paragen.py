@@ -35,7 +35,7 @@ if __name__ == '__main__':
     str = '_withH_withHt_NLO'
     Paralst_Unp=pd.read_csv(os.path.join(dir_path,f'GUMP_Params/Para_Unp_Off_forward{str}.csv'), header=None).to_numpy()[0]
     Paralst_Pol=pd.read_csv(os.path.join(dir_path,f'GUMP_Params/Para_Pol_Off_forward{str}.csv'), header=None).to_numpy()[0]
-    #'''
+    '''
     fit_off_forward = off_forward_fit_withH_withHt(Paralst_Unp, Paralst_Pol)
     
     FitVals = list([*fit_off_forward.values])
@@ -53,13 +53,13 @@ if __name__ == '__main__':
         csvWriter.writerow(FitVals[UnpLength:])
         csvWriter.writerow(FitErrs[UnpLength:])
         print(f"off-forward fit polarized parameters saved to Para_Pol_Off_forward{str}.csv")
-    #'''
+    '''
 
     #
     # Below is for testing, set Export_Mode to True in config.py and run through to generate the outputs
     #
 
-    '''
+    #'''
     config.Export_Mode = True
     
     Paralst_Unp=pd.read_csv(os.path.join(dir_path,f'GUMP_Params/Para_Unp_Off_forward{str}.csv'), header=None).to_numpy()[0]
@@ -71,7 +71,5 @@ if __name__ == '__main__':
     
     params = {**params_unp, **params_pol, **params_aux}
 
-    print(cost_forward_H(**params_unp))
-    print(cost_forward_Ht(**params_pol))
     print(cost_off_forward_withH_withHt(**params))
-    '''
+    #'''

@@ -1082,77 +1082,25 @@ def cost_off_forward_withH_withHt(Norm_HuV,    alpha_HuV,    beta_HuV,    alphap
     total_cost_exp = sum(df["cost"].sum() for df in all_results_exp if "cost" in df.columns)
     
     if config.Export_Mode:
-        grouped_results = {}
-        start = 0
-        for name in selected_tasks:
-            func, data, filename = all_tasks_def[name]
-            end = start + len(data)
-            grouped_results[name] = pd.concat(all_results_exp[start:end], ignore_index=True)
-            Export_Frame_Append(grouped_results[name], filename)
-            start = end
-        
-    return total_cost_exp + tPDF_pred['cost'].sum() + GFF_pred['cost'].sum() + PDF_H_pred['cost'].sum() + PDF_Ht_pred['cost'].sum()
-    '''
-    f1 = partial(DVCSxsec_cost_xBtQ, Para_Unp=Para_Unp_all, Para_Pol=Para_Pol_all, P_order = porder)
-    f2 = partial(DVCSxsec_HERA_cost_xBtQ, Para_Unp=Para_Unp_all, Para_Pol=Para_Pol_all, P_order= porder)
-    f3 = partial(DVMPxsec_cost_xBtQ, Para_Unp=Para_Unp_all, xsec_norm=1, meson=1, p_order= porder)
-    f4 = partial(DVMPxsec_cost_xBtQ, Para_Unp=Para_Unp_all, xsec_norm=1, meson=1, p_order= porder)
-    f5 = partial(DVMPxsec_cost_xBtQ, Para_Unp = Para_Unp_all, xsec_norm = jpsinorm, meson = 3, p_order = porder)
-    f6 = partial(DVCSAsym_cost_xBtQ, Para_Unp=Para_Unp_all, Para_Pol=Para_Pol_all, P_order = porder)
-    
-    all_tasks_exp = (
-        [(f1, arg) for arg in DVCSxsec_group_data] +
-        [(f2, arg) for arg in DVCSxsec_HERA_group_data] +
-        [(f3, arg) for arg in DVrhoPH1xsecL_group_data] +
-        [(f4, arg) for arg in DVrhoPZEUSxsecL_group_data] +
-        [(f5, arg) for arg in DVJpsiPH1xsec_group_data] +
-        [(f1, arg) for arg in DVCSxsecNew_group_data] +
-        [(f6, arg) for arg in DVCSAsym_group_data]
-    )
-    
-    all_results_exp = pool.map(simple_dispatch, all_tasks_exp)
-    
-    total_cost_exp = sum(df["cost"].sum() for df in all_results_exp if "cost" in df.columns)
-    
-    if (config.Export_Mode == True):
-        n1 = len(DVCSxsec_group_data)
-        n2 = len(DVCSxsec_HERA_group_data)
-        n3 = len(DVrhoPH1xsecL_group_data)
-        n4 = len(DVrhoPZEUSxsecL_group_data)
-        n5 = len(DVJpsiPH1xsec_group_data)
-        n6 = len(DVCSxsecNew_group_data)
-        n7 = len(DVCSAsym_group_data)
-
-        i1, i2, i3, i4, i5, i6 = n1, n1+n2, n1+n2+n3, n1+n2+n3+n4,n1+n2+n3+n4+n5, n1+n2+n3+n4+n5+n6
-
-        DVCS_pred_xBtQ         = pd.concat(all_results_exp[:i1], ignore_index=True)
-        DVCS_HERA_pred_xBtQ    = pd.concat(all_results_exp[i1:i2], ignore_index=True)
-        DVrhoPH1_pred_xBtQ     = pd.concat(all_results_exp[i2:i3], ignore_index=True)
-        DVrhoPZEUS_pred_xBtQ   = pd.concat(all_results_exp[i3:i4], ignore_index=True)
-        DVJpsiPH1xsec_pred_xBtQ   = pd.concat(all_results_exp[i4:i5], ignore_index=True)
-        DVCS_New_pred_xBtQ     = pd.concat(all_results_exp[i5:i6], ignore_index=True)
-        DVCSAsym_pred_xBtQ     = pd.concat(all_results_exp[i6:], ignore_index=True)
-    
-        Export_Frame_Append(DVCS_pred_xBtQ,"DVCSxsec.csv")
-        Export_Frame_Append(DVCS_HERA_pred_xBtQ,"DVCSxsec_HERA.csv")
-        Export_Frame_Append(DVrhoPH1_pred_xBtQ,"DVMPxsec.csv")
-        Export_Frame_Append(DVrhoPZEUS_pred_xBtQ,"DVMPxsec.csv")
-        Export_Frame_Append(DVJpsiPH1xsec_pred_xBtQ,"DVJpsiPxsec.csv")
-        Export_Frame_Append(DVCS_New_pred_xBtQ,"DVCSxsec_New.csv")
-        Export_Frame_Append(DVCSAsym_pred_xBtQ,"DVCSAsym.csv")
         
         Export_Frame_Append(tPDF_pred,"tPDFcomp.csv")
         Export_Frame_Append(GFF_pred,"GFFcomp.csv")
         Export_Frame_Append(PDF_H_pred,"PDFcomp.csv")
         Export_Frame_Append(PDF_Ht_pred,"PDFcomp.csv")
         
-        return [DVCS_pred_xBtQ['cost'].sum()/len(DVCS_pred_xBtQ.index), DVCS_HERA_pred_xBtQ['cost'].sum()/len(DVCS_HERA_pred_xBtQ.index),
-                DVrhoPH1_pred_xBtQ['cost'].sum()/len(DVrhoPH1_pred_xBtQ.index), DVrhoPZEUS_pred_xBtQ['cost'].sum()/len(DVrhoPZEUS_pred_xBtQ.index),
-                #DVJpsiPH1xsec_pred_xBtQ['cost'].sum()/len(DVJpsiPH1xsec_pred_xBtQ.index),# + cost_DVCSAsym
-                tPDF_pred['cost'].sum()/len(tPDF_pred.index), GFF_pred['cost'].sum()/len(GFF_pred.index), PDF_H_pred['cost'].sum()/len(PDF_H_pred.index), PDF_Ht_pred['cost'].sum()/len(PDF_Ht_pred.index)]
-    
+        grouped_results = {}
+        start = 0
+        for name in selected_tasks:
+            func, data, filename = all_tasks_def[name]
+            end = start + len(data)
+            grouped_results[name] = pd.concat(all_results_exp[start:end], ignore_index=True)
+            datalen = len(grouped_results[name])
+            totchi2 = grouped_results[name]['cost'].sum()
+            print(f'For the task {name}, with total {datalen} data points, the total chi^2 is {totchi2} and chi^2 per data point is {totchi2/datalen}')
+            Export_Frame_Append(grouped_results[name], filename)
+            start = end
+        
     return total_cost_exp + tPDF_pred['cost'].sum() + GFF_pred['cost'].sum() + PDF_H_pred['cost'].sum() + PDF_Ht_pred['cost'].sum()
-    '''
 
 def cost_off_forward_withH_withHt_withJpsi(Norm_HuV,    alpha_HuV,    beta_HuV,    alphap_HuV,   Invm2_HuV,
                     Norm_Hubar,  alpha_Hubar,  beta_Hubar,  alphap_Hqbar,
