@@ -1267,7 +1267,8 @@ def Moment_Evo_LO_NSp1(j: np.array, nf: int, p: int, mu: float, ConfFlav: np.arr
     # Transform the unevolved moments to evolution basis
     # ConfEvoBasis = np.einsum('...j,j', flav_trans, ConfFlav) # originally, output will be (5), I want it to be (N, 5)
     ConfEvoBasis = np.einsum('ij, ...j->...i', flav_trans, ConfFlav) # shape (N, 5)
-
+    if(mu == Init_Scale_Q):
+        return np.concatenate((ConfEvoBasis[..., :3], np.zeros_like(ConfEvoBasis[..., -2:])), axis=-1)
     # Taking the non-singlet and singlet parts of the conformal moments
     ConfNS = ConfEvoBasis[..., :3] # (N, 3)
 
@@ -2238,6 +2239,8 @@ def tPDF_Moment_Evo_NLO_NSp1(j: np.array, nf: int, p: int, mu: float, ConfFlav: 
 
     # Transform to evolution basis
     ConfEvoBasis = np.einsum('ij, ...j->...i', flav_trans, ConfFlav)  # (N, 5)
+    if(mu == Init_Scale_Q):
+        return np.concatenate((ConfEvoBasis[..., :3], np.zeros_like(ConfEvoBasis[..., -2:])), axis=-1)
     ConfNS = ConfEvoBasis[..., :3]   # (N, 3)
     
     # Get only NS evolution operators
