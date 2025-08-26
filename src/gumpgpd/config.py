@@ -6,3 +6,5 @@ Not in use currently. Can be used to set config parameters.
 Export_Mode = False
 
 INC_JPSI = False
+
+INC_gGFF = True

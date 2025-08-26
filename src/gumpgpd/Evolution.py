@@ -1222,7 +1222,8 @@ def Moment_Evo_LO(j: np.array, nf: int, p: int, mu: float, ConfFlav: np.array) -
     # Transform the unevolved moments to evolution basis
     # ConfEvoBasis = np.einsum('...j,j', flav_trans, ConfFlav) # originally, output will be (5), I want it to be (N, 5)
     ConfEvoBasis = np.einsum('ij, ...j->...i', flav_trans, ConfFlav) # shape (N, 5)
-
+    if(mu == Init_Scale_Q):
+        return ConfEvoBasis
     # Taking the non-singlet and singlet parts of the conformal moments
     ConfNS = ConfEvoBasis[..., :3] # (N, 3)
     ConfS = ConfEvoBasis[..., -2:] # (N, 2)
@@ -1806,6 +1807,9 @@ def Moment_Evo_NLO(j: np.array, nf: int, p: int, mu: float, t: float, xi: float,
     ConfFlav     = Moment_Sum(j - momshift, t, Para)
     # Transform the unevolved moments to evolution basis
     ConfEvoBasis = np.einsum('ij, ...j->...i', flav_trans, ConfFlav) # shape (N, 5)
+    if(mu == Init_Scale_Q):
+        return ConfEvoBasis
+    
     # Taking the non-singlet and singlet parts of the conformal moments
     ConfNS = ConfEvoBasis[..., :3] # (N, 3)
     ConfSG = ConfEvoBasis[..., -2:] # (N, 2)
@@ -2180,6 +2184,8 @@ def tPDF_Moment_Evo_NLO(j: np.array, nf: int, p: int, mu: float, ConfFlav: np.ar
     
     # Transform to evolution basis
     ConfEvoBasis = np.einsum('ij, ...j->...i', flav_trans, ConfFlav)  # (N, 5)
+    if(mu == Init_Scale_Q):
+        return ConfEvoBasis
     ConfNS = ConfEvoBasis[..., :3]
     ConfSG = ConfEvoBasis[..., -2:]
 

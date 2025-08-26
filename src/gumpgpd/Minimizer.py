@@ -144,6 +144,9 @@ tPDF_data = pd.read_csv(os.path.join(dir_path,'GUMPDATA/tPDFdata.csv'),     head
 
 GFF_data = pd.read_csv(os.path.join(dir_path,'GUMPDATA/GFFdata.csv'),       header = 0, names = ['j', 't', 'Q', 'f', 'delta f', 'spe', 'flv'],        dtype = {'j': int, 't': float, 'Q': float, 'f': float, 'delta f': float,'spe': int, 'flv': str})
 
+if not config.INC_gGFF:
+    GFF_data= GFF_data[GFF_data['flv']!='g']
+
 """
 ************************ DVCS data preprocessing ****************************
 """
