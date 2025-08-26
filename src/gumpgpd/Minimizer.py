@@ -138,6 +138,8 @@ PDF_data_Et = PDF_data[PDF_data['spe'] == 3]
 
 tPDF_data = pd.read_csv(os.path.join(dir_path,'GUMPDATA/tPDFdata.csv'),     header = 0, names = ['x', 't', 'Q', 'f', 'delta f', 'spe', 'flv'],        dtype = {'x': float, 't': float, 'Q': float, 'f': float, 'delta f': float,'spe': int, 'flv': str})
 
+GPD_data = pd.read_csv(os.path.join(dir_path,'GUMPDATA/GPDdata.csv'), header = 0, names = ['x', 'xi', 't', 'Q', 'f', 'delta f', 'spe', 'flv'],        dtype = {'x': float, 'xi': float, 't': float, 'Q': float, 'f': float, 'delta f': float,'spe': int, 'flv': str})
+
 """
 ************************ GFF data preprocessing ****************************
 """
@@ -604,8 +606,7 @@ def cost_off_forward_withH_withHt(Norm_HuV,    alpha_HuV,    beta_HuV,    alphap
     
     tPDF_pred = tPDF_theo(tPDF_data, Para=Para_Comb)
     GFF_pred = GFF_theo(GFF_data, Para=Para_Comb)
-    PDF_H_pred = PDF_theo(PDF_data_H, Para=Para_Comb)
-    PDF_Ht_pred = PDF_theo(PDF_data_Ht, Para=Para_Comb)
+    PDF_pred = PDF_theo(PDF_data, Para=Para_Comb)
     
     pool = get_pool()
 
@@ -703,11 +704,11 @@ def cost_off_forward_withH_withHt(Norm_HuV,    alpha_HuV,    beta_HuV,    alphap
     total_cost_exp = sum(df["cost"].sum() for df in all_results_exp if "cost" in df.columns)
     
     if config.Export_Mode:
-        
+        GPD_pred = GPD_theo(GPD_data, Para=Para_Comb)
+        Export_Frame_Append(GPD_pred,"GPDcomp.csv")
         Export_Frame_Append(tPDF_pred,"tPDFcomp.csv")
         Export_Frame_Append(GFF_pred,"GFFcomp.csv")
-        Export_Frame_Append(PDF_H_pred,"PDFcomp.csv")
-        Export_Frame_Append(PDF_Ht_pred,"PDFcomp.csv")
+        Export_Frame_Append(PDF_pred,"PDFcomp.csv")
         
         grouped_results = {}
         start = 0
@@ -721,7 +722,7 @@ def cost_off_forward_withH_withHt(Norm_HuV,    alpha_HuV,    beta_HuV,    alphap
             Export_Frame_Append(grouped_results[name], filename)
             start = end
         
-    return total_cost_exp + tPDF_pred['cost'].sum() + GFF_pred['cost'].sum() + PDF_H_pred['cost'].sum() + PDF_Ht_pred['cost'].sum()
+    return total_cost_exp + tPDF_pred['cost'].sum() + GFF_pred['cost'].sum() + PDF_pred['cost'].sum()
 
 def off_forward_fit_withH_withHt(Paralst_Unp, Paralst_Pol, Paralst_Aux=[1.0] * len(Paralst_Aux_Names), export_path = '.'):
 
@@ -856,6 +857,5 @@ def off_forward_fit_withH_withHt(Paralst_Unp, Paralst_Pol, Paralst_Aux=[1.0] * l
 Paralst_Unp_Init = pd.read_csv(os.path.join(dir_path,'GUMP_Params/Para_Unp.csv'), header=None).to_numpy()[0]
 Paralst_Pol_Init = pd.read_csv(os.path.join(dir_path,'GUMP_Params/Para_Pol.csv'), header=None).to_numpy()[0]
 
-#Paralst_Unp_off_forward=pd.read_csv(os.path.join(dir_path,'GUMP_Params/Para_Unp_Off_forward.csv'), header=None).to_numpy()[0]
-#Paralst_Pol_off_forward=pd.read_csv(os.path.join(dir_path,'GUMP_Params/Para_Pol_Off_forward.csv'), header=None).to_numpy()[0]
-
+Paralst_Unp_off_forward=pd.read_csv(os.path.join(dir_path,'GUMP_Params/Para_Unp_Off_forward_withH_withHt_NLO.csv'), header=None).to_numpy()[0]
+Paralst_Pol_off_forward=pd.read_csv(os.path.join(dir_path,'GUMP_Params/Para_Pol_Off_forward_withH_withHt_NLO.csv'), header=None).to_numpy()[0]

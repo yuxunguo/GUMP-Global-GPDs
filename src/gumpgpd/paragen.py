@@ -35,13 +35,13 @@ if __name__ == '__main__':
         csvWriter.writerow(FitVals[UnpLength:])
         csvWriter.writerow(FitErrs[UnpLength:])
         print(f"off-forward fit polarized parameters saved to Para_Pol_Off_forward{str}.csv")
-    #'''
+    '''
 
     #
     # Below is for testing, set Export_Mode to True in config.py and run through to generate the outputs
     #
 
-    '''
+    #'''
     str = '_withH_withHt_NLO'
     config.Export_Mode = True
     config.INC_gGFF = True
@@ -58,4 +58,4 @@ if __name__ == '__main__':
     params = {**params_unp, **params_pol, **params_aux}
 
     print(cost_off_forward_withH_withHt(**params))
-    '''
+    #'''

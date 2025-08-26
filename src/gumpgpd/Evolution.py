@@ -851,12 +851,12 @@ def ConfWaveFuncQ(j: complex, x: float, xi: float) -> complex:
     Returns:
         quark conformal wave function p_j(x,xi)
     """  
+    if(x > xi):
+        return np.sin(np.pi * (j+1))/ np.pi * x**(-j-1) * np.array(hyp2f1_nparray( (j+1)/2, (j+2)/2, j+5/2, (xi/x) ** 2), dtype= complex)
+    elif(x > - xi):
+        return 2 ** (1+j) * gamma(5/2+j) / (gamma(1/2) * gamma(1+j)) * xi ** (-j-1) * (1+x/xi) * np.array(hyp2f1_nparray(-1-j,j+2,2, (x+xi)/(2*xi)), dtype= complex)
 
-    pDGLAP = np.where(x > xi, np.sin(np.pi * (j+1))/ np.pi * x**(-j-1) * np.array(hyp2f1_nparray( (j+1)/2, (j+2)/2, j+5/2, (xi/x) ** 2), dtype= complex)                           , 0)
-
-    pERBL = np.where(((x > -xi) & (x <= xi)), 2 ** (1+j) * gamma(5/2+j) / (gamma(1/2) * gamma(1+j)) * xi ** (-j-1) * (1+x/xi) * np.array(hyp2f1_nparray(-1-j,j+2,2, (x+xi)/(2*xi)), dtype= complex), 0)
-
-    return pDGLAP + pERBL
+    return 0
 
 def ConfWaveFuncQ_over_sinpij(j: complex, x: float, xi: float) -> complex:
     """Quark conformal wave function p_j(x,xi)/sin(pi(j+1))
@@ -871,12 +871,12 @@ def ConfWaveFuncQ_over_sinpij(j: complex, x: float, xi: float) -> complex:
     Returns:
         quark conformal wave function p_j(x,xi)
     """
-    
-    pDGLAP = np.where(x > xi, 1/ np.pi * x**(-j-1) * np.array(hyp2f1_nparray( (j+1)/2, (j+2)/2, j+5/2, (xi/x) ** 2), dtype= complex)                           , 0)
+    if(x > xi):
+        return 1/ np.pi * x**(-j-1) * np.array(hyp2f1_nparray( (j+1)/2, (j+2)/2, j+5/2, (xi/x) ** 2), dtype= complex)
+    elif(x > - xi):
+        return 1/np.sin(np.pi * (j+1)) * 2 ** (1+j) * gamma(5/2+j) / (gamma(1/2) * gamma(1+j)) * xi ** (-j-1) * (1+x/xi) * np.array(hyp2f1_nparray(-1-j,j+2,2, (x+xi)/(2*xi)), dtype= complex)
 
-    pERBL = np.where(((x > -xi) & (x <= xi)), 1/np.sin(np.pi * (j+1)) * 2 ** (1+j) * gamma(5/2+j) / (gamma(1/2) * gamma(1+j)) * xi ** (-j-1) * (1+x/xi) * np.array(hyp2f1_nparray(-1-j,j+2,2, (x+xi)/(2*xi)), dtype= complex), 0)
-
-    return pDGLAP + pERBL
+    return 0
 
 def ConfWaveFuncG(j: complex, x: float, xi: float) -> complex:
     """Gluon conformal wave function p_j(x,xi) 
@@ -893,12 +893,12 @@ def ConfWaveFuncG(j: complex, x: float, xi: float) -> complex:
     """ 
     # An extra minus sign defined different from the orginal definition to absorb the extra minus sign of MB integral for gluon
     Minus = -1
+    if(x > xi):
+        return Minus * np.sin(np.pi * j)/ np.pi * x**(-j) * np.array(hyp2f1_nparray( j/2, (j+1)/2, j+5/2, (xi/x) ** 2), dtype= complex)
+    elif(x > - xi):
+        return Minus * 2 ** j * gamma(5/2+j) / (gamma(1/2) * gamma(j)) * xi ** (-j) * (1+x/xi) ** 2 * np.array((hyp2f1_nparray(-1-j,j+2,3, (x+xi)/(2*xi))), dtype= complex)
 
-    pDGLAP = np.where(x > xi,                Minus * np.sin(np.pi * j)/ np.pi * x**(-j) * np.array(hyp2f1_nparray( j/2, (j+1)/2, j+5/2, (xi/x) ** 2), dtype= complex)                                   , 0)
-
-    pERBL = np.where(((x > -xi) & (x <= xi)), Minus * 2 ** j * gamma(5/2+j) / (gamma(1/2) * gamma(j)) * xi ** (-j) * (1+x/xi) ** 2 * np.array((hyp2f1_nparray(-1-j,j+2,3, (x+xi)/(2*xi))), dtype= complex), 0)
-
-    return pDGLAP + pERBL
+    return 0
 
 def ConfWaveFuncG_over_sinpij(j: complex, x: float, xi: float) -> complex:
     """Gluon conformal wave function p_j(x,xi)/sin(pi(j+1)) = Minus * p_j(x,xi)/sin(pi*j)
@@ -913,12 +913,12 @@ def ConfWaveFuncG_over_sinpij(j: complex, x: float, xi: float) -> complex:
     Returns:
         gluon conformal wave function p_j(x,xi)
     """ 
+    if(x > xi):
+        return 1/ np.pi * x**(-j) * np.array(hyp2f1_nparray( j/2, (j+1)/2, j+5/2, (xi/x) ** 2), dtype= complex)
+    elif(x > -xi):
+        return 1/np.sin(np.pi * j) * 2 ** j * gamma(5/2+j) / (gamma(1/2) * gamma(j)) * xi ** (-j) * (1+x/xi) ** 2 * np.array((hyp2f1_nparray(-1-j,j+2,3, (x+xi)/(2*xi))), dtype= complex)
 
-    pDGLAP = np.where(x > xi, 1/ np.pi * x**(-j) * np.array(hyp2f1_nparray( j/2, (j+1)/2, j+5/2, (xi/x) ** 2), dtype= complex)                                   , 0)
-
-    pERBL = np.where(((x > -xi) & (x <= xi)), 1/np.sin(np.pi * j) * 2 ** j * gamma(5/2+j) / (gamma(1/2) * gamma(j)) * xi ** (-j) * (1+x/xi) ** 2 * np.array((hyp2f1_nparray(-1-j,j+2,3, (x+xi)/(2*xi))), dtype= complex), 0)
-
-    return pDGLAP + pERBL
+    return 0
 
 def ConfWaveFuncEvo(j: complex, x: float, xi: float, p: int):
     
@@ -1809,7 +1809,7 @@ def Moment_Evo_NLO(j: np.array, nf: int, p: int, mu: float, t: float, xi: float,
     # Transform the unevolved moments to evolution basis
     ConfEvoBasis = np.einsum('ij, ...j->...i', flav_trans, ConfFlav) # shape (N, 5)
     if(mu == Init_Scale_Q):
-        return ConfEvoBasis
+        return ConfEvoBasis[..., :3], ConfEvoBasis[..., -2:], ConfEvoBasis[..., :3], ConfEvoBasis[..., -2:]
     
     # Taking the non-singlet and singlet parts of the conformal moments
     ConfNS = ConfEvoBasis[..., :3] # (N, 3)

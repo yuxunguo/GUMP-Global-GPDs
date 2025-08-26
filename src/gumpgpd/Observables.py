@@ -372,7 +372,7 @@ class GPDobserv (object) :
             
         reJ = 1 - 0.2
         Max_imJ = 180
-        return 1/2*np.real(fixed_quadvec(lambda imJ : Integrand_Mellin_Barnes(reJ + 1j* imJ) + Integrand_Mellin_Barnes(reJ - 1j* imJ),0, Max_imJ, n=800)) + np.real(GPD0()) 
+        return 1/2*np.real(fixed_quadvec(lambda imJ : Integrand_Mellin_Barnes(reJ + 1j* imJ) + Integrand_Mellin_Barnes(reJ - 1j* imJ),0, Max_imJ, n=800)) + np.real(GPD0())[0]
     
     def GPDNLO_evMom(self, flv, ParaAll):
         """GPD F(x, xi, t) in flavor space (flv = "u", "d", "S", "NS" or "g")
@@ -502,7 +502,7 @@ class GPDobserv (object) :
         
         reJ = 1 - 0.2
         Max_imJ = 180
-        return 1/2*np.real(fixed_quadvec(lambda imJ : Integrand_Mellin_Barnes(reJ + 1j* imJ) + Integrand_Mellin_Barnes(reJ - 1j* imJ),0, Max_imJ, n=800)) + np.real(GPD0()) 
+        return 1/2*np.real(fixed_quadvec(lambda imJ : Integrand_Mellin_Barnes(reJ + 1j* imJ) + Integrand_Mellin_Barnes(reJ - 1j* imJ),0, Max_imJ, n=800)) + np.real(GPD0())[0]
     
     def GFFj0(self, j: int, flv, ParaAll, p_order):
         """Generalized Form Factors A_{j0}(t) which is the xi^0 term of the nth (n= j+1) Mellin moment of GPD int dx x^j F(x,xi,t) for quark and int dx x^(j-1) F(x,xi,t) for gluon
