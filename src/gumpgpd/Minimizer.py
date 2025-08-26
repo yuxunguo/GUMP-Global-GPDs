@@ -761,14 +761,14 @@ def off_forward_fit_withH_withHt(Paralst_Unp, Paralst_Pol, Paralst_Aux=[1.0] * l
     fit_off_forward.limits['beta_Hdbar_2'] = (0, None)
     fit_off_forward.limits['beta_Hg_2'] = (0, None) 
     
-    fit_off_forward.limits['alphap_HuV'] = (0,None)
-    fit_off_forward.limits['Invm2_HuV'] = (0,None)
-    fit_off_forward.limits['alphap_HdV'] = (0,None)
-    fit_off_forward.limits['Invm2_HdV'] = (0,None)
-    fit_off_forward.limits['Invm2_Hg'] = (0,None)
+    fit_off_forward.limits['alphap_HuV'] = (0,5)
+    fit_off_forward.limits['Invm2_HuV'] = (0,5)
+    fit_off_forward.limits['alphap_HdV'] = (0,5)
+    fit_off_forward.limits['Invm2_HdV'] = (0,5)
+    fit_off_forward.limits['Invm2_Hg'] = (0,5)
     
     fit_off_forward.limits['alpha_EuV'] = (-2, 1.2)
-    fit_off_forward.limits['alphap_EuV'] = (0,None)
+    fit_off_forward.limits['alphap_EuV'] = (0,5)
     fit_off_forward.limits['bexp_Hg']  = (0, None)
     fit_off_forward.limits['bexp_HSea']  = (0, None)
     
@@ -786,8 +786,8 @@ def off_forward_fit_withH_withHt(Paralst_Unp, Paralst_Pol, Paralst_Aux=[1.0] * l
     fit_off_forward.limits['beta_Htg'] = (0, None)
     fit_off_forward.limits['beta_EtuV'] = (0, None)
     
-    fit_off_forward.limits['alphap_HtuV'] = (0,None)
-    fit_off_forward.limits['alphap_HtdV'] = (0,None)
+    fit_off_forward.limits['alphap_HtuV'] = (0,5)
+    fit_off_forward.limits['alphap_HtdV'] = (0,5)
     
     fit_off_forward.limits['beta_EtuV'] = (0, None)
     fit_off_forward.limits['bexp_HtSea'] = (0, None)
@@ -825,7 +825,7 @@ def off_forward_fit_withH_withHt(Paralst_Unp, Paralst_Pol, Paralst_Aux=[1.0] * l
     print("------------------------------------------")
     print("off forward fit starts, update in 10 mins")
     
-    fit_off_forward.migrad()
+    fit_off_forward.migrad(ncall=100000)
     fit_off_forward.hesse()
     
     print("off forward fit finished, see summary in /GUMP_Output")
