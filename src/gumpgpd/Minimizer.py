@@ -313,6 +313,12 @@ def PDF_theo_scalar_helper(args):
     _PDF_theo = GPDobserv(x_i, xi_i, t_i, Q_i, p_i)  
     return _PDF_theo.tPDF(flv_i, Para_i, p_order)
 
+def GPD_theo_scalar_helper(args):
+    x_i, xi_i, t_i, Q_i, p_i, flv_i, Para_i, p_order = args
+    _GPD_theo = GPDobserv(x_i, xi_i, t_i, Q_i, p_i)  
+    return _GPD_theo.GPD(flv_i, Para_i, p_order)
+
+
 def PDF_theo(PDF_input: pd.DataFrame, Para: np.array, p_order = 2):
     
     PDF_input = PDF_input.copy()
@@ -338,6 +344,33 @@ def PDF_theo(PDF_input: pd.DataFrame, Para: np.array, p_order = 2):
     PDF_input['cost'] = ((PDF_input["pred f"]-PDF_input["f"])/PDF_input["delta f"])**2
     
     return PDF_input
+
+def GPD_theo(GPD_input: pd.DataFrame, Para: np.array, p_order = 2):
+    
+    GPD_input = GPD_input.copy()
+    
+    xs = GPD_input['x'].to_numpy()
+    xis = GPD_input['xi'].to_numpy()
+    ts = GPD_input['t'].to_numpy()
+    Qs = GPD_input['Q'].to_numpy()
+    flvs = GPD_input['flv'].to_numpy()
+    spes = GPD_input['spe'].to_numpy()
+    ps = np.where(spes <= 1, 1, -1)
+    Para_spe = Para[spes]
+    
+    xis = np.zeros_like(xs)
+    
+    # Prepare input arguments for parallel computation
+    args = [(x_i, xi_i, t_i, Q_i, p_i, flv_i, Para_i, p_order) 
+            for x_i, xi_i, t_i, Q_i, p_i, flv_i, Para_i 
+            in zip(xs, xis, ts, Qs, ps, flvs, Para_spe)]
+
+    # Use multiprocessing Pool to parallelize the computation'
+    pool = get_pool()
+    GPD_input['pred f'] = list(pool.map(GPD_theo_scalar_helper, args))
+    GPD_input['cost'] = ((GPD_input["pred f"]-GPD_input["f"])/GPD_input["delta f"])**2
+    
+    return GPD_input
 
 #Not in use, can be rewritten for GPD though
 '''
