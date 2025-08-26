@@ -1809,7 +1809,7 @@ def Moment_Evo_NLO(j: np.array, nf: int, p: int, mu: float, t: float, xi: float,
     # Transform the unevolved moments to evolution basis
     ConfEvoBasis = np.einsum('ij, ...j->...i', flav_trans, ConfFlav) # shape (N, 5)
     if(mu == Init_Scale_Q):
-        return ConfEvoBasis
+        return ConfEvoBasis[..., :3], ConfEvoBasis[..., -2:], ConfEvoBasis[..., :3], ConfEvoBasis[..., -2:]
     
     # Taking the non-singlet and singlet parts of the conformal moments
     ConfNS = ConfEvoBasis[..., :3] # (N, 3)
