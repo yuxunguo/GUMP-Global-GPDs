@@ -859,11 +859,3 @@ Paralst_Pol_Init = pd.read_csv(os.path.join(dir_path,'GUMP_Params/Para_Pol.csv')
 
 Paralst_Unp_off_forward=pd.read_csv(os.path.join(dir_path,'GUMP_Params/Para_Unp_Off_forward_withH_withHt_NLO.csv'), header=None).to_numpy()[0]
 Paralst_Pol_off_forward=pd.read_csv(os.path.join(dir_path,'GUMP_Params/Para_Pol_Off_forward_withH_withHt_NLO.csv'), header=None).to_numpy()[0]
-
-if __name__ == '__main__':
-    
-    Para_Unp_all = ParaManager_Unp(Paralst_Unp_off_forward)
-    Para_Pol_all = ParaManager_Pol(Paralst_Pol_off_forward[:-1])
-    Para_Comb = np.concatenate([Para_Unp_all, Para_Pol_all], axis=0)
-
-    print(GPD_theo(GPD_data, Para=Para_Comb))
