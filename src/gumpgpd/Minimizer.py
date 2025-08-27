@@ -15,6 +15,7 @@ dir_path = os.path.dirname(os.path.realpath(__file__))
 Minuit_Counter = 0
 Time_Counter = 1
 Q_threshold = 1.9
+t_threshold_Jpsi = 0.6
 xB_Cut = 0.5
 xB_small_Cut = 0.0001
 time_start = time.time()
@@ -131,10 +132,6 @@ def group_by_unique(data, subset=['xB', 't', 'Q']):
 """
 
 PDF_data = pd.read_csv(os.path.join(dir_path,'GUMPDATA/PDFdata.csv'), header = 0, names = ['x', 't', 'Q', 'f', 'delta f', 'spe', 'flv'],        dtype = {'x': float, 't': float, 'Q': float, 'f': float, 'delta f': float,'spe': int, 'flv': str})
-PDF_data_H  = PDF_data[PDF_data['spe'] == 0]
-PDF_data_E  = PDF_data[PDF_data['spe'] == 1]
-PDF_data_Ht = PDF_data[PDF_data['spe'] == 2]
-PDF_data_Et = PDF_data[PDF_data['spe'] == 3]
 
 tPDF_data = pd.read_csv(os.path.join(dir_path,'GUMPDATA/tPDFdata.csv'),     header = 0, names = ['x', 't', 'Q', 'f', 'delta f', 'spe', 'flv'],        dtype = {'x': float, 't': float, 'Q': float, 'f': float, 'delta f': float,'spe': int, 'flv': str})
 
@@ -259,7 +256,15 @@ DVJpsiPH1xsec_data = pd.read_csv(os.path.join(dir_path,'GUMPDATA/DVMP_HERA/DVJps
 DVJpsiPH1xsec_data['Q'] = np.sqrt(DVJpsiPH1xsec_data['Q'])
 DVJpsiPH1xsec_data['t'] = -1 * DVJpsiPH1xsec_data['t']
 DVJpsiPH1xsec_data = DVJpsiPH1xsec_data[(DVJpsiPH1xsec_data['Q']>Q_threshold)]
+DVJpsiPH1xsec_data = DVJpsiPH1xsec_data[(-DVJpsiPH1xsec_data['t']<t_threshold_Jpsi)]
 DVJpsiPH1xsec_group_data = group_by_unique(DVJpsiPH1xsec_data)
+
+DVJpsiPZEUSxsec_data = pd.read_csv(os.path.join(dir_path,'GUMPDATA/DVMP_HERA/DVJpsiPZEUSdt_w_mass.csv'), header = None, names = ['y', 'xB', 't', 'Q', 'f', 'delta f'] , dtype = {'y': float, 'xB': float, 't': float, 'Q': float, 'f': float, 'delta f': float})
+DVJpsiPZEUSxsec_data['Q'] = np.sqrt(DVJpsiPZEUSxsec_data['Q'])
+DVJpsiPZEUSxsec_data['t'] = -1 * DVJpsiPZEUSxsec_data['t']
+DVJpsiPZEUSxsec_data = DVJpsiPZEUSxsec_data[(DVJpsiPZEUSxsec_data['Q']>Q_threshold)]
+DVJpsiPZEUSxsec_data = DVJpsiPZEUSxsec_data[(-DVJpsiPZEUSxsec_data['t']<t_threshold_Jpsi)]
+DVJpsiPZEUSxsec_group_data = group_by_unique(DVJpsiPZEUSxsec_data)
 
 '''
 For Jpsi we used NRQCD framework that predict the R ratio, the following code not in use
@@ -666,6 +671,15 @@ def cost_off_forward_withH_withHt(Norm_HuV,    alpha_HuV,    beta_HuV,    alphap
             DVJpsiPH1xsec_group_data,
             "DVJpsiPxsec.csv"
         ),
+        "DVJpsiPZEUS": (
+            partial(DVMPxsec_cost_xBtQ,
+                    Para_Unp=Para_Unp_all,
+                    xsec_norm=jpsinorm,
+                    meson=3,
+                    p_order=porder),
+            DVJpsiPZEUSxsec_group_data,
+            "DVJpsiPZEUSxsec.csv"
+        ),
         "DVCSxsec_New": (
             partial(DVCSxsec_cost_xBtQ,
                     Para_Unp=Para_Unp_all,
@@ -691,6 +705,7 @@ def cost_off_forward_withH_withHt(Norm_HuV,    alpha_HuV,    beta_HuV,    alphap
     ]
     if config.INC_JPSI:
         selected_tasks.append("DVJpsiPH1")
+        #selected_tasks.append("DVJpsiPZEUS")
     
     all_tasks_exp = []
     task_names = []
@@ -704,8 +719,8 @@ def cost_off_forward_withH_withHt(Norm_HuV,    alpha_HuV,    beta_HuV,    alphap
     total_cost_exp = sum(df["cost"].sum() for df in all_results_exp if "cost" in df.columns)
     
     if config.Export_Mode:
-        GPD_pred = GPD_theo(GPD_data, Para=Para_Comb)
-        Export_Frame_Append(GPD_pred,"GPDcomp.csv")
+        #GPD_pred = GPD_theo(GPD_data, Para=Para_Comb)
+        #Export_Frame_Append(GPD_pred,"GPDcomp.csv")
         Export_Frame_Append(tPDF_pred,"tPDFcomp.csv")
         Export_Frame_Append(GFF_pred,"GFFcomp.csv")
         Export_Frame_Append(PDF_pred,"PDFcomp.csv")
@@ -834,12 +849,13 @@ def off_forward_fit_withH_withHt(Paralst_Unp, Paralst_Pol, Paralst_Aux=[1.0] * l
     time_end = time.time() -time_start
     
     ndof_off_forward = (len(DVCSxsec_data.index) + len(DVCSxsec_HERA_data.index) 
-                        + len(DVrhoPH1xsec_data.index) + len(DVrhoPZEUSxsec_data.index)  #+ len(DVJpsiPH1xsec_data.index)
-                         + len(tPDF_data.index) + len(GFF_data.index) + len(PDF_data_H.index)+ len(PDF_data_Ht.index) - fit_off_forward.nfit)
-
+                        + len(DVrhoPH1xsec_data.index) + len(DVrhoPZEUSxsec_data.index)
+                         + len(tPDF_data.index) + len(GFF_data.index) + len(PDF_data.index) - fit_off_forward.nfit)
+    
     os.makedirs(os.path.join(export_path, 'GUMP_Output'), exist_ok=True)
     
     if config.INC_JPSI:
+        ndof_off_forward = ndof_off_forward + len(DVJpsiPH1xsec_data.index)
         Exp_path = os.path.join(export_path,'GUMP_Output/off_forward_fit_withH_withHt_NLO_withJpsi.txt')
     else:
         Exp_path = os.path.join(export_path,'GUMP_Output/off_forward_fit_withH_withHt_NLO.txt')
