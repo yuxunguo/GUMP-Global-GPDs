@@ -719,8 +719,8 @@ def cost_off_forward_withH_withHt(Norm_HuV,    alpha_HuV,    beta_HuV,    alphap
     total_cost_exp = sum(df["cost"].sum() for df in all_results_exp if "cost" in df.columns)
     
     if config.Export_Mode:
-        #GPD_pred = GPD_theo(GPD_data, Para=Para_Comb)
-        #Export_Frame_Append(GPD_pred,"GPDcomp.csv")
+        GPD_pred = GPD_theo(GPD_data, Para=Para_Comb)
+        Export_Frame_Append(GPD_pred,"GPDcomp.csv")
         Export_Frame_Append(tPDF_pred,"tPDFcomp.csv")
         Export_Frame_Append(GFF_pred,"GFFcomp.csv")
         Export_Frame_Append(PDF_pred,"PDFcomp.csv")
