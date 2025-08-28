@@ -3,17 +3,14 @@ import numpy as np
 import pandas as pd
 from . import config 
 config.INC_gGFF = False
-from .Minimizer import off_forward_fit_withH_withHt, cost_off_forward_withH_withHt, Paralst_Unp_Names, Paralst_Pol_Names,Paralst_Aux_Names
+config.INC_JPSI = False
+from .Minimizer import off_forward_fit_withH_withHt
 
 dir_path = os.path.dirname(os.path.realpath(__file__))
 
 if __name__ == '__main__':
     
-    print('Test16')
-    time_start = time.time()
-
-    #'''
-    config.INC_JPSI = False
+    print('Fit will be running, parameters will be generated to Minimizer.Paralst_Unp_off_forward and Minimizer.Paralst_Pol_off_forward')
     str = '_withH_withHt_NLO'
     Paralst_Unp=pd.read_csv(os.path.join(dir_path,f'GUMP_Params/Para_Unp_Off_forward{str}.csv'), header=None).to_numpy()[0]
     Paralst_Pol=pd.read_csv(os.path.join(dir_path,f'GUMP_Params/Para_Pol_Off_forward{str}.csv'), header=None).to_numpy()[0]
@@ -35,26 +32,3 @@ if __name__ == '__main__':
         csvWriter.writerow(FitVals[UnpLength:])
         csvWriter.writerow(FitErrs[UnpLength:])
         print(f"off-forward fit polarized parameters saved to Para_Pol_Off_forward{str}.csv")
-    #'''
-
-    #
-    # Below is for testing, set Export_Mode to True in config.py and run through to generate the outputs
-    #
-
-    '''
-    str = '_withH_withHt_NLO'
-    config.Export_Mode = True
-    config.INC_JPSI = False
-    
-    Paralst_Unp=pd.read_csv(os.path.join(dir_path,f'GUMP_Params/Para_Unp_Off_forward{str}.csv'), header=None).to_numpy()[0]
-    Paralst_Pol=pd.read_csv(os.path.join(dir_path,f'GUMP_Params/Para_Pol_Off_forward{str}.csv'), header=None).to_numpy()[0]
-    Paralst_Aux = [Paralst_Pol[-1]]
-
-    params_unp = dict(zip(Paralst_Unp_Names, Paralst_Unp))
-    params_pol = dict(zip(Paralst_Pol_Names, Paralst_Pol))
-    params_aux = dict(zip(Paralst_Aux_Names, Paralst_Aux))
-    
-    params = {**params_unp, **params_pol, **params_aux}
-
-    print(cost_off_forward_withH_withHt(**params))
-    '''
