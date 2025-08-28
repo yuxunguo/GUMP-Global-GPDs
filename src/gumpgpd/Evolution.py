@@ -838,6 +838,25 @@ mp.dps = 25
 
 hyp2f1_nparray = np.frompyfunc(hyp2f1,4,1)
 
+def np_cache_ConfWF(function):
+    cache = {}
+
+    def serialize_array(arr: np.ndarray):
+        # serialize ndarray into a hashable key
+        return (arr.tobytes(), arr.shape, str(arr.dtype))
+
+    @functools.wraps(function)
+    def wrapper(j, x: float, xi: float):
+        j_arr = np.asarray(j)  # allow scalar, list, or np.ndarray
+        key = (serialize_array(j_arr), float(x), float(xi))
+        if key not in cache:
+            cache[key] = function(j_arr, x, xi)
+        return cache[key]
+
+    return wrapper
+
+#@np_cache_ConfWF
+@memory.cache
 def ConfWaveFuncQ(j: complex, x: float, xi: float) -> complex:
     """Quark conformal wave function p_j(x,xi) 
     
@@ -858,6 +877,8 @@ def ConfWaveFuncQ(j: complex, x: float, xi: float) -> complex:
 
     return 0
 
+#@np_cache_ConfWF
+@memory.cache
 def ConfWaveFuncQ_over_sinpij(j: complex, x: float, xi: float) -> complex:
     """Quark conformal wave function p_j(x,xi)/sin(pi(j+1))
     
@@ -878,6 +899,8 @@ def ConfWaveFuncQ_over_sinpij(j: complex, x: float, xi: float) -> complex:
 
     return 0
 
+#@np_cache_ConfWF
+@memory.cache
 def ConfWaveFuncG(j: complex, x: float, xi: float) -> complex:
     """Gluon conformal wave function p_j(x,xi) 
     
@@ -900,6 +923,8 @@ def ConfWaveFuncG(j: complex, x: float, xi: float) -> complex:
 
     return 0
 
+#@np_cache_ConfWF
+@memory.cache
 def ConfWaveFuncG_over_sinpij(j: complex, x: float, xi: float) -> complex:
     """Gluon conformal wave function p_j(x,xi)/sin(pi(j+1)) = Minus * p_j(x,xi)/sin(pi*j)
     

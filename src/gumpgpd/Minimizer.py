@@ -325,7 +325,6 @@ def GPD_theo_scalar_helper(args):
     _GPD_theo = GPDobserv(x_i, xi_i, t_i, Q_i, p_i)  
     return _GPD_theo.GPD(flv_i, Para_i, p_order)
 
-
 def PDF_theo(PDF_input: pd.DataFrame, Para: np.array, p_order = 2):
     
     PDF_input = PDF_input.copy()
@@ -352,8 +351,42 @@ def PDF_theo(PDF_input: pd.DataFrame, Para: np.array, p_order = 2):
     
     return PDF_input
 
+GDP_First_Time_FLAG = True
+
+def GPD_theo_init(GPD_input: pd.DataFrame, Para: np.array, p_order = 2):
+    
+    GPD_input = GPD_input.copy()
+    GPD_input = GPD_input.drop_duplicates(subset=["x", "xi"], keep="first")
+    xs = GPD_input['x'].to_numpy()
+    xis = GPD_input['xi'].to_numpy()
+    ts = GPD_input['t'].to_numpy()
+    Qs = GPD_input['Q'].to_numpy()
+    flvs = GPD_input['flv'].to_numpy()
+    spes = GPD_input['spe'].to_numpy()
+    ps = np.where(spes <= 1, 1, -1)
+    Para_spe = Para[spes]
+    
+    xis = np.zeros_like(xs)
+    
+    # Prepare input arguments for parallel computation
+    args = [(x_i, xi_i, t_i, Q_i, p_i, flv_i, Para_i, p_order) 
+            for x_i, xi_i, t_i, Q_i, p_i, flv_i, Para_i 
+            in zip(xs, xis, ts, Qs, ps, flvs, Para_spe)]
+
+    # Use multiprocessing Pool to parallelize the computation
+    pool = get_pool()
+    GPD_input['pred f'] = list(pool.map(GPD_theo_scalar_helper, args))
+    GPD_input['cost'] = ((GPD_input["pred f"]-GPD_input["f"])/GPD_input["delta f"])**2
+
 def GPD_theo(GPD_input: pd.DataFrame, Para: np.array, p_order = 2):
     
+    global GDP_First_Time_FLAG
+    
+    if GDP_First_Time_FLAG:
+        GDP_First_Time_FLAG = False
+        GPD_theo_init(GPD_input, Para, p_order)
+        print("Conformal wave function initialized")
+        
     GPD_input = GPD_input.copy()
     
     xs = GPD_input['x'].to_numpy()
@@ -372,7 +405,7 @@ def GPD_theo(GPD_input: pd.DataFrame, Para: np.array, p_order = 2):
             for x_i, xi_i, t_i, Q_i, p_i, flv_i, Para_i 
             in zip(xs, xis, ts, Qs, ps, flvs, Para_spe)]
 
-    # Use multiprocessing Pool to parallelize the computation'
+    # Use multiprocessing Pool to parallelize the computation
     pool = get_pool()
     GPD_input['pred f'] = list(pool.map(GPD_theo_scalar_helper, args))
     GPD_input['cost'] = ((GPD_input["pred f"]-GPD_input["f"])/GPD_input["delta f"])**2
@@ -612,6 +645,7 @@ def cost_off_forward_withH_withHt(Norm_HuV,    alpha_HuV,    beta_HuV,    alphap
     tPDF_pred = tPDF_theo(tPDF_data, Para=Para_Comb)
     GFF_pred = GFF_theo(GFF_data, Para=Para_Comb)
     PDF_pred = PDF_theo(PDF_data, Para=Para_Comb)
+    GPD_pred = GPD_theo(GPD_data, Para=Para_Comb)
     
     pool = get_pool()
 
@@ -719,11 +753,11 @@ def cost_off_forward_withH_withHt(Norm_HuV,    alpha_HuV,    beta_HuV,    alphap
     total_cost_exp = sum(df["cost"].sum() for df in all_results_exp if "cost" in df.columns)
     
     if config.Export_Mode:
-        GPD_pred = GPD_theo(GPD_data, Para=Para_Comb)
-        Export_Frame_Append(GPD_pred,"GPDcomp.csv")
+        
         Export_Frame_Append(tPDF_pred,"tPDFcomp.csv")
         Export_Frame_Append(GFF_pred,"GFFcomp.csv")
         Export_Frame_Append(PDF_pred,"PDFcomp.csv")
+        Export_Frame_Append(GPD_pred,"GPDcomp.csv")
         
         grouped_results = {}
         start = 0
@@ -737,7 +771,7 @@ def cost_off_forward_withH_withHt(Norm_HuV,    alpha_HuV,    beta_HuV,    alphap
             Export_Frame_Append(grouped_results[name], filename)
             start = end
         
-    return total_cost_exp + tPDF_pred['cost'].sum() + GFF_pred['cost'].sum() + PDF_pred['cost'].sum()
+    return total_cost_exp + tPDF_pred['cost'].sum() + GFF_pred['cost'].sum() + PDF_pred['cost'].sum() + GPD_pred['cost'].sum()
 
 def off_forward_fit_withH_withHt(Paralst_Unp, Paralst_Pol, Paralst_Aux=[1.0] * len(Paralst_Aux_Names), export_path = '.'):
 
@@ -850,7 +884,7 @@ def off_forward_fit_withH_withHt(Paralst_Unp, Paralst_Pol, Paralst_Aux=[1.0] * l
     
     ndof_off_forward = (len(DVCSxsec_data.index) + len(DVCSxsec_HERA_data.index) 
                         + len(DVrhoPH1xsec_data.index) + len(DVrhoPZEUSxsec_data.index)
-                         + len(tPDF_data.index) + len(GFF_data.index) + len(PDF_data.index) - fit_off_forward.nfit)
+                         + len(tPDF_data.index) + len(GFF_data.index) + len(PDF_data.index) + len(GPD_data.index) - fit_off_forward.nfit)
     
     os.makedirs(os.path.join(export_path, 'GUMP_Output'), exist_ok=True)
     

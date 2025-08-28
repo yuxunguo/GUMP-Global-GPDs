@@ -42,9 +42,9 @@ if __name__ == '__main__':
     #
 
     #'''
-    str = '_withH_withHt_NLO_withJpsi'
+    str = '_withH_withHt_NLO'
     config.Export_Mode = True
-    config.INC_JPSI = True
+    config.INC_JPSI = False
     
     Paralst_Unp=pd.read_csv(os.path.join(dir_path,f'GUMP_Params/Para_Unp_Off_forward{str}.csv'), header=None).to_numpy()[0]
     Paralst_Pol=pd.read_csv(os.path.join(dir_path,f'GUMP_Params/Para_Pol_Off_forward{str}.csv'), header=None).to_numpy()[0]
