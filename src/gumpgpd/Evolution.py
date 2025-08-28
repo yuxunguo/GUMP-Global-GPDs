@@ -855,8 +855,8 @@ def np_cache_ConfWF(function):
 
     return wrapper
 
-#@np_cache_ConfWF
-@memory.cache
+#@memory.cache
+@np_cache_ConfWF
 def ConfWaveFuncQ(j: complex, x: float, xi: float) -> complex:
     """Quark conformal wave function p_j(x,xi) 
     
@@ -877,8 +877,8 @@ def ConfWaveFuncQ(j: complex, x: float, xi: float) -> complex:
 
     return 0
 
-#@np_cache_ConfWF
-@memory.cache
+#@memory.cache
+@np_cache_ConfWF
 def ConfWaveFuncQ_over_sinpij(j: complex, x: float, xi: float) -> complex:
     """Quark conformal wave function p_j(x,xi)/sin(pi(j+1))
     
@@ -898,9 +898,8 @@ def ConfWaveFuncQ_over_sinpij(j: complex, x: float, xi: float) -> complex:
         return 1/np.sin(np.pi * (j+1)) * 2 ** (1+j) * gamma(5/2+j) / (gamma(1/2) * gamma(1+j)) * xi ** (-j-1) * (1+x/xi) * np.array(hyp2f1_nparray(-1-j,j+2,2, (x+xi)/(2*xi)), dtype= complex)
 
     return 0
-
-#@np_cache_ConfWF
-@memory.cache
+#@memory.cache
+@np_cache_ConfWF
 def ConfWaveFuncG(j: complex, x: float, xi: float) -> complex:
     """Gluon conformal wave function p_j(x,xi) 
     
@@ -923,8 +922,9 @@ def ConfWaveFuncG(j: complex, x: float, xi: float) -> complex:
 
     return 0
 
-#@np_cache_ConfWF
-@memory.cache
+
+#@memory.cache
+@np_cache_ConfWF
 def ConfWaveFuncG_over_sinpij(j: complex, x: float, xi: float) -> complex:
     """Gluon conformal wave function p_j(x,xi)/sin(pi(j+1)) = Minus * p_j(x,xi)/sin(pi*j)
     
@@ -1795,7 +1795,7 @@ def np_cache_GPD_moment(function):
     return wrapper
 
 # Turn off the cache to reduce hashing time if only one evolved moment is calculated for a set of parameters at a given kinematics. Otherwise cache it.
-@np_cache_GPD_moment
+#@np_cache_GPD_moment
 def Moment_Evo_NLO(j: np.array, nf: int, p: int, mu: float, t: float, xi: float, Para: np.array, momshift: int) -> np.array:
     """Next-to-leading order evolution of the conformal moments (Evolved moment method)
 

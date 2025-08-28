@@ -351,42 +351,8 @@ def PDF_theo(PDF_input: pd.DataFrame, Para: np.array, p_order = 2):
     
     return PDF_input
 
-GDP_First_Time_FLAG = True
-
-def GPD_theo_init(GPD_input: pd.DataFrame, Para: np.array, p_order = 2):
-    
-    GPD_input = GPD_input.copy()
-    GPD_input = GPD_input.drop_duplicates(subset=["x", "xi"], keep="first")
-    xs = GPD_input['x'].to_numpy()
-    xis = GPD_input['xi'].to_numpy()
-    ts = GPD_input['t'].to_numpy()
-    Qs = GPD_input['Q'].to_numpy()
-    flvs = GPD_input['flv'].to_numpy()
-    spes = GPD_input['spe'].to_numpy()
-    ps = np.where(spes <= 1, 1, -1)
-    Para_spe = Para[spes]
-    
-    xis = np.zeros_like(xs)
-    
-    # Prepare input arguments for parallel computation
-    args = [(x_i, xi_i, t_i, Q_i, p_i, flv_i, Para_i, p_order) 
-            for x_i, xi_i, t_i, Q_i, p_i, flv_i, Para_i 
-            in zip(xs, xis, ts, Qs, ps, flvs, Para_spe)]
-
-    # Use multiprocessing Pool to parallelize the computation
-    pool = get_pool()
-    GPD_input['pred f'] = list(pool.map(GPD_theo_scalar_helper, args))
-    GPD_input['cost'] = ((GPD_input["pred f"]-GPD_input["f"])/GPD_input["delta f"])**2
-
 def GPD_theo(GPD_input: pd.DataFrame, Para: np.array, p_order = 2):
     
-    global GDP_First_Time_FLAG
-    
-    if GDP_First_Time_FLAG:
-        GDP_First_Time_FLAG = False
-        GPD_theo_init(GPD_input, Para, p_order)
-        print("Conformal wave function initialized")
-        
     GPD_input = GPD_input.copy()
     
     xs = GPD_input['x'].to_numpy()
@@ -397,8 +363,6 @@ def GPD_theo(GPD_input: pd.DataFrame, Para: np.array, p_order = 2):
     spes = GPD_input['spe'].to_numpy()
     ps = np.where(spes <= 1, 1, -1)
     Para_spe = Para[spes]
-    
-    xis = np.zeros_like(xs)
     
     # Prepare input arguments for parallel computation
     args = [(x_i, xi_i, t_i, Q_i, p_i, flv_i, Para_i, p_order) 
@@ -767,7 +731,7 @@ def cost_off_forward_withH_withHt(Norm_HuV,    alpha_HuV,    beta_HuV,    alphap
             grouped_results[name] = pd.concat(all_results_exp[start:end], ignore_index=True)
             datalen = len(grouped_results[name])
             totchi2 = grouped_results[name]['cost'].sum()
-            print(f'For the task {name}, with total {datalen} data points, the total chi^2 is {totchi2} and chi^2 per data point is {totchi2/datalen}')
+            print(f'For the task {name}, with total {datalen} data points, the total chi^2 is {totchi2:.2f} and chi^2 per data point is {totchi2/datalen:.2f}')
             Export_Frame_Append(grouped_results[name], filename)
             start = end
         
