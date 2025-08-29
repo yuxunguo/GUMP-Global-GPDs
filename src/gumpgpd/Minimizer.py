@@ -323,6 +323,11 @@ def PDF_theo_scalar_helper(x_i, xi_i, t_i, Q_i, p_i, flv_i, Para_i, p_order):
     _PDF_theo = GPDobserv(x_i, xi_i, t_i, Q_i, p_i)  
     return _PDF_theo.tPDF(flv_i, Para_i, p_order)
 
+# Helper function for scalar computation
+def GFF_theo_scalar_helper(j_i, x, xi, t_i, Q_i, p_i, flv_i, Para_i, p_order):
+    _GFF_theo = GPDobserv(x, xi, t_i, Q_i, p_i)
+    return _GFF_theo.GFFj0(j_i, flv_i, Para_i, p_order)
+
 def GPD_theo_scalar_helper(x_i, xi_i, t_i, Q_i, p_i, flv_i, Para_i, p_order):
     _GPD_theo = GPDobserv(x_i, xi_i, t_i, Q_i, p_i)  
     return _GPD_theo.GPD(flv_i, Para_i, p_order)
@@ -347,58 +352,12 @@ def PDF_theo(PDF_input: pd.DataFrame, Para: np.array, p_order = 2):
     # Use multiprocessing Pool to parallelize the computation'
     pool = get_pool()
     PDF_input['pred f'] = list(pool.starmap(PDF_theo_scalar_helper, args))
-    PDF_input['cost'] = ((PDF_input["pred f"]-PDF_input["f"])/PDF_input["delta f"])**2
+    if "f" in PDF_input and "delta f" in PDF_input:
+        PDF_input['cost'] = ((PDF_input["pred f"]-PDF_input["f"])/PDF_input["delta f"])**2
     
     return PDF_input
 
-def GPD_theo(GPD_input: pd.DataFrame, Para: np.array, p_order = 2):
-    
-    GPD_input = GPD_input.copy()
-    
-    xs = GPD_input['x'].to_numpy()
-    xis = GPD_input['xi'].to_numpy()
-    ts = GPD_input['t'].to_numpy()
-    Qs = GPD_input['Q'].to_numpy()
-    flvs = GPD_input['flv'].to_numpy()
-    spes = GPD_input['spe'].to_numpy()
-    ps = np.where(spes <= 1, 1, -1)
-    Para_spe = Para[spes]
-    
-    # Prepare input arguments for parallel computation
-    args = zip(xs, xis, ts, Qs, ps, flvs, Para_spe, [p_order]*len(xs))
-
-    # Use multiprocessing Pool to parallelize the computation
-    pool = get_pool()
-    GPD_input['pred f'] = list(pool.starmap(GPD_theo_scalar_helper, args))
-    GPD_input['cost'] = ((GPD_input["pred f"]-GPD_input["f"])/GPD_input["delta f"])**2
-    
-    return GPD_input
-
-#Not in use, can be rewritten for GPD though
-'''
-def PDF_theo_parallel(PDF_input: pd.DataFrame, Para: np.array, p_order = 2):
-    
-    PDF_input = PDF_input.copy()
-    
-    PDFMask = PDF_input.duplicated(subset=['t', 'Q','spe'], keep='first')
-    PDF_input_duplicate = PDF_input[PDFMask]
-    PDF_input_unique = PDF_input[~PDFMask]
-    
-    # Run the unique ones to precache and avoid conflicts in writing cache
-    PDF_input_unique = PDF_theo(PDF_input_unique, Para = Para, p_order = p_order)
-    # Run the duplicate ones can be calculated from the cache
-    PDF_input_duplicate = PDF_theo(PDF_input_duplicate, Para = Para, p_order = p_order)
-    
-    PDF_input_reconstructed = pd.concat([PDF_input_unique, PDF_input_duplicate])
-    
-    return PDF_input_reconstructed
-'''
 tPDF_theo = PDF_theo
-
-# Helper function for scalar computation
-def GFF_theo_scalar_helper(j_i, x, xi, t_i, Q_i, p_i, flv_i, Para_i, p_order):
-    _GFF_theo = GPDobserv(x, xi, t_i, Q_i, p_i)
-    return _GFF_theo.GFFj0(j_i, flv_i, Para_i, p_order)
 
 def GFF_theo(GFF_input: pd.DataFrame, Para: np.array, p_order = 2):
     
@@ -420,24 +379,36 @@ def GFF_theo(GFF_input: pd.DataFrame, Para: np.array, p_order = 2):
 
     pool = get_pool()
     GFF_input['pred f'] = list(pool.starmap(GFF_theo_scalar_helper, args))
-    GFF_input['cost'] = ((GFF_input["pred f"]-GFF_input["f"])/GFF_input["delta f"])**2
+    if "f" in GFF_input and "delta f" in GFF_input:
+        GFF_input['cost'] = ((GFF_input["pred f"]-GFF_input["f"])/GFF_input["delta f"])**2
     
     return GFF_input
 
-def CFF_theo(xB, t, Q, Para_Unp, Para_Pol, porder = 2):
-    x = 0
-    xi = (1/(2 - xB) - (2*t*(-1 + xB))/(Q**2*(-2 + xB)**2))*xB
-    H_E = GPDobserv(x, xi, t, Q, 1)
-    Ht_Et = GPDobserv(x, xi, t, Q, -1)
-    HCFF = H_E.CFF(Para_Unp[..., 0, :, :, :, :], Q, p_order = porder)
-    ECFF = H_E.CFF(Para_Unp[..., 1, :, :, :, :], Q, p_order = porder)
-    HtCFF = Ht_Et.CFF(Para_Pol[..., 0, :, :, :, :], Q, p_order = porder)
-    EtCFF = Ht_Et.CFF(Para_Pol[..., 1, :, :, :, :], Q, p_order = porder)
+def GPD_theo(GPD_input: pd.DataFrame, Para: np.array, p_order = 2):
+    
+    GPD_input = GPD_input.copy()
+    
+    xs = GPD_input['x'].to_numpy()
+    xis = GPD_input['xi'].to_numpy()
+    ts = GPD_input['t'].to_numpy()
+    Qs = GPD_input['Q'].to_numpy()
+    flvs = GPD_input['flv'].to_numpy()
+    spes = GPD_input['spe'].to_numpy()
+    ps = np.where(spes <= 1, 1, -1)
+    Para_spe = Para[spes]
+    
+    # Prepare input arguments for parallel computation
+    args = zip(xs, xis, ts, Qs, ps, flvs, Para_spe, [p_order]*len(xs))
 
-    return [ HCFF, ECFF, HtCFF, EtCFF ] # this can be a list of arrays of shape (N)
-    # return np.stack([HCFF, ECFF, HtCFF, EtCFF], axis=-1)
+    # Use multiprocessing Pool to parallelize the computation
+    pool = get_pool()
+    GPD_input['pred f'] = list(pool.starmap(GPD_theo_scalar_helper, args))
+    if "f" in GPD_input and "delta f" in GPD_input:
+        GPD_input['cost'] = ((GPD_input["pred f"]-GPD_input["f"])/GPD_input["delta f"])**2
+    
+    return GPD_input
 
-def DVCSxsec_theo(DVCSxsec_input: pd.DataFrame, CFF_input: np.array):
+def DVCSxsec_theo_helper(DVCSxsec_input: pd.DataFrame, CFF_input: np.array):
     # CFF_input is a list of np.arrays
     # [y, xB, t, Q, phi, f, delta_f, pol] = DVCSxsec_input    
 
@@ -452,18 +423,7 @@ def DVCSxsec_theo(DVCSxsec_input: pd.DataFrame, CFF_input: np.array):
     [HCFF, ECFF, HtCFF, EtCFF] = CFF_input # each of them have shape (N); scalar is also OK if we use 
     return dsigma_DVCS_TOT(y, xB, t, Q, phi, pol, HCFF, ECFF, HtCFF, EtCFF)
 
-def DVCSxsec_cost_xBtQ(DVCSxsec_data_xBtQ: pd.DataFrame, Para_Unp, Para_Pol, P_order = 2):
-    [xB, t, Q] = [DVCSxsec_data_xBtQ['xB'].iat[0], DVCSxsec_data_xBtQ['t'].iat[0], DVCSxsec_data_xBtQ['Q'].iat[0]] 
-    [HCFF, ECFF, HtCFF, EtCFF] = CFF_theo(xB, t, Q, Para_Unp, Para_Pol, porder= P_order) # scalar for each of them
-    DVCS_pred_xBtQ = DVCSxsec_theo(DVCSxsec_data_xBtQ, CFF_input = [HCFF, ECFF, HtCFF, EtCFF])
-    DVCS_cost_xBtQ = ((DVCS_pred_xBtQ - DVCSxsec_data_xBtQ['f'])/ DVCSxsec_data_xBtQ['delta f']) ** 2
-    
-    DVCSxsec_data_xBtQ['pred f'] = DVCS_pred_xBtQ
-    DVCSxsec_data_xBtQ['cost'] = DVCS_cost_xBtQ
-        
-    return DVCSxsec_data_xBtQ
-
-def DVCSAsym_theo(DVCSAsym_input: pd.DataFrame, CFF_input: np.array):
+def DVCSAsym_theo_helper(DVCSAsym_input: pd.DataFrame, CFF_input: np.array):
     # CFF_input is a list of np.arrays
     # [y, xB, t, Q, phi, f, delta_f, pol] = DVCSxsec_input    
 
@@ -477,18 +437,7 @@ def DVCSAsym_theo(DVCSAsym_input: pd.DataFrame, CFF_input: np.array):
     [HCFF, ECFF, HtCFF, EtCFF] = CFF_input # each of them have shape (N); scalar is also OK if we use 
     return Asymmetry_DVCS_TOT(y, xB, t, Q, phi, pol, HCFF, ECFF, HtCFF, EtCFF)
 
-def DVCSAsym_cost_xBtQ(DVCSAsym_data_xBtQ: pd.DataFrame, Para_Unp, Para_Pol, P_order = 2):
-    [xB, t, Q] = [DVCSAsym_data_xBtQ['xB'].iat[0], DVCSAsym_data_xBtQ['t'].iat[0], DVCSAsym_data_xBtQ['Q'].iat[0]] 
-    [HCFF, ECFF, HtCFF, EtCFF] = CFF_theo(xB, t, Q, Para_Unp, Para_Pol, porder= P_order) # scalar for each of them
-    DVCS_Asym_pred_xBtQ = DVCSAsym_theo(DVCSAsym_data_xBtQ, CFF_input = [HCFF, ECFF, HtCFF, EtCFF])
-    DVCS_Asym_cost_xBtQ = ((DVCS_Asym_pred_xBtQ - DVCSAsym_data_xBtQ['f'])/ DVCSAsym_data_xBtQ['delta f']) ** 2
-
-    DVCSAsym_data_xBtQ['pred f'] = DVCS_Asym_pred_xBtQ
-    DVCSAsym_data_xBtQ['cost'] = DVCS_Asym_cost_xBtQ
-    
-    return DVCSAsym_data_xBtQ
-
-def DVCSxsec_HERA_theo(DVCSxsec_HERA_input: pd.DataFrame, CFF_input: np.array):
+def DVCSxsec_HERA_theo_helper(DVCSxsec_HERA_input: pd.DataFrame, CFF_input: np.array):
     #[y, xB, t, Q, f, delta_f, pol]  = DVCSxsec_data_HERA
     y = DVCSxsec_HERA_input['y'].to_numpy()
     xB = DVCSxsec_HERA_input['xB'].to_numpy()
@@ -501,30 +450,7 @@ def DVCSxsec_HERA_theo(DVCSxsec_HERA_input: pd.DataFrame, CFF_input: np.array):
     [HCFF, ECFF, HtCFF, EtCFF] = CFF_input
     return dsigma_DVCS_HERA(y, xB, t, Q, pol, HCFF, ECFF, HtCFF, EtCFF)
 
-def DVCSxsec_HERA_cost_xBtQ(DVCSxsec_HERA_data_xBtQ: pd.DataFrame, Para_Unp, Para_Pol , P_order = 2):
-    
-    [xB, t, Q] = [DVCSxsec_HERA_data_xBtQ['xB'].iat[0], DVCSxsec_HERA_data_xBtQ['t'].iat[0], DVCSxsec_HERA_data_xBtQ['Q'].iat[0]] 
-    [HCFF, ECFF, HtCFF, EtCFF] = CFF_theo(xB, t, Q, Para_Unp, Para_Pol, porder = P_order) # scalar for each of them
-    DVCS_HERA_pred_xBtQ = DVCSxsec_HERA_theo(DVCSxsec_HERA_data_xBtQ, CFF_input = [HCFF, ECFF, HtCFF, EtCFF])
-    DVCS_HERA_cost_xBtQ = ((DVCS_HERA_pred_xBtQ - DVCSxsec_HERA_data_xBtQ['f'])/ DVCSxsec_HERA_data_xBtQ['delta f']) ** 2
-    
-    DVCSxsec_HERA_data_xBtQ['pred f'] = DVCS_HERA_pred_xBtQ
-    DVCSxsec_HERA_data_xBtQ['cost'] = DVCS_HERA_cost_xBtQ
-
-    return DVCSxsec_HERA_data_xBtQ
-
-def TFF_theo(xB, t, Q, Para_Unp, meson:int, p_order = 2, muset = 1, flv = 'All'):
-    x = 0
-    xi = (1/(2 - xB) - (2*t*(-1 + xB))/((Q**2)*(-2 + xB)**2))*xB
-    if (meson==3):
-       xi = (1/(2 - xB) - (2*t*(-1 + xB))/((Q**2 + M_jpsi**2)*(-2 + xB)**2))*xB
-    H_E = GPDobserv(x, xi, t, Q, 1)
-    HTFF = H_E.TFF(Para_Unp[..., 0, :, :, :, :], muset * Q, meson, p_order, flv)
-    ETFF = H_E.TFF(Para_Unp[..., 1, :, :, :, :], muset * Q, meson, p_order, flv)
-
-    return  [ HTFF, ETFF]
-
-def DVMPxsec_theo(DVMPxsec_input: pd.DataFrame,  TFF_input: np.array, meson:int):
+def DVMPxsec_theo_helper(DVMPxsec_input: pd.DataFrame,  TFF_input: np.array, meson:int):
     y = DVMPxsec_input['y'].to_numpy()
     xB = DVMPxsec_input['xB'].to_numpy()
     t = DVMPxsec_input['t'].to_numpy()
@@ -538,17 +464,99 @@ def DVMPxsec_theo(DVMPxsec_input: pd.DataFrame,  TFF_input: np.array, meson:int)
     if (meson==1):
         return dsigmaL_DVMP_dt(y, xB, t, Q, meson, HTFF, ETFF)
 
-def DVMPxsec_cost_xBtQ(DVMPxsec_data_xBtQ: pd.DataFrame, Para_Unp, xsec_norm, meson:int, p_order = 2):
+def CFF_theo(xB, t, Q, Para_Unp, Para_Pol, porder = 2):
+    x = 0
+    xi = (1/(2 - xB) - (2*t*(-1 + xB))/(Q**2*(-2 + xB)**2))*xB
+    H_E = GPDobserv(x, xi, t, Q, 1)
+    Ht_Et = GPDobserv(x, xi, t, Q, -1)
+    HCFF = H_E.CFF(Para_Unp[..., 0, :, :, :, :], Q, p_order = porder)
+    ECFF = H_E.CFF(Para_Unp[..., 1, :, :, :, :], Q, p_order = porder)
+    HtCFF = Ht_Et.CFF(Para_Pol[..., 0, :, :, :, :], Q, p_order = porder)
+    EtCFF = Ht_Et.CFF(Para_Pol[..., 1, :, :, :, :], Q, p_order = porder)
+
+    return [ HCFF, ECFF, HtCFF, EtCFF ] # this can be a list of arrays of shape (N)
+    # return np.stack([HCFF, ECFF, HtCFF, EtCFF], axis=-1)
+
+def TFF_theo(xB, t, Q, Para_Unp, meson:int, p_order = 2, muset = 1, flv = 'All'):
+    x = 0
+    xi = (1/(2 - xB) - (2*t*(-1 + xB))/((Q**2)*(-2 + xB)**2))*xB
+    if (meson==3):
+       xi = (1/(2 - xB) - (2*t*(-1 + xB))/((Q**2 + M_jpsi**2)*(-2 + xB)**2))*xB
+    H_E = GPDobserv(x, xi, t, Q, 1)
+    HTFF = H_E.TFF(Para_Unp[..., 0, :, :, :, :], muset * Q, meson, p_order, flv)
+    ETFF = H_E.TFF(Para_Unp[..., 1, :, :, :, :], muset * Q, meson, p_order, flv)
+
+    return  [ HTFF, ETFF]
+
+def DVCSxsec_theo_xBtQ(DVCSxsec_data_xBtQ: pd.DataFrame, Para_Unp, Para_Pol, P_order = 2):
+    [xB, t, Q] = [DVCSxsec_data_xBtQ['xB'].iat[0], DVCSxsec_data_xBtQ['t'].iat[0], DVCSxsec_data_xBtQ['Q'].iat[0]] 
+    [HCFF, ECFF, HtCFF, EtCFF] = CFF_theo(xB, t, Q, Para_Unp, Para_Pol, porder= P_order) # scalar for each of them
+
+    DVCSxsec_data_xBtQ['pred f'] = DVCSxsec_theo_helper(DVCSxsec_data_xBtQ, CFF_input = [HCFF, ECFF, HtCFF, EtCFF])
+    if "f" in DVCSxsec_data_xBtQ and "delta f" in DVCSxsec_data_xBtQ:
+        DVCSxsec_data_xBtQ['cost'] = ((DVCSxsec_data_xBtQ['pred f'] - DVCSxsec_data_xBtQ['f'])/ DVCSxsec_data_xBtQ['delta f']) ** 2
+
+    return DVCSxsec_data_xBtQ
+
+def DVCSAsym_theo_xBtQ(DVCSAsym_data_xBtQ: pd.DataFrame, Para_Unp, Para_Pol, P_order = 2):
+    [xB, t, Q] = [DVCSAsym_data_xBtQ['xB'].iat[0], DVCSAsym_data_xBtQ['t'].iat[0], DVCSAsym_data_xBtQ['Q'].iat[0]] 
+    [HCFF, ECFF, HtCFF, EtCFF] = CFF_theo(xB, t, Q, Para_Unp, Para_Pol, porder= P_order) # scalar for each of them
+
+    DVCSAsym_data_xBtQ['pred f'] = DVCSAsym_theo_helper(DVCSAsym_data_xBtQ, CFF_input = [HCFF, ECFF, HtCFF, EtCFF])
+    if "f" in DVCSAsym_data_xBtQ and "delta f" in DVCSAsym_data_xBtQ:
+        DVCSAsym_data_xBtQ['cost'] = ((DVCSAsym_data_xBtQ['pred f'] - DVCSAsym_data_xBtQ['f'])/ DVCSAsym_data_xBtQ['delta f']) ** 2
+
+    return DVCSAsym_data_xBtQ
+
+def DVCSxsecHERA_theo_xBtQ(DVCSxsec_HERA_data_xBtQ: pd.DataFrame, Para_Unp, Para_Pol , P_order = 2):
+
+    [xB, t, Q] = [DVCSxsec_HERA_data_xBtQ['xB'].iat[0], DVCSxsec_HERA_data_xBtQ['t'].iat[0], DVCSxsec_HERA_data_xBtQ['Q'].iat[0]] 
+    [HCFF, ECFF, HtCFF, EtCFF] = CFF_theo(xB, t, Q, Para_Unp, Para_Pol, porder = P_order) # scalar for each of them
+
+    DVCSxsec_HERA_data_xBtQ['pred f'] = DVCSxsec_HERA_theo_helper(DVCSxsec_HERA_data_xBtQ, CFF_input = [HCFF, ECFF, HtCFF, EtCFF])
+    if "f" in DVCSxsec_HERA_data_xBtQ and "delta f" in DVCSxsec_HERA_data_xBtQ:
+        DVCSxsec_HERA_data_xBtQ['cost'] = ((DVCSxsec_HERA_data_xBtQ['pred f'] - DVCSxsec_HERA_data_xBtQ['f'])/ DVCSxsec_HERA_data_xBtQ['delta f']) ** 2
+        
+    return DVCSxsec_HERA_data_xBtQ
+
+def DVMPxsec_theo_xBtQ(DVMPxsec_data_xBtQ: pd.DataFrame, Para_Unp, xsec_norm, meson:int, p_order = 2):
 
     [xB, t, Q] = [DVMPxsec_data_xBtQ['xB'].iat[0], DVMPxsec_data_xBtQ['t'].iat[0], DVMPxsec_data_xBtQ['Q'].iat[0]] 
     [HTFF, ETFF] = TFF_theo(xB, t, Q, Para_Unp, meson, p_order, muset = 1)
-    DVMP_pred_xBtQ = DVMPxsec_theo(DVMPxsec_data_xBtQ, [HTFF, ETFF], meson) * xsec_norm**2
-    DVMP_cost_xBtQ = ((DVMP_pred_xBtQ - DVMPxsec_data_xBtQ['f'])/ DVMPxsec_data_xBtQ['delta f']) ** 2
+    
+    DVMPxsec_data_xBtQ['pred f'] = DVMPxsec_theo_helper(DVMPxsec_data_xBtQ, [HTFF, ETFF], meson) * xsec_norm**2
+    if "f" in DVMPxsec_data_xBtQ and "delta f" in DVMPxsec_data_xBtQ:
+        DVMPxsec_data_xBtQ['cost'] = ((DVMPxsec_data_xBtQ['pred f'] - DVMPxsec_data_xBtQ['f'])/ DVMPxsec_data_xBtQ['delta f']) ** 2
 
-    DVMPxsec_data_xBtQ['pred f'] = DVMP_pred_xBtQ
-    DVMPxsec_data_xBtQ['cost'] = DVMP_cost_xBtQ
-        
     return DVMPxsec_data_xBtQ
+
+def DVCSxsec_theo(DVCSxsec_data: pd.DataFrame, Para_Unp, Para_Pol, P_order = 2):
+    
+    DVCSxsec_data_xBtQ = group_by_unique(DVCSxsec_data)
+    pool = get_pool()
+    DVCSxsec_data_xBtQ = pd.concat(list(pool.map(partial(DVCSxsec_theo_xBtQ, Para_Unp = Para_Unp, Para_Pol = Para_Pol, P_order = P_order), DVCSxsec_data_xBtQ)), ignore_index=True)
+    return DVCSxsec_data_xBtQ
+
+def DVCSAsym_theo(DVCSAsym_data: pd.DataFrame, Para_Unp, Para_Pol, P_order = 2):
+
+    DVCSAsym_data_xBtQ = group_by_unique(DVCSAsym_data)
+    pool = get_pool()
+    DVCSAsym_data_xBtQ = pd.concat(list(pool.map(partial(DVCSAsym_theo_xBtQ, Para_Unp = Para_Unp, Para_Pol = Para_Pol, P_order = P_order), DVCSAsym_data_xBtQ)), ignore_index=True)
+    return DVCSAsym_data_xBtQ
+
+def DVMPxsec_theo(DVMPxsec_data: pd.DataFrame, Para_Unp, xsec_norm, meson:int, p_order = 2):
+    
+    DVMPxsec_data_xBtQ = group_by_unique(DVMPxsec_data)
+    pool = get_pool()
+    DVMPxsec_data_xBtQ = pd.concat(list(pool.map(partial(DVMPxsec_theo_xBtQ, Para_Unp = Para_Unp, xsec_norm = xsec_norm, meson = meson, p_order = p_order), DVMPxsec_data_xBtQ)), ignore_index=True)
+    return DVMPxsec_data_xBtQ
+
+def DVCSxsecHERA_theo(DVCSxsec_HERA_data: pd.DataFrame, Para_Unp, Para_Pol, P_order = 2):
+
+    DVCSxsec_HERA_data_xBtQ = group_by_unique(DVCSxsec_HERA_data)
+    pool = get_pool()
+    DVCSxsec_HERA_data_xBtQ = pd.concat(list(pool.map(partial(DVCSxsecHERA_theo_xBtQ, Para_Unp = Para_Unp, Para_Pol = Para_Pol, P_order = P_order), DVCSxsec_HERA_data_xBtQ)), ignore_index=True)
+    return DVCSxsec_HERA_data_xBtQ
 
 def simple_dispatch(task):
     func, arg = task
@@ -620,7 +628,7 @@ def cost_off_forward_withH_withHt(Norm_HuV,    alpha_HuV,    beta_HuV,    alphap
     porder = 2
     all_tasks_def = {
         "DVCSxsec": (
-            partial(DVCSxsec_cost_xBtQ,
+            partial(DVCSxsec_theo_xBtQ,
                     Para_Unp=Para_Unp_all,
                     Para_Pol=Para_Pol_all,
                     P_order=porder),
@@ -628,7 +636,7 @@ def cost_off_forward_withH_withHt(Norm_HuV,    alpha_HuV,    beta_HuV,    alphap
             "DVCSxsec.csv"
         ),
         "DVCSxsec_HERA": (
-            partial(DVCSxsec_HERA_cost_xBtQ,
+            partial(DVCSxsecHERA_theo_xBtQ,
                     Para_Unp=Para_Unp_all,
                     Para_Pol=Para_Pol_all,
                     P_order=porder),
@@ -636,7 +644,7 @@ def cost_off_forward_withH_withHt(Norm_HuV,    alpha_HuV,    beta_HuV,    alphap
             "DVCSxsec_HERA.csv"
         ),
         "DVrhoPH1": (
-            partial(DVMPxsec_cost_xBtQ,
+            partial(DVMPxsec_theo_xBtQ,
                     Para_Unp=Para_Unp_all,
                     xsec_norm=1,
                     meson=1,
@@ -645,7 +653,7 @@ def cost_off_forward_withH_withHt(Norm_HuV,    alpha_HuV,    beta_HuV,    alphap
             "DVMPxsec.csv"
         ),
         "DVrhoPZEUS": (
-            partial(DVMPxsec_cost_xBtQ,
+            partial(DVMPxsec_theo_xBtQ,
                     Para_Unp=Para_Unp_all,
                     xsec_norm=1,
                     meson=1,
@@ -654,7 +662,7 @@ def cost_off_forward_withH_withHt(Norm_HuV,    alpha_HuV,    beta_HuV,    alphap
             "DVMPxsec.csv"
         ),
         "DVJpsiPH1": (
-            partial(DVMPxsec_cost_xBtQ,
+            partial(DVMPxsec_theo_xBtQ,
                     Para_Unp=Para_Unp_all,
                     xsec_norm=jpsinorm,
                     meson=3,
@@ -663,7 +671,7 @@ def cost_off_forward_withH_withHt(Norm_HuV,    alpha_HuV,    beta_HuV,    alphap
             "DVJpsiPxsec.csv"
         ),
         "DVJpsiPZEUS": (
-            partial(DVMPxsec_cost_xBtQ,
+            partial(DVMPxsec_theo_xBtQ,
                     Para_Unp=Para_Unp_all,
                     xsec_norm=jpsinorm,
                     meson=3,
@@ -672,7 +680,7 @@ def cost_off_forward_withH_withHt(Norm_HuV,    alpha_HuV,    beta_HuV,    alphap
             "DVJpsiPZEUSxsec.csv"
         ),
         "DVCSxsec_New": (
-            partial(DVCSxsec_cost_xBtQ,
+            partial(DVCSxsec_theo_xBtQ,
                     Para_Unp=Para_Unp_all,
                     Para_Pol=Para_Pol_all,
                     P_order=porder),
@@ -680,7 +688,7 @@ def cost_off_forward_withH_withHt(Norm_HuV,    alpha_HuV,    beta_HuV,    alphap
             "DVCSxsec_New.csv"
         ),
         "DVCSAsym": (
-            partial(DVCSAsym_cost_xBtQ,
+            partial(DVCSAsym_theo_xBtQ,
                     Para_Unp=Para_Unp_all,
                     Para_Pol=Para_Pol_all,
                     P_order=porder),

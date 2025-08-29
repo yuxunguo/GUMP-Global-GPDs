@@ -1,5 +1,5 @@
 # ==========================================================================================
-# In this code, we provide a example of how to call the gumpgpd package to 
+# In this example, we show how to call the gumpgpd package to 
 # generate all the data to be used in the analysis as well as the theoretical predictions
 #
 # This package is written in a half-integrated way purposely, so the parameters can be varied if necessary
