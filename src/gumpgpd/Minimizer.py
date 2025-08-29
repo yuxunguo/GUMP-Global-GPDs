@@ -806,6 +806,36 @@ def off_forward_fit_withH_withHt(Paralst_Unp, Paralst_Pol, Paralst_Aux=[1.0] * l
     fit_off_forward.limits['beta_EtuV'] = (0, None)
     fit_off_forward.limits['bexp_HtSea'] = (0, None)
     
+    Rmax = 10
+    
+    fit_off_forward.limits['R_Hu_xi2'] =(-Rmax,Rmax)
+    fit_off_forward.limits['R_Hd_xi2'] =(-Rmax,Rmax)
+    fit_off_forward.limits['R_Hg_xi2'] =(-Rmax,Rmax)
+    fit_off_forward.limits['R_Eu_xi2'] =(-Rmax,Rmax)
+    fit_off_forward.limits['R_Ed_xi2'] =(-Rmax,Rmax)
+    fit_off_forward.limits['R_Eg_xi2'] =(-Rmax,Rmax)
+    
+    fit_off_forward.limits['R_Hu_xi4'] =(-Rmax,Rmax)
+    fit_off_forward.limits['R_Hd_xi4'] =(-Rmax,Rmax)
+    fit_off_forward.limits['R_Hg_xi4'] =(-Rmax,Rmax)
+    fit_off_forward.limits['R_Eu_xi4'] =(-Rmax,Rmax)
+    fit_off_forward.limits['R_Ed_xi4'] =(-Rmax,Rmax)
+    fit_off_forward.limits['R_Eg_xi4'] =(-Rmax,Rmax)
+    
+    fit_off_forward.limits['R_Htu_xi2'] =(-Rmax,Rmax)
+    fit_off_forward.limits['R_Htd_xi2'] =(-Rmax,Rmax)
+    fit_off_forward.limits['R_Htg_xi2'] =(-Rmax,Rmax)
+    fit_off_forward.limits['R_Etu_xi2'] =(-Rmax,Rmax)
+    fit_off_forward.limits['R_Etd_xi2'] =(-Rmax,Rmax)
+    fit_off_forward.limits['R_Etg_xi2'] =(-Rmax,Rmax)
+    
+    fit_off_forward.limits['R_Htu_xi4'] =(-Rmax,Rmax)
+    fit_off_forward.limits['R_Htd_xi4'] =(-Rmax,Rmax)
+    fit_off_forward.limits['R_Htg_xi4'] =(-Rmax,Rmax)
+    fit_off_forward.limits['R_Etu_xi4'] =(-Rmax,Rmax)
+    fit_off_forward.limits['R_Etd_xi4'] =(-Rmax,Rmax)
+    fit_off_forward.limits['R_Etg_xi4'] =(-Rmax,Rmax)
+    
     fixed_params = [
         #"Norm_HuV", "alpha_HuV", "beta_HuV", 
         #"Norm_Hubar", "alpha_Hubar", "beta_Hubar", 
