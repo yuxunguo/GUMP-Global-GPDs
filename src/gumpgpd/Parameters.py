@@ -276,7 +276,7 @@ def ConfMoment(j: complex, t: float, ParaSets: np.ndarray):
     j = np.reshape(j, j_new_shape)
 
     # Currently with KM ansatz and dipole residual
-    return norm * beta_loggamma (j + 1 - alpha - alphap * t, 1 + beta) * np.exp(t*bexp) * (1 - t * invm2 ) ** (-2)
+    return norm/ beta_loggamma(2 - alpha,1 + beta) * beta_loggamma (j + 1 - alpha - alphap * t, 1 + beta) * np.exp(t*bexp) * (1 - t * invm2 ) ** (-2)
     #return norm * beta_loggamma (j + 1 - alpha, 1 + beta) * (j + 1  - alpha)/ (j + 1 - alpha - alphap * t) * np.exp(t*bexp) * (1 - t * invm2 ) ** (-2)
     # (N) or (N, m1) or (N, m1, m2) .... depends on usage
     # For the recommended usage, the output is (N, 5, init_NumofAnsatz)

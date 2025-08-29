@@ -318,14 +318,12 @@ JpsiphotoH1xsec_data['t'] = -1 * JpsiphotoH1xsec_data['t']
 JpsiphotoH1xsec_data = JpsiphotoH1xsec_data[(JpsiphotoH1xsec_data['Q']>Q_threshold)]
 xBtQlst_JpsiphotoH1 = JpsiphotoH1xsec_data.drop_duplicates(subset = ['xB', 't', 'Q'], keep = 'first')[['xB','t','Q']].values.tolist()
 
-# Helper function for scalar computation
-def PDF_theo_scalar_helper(args):
-    x_i, xi_i, t_i, Q_i, p_i, flv_i, Para_i, p_order = args
+# Helper functions now take multiple arguments directly
+def PDF_theo_scalar_helper(x_i, xi_i, t_i, Q_i, p_i, flv_i, Para_i, p_order):
     _PDF_theo = GPDobserv(x_i, xi_i, t_i, Q_i, p_i)  
     return _PDF_theo.tPDF(flv_i, Para_i, p_order)
 
-def GPD_theo_scalar_helper(args):
-    x_i, xi_i, t_i, Q_i, p_i, flv_i, Para_i, p_order = args
+def GPD_theo_scalar_helper(x_i, xi_i, t_i, Q_i, p_i, flv_i, Para_i, p_order):
     _GPD_theo = GPDobserv(x_i, xi_i, t_i, Q_i, p_i)  
     return _GPD_theo.GPD(flv_i, Para_i, p_order)
 
@@ -344,13 +342,11 @@ def PDF_theo(PDF_input: pd.DataFrame, Para: np.array, p_order = 2):
     xis = np.zeros_like(xs)
     
     # Prepare input arguments for parallel computation
-    args = [(x_i, xi_i, t_i, Q_i, p_i, flv_i, Para_i, p_order) 
-            for x_i, xi_i, t_i, Q_i, p_i, flv_i, Para_i 
-            in zip(xs, xis, ts, Qs, ps, flvs, Para_spe)]
+    args = zip(xs, xis, ts, Qs, ps, flvs, Para_spe, [p_order]*len(xs))
 
     # Use multiprocessing Pool to parallelize the computation'
     pool = get_pool()
-    PDF_input['pred f'] = list(pool.map(PDF_theo_scalar_helper, args))
+    PDF_input['pred f'] = list(pool.starmap(PDF_theo_scalar_helper, args))
     PDF_input['cost'] = ((PDF_input["pred f"]-PDF_input["f"])/PDF_input["delta f"])**2
     
     return PDF_input
@@ -369,13 +365,11 @@ def GPD_theo(GPD_input: pd.DataFrame, Para: np.array, p_order = 2):
     Para_spe = Para[spes]
     
     # Prepare input arguments for parallel computation
-    args = [(x_i, xi_i, t_i, Q_i, p_i, flv_i, Para_i, p_order) 
-            for x_i, xi_i, t_i, Q_i, p_i, flv_i, Para_i 
-            in zip(xs, xis, ts, Qs, ps, flvs, Para_spe)]
+    args = zip(xs, xis, ts, Qs, ps, flvs, Para_spe, [p_order]*len(xs))
 
     # Use multiprocessing Pool to parallelize the computation
     pool = get_pool()
-    GPD_input['pred f'] = list(pool.map(GPD_theo_scalar_helper, args))
+    GPD_input['pred f'] = list(pool.starmap(GPD_theo_scalar_helper, args))
     GPD_input['cost'] = ((GPD_input["pred f"]-GPD_input["f"])/GPD_input["delta f"])**2
     
     return GPD_input
@@ -402,9 +396,7 @@ def PDF_theo_parallel(PDF_input: pd.DataFrame, Para: np.array, p_order = 2):
 tPDF_theo = PDF_theo
 
 # Helper function for scalar computation
-def GFF_theo_scalar_helper(args):
-
-    j_i, x, xi, t_i, Q_i, p_i, flv_i, Para_i, p_order = args
+def GFF_theo_scalar_helper(j_i, x, xi, t_i, Q_i, p_i, flv_i, Para_i, p_order):
     _GFF_theo = GPDobserv(x, xi, t_i, Q_i, p_i)
     return _GFF_theo.GFFj0(j_i, flv_i, Para_i, p_order)
 
@@ -424,13 +416,10 @@ def GFF_theo(GFF_input: pd.DataFrame, Para: np.array, p_order = 2):
     x = 0
     xi = 0
     
-    # Prepare input arguments for parallel computation
-    args = [(j_i, x, xi, t_i, Q_i, p_i, flv_i, Para_i, p_order) 
-            for j_i, t_i, Q_i, p_i, flv_i, Para_i 
-            in zip(js, ts, Qs, ps, flvs, Para_spe)]
+    args = zip(js, [x]*len(js), [xi]*len(js), ts, Qs, ps, flvs, Para_spe, [p_order]*len(js))
 
     pool = get_pool()
-    GFF_input['pred f'] = list(pool.map(GFF_theo_scalar_helper, args))
+    GFF_input['pred f'] = list(pool.starmap(GFF_theo_scalar_helper, args))
     GFF_input['cost'] = ((GFF_input["pred f"]-GFF_input["f"])/GFF_input["delta f"])**2
     
     return GFF_input
@@ -778,28 +767,38 @@ def off_forward_fit_withH_withHt(Paralst_Unp, Paralst_Pol, Paralst_Aux=[1.0] * l
     
     fit_off_forward.errordef = 1
 
+    fit_off_forward.limits['Norm_HuV'] = (-20,20)
+    fit_off_forward.limits['Norm_Hubar'] = (-20,20)
+    fit_off_forward.limits['Norm_HdV'] = (-20,20)
+    fit_off_forward.limits['Norm_Hdbar'] = (-20,20)
+    fit_off_forward.limits['Norm_Hg'] = (-20,20)
+    
+    fit_off_forward.limits['Norm_Hubar_2'] = (-20,20)
+    fit_off_forward.limits['Norm_Hdbar_2'] = (-20,20)
+    fit_off_forward.limits['Norm_Hg_2'] = (-20,20)
+    
     fit_off_forward.limits['alpha_HuV'] = (-2, 1.2)
-    fit_off_forward.limits['alpha_Hubar'] = (0, 1.2)
+    fit_off_forward.limits['alpha_Hubar'] = (-2, 1.2)
     fit_off_forward.limits['alpha_HdV'] = (-2, 1.2)
-    fit_off_forward.limits['alpha_Hdbar'] = (0, 1.2)
-    fit_off_forward.limits['alpha_Hg'] = (0, 1.2)
+    fit_off_forward.limits['alpha_Hdbar'] = (-2, 1.2)
+    fit_off_forward.limits['alpha_Hg'] = (-2, 1.2)
     fit_off_forward.limits['alpha_EuV'] = (-2, 1.2)
 
-    # make the second set of parameters 'valence-like' bounded by small x <~ x **(-0.8)
-    fit_off_forward.limits['alpha_Hubar_2'] = (0, 0.8)
-    fit_off_forward.limits['alpha_Hdbar_2'] = (0, 0.8)
-    fit_off_forward.limits['alpha_Hg_2'] = (0, 0.8)
+    # make the second set of parameters 'valence-like' bounded by small x <~ x **(-0.6)
+    fit_off_forward.limits['alpha_Hubar_2'] = (-2, 0.6)
+    fit_off_forward.limits['alpha_Hdbar_2'] = (-2, 0.6)
+    fit_off_forward.limits['alpha_Hg_2'] = (-2, 0.6)
 
-    fit_off_forward.limits['beta_HuV'] = (0, None)
-    fit_off_forward.limits['beta_Hubar'] = (0, None)
-    fit_off_forward.limits['beta_HdV'] = (0, None)
-    fit_off_forward.limits['beta_Hdbar'] = (0, None)
-    fit_off_forward.limits['beta_Hg'] = (0, None)    
-    fit_off_forward.limits['beta_EuV'] = (0, None)
+    fit_off_forward.limits['beta_HuV'] = (0, 20)
+    fit_off_forward.limits['beta_Hubar'] = (0, 20)
+    fit_off_forward.limits['beta_HdV'] = (0, 20)
+    fit_off_forward.limits['beta_Hdbar'] = (0, 20)
+    fit_off_forward.limits['beta_Hg'] = (0, 20)    
+    fit_off_forward.limits['beta_EuV'] = (0, 20)
     
-    fit_off_forward.limits['beta_Hubar_2'] = (0, None)
-    fit_off_forward.limits['beta_Hdbar_2'] = (0, None)
-    fit_off_forward.limits['beta_Hg_2'] = (0, None) 
+    fit_off_forward.limits['beta_Hubar_2'] = (0, 20)
+    fit_off_forward.limits['beta_Hdbar_2'] = (0, 20)
+    fit_off_forward.limits['beta_Hg_2'] = (0, 20) 
     
     fit_off_forward.limits['alphap_HuV'] = (0,5)
     fit_off_forward.limits['Invm2_HuV'] = (0,5)
@@ -807,10 +806,20 @@ def off_forward_fit_withH_withHt(Paralst_Unp, Paralst_Pol, Paralst_Aux=[1.0] * l
     fit_off_forward.limits['Invm2_HdV'] = (0,5)
     fit_off_forward.limits['Invm2_Hg'] = (0,5)
     
+    fit_off_forward.limits['Norm_EuV'] = (-20,20)
+    fit_off_forward.limits['Norm_EdV'] = (-20,20)
+    fit_off_forward.limits['R_E_Sea'] = (-20,20)
+    
     fit_off_forward.limits['alpha_EuV'] = (-2, 1.2)
     fit_off_forward.limits['alphap_EuV'] = (0,5)
-    fit_off_forward.limits['bexp_Hg']  = (0, None)
-    fit_off_forward.limits['bexp_HSea']  = (0, None)
+    fit_off_forward.limits['bexp_Hg']  = (0, 10)
+    fit_off_forward.limits['bexp_HSea']  = (0, 10)
+    
+    fit_off_forward.limits['Norm_HtuV'] = (-20,20)
+    fit_off_forward.limits['Norm_Htubar'] = (-20,20)
+    fit_off_forward.limits['Norm_HtdV'] = (-20,20)
+    fit_off_forward.limits['Norm_Htdbar'] = (-20,20)
+    fit_off_forward.limits['Norm_Htg'] = (-20,20)
     
     fit_off_forward.limits['alpha_HtuV'] = (-2, 1.2)
     fit_off_forward.limits['alpha_Htubar'] = (-2, 1.2)
@@ -819,18 +828,22 @@ def off_forward_fit_withH_withHt(Paralst_Unp, Paralst_Pol, Paralst_Aux=[1.0] * l
     fit_off_forward.limits['alpha_Htg'] = (-2, 1.2)
     fit_off_forward.limits['alpha_EtuV'] = (-2, 1.2)
 
-    fit_off_forward.limits['beta_HtuV'] = (0, None)
-    fit_off_forward.limits['beta_Htubar'] = (0, None)
-    fit_off_forward.limits['beta_HtdV'] = (0, None)
-    fit_off_forward.limits['beta_Htdbar'] = (0, None)
-    fit_off_forward.limits['beta_Htg'] = (0, None)
-    fit_off_forward.limits['beta_EtuV'] = (0, None)
+    fit_off_forward.limits['Norm_EtuV'] = (-100, 100)
+    fit_off_forward.limits['Norm_EtdV'] = (-100, 100)
+    fit_off_forward.limits['R_Et_Sea'] = (-100, 100)
+
+    fit_off_forward.limits['beta_HtuV'] = (0, 20)
+    fit_off_forward.limits['beta_Htubar'] = (0, 20)
+    fit_off_forward.limits['beta_HtdV'] = (0, 20)
+    fit_off_forward.limits['beta_Htdbar'] = (0, 20)
+    fit_off_forward.limits['beta_Htg'] = (0, 20)
+    fit_off_forward.limits['beta_EtuV'] = (0, 20)
     
     fit_off_forward.limits['alphap_HtuV'] = (0,5)
     fit_off_forward.limits['alphap_HtdV'] = (0,5)
+    fit_off_forward.limits['alphap_EtuV'] = (0,5)
     
-    fit_off_forward.limits['beta_EtuV'] = (0, None)
-    fit_off_forward.limits['bexp_HtSea'] = (0, None)
+    fit_off_forward.limits['bexp_HtSea'] = (0, 15)
     
     Rmax = 10
     

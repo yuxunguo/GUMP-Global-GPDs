@@ -855,6 +855,64 @@ def np_cache_ConfWF(function):
 
     return wrapper
 
+def np_cache_MellinWF(func):
+    cache = {}
+
+    def serialize_array(arr: np.ndarray):
+        # Use bytes + shape + dtype as unique key
+        return (arr.tobytes(), arr.shape, str(arr.dtype))
+
+    @functools.wraps(func)
+    def wrapper(s: np.ndarray, x: float):
+        key = (serialize_array(s), x)
+        if key not in cache:
+            cache[key] = func(s, x)
+        return cache[key]
+
+    return wrapper
+
+@np_cache_MellinWF
+def InvMellinWaveFuncQ(s: complex, x: float) -> complex:
+    """ Quark wave function for inverse Mellin transformation: x^(-s) for x>0 and 0 for x<0
+
+    Args:
+        s: Mellin moment s (= n)
+        x: momentum fraction x
+
+    Returns:
+        Wave function for inverse Mellin transformation: x^(-s) for x>0 and 0 for x<0
+
+    vectorized version of InvMellinWaveFuncQ
+    """ 
+
+    ''' 
+    if(x > 0):
+        return x ** (-s)
+    
+    return 0
+    '''
+    return np.where(x>0, x**(-s), 0)
+
+@np_cache_MellinWF
+def InvMellinWaveFuncG(s: complex, x: float) -> complex:
+    """ Gluon wave function for inverse Mellin transformation: x^(-s+1) for x>0 and 0 for x<0
+
+    Args:
+        s: Mellin moment s (= n)
+        x: momentum fraction x
+
+    Returns:
+        Gluon wave function for inverse Mellin transformation: x^(-s+1) for x>0 and 0 for x<0
+    """  
+
+    '''
+    if(x > 0):
+        return x ** (-s+1)
+    
+    return 0
+    '''
+    return np.where(x>0, x**(-s+1), 0)
+
 #@memory.cache
 @np_cache_ConfWF
 def ConfWaveFuncQ(j: complex, x: float, xi: float) -> complex:
@@ -898,6 +956,7 @@ def ConfWaveFuncQ_over_sinpij(j: complex, x: float, xi: float) -> complex:
         return 1/np.sin(np.pi * (j+1)) * 2 ** (1+j) * gamma(5/2+j) / (gamma(1/2) * gamma(1+j)) * xi ** (-j-1) * (1+x/xi) * np.array(hyp2f1_nparray(-1-j,j+2,2, (x+xi)/(2*xi)), dtype= complex)
 
     return 0
+
 #@memory.cache
 @np_cache_ConfWF
 def ConfWaveFuncG(j: complex, x: float, xi: float) -> complex:
@@ -921,7 +980,6 @@ def ConfWaveFuncG(j: complex, x: float, xi: float) -> complex:
         return Minus * 2 ** j * gamma(5/2+j) / (gamma(1/2) * gamma(j)) * xi ** (-j) * (1+x/xi) ** 2 * np.array((hyp2f1_nparray(-1-j,j+2,3, (x+xi)/(2*xi))), dtype= complex)
 
     return 0
-
 
 #@memory.cache
 @np_cache_ConfWF

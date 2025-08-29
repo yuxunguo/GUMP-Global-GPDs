@@ -4,7 +4,7 @@ With the GPDs ansatz, observables with LO evolution are calculated
 """
 from .Evolution import Moment_Evo_LO,Moment_Evo_LO_NSp1, TFF_Evo_LO, CFF_Evo_LO, TFF_Evo_NLO_evWC, TFF_Evo_NLO_evMOM, CFF_Evo_NLO_evWC,CFF_Evo_NLO_evMOM, GPD_Moment_Evo_NLO,tPDF_Moment_Evo_NLO, tPDF_Moment_Evo_NLO_NSp1, fixed_quadvec, inv_flav_trans
 from .Parameters import Moment_Sum
-from .Evolution import ConfWaveFuncQ, ConfWaveFuncG, ConfWaveFuncQ_over_sinpij, ConfWaveFuncG_over_sinpij
+from .Evolution import InvMellinWaveFuncQ, InvMellinWaveFuncG, ConfWaveFuncQ, ConfWaveFuncG, ConfWaveFuncQ_over_sinpij, ConfWaveFuncG_over_sinpij
 
 import scipy as sp
 import numpy as np
@@ -87,47 +87,23 @@ def flvmask(flv: str):
         return np.array([0,0,0,0,1])
     elif (flv == 'q'):
         return np.array([1,1,1,1,0])
-    
-def InvMellinWaveFuncQ(s: complex, x: float) -> complex:
-    """ Quark wave function for inverse Mellin transformation: x^(-s) for x>0 and 0 for x<0
 
-    Args:
-        s: Mellin moment s (= n)
-        x: momentum fraction x
-
-    Returns:
-        Wave function for inverse Mellin transformation: x^(-s) for x>0 and 0 for x<0
-
-    vectorized version of InvMellinWaveFuncQ
-    """ 
-
-    ''' 
-    if(x > 0):
-        return x ** (-s)
-    
-    return 0
-    '''
-    return np.where(x>0, x**(-s), 0)
-
-
-def InvMellinWaveFuncG(s: complex, x: float) -> complex:
-    """ Gluon wave function for inverse Mellin transformation: x^(-s+1) for x>0 and 0 for x<0
-
-    Args:
-        s: Mellin moment s (= n)
-        x: momentum fraction x
-
-    Returns:
-        Gluon wave function for inverse Mellin transformation: x^(-s+1) for x>0 and 0 for x<0
-    """  
-
-    '''
-    if(x > 0):
-        return x ** (-s+1)
-    
-    return 0
-    '''
-    return np.where(x>0, x**(-s+1), 0)
+'''
+InvMellinWaveC = np.array([[InvMellinWaveFuncQ(s, self.x), InvMellinWaveFuncQ(s, self.x) - self.p * InvMellinWaveFuncQ(s, -self.x),0,0,0],
+                            [0,0,InvMellinWaveFuncQ(s, self.x), InvMellinWaveFuncQ(s, self.x) - self.p * InvMellinWaveFuncQ(s, -self.x),0],
+                            [0,0,0,0,(InvMellinWaveFuncG(s, self.x)+ self.p * InvMellinWaveFuncG(s, -self.x))]]) # (3, 5) matrix
+                            # in my case, I want it to be (N, 3, 5) ndarray
+'''
+            
+WF_helper1 = np.array([[1, 1, 0, 0, 0],
+                    [0, 0, 1, 1, 0],
+                    [0, 0, 0, 0, 0]])
+WF_helper2 = np.array([[0, -1, 0, 0, 0],
+                    [0, 0, 0, -1, 0],
+                    [0, 0, 0, 0, 0]])
+WF_helper3 = np.array([[0, 0, 0, 0, 0],
+                    [0, 0, 0, 0, 0],
+                    [0, 0, 0, 0, 1]])
 
 
 """
@@ -184,29 +160,9 @@ class GPDobserv (object) :
         def InvMellinWaveConf(s: complex):
             # s is scalar (but it actually can be an ndarray as long as broadcasting rule allows it)
 
-            '''
-            InvMellinWaveC = np.array([[InvMellinWaveFuncQ(s, self.x), InvMellinWaveFuncQ(s, self.x) - self.p * InvMellinWaveFuncQ(s, -self.x),0,0,0],
-                                       [0,0,InvMellinWaveFuncQ(s, self.x), InvMellinWaveFuncQ(s, self.x) - self.p * InvMellinWaveFuncQ(s, -self.x),0],
-                                       [0,0,0,0,(InvMellinWaveFuncG(s, self.x)+ self.p * InvMellinWaveFuncG(s, -self.x))]]) # (3, 5) matrix
-                                       # in my case, I want it to be (N, 3, 5) ndarray
-            '''
-
-            # InvMellinWaveFuncQ(s, self.x) # shape (N)
-            # self.p * InvMellinWaveFuncQ(s, -self.x) # shape (N)
-
-            helper1 = np.array([[1, 1, 0, 0, 0],
-                                [0, 0, 1, 1, 0],
-                                [0, 0, 0, 0, 0]])
-            helper2 = np.array([[0, -1, 0, 0, 0],
-                                [0, 0, 0, -1, 0],
-                                [0, 0, 0, 0, 0]])
-            helper3 = np.array([[0, 0, 0, 0, 0],
-                                [0, 0, 0, 0, 0],
-                                [0, 0, 0, 0, 1]])
-
-            InvMellinWaveC =np.einsum('..., ij->...ij', InvMellinWaveFuncQ(s, self.x), helper1) \
-                            + np.einsum('... ,ij->...ij', self.p * InvMellinWaveFuncQ(s, -self.x), helper2) \
-                            + np.einsum('... ,ij->...ij', (InvMellinWaveFuncG(s, self.x)+ self.p * InvMellinWaveFuncG(s, -self.x)), helper3)
+            InvMellinWaveC =np.einsum('..., ij->...ij', InvMellinWaveFuncQ(s, self.x), WF_helper1) \
+                            + np.einsum('... ,ij->...ij', self.p * InvMellinWaveFuncQ(s, -self.x), WF_helper2) \
+                            + np.einsum('... ,ij->...ij', (InvMellinWaveFuncG(s, self.x)+ self.p * InvMellinWaveFuncG(s, -self.x)), WF_helper3)
 
             return InvMellinWaveC #(N, 3, 5)
 
@@ -265,25 +221,10 @@ class GPDobserv (object) :
 
         # The contour for Mellin-Barnes integral in terms of j not n.         
         def ConfWaveConv(j: complex):
-            """
-            ConfWaveC = np.array([[ConfWaveFuncQ(j, self.x, self.xi), ConfWaveFuncQ(j, self.x, self.xi) - self.p * ConfWaveFuncQ(j, -self.x, self.xi),0,0,0],
-                                  [0,0,ConfWaveFuncQ(j, self.x, self.xi), ConfWaveFuncQ(j, self.x, self.xi) - self.p * ConfWaveFuncQ(j, -self.x, self.xi),0],
-                                  [0,0,0,0,ConfWaveFuncG(j, self.x, self.xi)+ self.p * ConfWaveFuncG(j, -self.x, self.xi)]])
-            """
 
-            helper1 = np.array([[1, 1, 0, 0, 0],
-                                [0, 0, 1, 1, 0],
-                                [0, 0, 0, 0, 0]])
-            helper2 = np.array([[0, -1, 0, 0, 0],
-                                [0, 0, 0, -1, 0],
-                                [0, 0, 0, 0, 0]])
-            helper3 = np.array([[0, 0, 0, 0, 0],
-                                [0, 0, 0, 0, 0],
-                                [0, 0, 0, 0, 1]])
-
-            ConfWaveC =np.einsum('..., ij->...ij', ConfWaveFuncQ(j, self.x, self.xi), helper1) \
-                     + np.einsum('... ,ij->...ij', self.p * ConfWaveFuncQ(j, -self.x, self.xi), helper2) \
-                     + np.einsum('... ,ij->...ij', ConfWaveFuncG(j, self.x, self.xi)+ self.p * ConfWaveFuncG(j, -self.x, self.xi), helper3)
+            ConfWaveC =np.einsum('..., ij->...ij', ConfWaveFuncQ(j, self.x, self.xi), WF_helper1) \
+                     + np.einsum('... ,ij->...ij', self.p * ConfWaveFuncQ(j, -self.x, self.xi), WF_helper2) \
+                     + np.einsum('... ,ij->...ij', ConfWaveFuncG(j, self.x, self.xi)+ self.p * ConfWaveFuncG(j, -self.x, self.xi), WF_helper3)
 
             return ConfWaveC
         
@@ -296,19 +237,10 @@ class GPDobserv (object) :
             So we absorb 1/sin(pi*(j+1)) factor into the conformal partial wave function in advance to avoid the overflow in the conformal wave function.
             This is only need for Mellin-Barnes integral!
             """
-            helper1 = np.array([[1, 1, 0, 0, 0],
-                                [0, 0, 1, 1, 0],
-                                [0, 0, 0, 0, 0]])
-            helper2 = np.array([[0, -1, 0, 0, 0],
-                                [0, 0, 0, -1, 0],
-                                [0, 0, 0, 0, 0]])
-            helper3 = np.array([[0, 0, 0, 0, 0],
-                                [0, 0, 0, 0, 0],
-                                [0, 0, 0, 0, 1]])
-
-            ConfWaveC =np.einsum('..., ij->...ij', ConfWaveFuncQ_over_sinpij(j, self.x, self.xi), helper1) \
-                     + np.einsum('... ,ij->...ij', self.p * ConfWaveFuncQ_over_sinpij(j, -self.x, self.xi), helper2) \
-                     + np.einsum('... ,ij->...ij', ConfWaveFuncG_over_sinpij(j, self.x, self.xi)+ self.p * ConfWaveFuncG_over_sinpij(j, -self.x, self.xi), helper3)
+            
+            ConfWaveC =np.einsum('..., ij->...ij', ConfWaveFuncQ_over_sinpij(j, self.x, self.xi), WF_helper1) \
+                     + np.einsum('... ,ij->...ij', self.p * ConfWaveFuncQ_over_sinpij(j, -self.x, self.xi), WF_helper2) \
+                     + np.einsum('... ,ij->...ij', ConfWaveFuncG_over_sinpij(j, self.x, self.xi)+ self.p * ConfWaveFuncG_over_sinpij(j, -self.x, self.xi), WF_helper3)
 
             return ConfWaveC
         
@@ -336,7 +268,6 @@ class GPDobserv (object) :
                         + self.xi ** 2 * np.einsum('...ij,...j->...i', ConfWaveConv(j+2), ConfFlavEv_xi2) \
                         + self.xi ** 4 * np.einsum('...ij,...j->...i', ConfWaveConv(j+4), ConfFlavEv_xi4),flv)
                 
-        
         # Adding a j = 0 term because the contour do not enclose the j = 0 pole which should be the 0th conformal moment.
         def GPD0():
 
@@ -399,25 +330,10 @@ class GPDobserv (object) :
 
         # The contour for Mellin-Barnes integral in terms of j not n.         
         def ConfWaveConv(j: complex):
-            """
-            ConfWaveC = np.array([[ConfWaveFuncQ(j, self.x, self.xi), ConfWaveFuncQ(j, self.x, self.xi) - self.p * ConfWaveFuncQ(j, -self.x, self.xi),0,0,0],
-                                  [0,0,ConfWaveFuncQ(j, self.x, self.xi), ConfWaveFuncQ(j, self.x, self.xi) - self.p * ConfWaveFuncQ(j, -self.x, self.xi),0],
-                                  [0,0,0,0,ConfWaveFuncG(j, self.x, self.xi)+ self.p * ConfWaveFuncG(j, -self.x, self.xi)]])
-            """
 
-            helper1 = np.array([[1, 1, 0, 0, 0],
-                                [0, 0, 1, 1, 0],
-                                [0, 0, 0, 0, 0]])
-            helper2 = np.array([[0, -1, 0, 0, 0],
-                                [0, 0, 0, -1, 0],
-                                [0, 0, 0, 0, 0]])
-            helper3 = np.array([[0, 0, 0, 0, 0],
-                                [0, 0, 0, 0, 0],
-                                [0, 0, 0, 0, 1]])
-
-            ConfWaveC =np.einsum('..., ij->...ij', ConfWaveFuncQ(j, self.x, self.xi), helper1) \
-                     + np.einsum('... ,ij->...ij', self.p * ConfWaveFuncQ(j, -self.x, self.xi), helper2) \
-                     + np.einsum('... ,ij->...ij', ConfWaveFuncG(j, self.x, self.xi)+ self.p * ConfWaveFuncG(j, -self.x, self.xi), helper3)
+            ConfWaveC =np.einsum('..., ij->...ij', ConfWaveFuncQ(j, self.x, self.xi), WF_helper1) \
+                     + np.einsum('... ,ij->...ij', self.p * ConfWaveFuncQ(j, -self.x, self.xi), WF_helper2) \
+                     + np.einsum('... ,ij->...ij', ConfWaveFuncG(j, self.x, self.xi)+ self.p * ConfWaveFuncG(j, -self.x, self.xi), WF_helper3)
 
             return ConfWaveC
         
@@ -430,19 +346,10 @@ class GPDobserv (object) :
             So we absorb 1/sin(pi*(j+1)) factor into the conformal partial wave function in advance to avoid the overflow in the conformal wave function.
             This is only need for Mellin-Barnes integral!
             """
-            helper1 = np.array([[1, 1, 0, 0, 0],
-                                [0, 0, 1, 1, 0],
-                                [0, 0, 0, 0, 0]])
-            helper2 = np.array([[0, -1, 0, 0, 0],
-                                [0, 0, 0, -1, 0],
-                                [0, 0, 0, 0, 0]])
-            helper3 = np.array([[0, 0, 0, 0, 0],
-                                [0, 0, 0, 0, 0],
-                                [0, 0, 0, 0, 1]])
 
-            ConfWaveC =np.einsum('..., ij->...ij', ConfWaveFuncQ_over_sinpij(j, self.x, self.xi), helper1) \
-                     + np.einsum('... ,ij->...ij', self.p * ConfWaveFuncQ_over_sinpij(j, -self.x, self.xi), helper2) \
-                     + np.einsum('... ,ij->...ij', ConfWaveFuncG_over_sinpij(j, self.x, self.xi)+ self.p * ConfWaveFuncG_over_sinpij(j, -self.x, self.xi), helper3)
+            ConfWaveC =np.einsum('..., ij->...ij', ConfWaveFuncQ_over_sinpij(j, self.x, self.xi), WF_helper1) \
+                     + np.einsum('... ,ij->...ij', self.p * ConfWaveFuncQ_over_sinpij(j, -self.x, self.xi), WF_helper2) \
+                     + np.einsum('... ,ij->...ij', ConfWaveFuncG_over_sinpij(j, self.x, self.xi)+ self.p * ConfWaveFuncG_over_sinpij(j, -self.x, self.xi), WF_helper3)
 
             return ConfWaveC
         
@@ -684,7 +591,6 @@ class GPDobserv (object) :
         
         return fixed_quadvec(lambda imJ: Integrand_TFF(imJ)+Integrand_TFF(-imJ), 0,  Max_imJ, n=500) + TFFj0()
     
-    # !!! Working in progress
     def CFFNLO(self, ParaAll, muf: float, flv = 'All'):
         """CFF $\mathcal{F}(xi, t) (\mathcal{F}$
         
@@ -747,7 +653,6 @@ class GPDobserv (object) :
         
         return 1j*fixed_quadvec(lambda imJ: tan_factor(reJ+1j*imJ)*Integrand_Mellin_Barnes_CFF(reJ+1j*imJ)+tan_factor(reJ-1j*imJ)*Integrand_Mellin_Barnes_CFF(reJ-1j*imJ), 0, Max_imJ,n = 300) + CFFj0()
 
-    # !!! Working in progress
     def CFFNLO_evMom(self, ParaAll, muf: float, flv = 'All'):
         """NLOCFF $\mathcal{F}(xi, t) (\mathcal{F}) $
         
