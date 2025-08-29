@@ -73,8 +73,12 @@ def validate_params(params: dict, required_names: set):
         raise ValueError("; ".join(errors))
 
 First_Write_Flag = {}
+SAVE_TO_FILE = True
+SAVE_TO_FILE_PATH = '.'
+def Export_Frame_Append(df, filename, export_path = None):
 
-def Export_Frame_Append(df, filename, export_path = '.'):
+    if export_path is None:
+        export_path = SAVE_TO_FILE_PATH
 
     os.makedirs(os.path.join(export_path, 'GUMP_Results'), exist_ok=True)
     
@@ -718,22 +722,44 @@ def cost_off_forward_withH_withHt(Norm_HuV,    alpha_HuV,    beta_HuV,    alphap
     
     if config.Export_Mode:
         
-        Export_Frame_Append(tPDF_pred,"tPDFcomp.csv")
-        Export_Frame_Append(GFF_pred,"GFFcomp.csv")
-        Export_Frame_Append(PDF_pred,"PDFcomp.csv")
-        Export_Frame_Append(GPD_pred,"GPDcomp.csv")
-        
         grouped_results = {}
+        
+        grouped_results["tPDF_pred"] = tPDF_pred
+        grouped_results["GFF_pred"] = GFF_pred
+        grouped_results["PDF_pred"] = PDF_pred
+        grouped_results["GPD_pred"] = GPD_pred
+        
+        if SAVE_TO_FILE:
+            Export_Frame_Append(tPDF_pred,"tPDFcomp.csv")
+            Export_Frame_Append(GFF_pred,"GFFcomp.csv")
+            Export_Frame_Append(PDF_pred,"PDFcomp.csv")
+            Export_Frame_Append(GPD_pred,"GPDcomp.csv")
+            
         start = 0
+        
         for name in selected_tasks:
             func, data, filename = all_tasks_def[name]
             end = start + len(data)
             grouped_results[name] = pd.concat(all_results_exp[start:end], ignore_index=True)
-            datalen = len(grouped_results[name])
-            totchi2 = grouped_results[name]['cost'].sum()
-            print(f'For the task {name}, with total {datalen} data points, the total chi^2 is {totchi2:.2f} and chi^2 per data point is {totchi2/datalen:.2f}')
-            Export_Frame_Append(grouped_results[name], filename)
+            if SAVE_TO_FILE:
+                Export_Frame_Append(grouped_results[name], filename)
             start = end
+        
+        total_points = 0
+        total_chi2 = 0
+
+        for name, df in grouped_results.items():
+            datalen = len(df)
+            totchi2 = df['cost'].sum()
+            print(f'For task {name} with total {datalen} data points, total chi^2: {totchi2:.2f} and chi^2 per data point: {totchi2/datalen:.2f}')
+            
+            total_points += datalen
+            total_chi2 += totchi2
+
+        # Summary across all tasks
+        print(f'\nOverall: total {total_points} data points, total chi^2: {total_chi2:.2f}, chi^2 per data point: {total_chi2/total_points:.2f}')
+
+        return grouped_results
         
     return total_cost_exp + tPDF_pred['cost'].sum() + GFF_pred['cost'].sum() + PDF_pred['cost'].sum() + GPD_pred['cost'].sum()
 
@@ -903,3 +929,8 @@ Paralst_Pol_Init = pd.read_csv(os.path.join(dir_path,'GUMP_Params/Para_Pol.csv')
 
 Paralst_Unp_off_forward=pd.read_csv(os.path.join(dir_path,'GUMP_Params/Para_Unp_Off_forward_withH_withHt_NLO.csv'), header=None).to_numpy()[0]
 Paralst_Pol_off_forward=pd.read_csv(os.path.join(dir_path,'GUMP_Params/Para_Pol_Off_forward_withH_withHt_NLO.csv'), header=None).to_numpy()[0]
+
+Para_Unp_off_forward = ParaManager_Unp(Paralst_Unp_off_forward)
+Para_Pol_off_forward = ParaManager_Pol(Paralst_Pol_off_forward[:-1]) # exclude jpsi_norm
+
+Para_Comb_off_forward = np.concatenate([Para_Unp_off_forward, Para_Pol_off_forward], axis=0)
