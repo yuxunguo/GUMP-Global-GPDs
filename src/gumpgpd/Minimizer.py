@@ -775,83 +775,91 @@ def off_forward_fit_withH_withHt(Paralst_Unp, Paralst_Pol, Paralst_Aux=[1.0] * l
     
     fit_off_forward.errordef = 1
 
-    fit_off_forward.limits['Norm_HuV'] = (-20,20)
-    fit_off_forward.limits['Norm_Hubar'] = (-20,20)
-    fit_off_forward.limits['Norm_HdV'] = (-20,20)
-    fit_off_forward.limits['Norm_Hdbar'] = (-20,20)
-    fit_off_forward.limits['Norm_Hg'] = (-20,20)
+    norm_max = 1
     
-    fit_off_forward.limits['Norm_Hubar_2'] = (-20,20)
-    fit_off_forward.limits['Norm_Hdbar_2'] = (-20,20)
-    fit_off_forward.limits['Norm_Hg_2'] = (-20,20)
+    fit_off_forward.limits['Norm_HuV']     = (-norm_max,norm_max)
+    fit_off_forward.limits['Norm_Hubar']   = (-norm_max,norm_max)
+    fit_off_forward.limits['Norm_HdV']     = (-norm_max,norm_max)
+    fit_off_forward.limits['Norm_Hdbar']   = (-norm_max,norm_max)
+    fit_off_forward.limits['Norm_Hg']      = (-norm_max,norm_max)
+
+    fit_off_forward.limits['Norm_Hubar_2'] = (-norm_max,norm_max)
+    fit_off_forward.limits['Norm_Hdbar_2'] = (-norm_max,norm_max)
+    fit_off_forward.limits['Norm_Hg_2']    = (-norm_max,norm_max)
+
+    fit_off_forward.limits['Norm_EuV']     = (-norm_max,norm_max)
+    fit_off_forward.limits['Norm_EdV']     = (-norm_max,norm_max)
     
-    fit_off_forward.limits['alpha_HuV'] = (-2, 1.2)
+    fit_off_forward.limits['Norm_HtuV']    = (-norm_max,norm_max)
+    fit_off_forward.limits['Norm_Htubar']  = (-norm_max,norm_max)
+    fit_off_forward.limits['Norm_HtdV']    = (-norm_max,norm_max)
+    fit_off_forward.limits['Norm_Htdbar']  = (-norm_max,norm_max)
+    fit_off_forward.limits['Norm_Htg']     = (-norm_max,norm_max)
+    fit_off_forward.limits['Norm_EtuV']    = (-norm_max, norm_max)
+    fit_off_forward.limits['Norm_EtdV']    = (-norm_max, norm_max)
+
+    fit_off_forward.limits['alpha_HuV']   = (-2, 1.2)
     fit_off_forward.limits['alpha_Hubar'] = (-2, 1.2)
-    fit_off_forward.limits['alpha_HdV'] = (-2, 1.2)
+    fit_off_forward.limits['alpha_HdV']   = (-2, 1.2)
     fit_off_forward.limits['alpha_Hdbar'] = (-2, 1.2)
-    fit_off_forward.limits['alpha_Hg'] = (-2, 1.2)
-    fit_off_forward.limits['alpha_EuV'] = (-2, 1.2)
+    fit_off_forward.limits['alpha_Hg']    = (-2, 1.2)
+    fit_off_forward.limits['alpha_EuV']   = (-2, 1.2)
 
     # make the second set of parameters 'valence-like' bounded by small x <~ x **(-0.6)
     fit_off_forward.limits['alpha_Hubar_2'] = (-2, 0.6)
     fit_off_forward.limits['alpha_Hdbar_2'] = (-2, 0.6)
-    fit_off_forward.limits['alpha_Hg_2'] = (-2, 0.6)
+    fit_off_forward.limits['alpha_Hg_2']    = (-2, 0.6)
 
-    fit_off_forward.limits['beta_HuV'] = (0, 20)
-    fit_off_forward.limits['beta_Hubar'] = (0, 20)
-    fit_off_forward.limits['beta_HdV'] = (0, 20)
-    fit_off_forward.limits['beta_Hdbar'] = (0, 20)
-    fit_off_forward.limits['beta_Hg'] = (0, 20)    
-    fit_off_forward.limits['beta_EuV'] = (0, 20)
-    
-    fit_off_forward.limits['beta_Hubar_2'] = (0, 20)
-    fit_off_forward.limits['beta_Hdbar_2'] = (0, 20)
-    fit_off_forward.limits['beta_Hg_2'] = (0, 20) 
-    
-    fit_off_forward.limits['alphap_HuV'] = (0,5)
-    fit_off_forward.limits['Invm2_HuV'] = (0,5)
-    fit_off_forward.limits['alphap_HdV'] = (0,5)
-    fit_off_forward.limits['Invm2_HdV'] = (0,5)
-    fit_off_forward.limits['Invm2_Hg'] = (0,5)
-    
-    fit_off_forward.limits['Norm_EuV'] = (-20,20)
-    fit_off_forward.limits['Norm_EdV'] = (-20,20)
-    fit_off_forward.limits['R_E_Sea'] = (-20,20)
-    
-    fit_off_forward.limits['alpha_EuV'] = (-2, 1.2)
-    fit_off_forward.limits['alphap_EuV'] = (0,5)
-    fit_off_forward.limits['bexp_Hg']  = (0, 10)
-    fit_off_forward.limits['bexp_HSea']  = (0, 10)
-    
-    fit_off_forward.limits['Norm_HtuV'] = (-20,20)
-    fit_off_forward.limits['Norm_Htubar'] = (-20,20)
-    fit_off_forward.limits['Norm_HtdV'] = (-20,20)
-    fit_off_forward.limits['Norm_Htdbar'] = (-20,20)
-    fit_off_forward.limits['Norm_Htg'] = (-20,20)
-    
-    fit_off_forward.limits['alpha_HtuV'] = (-2, 1.2)
-    fit_off_forward.limits['alpha_Htubar'] = (-2, 1.2)
-    fit_off_forward.limits['alpha_HtdV'] = (-2, 1.2)
-    fit_off_forward.limits['alpha_Htdbar'] = (-2, 1.2)
-    fit_off_forward.limits['alpha_Htg'] = (-2, 1.2)
-    fit_off_forward.limits['alpha_EtuV'] = (-2, 1.2)
+    fit_off_forward.limits['alpha_EuV']     = (-2, 1.2)
+    fit_off_forward.limits['alpha_HtuV']    = (-2, 1.2)
+    fit_off_forward.limits['alpha_Htubar']  = (-2, 1.2)
+    fit_off_forward.limits['alpha_HtdV']    = (-2, 1.2)
+    fit_off_forward.limits['alpha_Htdbar']  = (-2, 1.2)
+    fit_off_forward.limits['alpha_Htg']     = (-2, 1.2)
+    fit_off_forward.limits['alpha_EtuV']    = (-2, 1.2)
 
-    fit_off_forward.limits['Norm_EtuV'] = (-100, 100)
-    fit_off_forward.limits['Norm_EtdV'] = (-100, 100)
+    beta_max = 20
+    
+    fit_off_forward.limits['beta_HuV']     = (0, beta_max)
+    fit_off_forward.limits['beta_Hubar']   = (0, beta_max)
+    fit_off_forward.limits['beta_HdV']     = (0, beta_max)
+    fit_off_forward.limits['beta_Hdbar']   = (0, beta_max)
+    fit_off_forward.limits['beta_Hg']      = (0, beta_max)
+    fit_off_forward.limits['beta_EuV']     = (0, beta_max)
+    
+    fit_off_forward.limits['beta_Hubar_2'] = (0, beta_max)
+    fit_off_forward.limits['beta_Hdbar_2'] = (0, beta_max)
+    fit_off_forward.limits['beta_Hg_2']    = (0, beta_max)
+    
+    fit_off_forward.limits['beta_HtuV']    = (0, beta_max)
+    fit_off_forward.limits['beta_Htubar']  = (0, beta_max)
+    fit_off_forward.limits['beta_HtdV']    = (0, beta_max)
+    fit_off_forward.limits['beta_Htdbar']  = (0, beta_max)
+    fit_off_forward.limits['beta_Htg']     = (0, beta_max)
+    fit_off_forward.limits['beta_EtuV']    = (0, beta_max)
+    
+    alpha_p_max = 5
+    
+    fit_off_forward.limits['alphap_HuV']   = (0, alpha_p_max)
+    fit_off_forward.limits['Invm2_HuV']    = (0, alpha_p_max)
+    fit_off_forward.limits['alphap_HdV']   = (0, alpha_p_max)
+    fit_off_forward.limits['Invm2_HdV']    = (0, alpha_p_max)
+    fit_off_forward.limits['Invm2_Hg']     = (0, alpha_p_max)
+    fit_off_forward.limits['alphap_EuV']   = (0, alpha_p_max)
+
+    fit_off_forward.limits['alphap_HtuV']  = (0, alpha_p_max)
+    fit_off_forward.limits['alphap_HtdV']  = (0, alpha_p_max)
+    fit_off_forward.limits['alphap_EtuV']  = (0, alpha_p_max)
+
+    fit_off_forward.limits['R_E_Sea'] = (-10,10)
     fit_off_forward.limits['R_Et_Sea'] = (-100, 100)
-
-    fit_off_forward.limits['beta_HtuV'] = (0, 20)
-    fit_off_forward.limits['beta_Htubar'] = (0, 20)
-    fit_off_forward.limits['beta_HtdV'] = (0, 20)
-    fit_off_forward.limits['beta_Htdbar'] = (0, 20)
-    fit_off_forward.limits['beta_Htg'] = (0, 20)
-    fit_off_forward.limits['beta_EtuV'] = (0, 20)
     
-    fit_off_forward.limits['alphap_HtuV'] = (0,5)
-    fit_off_forward.limits['alphap_HtdV'] = (0,5)
-    fit_off_forward.limits['alphap_EtuV'] = (0,5)
     
-    fit_off_forward.limits['bexp_HtSea'] = (0, 15)
+    bmax = 15
+    
+    fit_off_forward.limits['bexp_Hg']    = (0, bmax)
+    fit_off_forward.limits['bexp_HSea']  = (0, bmax)
+    fit_off_forward.limits['bexp_HtSea'] = (0, bmax)
     
     Rmax = 10
     
@@ -944,9 +952,6 @@ def off_forward_fit_withH_withHt(Paralst_Unp, Paralst_Pol, Paralst_Aux=[1.0] * l
         print(fit_off_forward.params, file = f)
 
     return fit_off_forward
-
-Paralst_Unp_Init = pd.read_csv(os.path.join(dir_path,'GUMP_Params/Para_Unp.csv'), header=None).to_numpy()[0]
-Paralst_Pol_Init = pd.read_csv(os.path.join(dir_path,'GUMP_Params/Para_Pol.csv'), header=None).to_numpy()[0]
 
 Paralst_Unp_off_forward=pd.read_csv(os.path.join(dir_path,'GUMP_Params/Para_Unp_Off_forward_withH_withHt_NLO.csv'), header=None).to_numpy()[0]
 Paralst_Pol_off_forward=pd.read_csv(os.path.join(dir_path,'GUMP_Params/Para_Pol_Off_forward_withH_withHt_NLO.csv'), header=None).to_numpy()[0]
