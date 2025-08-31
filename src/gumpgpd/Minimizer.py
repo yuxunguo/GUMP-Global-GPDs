@@ -3,6 +3,7 @@ from .Observables import GPDobserv
 from .DVCS_xsec import dsigma_DVCS_TOT, Asymmetry_DVCS_TOT, dsigma_DVCS_HERA, M
 from .DVMP_xsec import dsigma_DVMP_dt,dsigmaL_DVMP_dt, M_jpsi,epsilon, R_fitted
 from . import config
+from ._helper_ import cluster_DVCSAsym
 
 from multiprocessing import Pool
 from functools import partial
@@ -159,7 +160,7 @@ DVCSxsec_data_invalid = DVCSxsec_data[DVCSxsec_data['t']*(DVCSxsec_data['xB']-1)
 DVCSxsec_data = DVCSxsec_data[(DVCSxsec_data['Q'] > Q_threshold) & (DVCSxsec_data['xB'] < xB_Cut) & (DVCSxsec_data['t']*(DVCSxsec_data['xB']-1) - M ** 2 * DVCSxsec_data['xB'] ** 2 > 0) & (DVCSxsec_data['delta f']>0) & ((DVCSxsec_data['f']>0) | (DVCSxsec_data['pol']!='UU'))]
 DVCSxsec_group_data = group_by_unique(DVCSxsec_data)
 
-DVCSxsecNew_data = pd.read_csv(os.path.join(dir_path,'GUMPDATA/DVCSxsec_New.csv'), header = 0, names = ['y', 'xB', 't', 'Q', 'phi', 'f', 'delta f', 'pol'] , dtype = {'y': float, 'xB': float, 't': float, 'Q': float, 'phi': float, 'f': float, 'delta f': float, 'pol': str})
+DVCSxsecNew_data = pd.read_csv(os.path.join(dir_path,'GUMPDATA/DVCSxsec_New.csv'), header = 0, names = ['y', 'xB', 't', 'Q', 'phi', 'f', 'delta f', 'pol', 'comment'] , dtype = {'y': float, 'xB': float, 't': float, 'Q': float, 'phi': float, 'f': float, 'delta f': float, 'pol': str, 'comment': str})
 DVCSxsecNew_data_invalid = DVCSxsecNew_data[DVCSxsecNew_data['t']*(DVCSxsecNew_data['xB']-1) - M ** 2 * DVCSxsecNew_data['xB'] ** 2 < 0]
 DVCSxsecNew_data = DVCSxsecNew_data[(DVCSxsecNew_data['Q'] > Q_threshold) & (DVCSxsecNew_data['xB'] < xB_Cut) & (DVCSxsecNew_data['t']*(DVCSxsecNew_data['xB']-1) - M ** 2 * DVCSxsecNew_data['xB'] ** 2 > 0) & (DVCSxsecNew_data['delta f']>0) & ((DVCSxsecNew_data['f']>0) | (DVCSxsecNew_data['pol']!='UU'))]
 DVCSxsecNew_group_data = group_by_unique(DVCSxsecNew_data)
@@ -169,10 +170,12 @@ DVCSxsec_HERA_data_invalid = DVCSxsec_HERA_data[DVCSxsec_HERA_data['t']*(DVCSxse
 DVCSxsec_HERA_data = DVCSxsec_HERA_data[(DVCSxsec_HERA_data['Q'] > Q_threshold) & (DVCSxsec_HERA_data['xB'] < xB_Cut) & (DVCSxsec_HERA_data['t']*(DVCSxsec_HERA_data['xB']-1) - M ** 2 * DVCSxsec_HERA_data['xB'] ** 2 > 0)]
 DVCSxsec_HERA_group_data = group_by_unique(DVCSxsec_HERA_data)
 
-DVCSAsym_data = pd.read_csv(os.path.join(dir_path,'GUMPDATA/DVCSAsym.csv'), header = 0, names = ['y', 'xB', 't', 'Q', 'phi', 'f', 'delta f', 'pol'] , dtype = {'y': float, 'xB': float, 't': float, 'Q': float, 'phi': float, 'f': float, 'delta f': float, 'pol': str})
+DVCSAsym_data = pd.read_csv(os.path.join(dir_path,'GUMPDATA/DVCSAsym.csv'), header = 0, names = ['y', 'xB', 't', 'Q', 'phi', 'f', 'delta f', 'pol', 'comment'] , dtype = {'y': float, 'xB': float, 't': float, 'Q': float, 'phi': float, 'f': float, 'delta f': float, 'pol': str, 'comment': str})
 DVCSAsym_data_invalid = DVCSAsym_data[DVCSAsym_data['t']*(DVCSAsym_data['xB']-1) - M ** 2 * DVCSAsym_data['xB'] ** 2 < 0]
 DVCSAsym_data = DVCSAsym_data[(DVCSAsym_data['Q'] > Q_threshold) & (DVCSAsym_data['xB'] < xB_Cut) & (DVCSAsym_data['t']*(DVCSAsym_data['xB']-1) - M ** 2 * DVCSAsym_data['xB'] ** 2 > 0) & DVCSAsym_data['delta f']>0]
-DVCSAsym_group_data = group_by_unique(DVCSAsym_data)
+
+DVCSAsym_Clustered = cluster_DVCSAsym(DVCSAsym_data,verbose=False)
+DVCSAsym_group_data = group_by_unique(DVCSAsym_Clustered)
 
 """
 ************************ DVMP for rho data preprocessing ****************************
@@ -701,6 +704,8 @@ def cost_off_forward_withH_withHt(Norm_HuV,    alpha_HuV,    beta_HuV,    alphap
         "DVCSxsec_HERA",
         "DVrhoPH1",
         "DVrhoPZEUS",
+        #"DVCSxsec_New",
+        "DVCSAsym",
     ]
     if config.INC_JPSI:
         selected_tasks.append("DVJpsiPH1")
