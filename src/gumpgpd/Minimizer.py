@@ -854,7 +854,6 @@ def off_forward_fit_withH_withHt(Paralst_Unp, Paralst_Pol, Paralst_Aux=[1.0] * l
     fit_off_forward.limits['R_E_Sea'] = (-10,10)
     fit_off_forward.limits['R_Et_Sea'] = (-100, 100)
     
-    
     bmax = 15
     
     fit_off_forward.limits['bexp_Hg']    = (0, bmax)
