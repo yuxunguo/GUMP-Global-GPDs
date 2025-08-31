@@ -935,7 +935,7 @@ def off_forward_fit_withH_withHt(Paralst_Unp, Paralst_Pol, Paralst_Aux=[1.0] * l
 
     time_end = time.time() -time_start
     
-    ndof_off_forward = (len(DVCSxsec_data.index) + len(DVCSxsec_HERA_data.index) 
+    ndof_off_forward = (len(DVCSxsec_data.index) + len(DVCSxsec_HERA_data.index) + len(DVCSAsym_Clustered.index)
                         + len(DVrhoPH1xsec_data.index) + len(DVrhoPZEUSxsec_data.index)
                          + len(tPDF_data.index) + len(GFF_data.index) + len(PDF_data.index) + len(GPD_data.index) - fit_off_forward.nfit)
     
