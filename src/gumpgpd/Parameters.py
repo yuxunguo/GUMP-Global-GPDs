@@ -47,7 +47,9 @@ def ParaManager_Unp(Paralst: np.array):
      Norm_Hg,     alpha_Hg,     beta_Hg,     alphap_Hg, Invm2_Hg,
      Norm_Hg_2,     alpha_Hg_2,     beta_Hg_2,
      Norm_EuV,    alpha_EuV,    beta_EuV,    alphap_EuV,
-     Norm_EdV,    R_E_Sea,      R_Hu_xi2,    R_Hd_xi2,    R_Hg_xi2,
+     Norm_EdV,    alpha_EdV,    beta_EdV,    alphap_EdV,
+     R_E_ubar,    R_E_dbar,    R_E_g,
+     R_Hu_xi2,    R_Hd_xi2,    R_Hg_xi2,
      R_Eu_xi2,    R_Ed_xi2,     R_Eg_xi2,
      R_Hu_xi4,    R_Hd_xi4,     R_Hg_xi4,
      R_Eu_xi4,    R_Ed_xi4,     R_Eg_xi4,    bexp_HSea, bexp_Hg] = Paralst
@@ -89,10 +91,10 @@ def ParaManager_Unp(Paralst: np.array):
         Three free parameter R_E_u, R_E_d, R_E_g for the E/H ratio 
     """
     E_uV =   np.array([[Norm_EuV,   alpha_EuV,   beta_EuV,   alphap_EuV, 0, 0], Ansatz_Place_Holder])
-    E_ubar = np.einsum('...i,i->...i', H_ubar,   [R_E_Sea,1,1,1,1,1])
-    E_dV =   np.array([[Norm_EdV,   alpha_EuV,   beta_EuV,   alphap_EuV, 0, 0], Ansatz_Place_Holder])
-    E_dbar = np.einsum('...i,i->...i', H_dbar,   [R_E_Sea,1,1,1,1,1])
-    E_g =    np.einsum('...i,i->...i', H_g,      [R_E_Sea,1,1,1,1,1])
+    E_ubar = np.einsum('...i,i->...i', H_ubar,   [R_E_ubar,1,1,1,1,1])
+    E_dV =   np.array([[Norm_EdV,   alpha_EdV,   beta_EdV,   alphap_EdV, 0, 0], Ansatz_Place_Holder])
+    E_dbar = np.einsum('...i,i->...i', H_dbar,   [R_E_dbar,1,1,1,1,1])
+    E_g =    np.einsum('...i,i->...i', H_g,      [R_E_g,1,1,1,1,1])
 
     # Initial xi^2 parameters for the E of (uV, ubar, dV, dbar,g) distributions
     """

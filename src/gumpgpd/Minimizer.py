@@ -5,6 +5,7 @@ from .DVMP_xsec import dsigma_DVMP_dt,dsigmaL_DVMP_dt, M_jpsi,epsilon, R_fitted
 from . import config
 from ._helper_ import cluster_DVCSAsym
 
+from scipy.special import beta
 from multiprocessing import Pool
 from functools import partial
 from iminuit import Minuit
@@ -34,7 +35,9 @@ Paralst_Unp_Names = [
     "Norm_Hg", "alpha_Hg", "beta_Hg", "alphap_Hg", "Invm2_Hg",
     "Norm_Hg_2", "alpha_Hg_2", "beta_Hg_2",
     "Norm_EuV", "alpha_EuV", "beta_EuV", "alphap_EuV",
-    "Norm_EdV", "R_E_Sea", "R_Hu_xi2", "R_Hd_xi2", "R_Hg_xi2",
+    "Norm_EdV", "alpha_EdV", "beta_EdV", "alphap_EdV",
+    "R_E_ubar", "R_E_dbar", "R_E_g", 
+    "R_Hu_xi2", "R_Hd_xi2", "R_Hg_xi2",
     "R_Eu_xi2", "R_Ed_xi2", "R_Eg_xi2",
     "R_Hu_xi4", "R_Hd_xi4", "R_Hg_xi4",
     "R_Eu_xi4", "R_Ed_xi4", "R_Eg_xi4", "bexp_HSea", "bexp_Hg"
@@ -146,7 +149,7 @@ GPD_data = pd.read_csv(os.path.join(dir_path,'GUMPDATA/GPDdata.csv'), header = 0
 ************************ GFF data preprocessing ****************************
 """
 
-GFF_data = pd.read_csv(os.path.join(dir_path,'GUMPDATA/GFFdata.csv'),       header = 0, names = ['j', 't', 'Q', 'f', 'delta f', 'spe', 'flv'],        dtype = {'j': int, 't': float, 'Q': float, 'f': float, 'delta f': float,'spe': int, 'flv': str})
+GFF_data = pd.read_csv(os.path.join(dir_path,'GUMPDATA/GFFdata.csv'),       header = 0, names = ['j', 't', 'Q', 'f', 'delta f', 'spe', 'flv', 'comment'],        dtype = {'j': int, 't': float, 'Q': float, 'f': float, 'delta f': float,'spe': int, 'flv': str})
 
 if not config.INC_gGFF:
     GFF_data= GFF_data[GFF_data['flv']!='g']
@@ -335,7 +338,7 @@ def GPD_theo_scalar_helper(x_i, xi_i, t_i, Q_i, p_i, flv_i, Para_i, p_order):
     _GPD_theo = GPDobserv(x_i, xi_i, t_i, Q_i, p_i)  
     return _GPD_theo.GPD(flv_i, Para_i, p_order)
 
-def PDF_theo(PDF_input: pd.DataFrame, Para: np.array, p_order = 2):
+def PDF_theo(PDF_input: pd.DataFrame, Para: np.array, p_order = 2, chunksize = None):
     
     PDF_input = PDF_input.copy()
     
@@ -354,7 +357,7 @@ def PDF_theo(PDF_input: pd.DataFrame, Para: np.array, p_order = 2):
 
     # Use multiprocessing Pool to parallelize the computation'
     pool = get_pool()
-    PDF_input['pred f'] = list(pool.starmap(PDF_theo_scalar_helper, args))
+    PDF_input['pred f'] = list(pool.starmap(PDF_theo_scalar_helper, args, chunksize = chunksize))
     if "f" in PDF_input and "delta f" in PDF_input:
         PDF_input['cost'] = ((PDF_input["pred f"]-PDF_input["f"])/PDF_input["delta f"])**2
     
@@ -362,7 +365,7 @@ def PDF_theo(PDF_input: pd.DataFrame, Para: np.array, p_order = 2):
 
 tPDF_theo = PDF_theo
 
-def GFF_theo(GFF_input: pd.DataFrame, Para: np.array, p_order = 2):
+def GFF_theo(GFF_input: pd.DataFrame, Para: np.array, p_order = 2, chunksize = None):
     
     GFF_input = GFF_input.copy()
     
@@ -381,13 +384,13 @@ def GFF_theo(GFF_input: pd.DataFrame, Para: np.array, p_order = 2):
     args = zip(js, [x]*len(js), [xi]*len(js), ts, Qs, ps, flvs, Para_spe, [p_order]*len(js))
 
     pool = get_pool()
-    GFF_input['pred f'] = list(pool.starmap(GFF_theo_scalar_helper, args))
+    GFF_input['pred f'] = list(pool.starmap(GFF_theo_scalar_helper, args, chunksize = chunksize))
     if "f" in GFF_input and "delta f" in GFF_input:
         GFF_input['cost'] = ((GFF_input["pred f"]-GFF_input["f"])/GFF_input["delta f"])**2
     
     return GFF_input
 
-def GPD_theo(GPD_input: pd.DataFrame, Para: np.array, p_order = 2):
+def GPD_theo(GPD_input: pd.DataFrame, Para: np.array, p_order = 2, chunksize = None):
     
     GPD_input = GPD_input.copy()
     
@@ -405,7 +408,7 @@ def GPD_theo(GPD_input: pd.DataFrame, Para: np.array, p_order = 2):
 
     # Use multiprocessing Pool to parallelize the computation
     pool = get_pool()
-    GPD_input['pred f'] = list(pool.starmap(GPD_theo_scalar_helper, args))
+    GPD_input['pred f'] = list(pool.starmap(GPD_theo_scalar_helper, args, chunksize = chunksize))
     if "f" in GPD_input and "delta f" in GPD_input:
         GPD_input['cost'] = ((GPD_input["pred f"]-GPD_input["f"])/GPD_input["delta f"])**2
     
@@ -574,7 +577,9 @@ def cost_off_forward_withH_withHt(Norm_HuV,    alpha_HuV,    beta_HuV,    alphap
                     Norm_Hg,     alpha_Hg,     beta_Hg,     alphap_Hg,  Invm2_Hg,
                     Norm_Hg_2,     alpha_Hg_2,     beta_Hg_2,
                     Norm_EuV,    alpha_EuV,    beta_EuV,    alphap_EuV,
-                    Norm_EdV,    R_E_Sea,      R_Hu_xi2,    R_Hd_xi2,    R_Hg_xi2,
+                    Norm_EdV,    alpha_EdV,    beta_EdV,    alphap_EdV,
+                    R_E_ubar,    R_E_dbar,     R_E_g,
+                    R_Hu_xi2,    R_Hd_xi2,    R_Hg_xi2,
                     R_Eu_xi2,    R_Ed_xi2,     R_Eg_xi2,
                     R_Hu_xi4,    R_Hd_xi4,     R_Hg_xi4,
                     R_Eu_xi4,    R_Ed_xi4,     R_Eg_xi4,    bexp_HSea, bexp_Hg,
@@ -610,10 +615,10 @@ def cost_off_forward_withH_withHt(Norm_HuV,    alpha_HuV,    beta_HuV,    alphap
     Para_Pol_all = ParaManager_Pol(Para_Pol_lst)
     Para_Comb = np.concatenate([Para_Unp_all, Para_Pol_all], axis=0)
     
-    tPDF_pred = tPDF_theo(tPDF_data, Para=Para_Comb)
-    GFF_pred = GFF_theo(GFF_data, Para=Para_Comb)
-    PDF_pred = PDF_theo(PDF_data, Para=Para_Comb)
-    GPD_pred = GPD_theo(GPD_data, Para=Para_Comb)
+    tPDF_pred = tPDF_theo(tPDF_data, Para=Para_Comb, chunksize=1)
+    GFF_pred  = GFF_theo(  GFF_data, Para=Para_Comb, chunksize=1)
+    PDF_pred  = PDF_theo(  PDF_data, Para=Para_Comb, chunksize=1)
+    GPD_pred  = GPD_theo(  GPD_data, Para=Para_Comb, chunksize=1)
     
     pool = get_pool()
 
@@ -718,9 +723,39 @@ def cost_off_forward_withH_withHt(Norm_HuV,    alpha_HuV,    beta_HuV,    alphap
         all_tasks_exp.extend([(func, arg) for arg in data])
         task_names.extend([name] * len(data))
 
-    all_results_exp = pool.map(simple_dispatch, all_tasks_exp)
+    all_results_exp = pool.map(simple_dispatch, all_tasks_exp, chunksize=1)
     
     total_cost_exp = sum(df["cost"].sum() for df in all_results_exp if "cost" in df.columns)
+
+    
+    # Define penalty terms
+    penalty_terms = np.array([
+        (params['Norm_HuV'] + params['Norm_HdV'] + params['Norm_Hg'] + + params['Norm_Hg_2']
+        + 2*(params['Norm_Hubar'] + params['Norm_Hubar_2']) + 2*(params['Norm_Hdbar'] + params['Norm_Hdbar_2']) + 
+        - 1),
+
+        (params['Norm_HuV'] / beta(2-params['alpha_HuV'], 1+params['beta_HuV'])
+        * beta(1-params['alpha_HuV'], 1+params['beta_HuV']) - 2),
+
+        (params['Norm_HdV'] / beta(2-params['alpha_HdV'], 1+params['beta_HdV'])
+        * beta(1-params['alpha_HdV'], 1+params['beta_HdV']) - 1),
+
+        (params['Norm_EuV'] + params['Norm_EdV'] 
+        + 2*params['R_E_ubar']*(params['Norm_Hubar'] + params['Norm_Hubar_2'])
+        + 2*params['R_E_dbar']*(params['Norm_Hdbar'] + params['Norm_Hdbar_2'])
+        + params['R_E_g']*(params['Norm_Hg'] + params['Norm_Hg_2'])),
+        
+        params['R_E_g']*(params['Norm_Hg'] + params['Norm_Hg_2'])
+    ])
+    
+    # Set tolerance for each term separately
+    tolerances = np.array([0.01, 0.01, 0.01, 0.01, 0.05]) 
+    
+    # Scale each term by its tolerance
+    scaled_penalty = (penalty_terms / tolerances) ** 2
+
+    # Total penalty
+    totpen = np.sum(scaled_penalty)
     
     if config.Export_Mode:
         
@@ -760,10 +795,10 @@ def cost_off_forward_withH_withHt(Norm_HuV,    alpha_HuV,    beta_HuV,    alphap
 
         # Summary across all tasks
         print(f'\nOverall: total {total_points} data points, total chi^2: {total_chi2:.2f}, chi^2 per data point: {total_chi2/total_points:.2f}')
-
+        print(f'The penalty terms total are: {penalty_terms**2} with a tot contributions of {totpen}')
         return grouped_results
-        
-    return total_cost_exp + tPDF_pred['cost'].sum() + GFF_pred['cost'].sum() + PDF_pred['cost'].sum() + GPD_pred['cost'].sum()
+    
+    return total_cost_exp + tPDF_pred['cost'].sum() + GFF_pred['cost'].sum() + PDF_pred['cost'].sum() + GPD_pred['cost'].sum() + totpen
 
 def off_forward_fit_withH_withHt(Paralst_Unp, Paralst_Pol, Paralst_Aux=[1.0] * len(Paralst_Aux_Names), export_path = '.'):
 
@@ -809,13 +844,13 @@ def off_forward_fit_withH_withHt(Paralst_Unp, Paralst_Pol, Paralst_Aux=[1.0] * l
     fit_off_forward.limits['alpha_Hdbar'] = (-2, 1.2)
     fit_off_forward.limits['alpha_Hg']    = (-2, 1.2)
     fit_off_forward.limits['alpha_EuV']   = (-2, 1.2)
+    fit_off_forward.limits['alpha_EdV']   = (-2, 1.2)
 
     # make the second set of parameters 'valence-like' bounded by small x <~ x **(-0.6)
     fit_off_forward.limits['alpha_Hubar_2'] = (-2, 0.6)
     fit_off_forward.limits['alpha_Hdbar_2'] = (-2, 0.6)
     fit_off_forward.limits['alpha_Hg_2']    = (-2, 0.6)
 
-    fit_off_forward.limits['alpha_EuV']     = (-2, 1.2)
     fit_off_forward.limits['alpha_HtuV']    = (-2, 1.2)
     fit_off_forward.limits['alpha_Htubar']  = (-2, 1.2)
     fit_off_forward.limits['alpha_HtdV']    = (-2, 1.2)
@@ -831,6 +866,7 @@ def off_forward_fit_withH_withHt(Paralst_Unp, Paralst_Pol, Paralst_Aux=[1.0] * l
     fit_off_forward.limits['beta_Hdbar']   = (0, beta_max)
     fit_off_forward.limits['beta_Hg']      = (0, beta_max)
     fit_off_forward.limits['beta_EuV']     = (0, beta_max)
+    fit_off_forward.limits['beta_EdV']     = (0, beta_max)
     
     fit_off_forward.limits['beta_Hubar_2'] = (0, beta_max)
     fit_off_forward.limits['beta_Hdbar_2'] = (0, beta_max)
@@ -851,12 +887,15 @@ def off_forward_fit_withH_withHt(Paralst_Unp, Paralst_Pol, Paralst_Aux=[1.0] * l
     fit_off_forward.limits['Invm2_HdV']    = (0, alpha_p_max)
     fit_off_forward.limits['Invm2_Hg']     = (0, alpha_p_max)
     fit_off_forward.limits['alphap_EuV']   = (0, alpha_p_max)
+    fit_off_forward.limits['alphap_EdV']   = (0, alpha_p_max)
 
     fit_off_forward.limits['alphap_HtuV']  = (0, alpha_p_max)
     fit_off_forward.limits['alphap_HtdV']  = (0, alpha_p_max)
     fit_off_forward.limits['alphap_EtuV']  = (0, alpha_p_max)
 
-    fit_off_forward.limits['R_E_Sea'] = (-10,10)
+    fit_off_forward.limits['R_E_ubar'] = (-10,10)
+    fit_off_forward.limits['R_E_dbar'] = (-10,10)
+    fit_off_forward.limits['R_E_g']    = (-10,10)
     fit_off_forward.limits['R_Et_Sea'] = (-100, 100)
     
     bmax = 15
@@ -949,7 +988,7 @@ def off_forward_fit_withH_withHt(Paralst_Unp, Paralst_Pol, Paralst_Aux=[1.0] * l
     
     with open(Exp_path, 'w', encoding='utf-8') as f:
         print('Total running time: %.1f minutes. Total call of cost function: %3d.\n' % ( time_end/60, fit_off_forward.nfcn), file=f)
-        print('The chi squared/d.o.f. is: %.2f / %3d ( = %.2f ).\n' % (fit_off_forward.fval, ndof_off_forward, fit_off_forward.fval/ndof_off_forward), file = f)
+        print('The chi squared/d.o.f. including penalties is: %.2f / %3d ( = %.2f ).\n' % (fit_off_forward.fval, ndof_off_forward, fit_off_forward.fval/ndof_off_forward), file = f)
         print('Below are the final output parameters from iMinuit:', file = f)
         print(*fit_off_forward.values, sep=", ", file = f)
         print(*fit_off_forward.errors, sep=", ", file = f)
