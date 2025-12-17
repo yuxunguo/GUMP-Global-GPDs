@@ -7,7 +7,7 @@
 # Here we list the required columns for each observable
 # the 'f' and 'delta f' columns are optional
 # a 'cost' will be calcuated from (('f'-'pred f')/'delta f')**2
-# Not having 'f' and 'delta f' will still gererate correction 'pred f'
+# Not having 'f' and 'delta f' will still gererate correct 'pred f'
 
 PDF_data_names = ['x', 't', 'Q', 'spe', 'flv']
 tPDF_data_names = ['x', 't', 'Q', 'spe', 'flv'] # The same as PDF
@@ -35,14 +35,28 @@ import numpy as np
 
 if __name__ == '__main__':
     
-    tPDFs = pd.DataFrame(columns=tPDF_data_names)
+    xarr = np.linspace(0.0005, 0.6, 50)    
+    tarr = np.linspace(-0.5, 0., 6)    
 
-    tarr = np.linspace(-10., -0.0, 20)
+    # Create all combinations using meshgrid and flatten
+    X, T = np.meshgrid(xarr, tarr)
+    x_list = X.flatten()
+    t_list = T.flatten()
 
-    tPDFs['x'] = [0.1]*len(tarr)
-    tPDFs['t'] = tarr
-    tPDFs['Q'] = [2.0]*len(tarr)
-    tPDFs['spe'] = [0]*len(tarr)
-    tPDFs['flv'] = ['u']*len(tarr)
+    # Create a DataFrame
+    tPDFs = pd.DataFrame({
+        'x': x_list,
+        't': t_list,
+        'Q': 2.0,
+        'spe': 0,
+        'flv': 'g'
+    })
 
-    print(tPDF_theo(tPDFs, Para = Para_Comb_off_forward))
+    # Evaluate your function
+    result = tPDF_theo(tPDFs, Para=Para_Comb_off_forward)
+
+    print(result)
+    
+    #result.to_csv("tPDF_results.csv", index=False)
+
+    #print("Saved tPDF results to tPDF_results.csv")
