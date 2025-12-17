@@ -5,7 +5,7 @@ This repository contains the source code for the **Generalized Parton Distributi
 ## Overview
 
 - **GPD Calculations:**  
-  The script under folder `/tests` provides example workflows to generate PDFs, GPDs and cross-sections using GUMP parameters obtained from the fitting program.
+  The script under folder `/Examples` provides example workflows to generate PDFs, GPDs and cross-sections using GUMP parameters obtained from the fitting program.
 
 - **Performance Note:**  
   Evaluating GPDs can be computationally intensive, as it involves QCD evolution in moment space and numerical contour integrals to transform back to the momentum fraction (x) space.
