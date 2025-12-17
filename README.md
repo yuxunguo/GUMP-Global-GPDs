@@ -12,7 +12,7 @@ This repository contains the source code for the **Generalized Parton Distributi
 
 ## Usage
 
-- **For simple usage** install through pip by ```pip install gumpgpd```. check the script under ```/test``` for example usage.
+- **For simple usage** install through pip by ```pip install gumpgpd```. Check the script under ```/Examples``` for example usage.
 
 - **For modified package and developer**  download the whole branch and run ```pip install -e .``` to install locally (Make sure to ```pip uninstall gumpgpd``` to avoid conflicts if you install the pip version already)
 
