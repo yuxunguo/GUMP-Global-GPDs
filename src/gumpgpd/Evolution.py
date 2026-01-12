@@ -2324,10 +2324,28 @@ def tPDF_Moment_Evo_NLO_NSp1(j: np.array, nf: int, p: int, mu: float, ConfFlav: 
     ConfEvoBasis = np.einsum('ij, ...j->...i', flav_trans, ConfFlav)  # (N, 5)
     if(mu == Init_Scale_Q):
         return np.concatenate((ConfEvoBasis[..., :3], np.zeros_like(ConfEvoBasis[..., -2:])), axis=-1)
+    
     ConfNS = ConfEvoBasis[..., :3]   # (N, 3)
     
-    # Get only NS evolution operators
-    evola0NS, _, evola1NS_diag_plus, _ = diagonal_evolution_NLO(j, nf, p, mu)
+    Alphafact = np.array(AlphaS(nloop_alphaS, nf, mu)) / np.pi / 2
+    R = np.array(AlphaS(nloop_alphaS, nf, mu) / AlphaS(nloop_alphaS, nf, Init_Scale_Q))
+    b0 = beta0(nf)
+
+    gam0NS = non_singlet_LO(j + 1, nf, p)
+    evola0NS = R ** (-gam0NS / b0)
+
+    # NS NLO
+    amuindepNS_stack = np.stack((
+        amuindepNS(j, nf, p, -1),
+        amuindepNS(j, nf, p, 1),
+        amuindepNS(j, nf, p, -1),
+    ), axis=-1)
+    
+    evola1NS_diag_plus = np.einsum(
+        '...,...i->...i',
+        Alphafact * evola0NS * rmudepNS(nf, gam0NS, gam0NS, mu),
+        amuindepNS_stack
+    )
 
     # LO + NLO NS evolution
     confNS_ev0 = np.einsum('...,...i->...i',evola0NS, ConfNS)

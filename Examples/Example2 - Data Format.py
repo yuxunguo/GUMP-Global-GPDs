@@ -29,14 +29,14 @@ DVCSAsym_data_names_withf = ['y', 'xB', 't', 'Q', 'phi', 'pol', 'f', 'delta f'] 
 DVCSHERA_data_names_withf = ['y', 'xB', 't', 'Q', 'pol', 'f', 'delta f']
 DVMP_data_names_withf = ['y', 'xB', 't', 'Q', 'f', 'delta f']
 
-from gumpgpd.Minimizer import tPDF_theo, Para_Comb_off_forward
+from gumpgpd.Minimizer import GPD_theo, tPDF_theo, Para_Comb_off_forward
 import pandas as pd
 import numpy as np
 
 if __name__ == '__main__':
     
-    xarr = np.linspace(0.0005, 0.6, 50)    
-    tarr = np.linspace(-0.5, 0., 6)    
+    xarr = np.linspace(0.1, 0.6, 50)    
+    tarr = np.linspace(-0.5, 0., 2)    
 
     # Create all combinations using meshgrid and flatten
     X, T = np.meshgrid(xarr, tarr)
@@ -44,19 +44,20 @@ if __name__ == '__main__':
     t_list = T.flatten()
 
     # Create a DataFrame
-    tPDFs = pd.DataFrame({
+    GPDs = pd.DataFrame({
         'x': x_list,
+        'xi':0.3,
         't': t_list,
-        'Q': 2.0,
+        'Q': 3.0,
         'spe': 0,
-        'flv': 'g'
+        'flv': 'NS'
     })
 
     # Evaluate your function
-    result = tPDF_theo(tPDFs, Para=Para_Comb_off_forward)
+    result = GPD_theo(GPDs, Para=Para_Comb_off_forward)
 
     print(result)
     
-    #result.to_csv("tPDF_results.csv", index=False)
+    result.to_csv("GPDs_results.csv", index=False)
 
-    #print("Saved tPDF results to tPDF_results.csv")
+    print("Saved GPD results to GPDs_results.csv")
