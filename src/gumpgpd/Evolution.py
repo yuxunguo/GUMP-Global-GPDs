@@ -18,6 +18,7 @@ from math import factorial, log
 from mpmath import mp, hyp2f1
 from typing import Tuple, Union
 from numba import vectorize, njit
+import hashlib
 import functools
 from joblib import Memory
 import os
@@ -30,6 +31,102 @@ if not os.path.exists(cache_dir):
     os.makedirs(cache_dir)
 
 memory = Memory(location=cache_dir, verbose=0)
+
+Arr_Cache_Strategy = "memory"   # "memory" or "disk"
+Arr_Cache_Maxsize = 128
+
+def cache_array(strategy=Arr_Cache_Strategy, maxsize=Arr_Cache_Maxsize, cache_dir=cache_dir):
+    """
+    Decorator to cache a function whose first argument is a NumPy array (or nested arrays).
+
+    Strategies:
+        - 'memory': in-memory caching (thread-safe, not process-safe)
+        - 'disk': joblib disk cache (process-safe)
+
+    Guarantees:
+        - Shape, dtype, contiguity preserved
+        - No kwargs unpacking bugs
+        - No joblib name collisions
+    """
+
+    def deep_contig_copy(obj):
+        if isinstance(obj, np.ndarray):
+            return np.ascontiguousarray(obj).copy()
+        elif isinstance(obj, (list, tuple)):
+            return type(obj)(deep_contig_copy(x) for x in obj)
+        elif isinstance(obj, dict):
+            return {k: deep_contig_copy(v) for k, v in obj.items()}
+        else:
+            return obj
+
+    def decorator(func):
+
+        def hash_array(arr: np.ndarray) -> str:
+            arr = np.ascontiguousarray(arr)
+            h = hashlib.sha256()
+            h.update(arr.tobytes())
+            h.update(str(arr.shape).encode())
+            h.update(str(arr.dtype).encode())
+            return h.hexdigest()
+
+        # =========================
+        # In-memory cache
+        # =========================
+        if strategy == "memory":
+            array_store = {}
+
+            @functools.lru_cache(maxsize=maxsize)
+            def _cached_mem(array_hash, args, kwargs_items):
+                kwargs = dict(kwargs_items)          # 🔧 FIX
+                return func(array_store[array_hash], *args, **kwargs)
+
+            @functools.wraps(func)
+            def wrapper(first_arg, *args, **kwargs):
+                first_arg = deep_contig_copy(first_arg)
+                h = hash_array(first_arg)
+                array_store[h] = first_arg
+                return _cached_mem(h, args, tuple(sorted(kwargs.items())))
+
+            return wrapper
+
+        # =========================
+        # Disk cache (joblib)
+        # =========================
+        elif strategy == "disk":
+            mem = Memory(cache_dir or ".joblib_cache", verbose=0)
+
+            @mem.cache
+            def _cached_disk(array_hash, array_val, shape, dtype, args, kwargs_items):
+                kwargs = dict(kwargs_items)          # 🔧 FIX
+
+                array_val = np.ascontiguousarray(array_val, dtype=dtype)
+                if array_val.shape != shape:
+                    array_val = array_val.reshape(shape)
+
+                array_val = deep_contig_copy(array_val)
+                return func(array_val, *args, **kwargs)
+
+            @functools.wraps(func)
+            def wrapper(first_arg, *args, **kwargs):
+                first_arg = deep_contig_copy(first_arg)
+                h = hash_array(first_arg)
+
+                return _cached_disk(
+                    h,
+                    first_arg,
+                    first_arg.shape,
+                    first_arg.dtype,
+                    args,
+                    tuple(sorted(kwargs.items()))
+                )
+
+            return wrapper
+
+        else:
+            raise ValueError("strategy must be 'memory' or 'disk'")
+
+    return decorator
+
 
 """
 ***********************QCD constants***************************************
@@ -135,7 +232,7 @@ def fixed_quadvec(func, a, b, n=100, args=()):
     y = (b-a) * (rootsNLO + 1)/2.0 + a
     yfunc = func(y)
     return (b-a)/2.0*np.einsum('j,j...->...',weightsNLO,yfunc)
-    
+
 def pochhammer(z: Union[complex, np.ndarray], m: int) -> Union[complex, np.ndarray]:
     """Pochhammer symbol.
 
@@ -312,6 +409,7 @@ def lsumrev(m: Union[complex, np.ndarray], n: Union[complex, np.ndarray])-> Unio
     return sum((2*l+1)*deldelS2((m+1)/2,l/2)/2 for l in range(1))
 '''
 
+@cache_array(strategy=Arr_Cache_Strategy, maxsize=Arr_Cache_Maxsize, cache_dir=cache_dir)
 def non_singlet_LO(n:Union[complex, np.ndarray], nf: int, p: int, prty: int = 1) -> Union[complex, np.ndarray]:
     """Non-singlet LO anomalous dimension.
 
@@ -328,6 +426,7 @@ def non_singlet_LO(n:Union[complex, np.ndarray], nf: int, p: int, prty: int = 1)
     """
     return CF*(-3.0-2.0/(n*(1.0+n))+4.0*S1(n))
 
+@cache_array(strategy=Arr_Cache_Strategy, maxsize=Arr_Cache_Maxsize, cache_dir=cache_dir)
 def singlet_LO(n: Union[complex, np.ndarray], nf: int, p: int, prty: int = 1) -> np.ndarray:
     """Singlet LO anomalous dimensions.
 
@@ -362,6 +461,7 @@ def singlet_LO(n: Union[complex, np.ndarray], nf: int, p: int, prty: int = 1) ->
 
     return np.stack((qq0_qg0, gq0_gg0), axis=-2)# (N, 2, 2)
 
+@cache_array(strategy=Arr_Cache_Strategy, maxsize=Arr_Cache_Maxsize, cache_dir=cache_dir)
 def non_singlet_NLO(n: complex, nf: int, p: int, prty: int) -> complex:
     """Non-singlet anomalous dimension.
     
@@ -400,7 +500,7 @@ def non_singlet_NLO(n: complex, nf: int, p: int, prty: int) -> complex:
 
     return nlo
 
-
+@cache_array(strategy=Arr_Cache_Strategy, maxsize=Arr_Cache_Maxsize, cache_dir=cache_dir)
 def singlet_NLO(n: complex, nf: int, p: int, prty: int = 1) -> np.ndarray:
     """Singlet NLO anomalous dimensions matrix.
     
@@ -472,12 +572,30 @@ def singlet_NLO(n: complex, nf: int, p: int, prty: int = 1) -> np.ndarray:
     gq1_gg1 = np.stack((gq1, gg1), axis=-1)
     
     return np.stack((qq1_qg1, gq1_gg1), axis=-2) #(N, 2, 2)
-    
-    
+
 """
 ***********************Evolution operator of GPD in the moment space*******
 Refer to the evolution.py at https://github.com/kkumer/gepard. Modifications are made.
 """
+
+def outer_subtract(arr1,arr2):   
+    """Perform the outer product of two array at the last dimension, each has shape (N,..., m)
+    
+    | Generate shape (N,m,m), Here m = 2 for S/G 
+    | result(i,j)=arr1(i)-arr2(j)
+
+    Args:
+        arr1 (np.array): 1st array in the outer subtract has shape (N,m)
+        arr2 (np.array): 2nd array in the outer subtract has shape (N,m)
+
+    Returns:
+        result (np.ndarray): shape(N,m,m) given by result(i,j)=arr1(i)-arr2(j)
+    """
+    repeated_arr1 = np.repeat(arr1[..., np.newaxis], repeats=2, axis=-1)
+    repeated_arr2 = np.repeat(arr2[..., np.newaxis], repeats=2, axis=-1)
+    transposed_axes = list(range(repeated_arr1.ndim))
+    transposed_axes[-2], transposed_axes[-1] = transposed_axes[-1], transposed_axes[-2]    
+    return repeated_arr1-np.transpose(repeated_arr2, axes=transposed_axes)
 
 def lambdaf(n: complex, nf: int, p: int, prty: int = 1) -> np.ndarray:
     """Eigenvalues of the LO singlet anomalous dimensions matrix.
@@ -539,53 +657,6 @@ def projectors(n: complex, nf: int, p: int, prty: int = 1) -> Tuple[np.ndarray, 
     pr = np.stack([prp, prm], axis=-3) # (N, 2, 2, 2)
     return lam, pr # (N, 2) and (N, 2, 2, 2)
 
-def outer_subtract(arr1,arr2):   
-    """Perform the outer product of two array at the last dimension, each has shape (N,..., m)
-    
-    | Generate shape (N,m,m), Here m = 2 for S/G 
-    | result(i,j)=arr1(i)-arr2(j)
-
-    Args:
-        arr1 (np.array): 1st array in the outer subtract has shape (N,m)
-        arr2 (np.array): 2nd array in the outer subtract has shape (N,m)
-
-    Returns:
-        result (np.ndarray): shape(N,m,m) given by result(i,j)=arr1(i)-arr2(j)
-    """
-    repeated_arr1 = np.repeat(arr1[..., np.newaxis], repeats=2, axis=-1)
-    repeated_arr2 = np.repeat(arr2[..., np.newaxis], repeats=2, axis=-1)
-    transposed_axes = list(range(repeated_arr1.ndim))
-    transposed_axes[-2], transposed_axes[-1] = transposed_axes[-1], transposed_axes[-2]    
-    return repeated_arr1-np.transpose(repeated_arr2, axes=transposed_axes)
-
-def rmudep(nf, lamj, lamk, mu):
-    """Scale dependent part of NLO evolution matrix 
-    
-    | Ref to the eq. (126) in https://arxiv.org/abs/hep-ph/0703179
-    | Here the expression is exactly the same as the ref, UNLIKE the Gepard with has an extra beta_0 to be canceled with amuindep
-
-    Args:
-        nf (int): number of effective fermions
-        lamj (np.array): shape (N,2,2), each row is 2-by-2 matrix of anomalous dimension in the (S, G) basis
-        lamk (np.array): shape (N,2,2), second row anomalous dimension for k
-        mu (float): final scale to be evolved from inital scale Init_Scale_Q
-
-    Returns:
-        R_ij^ab(Q}|n=1) according to eq. (126) in https://arxiv.org/abs/hep-ph/0703179
-    """
-
-    lamdif=outer_subtract(lamj,lamk)
-        
-    b0 = beta0(nf) # scalar
-    b11 = b0 * np.ones_like(lamdif) + lamdif # shape (N,2,2)
-    #print(b11)
-    R = AlphaS(nloop_alphaS, nf, mu)/AlphaS(nloop_alphaS, nf, Init_Scale_Q) # shape N
-    R = np.array(R)
-    #print(R)
-    Rpow = (1/R)[..., np.newaxis, np.newaxis, np.newaxis]**(b11/b0) # shape (N,2,2)
-    #print((np.ones_like(Rpow) - Rpow))
-    return (np.ones_like(Rpow) - Rpow) / b11 # shape (N,2,2)
-
 def amuindep(j: complex, nf: int, p: int, prty: int = 1):
     """Result the P [gamma] P part of the diagonal evolution operator A.
     
@@ -626,6 +697,34 @@ def amuindepNS(j: complex, nf: int, p: int, prty: int = 1):
     gam1NS = non_singlet_NLO(j+1,nf,p, prty)
     a1 = - gam1NS + 0.5 * beta1(nf) * gam0NS / beta0(nf) 
     return a1
+
+def rmudep(nf, lamj, lamk, mu):
+    """Scale dependent part of NLO evolution matrix 
+    
+    | Ref to the eq. (126) in https://arxiv.org/abs/hep-ph/0703179
+    | Here the expression is exactly the same as the ref, UNLIKE the Gepard with has an extra beta_0 to be canceled with amuindep
+
+    Args:
+        nf (int): number of effective fermions
+        lamj (np.array): shape (N,2,2), each row is 2-by-2 matrix of anomalous dimension in the (S, G) basis
+        lamk (np.array): shape (N,2,2), second row anomalous dimension for k
+        mu (float): final scale to be evolved from inital scale Init_Scale_Q
+
+    Returns:
+        R_ij^ab(Q}|n=1) according to eq. (126) in https://arxiv.org/abs/hep-ph/0703179
+    """
+
+    lamdif=outer_subtract(lamj,lamk)
+        
+    b0 = beta0(nf) # scalar
+    b11 = b0 * np.ones_like(lamdif) + lamdif # shape (N,2,2)
+    #print(b11)
+    R = AlphaS(nloop_alphaS, nf, mu)/AlphaS(nloop_alphaS, nf, Init_Scale_Q) # shape N
+    R = np.array(R)
+    #print(R)
+    Rpow = (1/R)[..., np.newaxis, np.newaxis, np.newaxis]**(b11/b0) # shape (N,2,2)
+    #print((np.ones_like(Rpow) - Rpow))
+    return (np.ones_like(Rpow) - Rpow) / b11 # shape (N,2,2)
 
 def rmudepNS(nf, lamj, lamk, mu):
     """Scale dependent part of NLO evolution matrix 
@@ -758,28 +857,8 @@ def bmudep(mu, zn, zk, nf: int, p: int, NS: bool = False, prty: int = 1):
                     R**(-lamk/b0)) 
     return Bjk
 
-def np_cache_Evo(function):
-    
-    cache = {}
-
-    def serialize_array(arr: np.ndarray):
-        return (arr.tobytes(), arr.shape, str(arr.dtype))
-
-    @functools.wraps(function)
-    def wrapper(j: np.ndarray, nf: int, p: int, mu: float):
-        key = (
-            serialize_array(j),
-            nf,
-            p,
-            mu
-        )
-        if key not in cache:
-            cache[key] = function(j, nf, p, mu)
-        return cache[key]
-
-    return wrapper
-
-@np_cache_Evo
+#@memory.cache
+@cache_array(strategy=Arr_Cache_Strategy, maxsize=Arr_Cache_Maxsize, cache_dir=cache_dir)
 def evolop(j: complex, nf: int, p: int, mu: float):
     """Leading order GPD evolution operator E(j, nf, mu)[a,b].
 
@@ -838,40 +917,7 @@ mp.dps = 25
 
 hyp2f1_nparray = np.frompyfunc(hyp2f1,4,1)
 
-def np_cache_ConfWF(function):
-    cache = {}
-
-    def serialize_array(arr: np.ndarray):
-        # serialize ndarray into a hashable key
-        return (arr.tobytes(), arr.shape, str(arr.dtype))
-
-    @functools.wraps(function)
-    def wrapper(j, x: float, xi: float):
-        j_arr = np.asarray(j)  # allow scalar, list, or np.ndarray
-        key = (serialize_array(j_arr), float(x), float(xi))
-        if key not in cache:
-            cache[key] = function(j_arr, x, xi)
-        return cache[key]
-
-    return wrapper
-
-def np_cache_MellinWF(func):
-    cache = {}
-
-    def serialize_array(arr: np.ndarray):
-        # Use bytes + shape + dtype as unique key
-        return (arr.tobytes(), arr.shape, str(arr.dtype))
-
-    @functools.wraps(func)
-    def wrapper(s: np.ndarray, x: float):
-        key = (serialize_array(s), x)
-        if key not in cache:
-            cache[key] = func(s, x)
-        return cache[key]
-
-    return wrapper
-
-@np_cache_MellinWF
+@memory.cache
 def InvMellinWaveFuncQ(s: complex, x: float) -> complex:
     """ Quark wave function for inverse Mellin transformation: x^(-s) for x>0 and 0 for x<0
 
@@ -893,7 +939,7 @@ def InvMellinWaveFuncQ(s: complex, x: float) -> complex:
     '''
     return np.where(x>0, x**(-s), 0)
 
-@np_cache_MellinWF
+@memory.cache
 def InvMellinWaveFuncG(s: complex, x: float) -> complex:
     """ Gluon wave function for inverse Mellin transformation: x^(-s+1) for x>0 and 0 for x<0
 
@@ -913,8 +959,7 @@ def InvMellinWaveFuncG(s: complex, x: float) -> complex:
     '''
     return np.where(x>0, x**(-s+1), 0)
 
-#@memory.cache
-@np_cache_ConfWF
+@memory.cache
 def ConfWaveFuncQ(j: complex, x: float, xi: float) -> complex:
     """Quark conformal wave function p_j(x,xi) 
     
@@ -935,8 +980,7 @@ def ConfWaveFuncQ(j: complex, x: float, xi: float) -> complex:
 
     return 0
 
-#@memory.cache
-@np_cache_ConfWF
+@memory.cache
 def ConfWaveFuncQ_over_sinpij(j: complex, x: float, xi: float) -> complex:
     """Quark conformal wave function p_j(x,xi)/sin(pi(j+1))
     
@@ -957,8 +1001,7 @@ def ConfWaveFuncQ_over_sinpij(j: complex, x: float, xi: float) -> complex:
 
     return 0
 
-#@memory.cache
-@np_cache_ConfWF
+@memory.cache
 def ConfWaveFuncG(j: complex, x: float, xi: float) -> complex:
     """Gluon conformal wave function p_j(x,xi) 
     
@@ -981,8 +1024,7 @@ def ConfWaveFuncG(j: complex, x: float, xi: float) -> complex:
 
     return 0
 
-#@memory.cache
-@np_cache_ConfWF
+@memory.cache
 def ConfWaveFuncG_over_sinpij(j: complex, x: float, xi: float) -> complex:
     """Gluon conformal wave function p_j(x,xi)/sin(pi(j+1)) = Minus * p_j(x,xi)/sin(pi*j)
     
@@ -2170,7 +2212,7 @@ def GPD_Moment_Evo_NLO(j: np.array, nf: int, p: int, mu: float, t: float, xi: co
 
     return EvoConf
 
-@np_cache_Evo
+@memory.cache
 def diagonal_evolution_NLO(j: np.ndarray, nf: int, p: int, mu: float) -> Tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
     """
     Construct LO and diagonal NLO evolution operators for given j, nf, p, mu.

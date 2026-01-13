@@ -6,6 +6,7 @@
 # ===========================================================================================
 import pandas as pd
 import os, csv
+import time
 
 # Import the package
 import gumpgpd as gp
@@ -40,8 +41,10 @@ if __name__ == '__main__':
     # Put all of them together
     params = {**params_unp, **params_pol, **params_aux}
     print("Running code to generate all results, could take a few minutes")
+    t0 = time.perf_counter()
     grouped_results = cost_off_forward_withH_withHt(**params)
-    
+    t1 = time.perf_counter()
+    print(f"Elapsed time: {t1 - t0:.6f} s")
     '''
     for name, df in grouped_results.items():
         print(f"\n===== {name} =====")
