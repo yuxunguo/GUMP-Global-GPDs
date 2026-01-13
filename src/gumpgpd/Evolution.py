@@ -32,102 +32,6 @@ if not os.path.exists(cache_dir):
 
 memory = Memory(location=cache_dir, verbose=0)
 
-Arr_Cache_Strategy = "memory"   # "memory" or "disk"
-Arr_Cache_Maxsize = 128
-
-def cache_array(strategy=Arr_Cache_Strategy, maxsize=Arr_Cache_Maxsize, cache_dir=cache_dir):
-    """
-    Decorator to cache a function whose first argument is a NumPy array (or nested arrays).
-
-    Strategies:
-        - 'memory': in-memory caching (thread-safe, not process-safe)
-        - 'disk': joblib disk cache (process-safe)
-
-    Guarantees:
-        - Shape, dtype, contiguity preserved
-        - No kwargs unpacking bugs
-        - No joblib name collisions
-    """
-
-    def deep_contig_copy(obj):
-        if isinstance(obj, np.ndarray):
-            return np.ascontiguousarray(obj).copy()
-        elif isinstance(obj, (list, tuple)):
-            return type(obj)(deep_contig_copy(x) for x in obj)
-        elif isinstance(obj, dict):
-            return {k: deep_contig_copy(v) for k, v in obj.items()}
-        else:
-            return obj
-
-    def decorator(func):
-
-        def hash_array(arr: np.ndarray) -> str:
-            arr = np.ascontiguousarray(arr)
-            h = hashlib.sha256()
-            h.update(arr.tobytes())
-            h.update(str(arr.shape).encode())
-            h.update(str(arr.dtype).encode())
-            return h.hexdigest()
-
-        # =========================
-        # In-memory cache
-        # =========================
-        if strategy == "memory":
-            array_store = {}
-
-            @functools.lru_cache(maxsize=maxsize)
-            def _cached_mem(array_hash, args, kwargs_items):
-                kwargs = dict(kwargs_items)          # 🔧 FIX
-                return func(array_store[array_hash], *args, **kwargs)
-
-            @functools.wraps(func)
-            def wrapper(first_arg, *args, **kwargs):
-                first_arg = deep_contig_copy(first_arg)
-                h = hash_array(first_arg)
-                array_store[h] = first_arg
-                return _cached_mem(h, args, tuple(sorted(kwargs.items())))
-
-            return wrapper
-
-        # =========================
-        # Disk cache (joblib)
-        # =========================
-        elif strategy == "disk":
-            mem = Memory(cache_dir or ".joblib_cache", verbose=0)
-
-            @mem.cache
-            def _cached_disk(array_hash, array_val, shape, dtype, args, kwargs_items):
-                kwargs = dict(kwargs_items)          # 🔧 FIX
-
-                array_val = np.ascontiguousarray(array_val, dtype=dtype)
-                if array_val.shape != shape:
-                    array_val = array_val.reshape(shape)
-
-                array_val = deep_contig_copy(array_val)
-                return func(array_val, *args, **kwargs)
-
-            @functools.wraps(func)
-            def wrapper(first_arg, *args, **kwargs):
-                first_arg = deep_contig_copy(first_arg)
-                h = hash_array(first_arg)
-
-                return _cached_disk(
-                    h,
-                    first_arg,
-                    first_arg.shape,
-                    first_arg.dtype,
-                    args,
-                    tuple(sorted(kwargs.items()))
-                )
-
-            return wrapper
-
-        else:
-            raise ValueError("strategy must be 'memory' or 'disk'")
-
-    return decorator
-
-
 """
 ***********************QCD constants***************************************
 Refer to the constants.py at https://github.com/kkumer/gepard.
@@ -409,7 +313,28 @@ def lsumrev(m: Union[complex, np.ndarray], n: Union[complex, np.ndarray])-> Unio
     return sum((2*l+1)*deldelS2((m+1)/2,l/2)/2 for l in range(1))
 '''
 
-@cache_array(strategy=Arr_Cache_Strategy, maxsize=Arr_Cache_Maxsize, cache_dir=cache_dir)
+def np_cache_Adim(function):
+    
+    cache = {}
+
+    def serialize_array(arr: np.ndarray):
+        return (arr.tobytes(), arr.shape, str(arr.dtype))
+
+    @functools.wraps(function)
+    def wrapper(j: np.ndarray, nf: int, p: int, prty: int =1):
+        key = (
+            serialize_array(j),
+            nf,
+            p,
+            prty
+        )
+        if key not in cache:
+            cache[key] = function(j, nf, p, prty)
+        return cache[key]
+
+    return wrapper
+
+@np_cache_Adim
 def non_singlet_LO(n:Union[complex, np.ndarray], nf: int, p: int, prty: int = 1) -> Union[complex, np.ndarray]:
     """Non-singlet LO anomalous dimension.
 
@@ -426,7 +351,7 @@ def non_singlet_LO(n:Union[complex, np.ndarray], nf: int, p: int, prty: int = 1)
     """
     return CF*(-3.0-2.0/(n*(1.0+n))+4.0*S1(n))
 
-@cache_array(strategy=Arr_Cache_Strategy, maxsize=Arr_Cache_Maxsize, cache_dir=cache_dir)
+@np_cache_Adim
 def singlet_LO(n: Union[complex, np.ndarray], nf: int, p: int, prty: int = 1) -> np.ndarray:
     """Singlet LO anomalous dimensions.
 
@@ -461,8 +386,8 @@ def singlet_LO(n: Union[complex, np.ndarray], nf: int, p: int, prty: int = 1) ->
 
     return np.stack((qq0_qg0, gq0_gg0), axis=-2)# (N, 2, 2)
 
-@cache_array(strategy=Arr_Cache_Strategy, maxsize=Arr_Cache_Maxsize, cache_dir=cache_dir)
-def non_singlet_NLO(n: complex, nf: int, p: int, prty: int) -> complex:
+@np_cache_Adim
+def non_singlet_NLO(n: complex, nf: int, p: int, prty: int = 1) -> complex:
     """Non-singlet anomalous dimension.
     
     Eq. (5.30) in https://www.sciencedirect.com/science/article/pii/0550321380900036?via%3Dihub
@@ -500,7 +425,7 @@ def non_singlet_NLO(n: complex, nf: int, p: int, prty: int) -> complex:
 
     return nlo
 
-@cache_array(strategy=Arr_Cache_Strategy, maxsize=Arr_Cache_Maxsize, cache_dir=cache_dir)
+@np_cache_Adim
 def singlet_NLO(n: complex, nf: int, p: int, prty: int = 1) -> np.ndarray:
     """Singlet NLO anomalous dimensions matrix.
     
@@ -857,8 +782,28 @@ def bmudep(mu, zn, zk, nf: int, p: int, NS: bool = False, prty: int = 1):
                     R**(-lamk/b0)) 
     return Bjk
 
-#@memory.cache
-@cache_array(strategy=Arr_Cache_Strategy, maxsize=Arr_Cache_Maxsize, cache_dir=cache_dir)
+def np_cache_Evo(function):
+    
+    cache = {}
+
+    def serialize_array(arr: np.ndarray):
+        return (arr.tobytes(), arr.shape, str(arr.dtype))
+
+    @functools.wraps(function)
+    def wrapper(j: np.ndarray, nf: int, p: int, mu: float):
+        key = (
+            serialize_array(j),
+            nf,
+            p,
+            mu
+        )
+        if key not in cache:
+            cache[key] = function(j, nf, p, mu)
+        return cache[key]
+
+    return wrapper
+
+@np_cache_Evo
 def evolop(j: complex, nf: int, p: int, mu: float):
     """Leading order GPD evolution operator E(j, nf, mu)[a,b].
 
@@ -917,7 +862,40 @@ mp.dps = 25
 
 hyp2f1_nparray = np.frompyfunc(hyp2f1,4,1)
 
-@memory.cache
+def np_cache_ConfWF(function):
+    cache = {}
+
+    def serialize_array(arr: np.ndarray):
+        # serialize ndarray into a hashable key
+        return (arr.tobytes(), arr.shape, str(arr.dtype))
+
+    @functools.wraps(function)
+    def wrapper(j, x: float, xi: float):
+        j_arr = np.asarray(j)  # allow scalar, list, or np.ndarray
+        key = (serialize_array(j_arr), float(x), float(xi))
+        if key not in cache:
+            cache[key] = function(j_arr, x, xi)
+        return cache[key]
+
+    return wrapper
+
+def np_cache_MellinWF(func):
+    cache = {}
+
+    def serialize_array(arr: np.ndarray):
+        # Use bytes + shape + dtype as unique key
+        return (arr.tobytes(), arr.shape, str(arr.dtype))
+
+    @functools.wraps(func)
+    def wrapper(s: np.ndarray, x: float):
+        key = (serialize_array(s), x)
+        if key not in cache:
+            cache[key] = func(s, x)
+        return cache[key]
+
+    return wrapper
+
+@np_cache_MellinWF
 def InvMellinWaveFuncQ(s: complex, x: float) -> complex:
     """ Quark wave function for inverse Mellin transformation: x^(-s) for x>0 and 0 for x<0
 
@@ -939,7 +917,7 @@ def InvMellinWaveFuncQ(s: complex, x: float) -> complex:
     '''
     return np.where(x>0, x**(-s), 0)
 
-@memory.cache
+@np_cache_MellinWF
 def InvMellinWaveFuncG(s: complex, x: float) -> complex:
     """ Gluon wave function for inverse Mellin transformation: x^(-s+1) for x>0 and 0 for x<0
 
@@ -959,7 +937,7 @@ def InvMellinWaveFuncG(s: complex, x: float) -> complex:
     '''
     return np.where(x>0, x**(-s+1), 0)
 
-@memory.cache
+@np_cache_ConfWF
 def ConfWaveFuncQ(j: complex, x: float, xi: float) -> complex:
     """Quark conformal wave function p_j(x,xi) 
     
@@ -980,7 +958,7 @@ def ConfWaveFuncQ(j: complex, x: float, xi: float) -> complex:
 
     return 0
 
-@memory.cache
+@np_cache_ConfWF
 def ConfWaveFuncQ_over_sinpij(j: complex, x: float, xi: float) -> complex:
     """Quark conformal wave function p_j(x,xi)/sin(pi(j+1))
     
@@ -1001,7 +979,7 @@ def ConfWaveFuncQ_over_sinpij(j: complex, x: float, xi: float) -> complex:
 
     return 0
 
-@memory.cache
+@np_cache_ConfWF
 def ConfWaveFuncG(j: complex, x: float, xi: float) -> complex:
     """Gluon conformal wave function p_j(x,xi) 
     
@@ -1024,7 +1002,7 @@ def ConfWaveFuncG(j: complex, x: float, xi: float) -> complex:
 
     return 0
 
-@memory.cache
+@np_cache_ConfWF
 def ConfWaveFuncG_over_sinpij(j: complex, x: float, xi: float) -> complex:
     """Gluon conformal wave function p_j(x,xi)/sin(pi(j+1)) = Minus * p_j(x,xi)/sin(pi*j)
     
@@ -2212,7 +2190,7 @@ def GPD_Moment_Evo_NLO(j: np.array, nf: int, p: int, mu: float, t: float, xi: co
 
     return EvoConf
 
-@memory.cache
+@np_cache_Evo
 def diagonal_evolution_NLO(j: np.ndarray, nf: int, p: int, mu: float) -> Tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
     """
     Construct LO and diagonal NLO evolution operators for given j, nf, p, mu.
