@@ -16,6 +16,10 @@ This repository contains the source code for the **Generalized Parton Distributi
 
 - **For modified package and developer**  download the whole branch and run ```pip install -e .``` to install locally (Make sure to ```pip uninstall gumpgpd``` to avoid conflicts if you install the pip version already)
 
+## Change log
+
+- ** v.1.0.1 **: bug fix in GPD calculations.
+
 ## Documentation
 For detailed documentation and further information, please visit:  
 [https://yuxunguo.github.io/GUMP-Global-GPDs/](https://yuxunguo.github.io/GUMP-Global-GPDs/)
