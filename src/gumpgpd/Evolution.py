@@ -1489,7 +1489,38 @@ def TFF_Evo_LO(j: np.array, nf: int, p: int, mu: float, ConfFlav: np.array, meso
 
     return EvoConf
 
-@memory.cache
+def hybrid_cache_dvmpnlo(function):
+    """Hybrid cache for DVMP NLO: RAM + Disk"""
+    ram_cache = {}  # in-process RAM cache
+
+    def serialize_array(arr: np.ndarray):
+        """Generate a lightweight hash key for a NumPy array"""
+        h = hashlib.sha256(arr.view(np.uint8)).hexdigest()
+        return (h, arr.shape, str(arr.dtype))
+
+    @functools.wraps(function)
+    def wrapper(j: np.ndarray, nf: int, p: int, Q: float, meson: int, muf: float):
+        # Generate key for RAM cache
+        key = (serialize_array(j), nf, p, Q, meson, muf)
+
+        # Fast path: RAM cache hit
+        if key in ram_cache:
+            return ram_cache[key]
+
+        # Disk cache via joblib.Memory
+        cached_func = memory.cache(function)
+
+        # Compute or load from disk
+        result = cached_func(j, nf, p, Q, meson, muf)
+
+        # Store in RAM cache for future calls
+        ram_cache[key] = result
+
+        return result
+
+    return wrapper
+
+@hybrid_cache_dvmpnlo
 def DVMP_WCoef_Evo_NLO(j: np.array, nf: int, p: int, Q: float, meson: int, muf: float) -> Tuple[np.ndarray, np.ndarray]:
     """Next-to-leading order evolution of the DVMP Wilson coefficient (Evolved Wilson coefficient method)
 
@@ -1662,7 +1693,37 @@ def TFF_Evo_NLO_evWC(j: np.array, nf: int, p: int, Q: float, ConfFlav: np.array,
     
     return EvoConf
 
-@memory.cache
+def hybrid_cache_dvcsnlo(function):
+    """Two-layer cache: disk + RAM."""
+    ram_cache = {}  # in-process RAM cache
+
+    def serialize_array(arr: np.ndarray):
+        """Generate a lightweight hash key for a NumPy array"""
+        h = hashlib.sha256(arr.view(np.uint8)).hexdigest()
+        return (h, arr.shape, str(arr.dtype))
+
+    @functools.wraps(function)
+    def wrapper(j: np.ndarray, nf: int, p: int, Q: float, muf: float):
+        # RAM key
+        key = (serialize_array(j), nf, p, Q, muf)
+
+        if key in ram_cache:
+            # Fast path: already in RAM
+            return ram_cache[key]
+
+        # Wrap the function with joblib.Memory disk cache
+        cached_func = memory.cache(function)
+
+        # Compute or load from disk
+        result = cached_func(j, nf, p, Q, muf)
+
+        # Store in RAM for fast future access
+        ram_cache[key] = result
+        return result
+
+    return wrapper
+
+@hybrid_cache_dvcsnlo
 def DVCS_WCoef_Evo_NLO(j: np.array, nf: int, p: int, Q: float, muf: float) -> Tuple[np.ndarray, np.ndarray]:
     """Next-to-leading order evolution of the DVCS Wilson coefficient (Evolved Wilson coefficient method)
 

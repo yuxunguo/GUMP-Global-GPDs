@@ -3,7 +3,7 @@ from .Observables import GPDobserv
 from .DVCS_xsec import dsigma_DVCS_TOT, Asymmetry_DVCS_TOT, dsigma_DVCS_HERA, M
 from .DVMP_xsec import dsigma_DVMP_dt,dsigmaL_DVMP_dt, M_jpsi,epsilon, R_fitted
 from . import config
-from ._helper_ import cluster_DVCSAsym
+from ._helper_ import cluster_DVCSAsym, gump_msg
 
 from scipy.special import beta
 from multiprocessing import Pool
@@ -606,7 +606,7 @@ def cost_off_forward_withH_withHt(Norm_HuV,    alpha_HuV,    beta_HuV,    alphap
     time_now = time.time() - time_start
     
     if(time_now > Time_Counter * 600):
-        print('Runing Time:',round(time_now/60),'minutes. Cost function called total', Minuit_Counter, 'times.')
+        gump_msg(f"Running time: {round(time_now/60)} minutes. Cost function called total {Minuit_Counter} times.", level="INFO")
         Time_Counter = Time_Counter + 1
     
     Minuit_Counter = Minuit_Counter + 1
@@ -964,13 +964,13 @@ def off_forward_fit_withH_withHt(Paralst_Unp, Paralst_Pol, Paralst_Aux=[1.0] * l
     Time_Counter = 1
     time_start = time.time()
     
-    print("------------------------------------------")
-    print("off forward fit starts, update in 10 mins")
+    print("--------------------------------------------------------------------------")
+    gump_msg("off forward fit starts, update in 10 mins", level="INFO")
     
     fit_off_forward.migrad(ncall=100000)
     fit_off_forward.hesse()
     
-    print("off forward fit finished, see summary in /GUMP_Output")
+    gump_msg("off forward fit finished, see summary in /GUMP_Output", level="INFO")
 
     time_end = time.time() -time_start
     
