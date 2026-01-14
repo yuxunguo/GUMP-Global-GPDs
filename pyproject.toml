@@ -5,7 +5,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "gumpgpd"
-version = "1.0.1+local"
+version = "1.0.2+dev"
 description = "GPD analysis tools for DVCS, DVMP, and lattice inputs"
 readme = "README.md"
 requires-python = ">=3.8"
@@ -29,6 +29,8 @@ dependencies = [
   "numpy",
   "pandas",
   "scipy",
+  "scikit-learn",
+  "colorama",
 ]
 
 
