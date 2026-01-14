@@ -605,7 +605,7 @@ def cost_off_forward_withH_withHt(Norm_HuV,    alpha_HuV,    beta_HuV,    alphap
 
     time_now = time.time() - time_start
     
-    if(time_now > Time_Counter * 600):
+    if(time_now > Time_Counter * 60 * config._log_interval_minutes):
         gump_msg(f"Running time: {round(time_now/60)} minutes. Cost function called total {Minuit_Counter} times.", level="INFO")
         Time_Counter = Time_Counter + 1
     
@@ -965,7 +965,7 @@ def off_forward_fit_withH_withHt(Paralst_Unp, Paralst_Pol, Paralst_Aux=[1.0] * l
     time_start = time.time()
     
     print("--------------------------------------------------------------------------")
-    gump_msg("off forward fit starts, update in 10 mins", level="INFO")
+    gump_msg(f"off forward fit starts, update in {config._log_interval_minutes} mins", level="INFO")
     
     fit_off_forward.migrad(ncall=100000)
     fit_off_forward.hesse()

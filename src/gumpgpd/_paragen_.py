@@ -17,7 +17,16 @@ if __name__ == '__main__':
 
     gump_msg("Performance may be lower and memory usage MUCH higher if no cache exists yet.", "NOTE")
 
+    # Ask user for log interval in minutes, default to 10
+    user_input = input("Enter log interval in minutes [default 10]: ")
 
+    try:
+        config._log_interval_minutes = int(user_input) if user_input else 10
+    except ValueError:
+        print("Invalid input, using default 10 minutes.")
+        config._log_interval_minutes = 10
+
+    print(f"Log interval set to {config._log_interval_minutes} minutes.")
 
     str = '_withH_withHt_NLO'
     Paralst_Unp=pd.read_csv(os.path.join(dir_path,f'GUMP_Params/Para_Unp_Off_forward{str}.csv'), header=None).to_numpy()[0]
