@@ -5,17 +5,17 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>gumpgpd.DVCS_xsec &mdash; GUMP GPD Analysis 0.5.0 documentation</title>
+  <title>gumpgpd.DVCS_xsec &mdash; GUMP GPD Analysis 1.0.2 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=80d5e7a1" />
-      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=7ab3649f" />
       <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
 
   
       <script src="../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../_static/documentation_options.js?v=1dd76d02"></script>
-      <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
-      <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+      <script src="../../_static/documentation_options.js?v=1ed6394b"></script>
+      <script src="../../_static/doctools.js?v=9a2dae69"></script>
+      <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
       <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
       <script src="../../_static/copybutton.js?v=f281be69"></script>
     <script src="../../_static/js/theme.js"></script>
@@ -108,7 +108,7 @@
 
 <span class="c1">#The prefactor for cross-section given by some kinematics</span>
 <div class="viewcode-block" id="Gamma_prefac">
-<a class="viewcode-back" href="../../gumpgpd.html#gumpgpd.DVCS_xsec.Gamma_prefac">[docs]</a>
+<a class="viewcode-back" href="../../DVCS_xsec.html#gumpgpd.DVCS_xsec.Gamma_prefac">[docs]</a>
 <span class="nd">@njit</span> 
 <span class="k">def</span> <span class="nf">Gamma_prefac</span><span class="p">(</span><span class="n">y</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">xB</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">Q</span><span class="p">:</span> <span class="nb">float</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Kinematic prefactor in the cross-sections </span>
@@ -127,7 +127,7 @@
 
 
 <div class="viewcode-block" id="xi">
-<a class="viewcode-back" href="../../gumpgpd.html#gumpgpd.DVCS_xsec.xi">[docs]</a>
+<a class="viewcode-back" href="../../DVCS_xsec.html#gumpgpd.DVCS_xsec.xi">[docs]</a>
 <span class="nd">@njit</span>
 <span class="k">def</span> <span class="nf">xi</span><span class="p">(</span><span class="n">xB</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">t</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">Q</span><span class="p">:</span> <span class="nb">float</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Skewness parameter xi that can be expressed with the kinematics</span>
@@ -144,7 +144,7 @@
 
 
 <div class="viewcode-block" id="N">
-<a class="viewcode-back" href="../../gumpgpd.html#gumpgpd.DVCS_xsec.N">[docs]</a>
+<a class="viewcode-back" href="../../DVCS_xsec.html#gumpgpd.DVCS_xsec.N">[docs]</a>
 <span class="nd">@njit</span>
 <span class="k">def</span> <span class="nf">N</span><span class="p">(</span><span class="n">xB</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">t</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">Q</span><span class="p">:</span> <span class="nb">float</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Numeric factor, essentially the transverse momentum transfer squared</span>
@@ -161,7 +161,7 @@
 
 
 <div class="viewcode-block" id="h_pureDVCS">
-<a class="viewcode-back" href="../../gumpgpd.html#gumpgpd.DVCS_xsec.h_pureDVCS">[docs]</a>
+<a class="viewcode-back" href="../../DVCS_xsec.html#gumpgpd.DVCS_xsec.h_pureDVCS">[docs]</a>
 <span class="nd">@njit</span>
 <span class="k">def</span> <span class="nf">h_pureDVCS</span><span class="p">(</span><span class="n">y</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">xB</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">t</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">Q</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">phi</span><span class="p">:</span> <span class="nb">float</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Kinematical variable for pure DVCS cross-sections</span>
@@ -183,7 +183,7 @@
 
 
 <div class="viewcode-block" id="hminus_pureDVCS">
-<a class="viewcode-back" href="../../gumpgpd.html#gumpgpd.DVCS_xsec.hminus_pureDVCS">[docs]</a>
+<a class="viewcode-back" href="../../DVCS_xsec.html#gumpgpd.DVCS_xsec.hminus_pureDVCS">[docs]</a>
 <span class="nd">@njit</span>
 <span class="k">def</span> <span class="nf">hminus_pureDVCS</span><span class="p">(</span><span class="n">y</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">xB</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">t</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">Q</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">phi</span><span class="p">:</span> <span class="nb">float</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot; Kinematical variable for pure DVCS cross-sections</span>
@@ -207,7 +207,7 @@
 
 
 <div class="viewcode-block" id="A_BH">
-<a class="viewcode-back" href="../../gumpgpd.html#gumpgpd.DVCS_xsec.A_BH">[docs]</a>
+<a class="viewcode-back" href="../../DVCS_xsec.html#gumpgpd.DVCS_xsec.A_BH">[docs]</a>
 <span class="nd">@njit</span>
 <span class="k">def</span> <span class="nf">A_BH</span><span class="p">(</span><span class="n">y</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">xB</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">t</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">Q</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">phi</span><span class="p">:</span> <span class="nb">float</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot; Kinematical variable for BH cross-section</span>
@@ -229,7 +229,7 @@
 
 
 <div class="viewcode-block" id="B_BH">
-<a class="viewcode-back" href="../../gumpgpd.html#gumpgpd.DVCS_xsec.B_BH">[docs]</a>
+<a class="viewcode-back" href="../../DVCS_xsec.html#gumpgpd.DVCS_xsec.B_BH">[docs]</a>
 <span class="nd">@njit</span>
 <span class="k">def</span> <span class="nf">B_BH</span><span class="p">(</span><span class="n">y</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">xB</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">t</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">Q</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">phi</span><span class="p">:</span> <span class="nb">float</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot; Kinematical variable for BH cross-section</span>
@@ -251,7 +251,7 @@
 
 
 <div class="viewcode-block" id="At_BH_L">
-<a class="viewcode-back" href="../../gumpgpd.html#gumpgpd.DVCS_xsec.At_BH_L">[docs]</a>
+<a class="viewcode-back" href="../../DVCS_xsec.html#gumpgpd.DVCS_xsec.At_BH_L">[docs]</a>
 <span class="nd">@njit</span>
 <span class="k">def</span> <span class="nf">At_BH_L</span><span class="p">(</span><span class="n">y</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">xB</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">t</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">Q</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">phi</span><span class="p">:</span> <span class="nb">float</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot; Kinematical variable for polarized BH cross-section</span>
@@ -273,7 +273,7 @@
 
 
 <div class="viewcode-block" id="Bt_BH_L">
-<a class="viewcode-back" href="../../gumpgpd.html#gumpgpd.DVCS_xsec.Bt_BH_L">[docs]</a>
+<a class="viewcode-back" href="../../DVCS_xsec.html#gumpgpd.DVCS_xsec.Bt_BH_L">[docs]</a>
 <span class="nd">@njit</span>
 <span class="k">def</span> <span class="nf">Bt_BH_L</span><span class="p">(</span><span class="n">y</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">xB</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">t</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">Q</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">phi</span><span class="p">:</span> <span class="nb">float</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot; Kinematical variable for polarized BH cross-section</span>
@@ -295,7 +295,7 @@
 
 
 <div class="viewcode-block" id="At_BH_Tin">
-<a class="viewcode-back" href="../../gumpgpd.html#gumpgpd.DVCS_xsec.At_BH_Tin">[docs]</a>
+<a class="viewcode-back" href="../../DVCS_xsec.html#gumpgpd.DVCS_xsec.At_BH_Tin">[docs]</a>
 <span class="nd">@njit</span>
 <span class="k">def</span> <span class="nf">At_BH_Tin</span><span class="p">(</span><span class="n">y</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">xB</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">t</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">Q</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">phi</span><span class="p">:</span> <span class="nb">float</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Kinematical variable for polarized BH cross-section</span>
@@ -317,7 +317,7 @@
 
 
 <div class="viewcode-block" id="Bt_BH_Tin">
-<a class="viewcode-back" href="../../gumpgpd.html#gumpgpd.DVCS_xsec.Bt_BH_Tin">[docs]</a>
+<a class="viewcode-back" href="../../DVCS_xsec.html#gumpgpd.DVCS_xsec.Bt_BH_Tin">[docs]</a>
 <span class="nd">@njit</span>
 <span class="k">def</span> <span class="nf">Bt_BH_Tin</span><span class="p">(</span><span class="n">y</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">xB</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">t</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">Q</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">phi</span><span class="p">:</span> <span class="nb">float</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot; Kinematical variable for polarized BH cross-section</span>
@@ -339,7 +339,7 @@
 
 
 <div class="viewcode-block" id="At_BH_Tout">
-<a class="viewcode-back" href="../../gumpgpd.html#gumpgpd.DVCS_xsec.At_BH_Tout">[docs]</a>
+<a class="viewcode-back" href="../../DVCS_xsec.html#gumpgpd.DVCS_xsec.At_BH_Tout">[docs]</a>
 <span class="nd">@njit</span>
 <span class="k">def</span> <span class="nf">At_BH_Tout</span><span class="p">(</span><span class="n">y</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">xB</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">t</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">Q</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">phi</span><span class="p">:</span> <span class="nb">float</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot; Kinematical variable for polarized BH cross-section</span>
@@ -361,7 +361,7 @@
 
 
 <div class="viewcode-block" id="Bt_BH_Tout">
-<a class="viewcode-back" href="../../gumpgpd.html#gumpgpd.DVCS_xsec.Bt_BH_Tout">[docs]</a>
+<a class="viewcode-back" href="../../DVCS_xsec.html#gumpgpd.DVCS_xsec.Bt_BH_Tout">[docs]</a>
 <span class="nd">@njit</span>
 <span class="k">def</span> <span class="nf">Bt_BH_Tout</span><span class="p">(</span><span class="n">y</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">xB</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">t</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">Q</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">phi</span><span class="p">:</span> <span class="nb">float</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot; Kinematical variable for polarized BH cross-section</span>
@@ -383,7 +383,7 @@
 
 
 <div class="viewcode-block" id="A_INT_unp">
-<a class="viewcode-back" href="../../gumpgpd.html#gumpgpd.DVCS_xsec.A_INT_unp">[docs]</a>
+<a class="viewcode-back" href="../../DVCS_xsec.html#gumpgpd.DVCS_xsec.A_INT_unp">[docs]</a>
 <span class="nd">@njit</span>
 <span class="k">def</span> <span class="nf">A_INT_unp</span><span class="p">(</span><span class="n">y</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">xB</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">t</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">Q</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">phi</span><span class="p">:</span> <span class="nb">float</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot; Kinematical variable for interference cross-section</span>
@@ -405,7 +405,7 @@
 
 
 <div class="viewcode-block" id="B_INT_unp">
-<a class="viewcode-back" href="../../gumpgpd.html#gumpgpd.DVCS_xsec.B_INT_unp">[docs]</a>
+<a class="viewcode-back" href="../../DVCS_xsec.html#gumpgpd.DVCS_xsec.B_INT_unp">[docs]</a>
 <span class="nd">@njit</span>
 <span class="k">def</span> <span class="nf">B_INT_unp</span><span class="p">(</span><span class="n">y</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">xB</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">t</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">Q</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">phi</span><span class="p">:</span> <span class="nb">float</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot; Kinematical variable for interference cross-section</span>
@@ -427,7 +427,7 @@
 
 
 <div class="viewcode-block" id="C_INT_unp">
-<a class="viewcode-back" href="../../gumpgpd.html#gumpgpd.DVCS_xsec.C_INT_unp">[docs]</a>
+<a class="viewcode-back" href="../../DVCS_xsec.html#gumpgpd.DVCS_xsec.C_INT_unp">[docs]</a>
 <span class="nd">@njit</span>
 <span class="k">def</span> <span class="nf">C_INT_unp</span><span class="p">(</span><span class="n">y</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">xB</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">t</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">Q</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">phi</span><span class="p">:</span> <span class="nb">float</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot; Kinematical variable for interference cross-section</span>
@@ -449,7 +449,7 @@
 
 
 <div class="viewcode-block" id="At_INT_unp">
-<a class="viewcode-back" href="../../gumpgpd.html#gumpgpd.DVCS_xsec.At_INT_unp">[docs]</a>
+<a class="viewcode-back" href="../../DVCS_xsec.html#gumpgpd.DVCS_xsec.At_INT_unp">[docs]</a>
 <span class="nd">@njit</span>
 <span class="k">def</span> <span class="nf">At_INT_unp</span><span class="p">(</span><span class="n">y</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">xB</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">t</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">Q</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">phi</span><span class="p">:</span> <span class="nb">float</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot; Kinematical variable for interference cross-section with polarized beam</span>
@@ -471,7 +471,7 @@
 
 
 <div class="viewcode-block" id="Bt_INT_unp">
-<a class="viewcode-back" href="../../gumpgpd.html#gumpgpd.DVCS_xsec.Bt_INT_unp">[docs]</a>
+<a class="viewcode-back" href="../../DVCS_xsec.html#gumpgpd.DVCS_xsec.Bt_INT_unp">[docs]</a>
 <span class="nd">@njit</span>
 <span class="k">def</span> <span class="nf">Bt_INT_unp</span><span class="p">(</span><span class="n">y</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">xB</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">t</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">Q</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">phi</span><span class="p">:</span> <span class="nb">float</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot; Kinematical variable for interference cross-section with polarized beam</span>
@@ -493,7 +493,7 @@
 
 
 <div class="viewcode-block" id="Ct_INT_unp">
-<a class="viewcode-back" href="../../gumpgpd.html#gumpgpd.DVCS_xsec.Ct_INT_unp">[docs]</a>
+<a class="viewcode-back" href="../../DVCS_xsec.html#gumpgpd.DVCS_xsec.Ct_INT_unp">[docs]</a>
 <span class="nd">@njit</span>
 <span class="k">def</span> <span class="nf">Ct_INT_unp</span><span class="p">(</span><span class="n">y</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">xB</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">t</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">Q</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">phi</span><span class="p">:</span> <span class="nb">float</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot; Kinematical variable for interference cross-section with polarized beam</span>
@@ -515,7 +515,7 @@
 
 
 <div class="viewcode-block" id="A_INT_pol">
-<a class="viewcode-back" href="../../gumpgpd.html#gumpgpd.DVCS_xsec.A_INT_pol">[docs]</a>
+<a class="viewcode-back" href="../../DVCS_xsec.html#gumpgpd.DVCS_xsec.A_INT_pol">[docs]</a>
 <span class="nd">@njit</span>
 <span class="k">def</span> <span class="nf">A_INT_pol</span><span class="p">(</span><span class="n">y</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">xB</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">t</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">Q</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">phi</span><span class="p">:</span> <span class="nb">float</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot; Kinematical variable for interference cross-section with polarized target</span>
@@ -537,7 +537,7 @@
 
 
 <div class="viewcode-block" id="B_INT_pol">
-<a class="viewcode-back" href="../../gumpgpd.html#gumpgpd.DVCS_xsec.B_INT_pol">[docs]</a>
+<a class="viewcode-back" href="../../DVCS_xsec.html#gumpgpd.DVCS_xsec.B_INT_pol">[docs]</a>
 <span class="nd">@njit</span>
 <span class="k">def</span> <span class="nf">B_INT_pol</span><span class="p">(</span><span class="n">y</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">xB</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">t</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">Q</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">phi</span><span class="p">:</span> <span class="nb">float</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot; Kinematical variable for interference cross-section with polarized target</span>
@@ -559,7 +559,7 @@
 
 
 <div class="viewcode-block" id="C_INT_pol">
-<a class="viewcode-back" href="../../gumpgpd.html#gumpgpd.DVCS_xsec.C_INT_pol">[docs]</a>
+<a class="viewcode-back" href="../../DVCS_xsec.html#gumpgpd.DVCS_xsec.C_INT_pol">[docs]</a>
 <span class="nd">@njit</span>
 <span class="k">def</span> <span class="nf">C_INT_pol</span><span class="p">(</span><span class="n">y</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">xB</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">t</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">Q</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">phi</span><span class="p">:</span> <span class="nb">float</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot; Kinematical variable for interference cross-section with polarized target</span>
@@ -581,7 +581,7 @@
 
 
 <div class="viewcode-block" id="At_INT_pol">
-<a class="viewcode-back" href="../../gumpgpd.html#gumpgpd.DVCS_xsec.At_INT_pol">[docs]</a>
+<a class="viewcode-back" href="../../DVCS_xsec.html#gumpgpd.DVCS_xsec.At_INT_pol">[docs]</a>
 <span class="nd">@njit</span>
 <span class="k">def</span> <span class="nf">At_INT_pol</span><span class="p">(</span><span class="n">y</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">xB</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">t</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">Q</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">phi</span><span class="p">:</span> <span class="nb">float</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot; Kinematical variable for interference cross-section with polarized target and target</span>
@@ -603,7 +603,7 @@
 
 
 <div class="viewcode-block" id="Bt_INT_pol">
-<a class="viewcode-back" href="../../gumpgpd.html#gumpgpd.DVCS_xsec.Bt_INT_pol">[docs]</a>
+<a class="viewcode-back" href="../../DVCS_xsec.html#gumpgpd.DVCS_xsec.Bt_INT_pol">[docs]</a>
 <span class="nd">@njit</span>
 <span class="k">def</span> <span class="nf">Bt_INT_pol</span><span class="p">(</span><span class="n">y</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">xB</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">t</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">Q</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">phi</span><span class="p">:</span> <span class="nb">float</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot; Kinematical variable for interference cross-section with polarized target and target</span>
@@ -625,7 +625,7 @@
 
 
 <div class="viewcode-block" id="Ct_INT_pol">
-<a class="viewcode-back" href="../../gumpgpd.html#gumpgpd.DVCS_xsec.Ct_INT_pol">[docs]</a>
+<a class="viewcode-back" href="../../DVCS_xsec.html#gumpgpd.DVCS_xsec.Ct_INT_pol">[docs]</a>
 <span class="nd">@njit</span>
 <span class="k">def</span> <span class="nf">Ct_INT_pol</span><span class="p">(</span><span class="n">y</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">xB</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">t</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">Q</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">phi</span><span class="p">:</span> <span class="nb">float</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot; Kinematical variable for interference cross-section with polarized target and target</span>
@@ -647,7 +647,7 @@
 
 
 <div class="viewcode-block" id="GE_FF">
-<a class="viewcode-back" href="../../gumpgpd.html#gumpgpd.DVCS_xsec.GE_FF">[docs]</a>
+<a class="viewcode-back" href="../../DVCS_xsec.html#gumpgpd.DVCS_xsec.GE_FF">[docs]</a>
 <span class="nd">@njit</span>
 <span class="k">def</span> <span class="nf">GE_FF</span><span class="p">(</span><span class="n">t</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot; Electric form factors taken from global analysis</span>
@@ -662,7 +662,7 @@
 
 
 <div class="viewcode-block" id="GM_FF">
-<a class="viewcode-back" href="../../gumpgpd.html#gumpgpd.DVCS_xsec.GM_FF">[docs]</a>
+<a class="viewcode-back" href="../../DVCS_xsec.html#gumpgpd.DVCS_xsec.GM_FF">[docs]</a>
 <span class="nd">@njit</span>
 <span class="k">def</span> <span class="nf">GM_FF</span><span class="p">(</span><span class="n">t</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot; Magentic form factors taken from global analysis</span>
@@ -677,7 +677,7 @@
 
 
 <div class="viewcode-block" id="F1_FF">
-<a class="viewcode-back" href="../../gumpgpd.html#gumpgpd.DVCS_xsec.F1_FF">[docs]</a>
+<a class="viewcode-back" href="../../DVCS_xsec.html#gumpgpd.DVCS_xsec.F1_FF">[docs]</a>
 <span class="nd">@njit</span>
 <span class="k">def</span> <span class="nf">F1_FF</span><span class="p">(</span><span class="n">t</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot; Dirac form factors calculated with GE and GM</span>
@@ -692,7 +692,7 @@
 
 
 <div class="viewcode-block" id="F2_FF">
-<a class="viewcode-back" href="../../gumpgpd.html#gumpgpd.DVCS_xsec.F2_FF">[docs]</a>
+<a class="viewcode-back" href="../../DVCS_xsec.html#gumpgpd.DVCS_xsec.F2_FF">[docs]</a>
 <span class="nd">@njit</span>
 <span class="k">def</span> <span class="nf">F2_FF</span><span class="p">(</span><span class="n">t</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot; Pauli form factors calculated with GE and GM</span>
@@ -713,7 +713,7 @@
 
 <span class="c1"># The total cross-section is given by the sum of Bethe-Heitler (BH), pure DVCS and interference (INT) contributions</span>
 <div class="viewcode-block" id="dsigma_DVCS_TOT">
-<a class="viewcode-back" href="../../gumpgpd.html#gumpgpd.DVCS_xsec.dsigma_DVCS_TOT">[docs]</a>
+<a class="viewcode-back" href="../../DVCS_xsec.html#gumpgpd.DVCS_xsec.dsigma_DVCS_TOT">[docs]</a>
 <span class="k">def</span> <span class="nf">dsigma_DVCS_TOT</span><span class="p">(</span><span class="n">y</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">xB</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">t</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">Q</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">phi</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">pol</span><span class="p">,</span> <span class="n">HCFF</span><span class="p">:</span> <span class="nb">complex</span><span class="p">,</span> <span class="n">ECFF</span><span class="p">:</span> <span class="nb">complex</span><span class="p">,</span> <span class="n">HtCFF</span><span class="p">:</span> <span class="nb">complex</span><span class="p">,</span> <span class="n">EtCFF</span><span class="p">:</span> <span class="nb">complex</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot; Combining the BH, Pure DVCS and interfernce cross-sections</span>
 
@@ -737,7 +737,7 @@
 
 
 <div class="viewcode-block" id="Asymmetry_DVCS_TOT">
-<a class="viewcode-back" href="../../gumpgpd.html#gumpgpd.DVCS_xsec.Asymmetry_DVCS_TOT">[docs]</a>
+<a class="viewcode-back" href="../../DVCS_xsec.html#gumpgpd.DVCS_xsec.Asymmetry_DVCS_TOT">[docs]</a>
 <span class="k">def</span> <span class="nf">Asymmetry_DVCS_TOT</span><span class="p">(</span><span class="n">y</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">xB</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">t</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">Q</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">phi</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">pol</span><span class="p">,</span> <span class="n">HCFF</span><span class="p">:</span> <span class="nb">complex</span><span class="p">,</span> <span class="n">ECFF</span><span class="p">:</span> <span class="nb">complex</span><span class="p">,</span> <span class="n">HtCFF</span><span class="p">:</span> <span class="nb">complex</span><span class="p">,</span> <span class="n">EtCFF</span><span class="p">:</span> <span class="nb">complex</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot; DVCS singlet/double spin asymmetries, defined by the ratio of the corresponding polarized total cross-sections to the unpolarized one.</span>
 
@@ -762,7 +762,7 @@
 
 <span class="c1"># The total cross-section integrated over phi</span>
 <div class="viewcode-block" id="dsigma_DVCS_HERA">
-<a class="viewcode-back" href="../../gumpgpd.html#gumpgpd.DVCS_xsec.dsigma_DVCS_HERA">[docs]</a>
+<a class="viewcode-back" href="../../DVCS_xsec.html#gumpgpd.DVCS_xsec.dsigma_DVCS_HERA">[docs]</a>
 <span class="k">def</span> <span class="nf">dsigma_DVCS_HERA</span><span class="p">(</span><span class="n">y</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">xB</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">t</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">Q</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">pol</span><span class="p">,</span> <span class="n">HCFF</span><span class="p">:</span> <span class="nb">complex</span><span class="p">,</span> <span class="n">ECFF</span><span class="p">:</span> <span class="nb">complex</span><span class="p">,</span> <span class="n">HtCFF</span><span class="p">:</span> <span class="nb">complex</span><span class="p">,</span> <span class="n">EtCFF</span><span class="p">:</span> <span class="nb">complex</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;cross-sections of virtual photon and proton scattering check for instance https://arxiv.org/abs/2310.13837</span>
 <span class="sd">    </span>
@@ -821,7 +821,7 @@
 
 <span class="c1"># The Bethe-Heitler cross-section contribute to four polarization configurations</span>
 <div class="viewcode-block" id="dsigma_BH">
-<a class="viewcode-back" href="../../gumpgpd.html#gumpgpd.DVCS_xsec.dsigma_BH">[docs]</a>
+<a class="viewcode-back" href="../../DVCS_xsec.html#gumpgpd.DVCS_xsec.dsigma_BH">[docs]</a>
 <span class="k">def</span> <span class="nf">dsigma_BH</span><span class="p">(</span><span class="n">y</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">xB</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">t</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">Q</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">phi</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">pol</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;A helper function converting the pol to number. check __dsigma_BH() for details</span>
 <span class="sd">        </span>
@@ -870,7 +870,7 @@
 
 
 <div class="viewcode-block" id="dsigma_DVCS">
-<a class="viewcode-back" href="../../gumpgpd.html#gumpgpd.DVCS_xsec.dsigma_DVCS">[docs]</a>
+<a class="viewcode-back" href="../../DVCS_xsec.html#gumpgpd.DVCS_xsec.dsigma_DVCS">[docs]</a>
 <span class="k">def</span> <span class="nf">dsigma_DVCS</span><span class="p">(</span><span class="n">y</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">xB</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">t</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">Q</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">phi</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">pol</span><span class="p">,</span> <span class="n">HCFF</span><span class="p">:</span> <span class="nb">complex</span><span class="p">,</span> <span class="n">ECFF</span><span class="p">:</span> <span class="nb">complex</span><span class="p">,</span> <span class="n">HtCFF</span><span class="p">:</span> <span class="nb">complex</span><span class="p">,</span> <span class="n">EtCFF</span><span class="p">:</span> <span class="nb">complex</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;A helper function converting the pol to number. check __dsigma_DVCS() for details</span>
 <span class="sd">        </span>
@@ -922,7 +922,7 @@
     <span class="k">return</span> <span class="mi">0</span>
 
 <div class="viewcode-block" id="dsigma_INT">
-<a class="viewcode-back" href="../../gumpgpd.html#gumpgpd.DVCS_xsec.dsigma_INT">[docs]</a>
+<a class="viewcode-back" href="../../DVCS_xsec.html#gumpgpd.DVCS_xsec.dsigma_INT">[docs]</a>
 <span class="k">def</span> <span class="nf">dsigma_INT</span><span class="p">(</span><span class="n">y</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">xB</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">t</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">Q</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">phi</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">pol</span><span class="p">,</span> <span class="n">HCFF</span><span class="p">:</span> <span class="nb">complex</span><span class="p">,</span> <span class="n">ECFF</span><span class="p">:</span> <span class="nb">complex</span><span class="p">,</span> <span class="n">HtCFF</span><span class="p">:</span> <span class="nb">complex</span><span class="p">,</span> <span class="n">EtCFF</span><span class="p">:</span> <span class="nb">complex</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;A helper function converting the pol to number. check __dsigma_INT() for details</span>
 <span class="sd">    </span>
@@ -1035,7 +1035,7 @@
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2024, Yuxun Guo. et. al..</p>
+    <p>&#169; Copyright 2026, Yuxun Guo. et. al..</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a

@@ -10,47 +10,41 @@ More resources and references are given at :ref:`Citation/Acknowledgement`.
 
 Installation
 ------------
-There are two ways to access this package: for ordinary user, install the public version with the command ``pip install gumpgpd``.
+There are two ways to access this package: 
+For ordinary user, ``pip install gumpgpd`` install the public version.
 For the lastest developper version, download the source code from the `GitHub <https://github.com/yuxunguo/GUMP-Global-GPDs/tree/GUMP1.0>`_ page 
-(make sure that the correct branch is used!), and run ``pip install -e .`` to install in “editable” mode.
+(make sure that the correct branch is used!), and run ``pip install -e .`` in the root folder to install in “editable” mode.
+
 The later allows you to edit the source code to generate results not directly accessible via the given interface.
+This mode is only recommended if you are familiar with the GUMP code already. 
+If you need interface for any customized observables not directly accessible in the public version, contact `Yuxun Guo <mailto:youuungx@gmail.com>`_ to request.
 
 Parameters and model setting
 ----------------------------
-To start with, you will need a set of parameter as well as models for the GPDs. 
-In the GUMP framework, we consider modeling in the conformal moment space which have many benefits.
-The details are documented in the :ref:`Parameters module`. 
-In genearl, a GPD model should take a set of parameter and generate moments in the conformal spin j space for all flavors, since they will be mixed under evolutions.
 
-For a quick start, we suggest using the GUMP parameterization and the best-fit parameters we obtained in previous work from 
-`DVMP <https://inspirehep.net/literature/2833822>`_ and `DVCS <https://inspirehep.net/literature/2632776>`_ analyses.
-These parameters are stored within the package:
+The GUMP framework is written in a form that is convenient for cutomized GPD model.
+The GUMP parameterization and modelling of GPDs are given in the :ref:`Parameters module`.
+Note that the model must be analytic in the complex j-space, 
+so not all models can be directly implemented in the GUMP framework.
+
+For ordinary user, the GUMP parameterization will be loaded by default. 
+The parameters are obtained through a global analysis process and they are stored in ``gumpgpd.Minimizer``
+and can be retrieved via:
 
 .. code-block:: py
      :name: parameters input
 
-     import pandas as pd
-     import os
-     dir_path = os.path.dirname(os.path.realpath(__file__))
-
-     Paralst_Unp=pd.read_csv(os.path.join(dir_path,'GUMP_Params/Para_Unp.csv'), header=None).to_numpy()[0]
-     Paralst_Pol=pd.read_csv(os.path.join(dir_path,'GUMP_Params/Para_Pol.csv'), header=None).to_numpy()[0]      
-
-These parameter shall be fed to the parameters managers:
-
-.. code-block:: py
-     :name: parameters managers
+     import gumpgpd.Minimizer as gM
      
-     from Parameters import ParaManager_Unp, ParaManager_Pol
-     Para_Unp = ParaManager_Unp(np.array(Paralst_Unp[:-2]))
-     Para_Pol = ParaManager_Pol(np.array(Paralst_Pol))
+     para_unp  = gM.Para_Unp_off_forward
+     para_pol  = gM.Para_Pol_off_forward
+     para_comb = gM.Para_Comb_off_forward
 
-Note that there are two parameters not needed for the GPDs (they are parameters for the cross-sections only).
-So they shall not be fed to the parameter manager.
-You can make your own model and modfies the parameter managers correspondingly.
+The above three high-dimensional numpy arrays stand for the best-fit parameters for the unpolarized (vector) and polarized (axial-vector) GPDs and their combination, respectively.
 
-Calculation of GPDs and observables
------------------------------------
+Calculation observables with existing interface
+------------------------------------------------
+
 With the above model we can in principle calcualte anythings that the :ref:`Observables module` allow to do. 
 In the following, we present some simple examples that calculate the obserbales of interestes.
 

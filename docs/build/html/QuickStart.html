@@ -8,18 +8,18 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Quick start &mdash; GUMP GPD Analysis 1.0.2 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=80d5e7a1" />
-      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=7ab3649f" />
       <link rel="stylesheet" type="text/css" href="_static/copybutton.css?v=76b2166b" />
 
   
       <script src="_static/jquery.js?v=5d32c60e"></script>
       <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
       <script src="_static/documentation_options.js?v=1ed6394b"></script>
-      <script src="_static/doctools.js?v=fd6eb6e6"></script>
-      <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
+      <script src="_static/doctools.js?v=9bcbadda"></script>
+      <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
       <script src="_static/clipboard.min.js?v=a7894cd8"></script>
       <script src="_static/copybutton.js?v=f281be69"></script>
-      <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-mml-chtml.js"></script>
+      <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
@@ -52,7 +52,7 @@
 <li class="toctree-l2"><a class="reference internal" href="#introducation">Introducation</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#installation">Installation</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#parameters-and-model-setting">Parameters and model setting</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#calculation-of-gpds-and-observables">Calculation of GPDs and observables</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#calculation-observables-with-existing-interface">Calculation observables with existing interface</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#leading-order-compton-form-factors">Leading-order Compton Form factors</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#leading-order-transition-form-factors">Leading-order Transition Form factors</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#nlo-transition-form-factors">NLO Transition Form factors</a></li>
@@ -106,40 +106,34 @@ More resources and references are given at <a class="reference internal" href="C
 </section>
 <section id="installation">
 <h2>Installation<a class="headerlink" href="#installation" title="Link to this heading"></a></h2>
-<p>There are two ways to access this package: for ordinary user, install the public version with the command <code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">gumpgpd</span></code>.
+<p>There are two ways to access this package:
+For ordinary user, <code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">gumpgpd</span></code> install the public version.
 For the lastest developper version, download the source code from the <a class="reference external" href="https://github.com/yuxunguo/GUMP-Global-GPDs/tree/GUMP1.0">GitHub</a> page
-(make sure that the correct branch is used!), and run <code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">-e</span> <span class="pre">.</span></code> to install in “editable” mode.
-The later allows you to edit the source code to generate results not directly accessible via the given interface.</p>
+(make sure that the correct branch is used!), and run <code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">-e</span> <span class="pre">.</span></code> in the root folder to install in “editable” mode.</p>
+<p>The later allows you to edit the source code to generate results not directly accessible via the given interface.
+This mode is only recommended if you are familiar with the GUMP code already.
+If you need interface for any customized observables not directly accessible in the public version, contact <a class="reference external" href="mailto:youuungx&#37;&#52;&#48;gmail&#46;com">Yuxun Guo</a> to request.</p>
 </section>
 <section id="parameters-and-model-setting">
 <h2>Parameters and model setting<a class="headerlink" href="#parameters-and-model-setting" title="Link to this heading"></a></h2>
-<p>To start with, you will need a set of parameter as well as models for the GPDs.
-In the GUMP framework, we consider modeling in the conformal moment space which have many benefits.
-The details are documented in the <a class="reference internal" href="Parameters.html#module-gumpgpd.Parameters"><span class="std std-ref">Parameters module</span></a>.
-In genearl, a GPD model should take a set of parameter and generate moments in the conformal spin j space for all flavors, since they will be mixed under evolutions.</p>
-<p>For a quick start, we suggest using the GUMP parameterization and the best-fit parameters we obtained in previous work from
-<a class="reference external" href="https://inspirehep.net/literature/2833822">DVMP</a> and <a class="reference external" href="https://inspirehep.net/literature/2632776">DVCS</a> analyses.
-These parameters are stored within the package:</p>
-<div class="highlight-py notranslate" id="parameters-input"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
-<span class="kn">import</span> <span class="nn">os</span>
-<span class="n">dir_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">realpath</span><span class="p">(</span><span class="vm">__file__</span><span class="p">))</span>
+<p>The GUMP framework is written in a form that is convenient for cutomized GPD model.
+The GUMP parameterization and modelling of GPDs are given in the <a class="reference internal" href="Parameters.html#module-gumpgpd.Parameters"><span class="std std-ref">Parameters module</span></a>.
+Note that the model must be analytic in the complex j-space,
+so not all models can be directly implemented in the GUMP framework.</p>
+<p>For ordinary user, the GUMP parameterization will be loaded by default.
+The parameters are obtained through a global analysis process and they are stored in <code class="docutils literal notranslate"><span class="pre">gumpgpd.Minimizer</span></code>
+and can be retrieved via:</p>
+<div class="highlight-py notranslate" id="parameters-input"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">gumpgpd.Minimizer</span> <span class="k">as</span> <span class="nn">gM</span>
 
-<span class="n">Paralst_Unp</span><span class="o">=</span><span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">dir_path</span><span class="p">,</span><span class="s1">&#39;GUMP_Params/Para_Unp.csv&#39;</span><span class="p">),</span> <span class="n">header</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span>
-<span class="n">Paralst_Pol</span><span class="o">=</span><span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">dir_path</span><span class="p">,</span><span class="s1">&#39;GUMP_Params/Para_Pol.csv&#39;</span><span class="p">),</span> <span class="n">header</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span>
+<span class="n">para_unp</span>  <span class="o">=</span> <span class="n">gM</span><span class="o">.</span><span class="n">Para_Unp_off_forward</span>
+<span class="n">para_pol</span>  <span class="o">=</span> <span class="n">gM</span><span class="o">.</span><span class="n">Para_Pol_off_forward</span>
+<span class="n">para_comb</span> <span class="o">=</span> <span class="n">gM</span><span class="o">.</span><span class="n">Para_Comb_off_forward</span>
 </pre></div>
 </div>
-<p>These parameter shall be fed to the parameters managers:</p>
-<div class="highlight-py notranslate" id="parameters-managers"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">Parameters</span> <span class="kn">import</span> <span class="n">ParaManager_Unp</span><span class="p">,</span> <span class="n">ParaManager_Pol</span>
-<span class="n">Para_Unp</span> <span class="o">=</span> <span class="n">ParaManager_Unp</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">Paralst_Unp</span><span class="p">[:</span><span class="o">-</span><span class="mi">2</span><span class="p">]))</span>
-<span class="n">Para_Pol</span> <span class="o">=</span> <span class="n">ParaManager_Pol</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">Paralst_Pol</span><span class="p">))</span>
-</pre></div>
-</div>
-<p>Note that there are two parameters not needed for the GPDs (they are parameters for the cross-sections only).
-So they shall not be fed to the parameter manager.
-You can make your own model and modfies the parameter managers correspondingly.</p>
+<p>The above three high-dimensional numpy arrays stand for the best-fit parameters for the unpolarized (vector) and polarized (axial-vector) GPDs and their combination, respectively.</p>
 </section>
-<section id="calculation-of-gpds-and-observables">
-<h2>Calculation of GPDs and observables<a class="headerlink" href="#calculation-of-gpds-and-observables" title="Link to this heading"></a></h2>
+<section id="calculation-observables-with-existing-interface">
+<h2>Calculation observables with existing interface<a class="headerlink" href="#calculation-observables-with-existing-interface" title="Link to this heading"></a></h2>
 <p>With the above model we can in principle calcualte anythings that the <a class="reference internal" href="Observables.html#module-gumpgpd.Observables"><span class="std std-ref">Observables module</span></a> allow to do.
 In the following, we present some simple examples that calculate the obserbales of interestes.</p>
 <section id="leading-order-compton-form-factors">
