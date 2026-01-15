@@ -57,11 +57,7 @@
 <li class="toctree-l3"><a class="reference internal" href="#calculation-of-experimental-cross-sections-and-asymmetries">Calculation of experimental cross-sections and asymmetries</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="#calculation-observables-without-existing-interface">Calculation observables without existing interface</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#leading-order-transition-form-factors">Leading-order Transition Form factors</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#nlo-transition-form-factors">NLO Transition Form factors</a></li>
-</ul>
-</li>
+<li class="toctree-l2"><a class="reference internal" href="#calculation-observables-without-existing-interface">Calculation observables without existing interface</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#other-possible-calculations">Other possible calculations</a></li>
 </ul>
 </li>
@@ -113,18 +109,15 @@ More resources and references are given at <a class="reference internal" href="C
 <p>There are two ways to access this package:
 For ordinary user, <code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">gumpgpd</span></code> install the public version.
 For the lastest developper version, download the source code from the <a class="reference external" href="https://github.com/yuxunguo/GUMP-Global-GPDs/tree/GUMP1.0">GitHub</a> page
-(make sure that the correct branch is used!), and run <code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">-e</span> <span class="pre">.</span></code> in the root folder to install in “editable” mode.</p>
-<p>The later allows you to edit the source code to generate results not directly accessible via the given interface.
+(make sure that the correct branch is used!), and run <code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">-e</span> <span class="pre">.</span></code> in the root folder to install in editable mode.</p>
+<p>The later mode allows you to edit the source code to generate results not directly accessible via the integrated interface.
 This mode is only recommended if you are familiar with the GUMP code already.
 If you need interface for any customized observables not directly accessible in the public version, contact <a class="reference external" href="mailto:youuungx&#37;&#52;&#48;gmail&#46;com">Yuxun Guo</a> to request.</p>
 </section>
 <section id="parameters-and-model-setting">
 <h2>Parameters and model setting<a class="headerlink" href="#parameters-and-model-setting" title="Link to this heading"></a></h2>
 <p>The GUMP framework is written in a form that is convenient for cutomized GPD model.
-The GUMP parameterization and modelling of GPDs are given in the <a class="reference internal" href="Parameters.html#module-gumpgpd.Parameters"><span class="std std-ref">Parameters module</span></a>.
-Note that the model must be analytic in the complex j-space,
-so not all models can be directly implemented in the GUMP framework.</p>
-<p>For ordinary user, the GUMP parameterization will be loaded by default.
+For ordinary user, the GUMP parameterization will be loaded by default.
 The parameters are obtained through a global analysis process and they are stored in <code class="docutils literal notranslate"><span class="pre">gumpgpd.Minimizer</span></code>
 and can be retrieved via:</p>
 <div class="highlight-py notranslate" id="parameters-input"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">gumpgpd.Minimizer</span> <span class="k">as</span> <span class="nn">gM</span>
@@ -135,17 +128,22 @@ and can be retrieved via:</p>
 </pre></div>
 </div>
 <p>The above three high-dimensional numpy arrays stand for the best-fit parameters for the unpolarized (vector) and polarized (axial-vector) GPDs and their combination, respectively.</p>
-<p>In most case, you won’t need to modify them, unless you want to tune the parameters.</p>
+<p><strong>In most case, you won’t need to modify them, unless you want to tune the parameters.</strong></p>
+<p>In case when you need to modify the parameterization and modelling of GPDs directly,
+they are provided in the <a class="reference internal" href="Parameters.html#module-gumpgpd.Parameters"><span class="std std-ref">Parameters module</span></a>.
+Note that the GPD models must be analytic in the complex j-space,
+so not all models can be directly implemented in the GUMP framework.</p>
 </section>
 <section id="calculation-observables-with-existing-interface">
 <h2>Calculation observables with existing interface<a class="headerlink" href="#calculation-observables-with-existing-interface" title="Link to this heading"></a></h2>
-<p>With the above model we can in principle calcualte anythings that the <a class="reference internal" href="Observables.html#module-gumpgpd.Observables"><span class="std std-ref">Observables module</span></a> allow to do.
-We start with observables where interface are provided as part of the package, which are also presented
+<p>With the above model we can in principle calcualte anythings that the <a class="reference internal" href="Observables.html#module-gumpgpd.Observables"><span class="std std-ref">Observables module</span></a> allows.
+We start with observables with integrated interface, which are also presented
 in the Example folder of <a class="reference external" href="https://github.com/yuxunguo/GUMP-Global-GPDs/tree/GUMP1.0">GitHub</a>.</p>
 <section id="samples-of-gpds-and-generalized-form-factors-gffs">
 <h3>Samples of GPDs and Generalized Form factors (GFFs)<a class="headerlink" href="#samples-of-gpds-and-generalized-form-factors-gffs" title="Link to this heading"></a></h3>
-<p>In the <code class="docutils literal notranslate"><span class="pre">gumpgpd</span></code> package, we provide integrated interface to calculate grid of GPDs and Generalized Form factors (GFFs).
-To do so, we need the <code class="docutils literal notranslate"><span class="pre">para_comb</span> <span class="pre">=</span> <span class="pre">gM.Para_Comb_off_forward</span></code>. An example is presented below:</p>
+<p>In the <code class="docutils literal notranslate"><span class="pre">gumpgpd</span></code> package, we provide integrated interface to calculate grid of GPDs and their reductions:
+Parton Distributions Functions (PDFs), t-dependent PDFs (tPDFs) and Generalized Form factors (GFFs).
+To do so, we need the <code class="docutils literal notranslate"><span class="pre">gM.Para_Comb_off_forward</span></code>. An example is presented below:</p>
 <div class="highlight-py notranslate" id="gpd-and-all"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">gumpgpd.Minimizer</span> <span class="kn">import</span> <span class="o">*</span>
 
 <span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
@@ -195,54 +193,55 @@ Again, those code are collected in the Example folder of <a class="reference ext
 </section>
 <section id="calculation-of-experimental-cross-sections-and-asymmetries">
 <h3>Calculation of experimental cross-sections and asymmetries<a class="headerlink" href="#calculation-of-experimental-cross-sections-and-asymmetries" title="Link to this heading"></a></h3>
+<p>The above workflow can be easily generalized to calculate experimental observables.</p>
+<div class="highlight-py notranslate" id="cross-sections-and-all"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">gumpgpd.Minimizer</span> <span class="kn">import</span> <span class="o">*</span>
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
+
+     <span class="n">DVCS_pred_xBtQ</span>       <span class="o">=</span> <span class="n">DVCSxsec_theo</span><span class="p">(</span><span class="n">DVCSxsec_data</span><span class="p">,</span>
+                                             <span class="n">Para_Unp</span> <span class="o">=</span> <span class="n">Para_Unp_off_forward</span><span class="p">,</span>
+                                             <span class="n">Para_Pol</span> <span class="o">=</span> <span class="n">Para_Pol_off_forward</span><span class="p">,</span>
+                                             <span class="n">P_order</span> <span class="o">=</span> <span class="mi">2</span><span class="p">)</span>
+     <span class="n">DVCS_HERA_pred_xBtQ</span>  <span class="o">=</span> <span class="n">DVCSxsecHERA_theo</span><span class="p">(</span><span class="n">DVCSxsec_HERA_data</span><span class="p">,</span>
+                                             <span class="n">Para_Unp</span> <span class="o">=</span> <span class="n">Para_Unp_off_forward</span><span class="p">,</span>
+                                             <span class="n">Para_Pol</span> <span class="o">=</span> <span class="n">Para_Pol_off_forward</span><span class="p">,</span>
+                                             <span class="n">P_order</span> <span class="o">=</span> <span class="mi">2</span><span class="p">)</span>
+     <span class="n">DVCS_Asym_pred_xBtQ</span>  <span class="o">=</span> <span class="n">DVCSAsym_theo</span><span class="p">(</span><span class="n">DVCSAsym_data</span><span class="p">,</span>
+                                             <span class="n">Para_Unp</span> <span class="o">=</span> <span class="n">Para_Unp_off_forward</span><span class="p">,</span>
+                                             <span class="n">Para_Pol</span> <span class="o">=</span> <span class="n">Para_Pol_off_forward</span><span class="p">,</span>
+                                             <span class="n">P_order</span> <span class="o">=</span> <span class="mi">2</span><span class="p">)</span>
+     <span class="n">DVrhoPH1_pred_xBtQ</span>   <span class="o">=</span> <span class="n">DVMPxsec_theo</span><span class="p">(</span><span class="n">DVrhoPH1xsecL_data</span><span class="p">,</span>
+                                             <span class="n">Para_Unp</span> <span class="o">=</span> <span class="n">Para_Unp_off_forward</span><span class="p">,</span>
+                                             <span class="n">xsec_norm</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">meson</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">p_order</span> <span class="o">=</span> <span class="mi">2</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Besides the parameters, we have P_order controlling the perturbative order: 1 for leading-order and 2 for next-to-leading order.
+(beyond not implemented yet). Meson = 1 for rho meson =3 for J/psi meson (Others not implemented yet).
+xsec_norm is an extra normalization typically not needed.</p>
+<p>An extra care that needs to be taken care of is that, since the Compton/Transition form factors only depends on (xB,t,Q),
+it would be preferrable to calculate cross-sections in groups of (xB,t,Q).
+The packge provide a <code class="docutils literal notranslate"><span class="pre">group_by_unique()</span></code> tool to do this with the following example:</p>
+<div class="highlight-py notranslate" id="cross-sections-group"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">gumpgpd.Minimizer</span> <span class="kn">import</span> <span class="n">group_by_unique</span>
+
+<span class="n">DVCSxsec_data</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">_DataFilePath_</span><span class="p">,</span> <span class="n">header</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">names</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;y&#39;</span><span class="p">,</span> <span class="s1">&#39;xB&#39;</span><span class="p">,</span> <span class="s1">&#39;t&#39;</span><span class="p">,</span> <span class="s1">&#39;Q&#39;</span><span class="p">,</span> <span class="s1">&#39;phi&#39;</span><span class="p">,</span> <span class="s1">&#39;f&#39;</span><span class="p">,</span> <span class="s1">&#39;delta f&#39;</span><span class="p">,</span> <span class="s1">&#39;pol&#39;</span><span class="p">]</span> <span class="p">,</span> <span class="n">dtype</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;y&#39;</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="s1">&#39;xB&#39;</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="s1">&#39;t&#39;</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="s1">&#39;Q&#39;</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="s1">&#39;phi&#39;</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="s1">&#39;f&#39;</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="s1">&#39;delta f&#39;</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="s1">&#39;pol&#39;</span><span class="p">:</span> <span class="nb">str</span><span class="p">})</span>
+<span class="n">DVCSxsec_group_data</span> <span class="o">=</span> <span class="n">group_by_unique</span><span class="p">(</span><span class="n">DVCSxsec_data</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Note that <code class="docutils literal notranslate"><span class="pre">'f','delta</span> <span class="pre">f'</span></code> is not complusory, while <code class="docutils literal notranslate"><span class="pre">'pol'</span></code> is.
+It must take the form of <code class="docutils literal notranslate"><span class="pre">'PbPt'</span></code> where <code class="docutils literal notranslate"><span class="pre">'Pb'='U'</span> <span class="pre">or</span> <span class="pre">'L'</span></code> for beam polarization and
+<code class="docutils literal notranslate"><span class="pre">'Pt'='U',</span> <span class="pre">'L',</span> <span class="pre">'Tin',</span> <span class="pre">'Tout'</span></code> for target polarizations.
+So a typical <code class="docutils literal notranslate"><span class="pre">'pol'</span></code> would be, e.g., <code class="docutils literal notranslate"><span class="pre">'UTin'</span></code> for unpolarized beam and transversely polarized target.
+Definition of the two different transversely polarizated target can be found here: <a class="reference external" href="https://inspirehep.net/literature/1925449">DVCS</a></p>
 </section>
 </section>
 <section id="calculation-observables-without-existing-interface">
 <h2>Calculation observables without existing interface<a class="headerlink" href="#calculation-observables-without-existing-interface" title="Link to this heading"></a></h2>
 <p>There are also ways to calcuate observables that are not directly accessible with the above integrated dataframe interface.
 They require you to directly call the corresponding function for the calculations. Here are some examples:</p>
-<section id="leading-order-transition-form-factors">
-<h3>Leading-order Transition Form factors<a class="headerlink" href="#leading-order-transition-form-factors" title="Link to this heading"></a></h3>
-<p>The same for the LO Transition form factors (TFFs) with <code class="xref py py-meth docutils literal notranslate"><span class="pre">Observables.GPDobserv.TFF()</span></code>.
-Note that in our definition, the TFFs absorp many prefactors like the <span class="math notranslate nohighlight">\(1/N_c\)</span> color factor and the meson decay constant
-<span class="math notranslate nohighlight">\(f_{\phi}\)</span> and the charge factor <span class="math notranslate nohighlight">\(e_c=2/3\)</span> for charm quark, and so on.</p>
-<div class="highlight-py notranslate" id="tff-lo"><div class="highlight"><pre><span></span><span class="c1"># Test of LO ImTFF and gluon GPD evolved to mu = 5 GeV</span>
-
-<span class="n">Para_H</span> <span class="o">=</span> <span class="n">Para_Unp</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-<span class="n">x</span><span class="o">=</span><span class="mf">0.0001</span>
-
-<span class="n">_GPD_theo</span> <span class="o">=</span> <span class="n">GPDobserv</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">x</span><span class="p">,</span><span class="mf">0.0</span><span class="p">,</span><span class="mf">5.0</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span>
-<span class="n">TFF</span> <span class="o">=</span> <span class="n">_GPD_theo</span><span class="o">.</span><span class="n">TFF</span><span class="p">(</span><span class="n">Para_spe</span><span class="p">,</span><span class="mf">5.0</span><span class="p">,</span><span class="mi">3</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="n">TFF</span><span class="p">)</span>
-
-<span class="n">gpd1</span> <span class="o">=</span> <span class="p">(</span><span class="n">_GPD_theo</span><span class="o">.</span><span class="n">GPD</span><span class="p">(</span><span class="s1">&#39;g&#39;</span><span class="p">,</span><span class="n">Para_spe</span><span class="p">))</span>
-<span class="n">f_jpsi</span><span class="o">=</span> <span class="mf">0.406</span>
-<span class="n">CF</span><span class="o">=</span><span class="mi">4</span><span class="o">/</span><span class="mi">3</span>
-<span class="n">NC</span><span class="o">=</span><span class="mi">3</span>
-<span class="n">prefact</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="mi">3</span> <span class="o">*</span> <span class="n">f_jpsi</span> <span class="o">/</span> <span class="n">NC</span> <span class="o">/</span><span class="n">x</span> <span class="o">*</span> <span class="mi">2</span><span class="o">/</span><span class="mi">3</span>
-
-<span class="nb">print</span><span class="p">(</span><span class="n">prefact</span><span class="o">*</span><span class="n">gpd1</span><span class="p">)</span>
-</pre></div>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>Working in progress.</p>
 </div>
-</section>
-<section id="nlo-transition-form-factors">
-<h3>NLO Transition Form factors<a class="headerlink" href="#nlo-transition-form-factors" title="Link to this heading"></a></h3>
-<p>We can also calculate TFF at next-to-leading order (NLO) where we currently only has singlet and gluon contributions (non-singlet working in progress).
-Three functions can do this <code class="xref py py-meth docutils literal notranslate"><span class="pre">Observables.GPDobserv.TFF()</span></code> with <code class="docutils literal notranslate"><span class="pre">p_order</span> <span class="pre">=2</span></code> is equivalent to <code class="xref py py-meth docutils literal notranslate"><span class="pre">Observables.GPDobserv.TFFNLO()</span></code> .
-Whereas the <code class="xref py py-meth docutils literal notranslate"><span class="pre">Observables.GPDobserv.TFFNLO_evMom()</span></code> uses the eolved moment method that provides a cross-check.</p>
-<p>The results are virtually the same:</p>
-<div class="highlight-py notranslate" id="tff-nlo"><div class="highlight"><pre><span></span><span class="c1"># Test of two methods of calculating TFF evolved to mu =5 GeV</span>
-
-<span class="n">Para_H</span> <span class="o">=</span> <span class="n">Para_Unp</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-<span class="n">x</span><span class="o">=</span><span class="mf">0.0001</span>
-<span class="n">_GPD_theo</span> <span class="o">=</span> <span class="n">GPDobserv</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">x</span><span class="p">,</span><span class="mf">0.0</span><span class="p">,</span><span class="mf">5.0</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span>
-<span class="n">TFF1</span> <span class="o">=</span> <span class="n">_GPD_theo</span><span class="o">.</span><span class="n">TFFNLO</span><span class="p">(</span><span class="n">Para_spe</span><span class="p">,</span><span class="mf">5.0</span><span class="p">,</span> <span class="n">meson</span> <span class="o">=</span> <span class="mi">3</span><span class="p">,</span> <span class="n">flv</span> <span class="o">=</span><span class="s1">&#39;All&#39;</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="n">TFF1</span><span class="p">)</span>
-<span class="n">TFF2</span> <span class="o">=</span> <span class="n">_GPD_theo</span><span class="o">.</span><span class="n">TFFNLO_evMom</span><span class="p">(</span><span class="n">Para_spe</span><span class="p">,</span><span class="mf">5.0</span><span class="p">,</span> <span class="n">meson</span> <span class="o">=</span> <span class="mi">3</span><span class="p">,</span> <span class="n">flv</span> <span class="o">=</span><span class="s1">&#39;All&#39;</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="n">TFF2</span><span class="p">)</span>
-</pre></div>
-</div>
-</section>
 </section>
 <section id="other-possible-calculations">
 <h2>Other possible calculations<a class="headerlink" href="#other-possible-calculations" title="Link to this heading"></a></h2>
