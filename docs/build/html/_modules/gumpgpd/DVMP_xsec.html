@@ -1,0 +1,399 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>gumpgpd.DVMP_xsec &mdash; GUMP GPD Analysis 0.5.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
+
+  
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../_static/documentation_options.js?v=1dd76d02"></script>
+      <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+      <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
+      <script src="../../_static/copybutton.js?v=f281be69"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            GUMP GPD Analysis
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../QuickStart.html">Quick start</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../ParametersIntro.html">Parameters Quickguide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../ObservablesIntro.html">Observables Quickguide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../EvolutionIntro.html">Evolution Quickguide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../MinimizerIntro.html">Minimizer Quickguide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../DVCSIntro.html">DVCS Quickguide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../DVMPIntro.html">DVMP Quickguide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../modules.html">Documentation of submodules</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../Citation.html">Citation/Acknowledgement</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">GUMP GPD Analysis</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">gumpgpd.DVMP_xsec</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for gumpgpd.DVMP_xsec</h1><div class="highlight"><pre>
+<span></span><span class="c1">### Module for calculating meson production cross-sections and TFFs</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">from</span> <span class="nn">iminuit</span> <span class="kn">import</span> <span class="n">Minuit</span>
+<span class="kn">from</span> <span class="nn">functools</span> <span class="kn">import</span> <span class="n">cache</span>
+
+<span class="kn">from</span> <span class="nn">numpy</span> <span class="kn">import</span> <span class="n">cos</span> <span class="k">as</span> <span class="n">Cos</span>
+<span class="kn">from</span> <span class="nn">numpy</span> <span class="kn">import</span> <span class="n">sin</span> <span class="k">as</span> <span class="n">Sin</span>
+<span class="kn">from</span> <span class="nn">numpy</span> <span class="kn">import</span> <span class="n">real</span> <span class="k">as</span> <span class="n">Real</span>
+<span class="kn">from</span> <span class="nn">numpy</span> <span class="kn">import</span> <span class="n">imag</span> <span class="k">as</span> <span class="n">Imag</span>
+<span class="kn">from</span> <span class="nn">numpy</span> <span class="kn">import</span> <span class="n">conjugate</span> <span class="k">as</span> <span class="n">Conjugate</span>
+
+<span class="n">dir_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">realpath</span><span class="p">(</span><span class="vm">__file__</span><span class="p">))</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">***************************** Masses, decay constants, etc. ***********************</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="n">M_p</span> <span class="o">=</span> <span class="mf">0.938</span>
+<span class="n">M_n</span> <span class="o">=</span> <span class="mf">0.940</span>
+<span class="n">M_rho</span> <span class="o">=</span> <span class="mf">0.775</span>
+<span class="n">M_phi</span> <span class="o">=</span> <span class="mf">1.019</span>
+<span class="n">M_jpsi</span> <span class="o">=</span> <span class="mf">3.097</span>
+<span class="n">gevtonb</span> <span class="o">=</span> <span class="mf">389.9</span> <span class="o">*</span> <span class="mi">1000</span>
+<span class="n">alphaEM</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">/</span> <span class="mf">137.036</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">******* R Ratio (longitudinal/transverse separation) Parametrization and Fits ************</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="R">
+<a class="viewcode-back" href="../../gumpgpd.html#gumpgpd.DVMP_xsec.R">[docs]</a>
+<span class="k">def</span> <span class="nf">R</span><span class="p">(</span><span class="n">Q</span><span class="p">:</span><span class="nb">float</span><span class="p">,</span> <span class="n">a</span><span class="p">:</span><span class="nb">float</span><span class="p">,</span> <span class="n">p</span><span class="p">:</span><span class="nb">float</span><span class="p">,</span> <span class="n">meson</span><span class="p">:</span><span class="nb">int</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; The R ratio: Longitudinal DVMP cross section/ Transverse DVMP cross section</span>
+<span class="sd">    </span>
+<span class="sd">    Args:</span>
+<span class="sd">       Q: The photon virtuality </span>
+<span class="sd">       a: Parameter</span>
+<span class="sd">       p:Parameter</span>
+<span class="sd">       meson: 1 for rho, 3 for jpsi, 2 is saved for phi to use later</span>
+<span class="sd">    </span>
+<span class="sd">    Returns: The parametrization of R factor of the  L/T separation  as in  Eq.(32) in https://arxiv.org/pdf/1112.2597&quot;</span>
+<span class="sd">    </span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">meson</span><span class="o">==</span><span class="mi">1</span><span class="p">):</span> 
+        <span class="k">return</span> <span class="p">(</span><span class="n">Q</span><span class="o">**</span><span class="mi">2</span> <span class="o">/</span> <span class="n">M_rho</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">a</span><span class="p">)</span> <span class="o">*</span> <span class="n">Q</span><span class="o">**</span><span class="mi">2</span> <span class="o">/</span> <span class="n">M_rho</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span> <span class="o">**</span> <span class="p">(</span><span class="o">-</span><span class="n">p</span><span class="p">)</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">meson</span><span class="o">==</span><span class="mi">3</span><span class="p">):</span> 
+        <span class="k">return</span>  <span class="p">(</span><span class="n">Q</span><span class="o">**</span><span class="mi">2</span><span class="o">/</span><span class="n">M_jpsi</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span></div>
+
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">************************ Preprocess the R ratio: we fit the R ratio measure from experiments and extrapolate with uncertainties ****************************</span>
+
+<span class="sd">R(Q,a,p,meson): the ratio σ_L / σ_T for meson production follows Eq.(32) in arXiv:1112.2597 for ρ, but here we handle both ρ (meson==1) and J/ψ (meson==3) cases in one function.</span>
+
+<span class="sd">This will convert all the measured total cross-sections into longitudinal cross-sections that theory predicts with dσ_L/dt= (dσ_tot/dt) / (ε + 1/R) with error propagation</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="c1">#Below we convert the raw data into the one with total errors for future use.</span>
+<span class="c1"># Loading the combined H1 and ZEUS R‐ratio data for ρ meson:</span>
+<span class="c1"># We’ve taken both the ZEUS and H1 measurements, merged them into one table, and now we are fitting a single parametrization to the combined HERA data.</span>
+<span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">def RrhoZEUSnH1_total_err():</span>
+
+<span class="sd">    RrhoZEUSnH1= pd.read_csv(os.path.join(dir_path,&#39;GUMPDATA/DVMP_HERA/R_rho_ZEUSnH1.csv&#39;), header = None, </span>
+<span class="sd">                names = [&#39;Q&#39;, &#39;R&#39;,&#39;stat_pos&#39;,&#39;stat_neg&#39;,&#39;syst_pos&#39;,&#39;syst_neg&#39;] , dtype = {&#39;Q&#39;: float, &#39;R&#39;: float, &#39;stat_pos&#39;: float,&#39;stat_neg&#39;: float, &#39;syst_pos&#39;:float, &#39;syst_neg&#39;:float})</span>
+
+<span class="sd">    # Generating the total errors of R --- Preprocessed already</span>
+<span class="sd">    stat_errors_pos=RrhoZEUSnH1[&#39;stat_pos&#39;].to_numpy()</span>
+<span class="sd">    stat_errors_neg=RrhoZEUSnH1[&#39;stat_neg&#39;].to_numpy()</span>
+<span class="sd">    syst_errors_pos=RrhoZEUSnH1[&#39;syst_pos&#39;].to_numpy()</span>
+<span class="sd">    syst_errors_neg=RrhoZEUSnH1[&#39;syst_neg&#39;].to_numpy()</span>
+
+
+
+<span class="sd">    # Taking the maximum of the +/– errors </span>
+<span class="sd">    stat_errors = np.maximum(stat_errors_pos, stat_errors_neg)</span>
+<span class="sd">    syst_errors = np.maximum(syst_errors_pos, syst_errors_neg)</span>
+
+<span class="sd">    # Combining the symmetric stat and syst errors in quadrature for total uncertainty</span>
+<span class="sd">    tot_errors = np.sqrt(stat_errors**2 + syst_errors**2)</span>
+
+
+<span class="sd">    RrhoZEUSnH1[&#39;tot_err&#39;] = tot_errors</span>
+<span class="sd">    RrhoZEUSnH1.to_csv(os.path.join(dir_path,&#39;GUMPDATA/DVMP_HERA/R_rho_ZEUSnH1_w_err.csv&#39;),index=False,header = None)</span>
+<span class="sd">    </span>
+<span class="sd">RrhoZEUSnH1_total_err()</span>
+<span class="sd">&#39;&#39;&#39;</span>
+
+<span class="n">RrhoZEUSnH1</span><span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">dir_path</span><span class="p">,</span><span class="s1">&#39;GUMPDATA/DVMP_HERA/R_rho_ZEUSnH1_w_err.csv&#39;</span><span class="p">),</span> <span class="n">header</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> 
+                <span class="n">names</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;Q&#39;</span><span class="p">,</span> <span class="s1">&#39;R&#39;</span><span class="p">,</span><span class="s1">&#39;stat_pos&#39;</span><span class="p">,</span><span class="s1">&#39;stat_neg&#39;</span><span class="p">,</span><span class="s1">&#39;syst_pos&#39;</span><span class="p">,</span><span class="s1">&#39;syst_neg&#39;</span><span class="p">,</span><span class="s1">&#39;tot_err&#39;</span><span class="p">]</span> <span class="p">,</span> <span class="n">dtype</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;Q&#39;</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="s1">&#39;R&#39;</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="s1">&#39;stat_pos&#39;</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span><span class="s1">&#39;stat_neg&#39;</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="s1">&#39;syst_pos&#39;</span><span class="p">:</span><span class="nb">float</span><span class="p">,</span> <span class="s1">&#39;syst_neg&#39;</span><span class="p">:</span><span class="nb">float</span><span class="p">})</span>
+<span class="n">RrhoZEUSnH1</span><span class="p">[</span><span class="s1">&#39;Q&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">RrhoZEUSnH1</span><span class="p">[</span><span class="s1">&#39;Q&#39;</span><span class="p">])</span> <span class="c1"># Converting the Q² values in the file to Q by taking the square root.</span>
+
+<span class="c1"># Defining the chi² cost function for fitting a, p to the ρ–data:</span>
+<div class="viewcode-block" id="R_rho_cost">
+<a class="viewcode-back" href="../../gumpgpd.html#gumpgpd.DVMP_xsec.R_rho_cost">[docs]</a>
+<span class="k">def</span> <span class="nf">R_rho_cost</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">p</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Cost function for R(Q) using H1 and Zeus data combined.</span>
+<span class="sd">    </span>
+<span class="sd">    Parameters:</span>
+<span class="sd">      </span>
+<span class="sd">      a, p  : Free parameters in the model</span>
+<span class="sd">      </span>
+<span class="sd">    Returns:</span>
+<span class="sd">      Reduced chi2: (Sum of squared differences between model prediction and experimental data divided by the total errror)/Degrees of freedom</span>
+<span class="sd">      </span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">Q_vals</span> <span class="o">=</span> <span class="n">RrhoZEUSnH1</span><span class="p">[</span><span class="s1">&#39;Q&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span> 
+    <span class="n">R_exp_rho</span>  <span class="o">=</span> <span class="n">RrhoZEUSnH1</span><span class="p">[</span><span class="s1">&#39;R&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span>
+    <span class="n">tot_errors</span>  <span class="o">=</span> <span class="n">RrhoZEUSnH1</span><span class="p">[</span><span class="s1">&#39;tot_err&#39;</span><span class="p">]</span>
+    
+    <span class="n">R_pred</span> <span class="o">=</span> <span class="n">R</span><span class="p">(</span><span class="n">Q_vals</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">p</span><span class="p">,</span><span class="n">meson</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>   <span class="c1"># Computing the model prediction for each Q value for ρ meson</span>
+    
+    <span class="n">chi2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(((</span><span class="n">R_exp_rho</span> <span class="o">-</span> <span class="n">R_pred</span><span class="p">)</span><span class="o">/</span><span class="n">tot_errors</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span>  <span class="c1"># Standard χ² sum over data points</span>
+    <span class="n">ndof</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">Q_vals</span><span class="p">)</span> <span class="o">-</span> <span class="mi">2</span>
+    
+    <span class="k">return</span> <span class="n">chi2</span> <span class="o">/</span> <span class="n">ndof</span></div>
+
+
+<span class="c1">#Using iminuit to minimize the cost function and extract best–fit values:</span>
+<div class="viewcode-block" id="R_rho_fit">
+<a class="viewcode-back" href="../../gumpgpd.html#gumpgpd.DVMP_xsec.R_rho_fit">[docs]</a>
+<span class="nd">@cache</span>
+<span class="k">def</span> <span class="nf">R_rho_fit</span><span class="p">():</span>
+
+    <span class="n">m</span> <span class="o">=</span> <span class="n">Minuit</span><span class="p">(</span><span class="n">R_rho_cost</span><span class="p">,</span> <span class="n">a</span><span class="o">=</span><span class="mf">2.5</span><span class="p">,</span> <span class="n">p</span><span class="o">=</span><span class="mf">0.7</span><span class="p">)</span> <span class="c1"># initial guesses.</span>
+
+    <span class="n">m</span><span class="o">.</span><span class="n">migrad</span><span class="p">()</span>  <span class="c1"># run the minimizer</span>
+    <span class="n">m</span><span class="o">.</span><span class="n">hesse</span><span class="p">()</span>   <span class="c1"># compute the uncertainties via the Hessian</span>
+
+    <span class="c1"># Pulling out fitted parameters and their 1σ errors:</span>
+    <span class="n">val_a</span> <span class="o">=</span> <span class="n">m</span><span class="o">.</span><span class="n">values</span><span class="p">[</span><span class="s1">&#39;a&#39;</span><span class="p">]</span>
+    <span class="n">val_p</span> <span class="o">=</span> <span class="n">m</span><span class="o">.</span><span class="n">values</span><span class="p">[</span><span class="s1">&#39;p&#39;</span><span class="p">]</span>
+    <span class="n">var_a</span> <span class="o">=</span> <span class="n">m</span><span class="o">.</span><span class="n">errors</span><span class="p">[</span><span class="s1">&#39;a&#39;</span><span class="p">]</span>
+    <span class="n">var_p</span> <span class="o">=</span> <span class="n">m</span><span class="o">.</span><span class="n">errors</span><span class="p">[</span><span class="s1">&#39;p&#39;</span><span class="p">]</span>
+
+    <span class="c1"># Correlation between a &amp; p from the off–diagonal of the covariance matrix:</span>
+    <span class="n">corr_ap</span> <span class="o">=</span> <span class="n">m</span><span class="o">.</span><span class="n">covariance</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">]</span> 
+    
+    <span class="k">return</span> <span class="n">val_a</span><span class="p">,</span> <span class="n">var_a</span><span class="p">,</span> <span class="n">val_p</span><span class="p">,</span> <span class="n">var_p</span><span class="p">,</span> <span class="n">corr_ap</span></div>
+
+
+<div class="viewcode-block" id="R_fitted">
+<a class="viewcode-back" href="../../gumpgpd.html#gumpgpd.DVMP_xsec.R_fitted">[docs]</a>
+<span class="k">def</span> <span class="nf">R_fitted</span><span class="p">(</span><span class="n">Q</span><span class="p">,</span> <span class="n">meson</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+    
+    <span class="k">assert</span> <span class="n">meson</span> <span class="o">==</span> <span class="mi">1</span><span class="p">,</span> <span class="s1">&#39;Not implemented yet, only rho meson (=1) now!&#39;</span>
+        
+    <span class="k">if</span><span class="p">(</span><span class="n">meson</span> <span class="o">==</span><span class="mi">1</span><span class="p">):</span>
+        
+        <span class="n">val_a</span><span class="p">,</span> <span class="n">var_a</span><span class="p">,</span> <span class="n">val_p</span><span class="p">,</span> <span class="n">var_p</span><span class="p">,</span> <span class="n">corr_ap</span> <span class="o">=</span> <span class="n">R_rho_fit</span><span class="p">()</span>
+        
+    <span class="n">R_Mean</span> <span class="o">=</span> <span class="n">R</span><span class="p">(</span><span class="n">Q</span><span class="p">,</span> <span class="n">val_a</span><span class="p">,</span> <span class="n">val_p</span><span class="p">,</span><span class="n">meson</span><span class="p">)</span>
+    
+    <span class="n">partial_derivative_a</span><span class="o">=-</span><span class="n">val_p</span> <span class="o">*</span> <span class="p">(</span><span class="n">Q</span><span class="o">**</span><span class="mi">2</span> <span class="o">/</span> <span class="n">M_rho</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">val_a</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">val_a</span><span class="p">)</span> <span class="o">*</span> <span class="n">Q</span><span class="o">**</span><span class="mi">2</span> <span class="o">/</span> <span class="n">M_rho</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span> <span class="o">**</span> <span class="p">(</span><span class="o">-</span><span class="n">val_p</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">partial_derivative_p</span><span class="o">=-</span><span class="p">(</span><span class="n">Q</span><span class="o">**</span><span class="mi">2</span> <span class="o">/</span> <span class="n">M_rho</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">val_a</span><span class="p">)</span> <span class="o">*</span> <span class="n">Q</span><span class="o">**</span><span class="mi">2</span> <span class="o">/</span> <span class="n">M_rho</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span><span class="o">**</span><span class="p">(</span><span class="o">-</span><span class="n">val_p</span><span class="p">)</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">val_a</span><span class="p">)</span> <span class="o">*</span> <span class="n">Q</span><span class="o">**</span><span class="mi">2</span> <span class="o">/</span> <span class="n">M_rho</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
+    
+    <span class="n">part_a</span>     <span class="o">=</span> <span class="n">partial_derivative_a</span><span class="o">**</span><span class="mi">2</span> <span class="o">*</span> <span class="n">var_a</span><span class="o">**</span><span class="mi">2</span>
+    <span class="n">part_p</span>     <span class="o">=</span> <span class="n">partial_derivative_p</span><span class="o">**</span><span class="mi">2</span> <span class="o">*</span> <span class="n">var_p</span><span class="o">**</span><span class="mi">2</span>
+    <span class="n">part_ap</span>    <span class="o">=</span> <span class="n">partial_derivative_a</span><span class="o">*</span><span class="n">partial_derivative_p</span><span class="o">*</span><span class="n">corr_ap</span>
+    <span class="n">variance_R</span> <span class="o">=</span> <span class="n">part_a</span> <span class="o">+</span> <span class="n">part_p</span> <span class="o">+</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">part_ap</span>
+
+    <span class="k">return</span> <span class="n">R_Mean</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">variance_R</span><span class="p">)</span></div>
+
+
+<span class="c1"># Plotting the results of the R fit (only for debugging)</span>
+<span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">def R_fit_plt():</span>
+
+<span class="sd">    # 2) Building an array of σ[R] over the fit grid Q_fit:</span>
+<span class="sd">    Q_fit = np.linspace(min(RrhoZEUSnH1[&#39;Q&#39;]), max(RrhoZEUSnH1[&#39;Q&#39;]))</span>
+<span class="sd">    R_rho_Mean, R_rho_Std = R_fitted(Q_fit) </span>
+<span class="sd">    </span>
+<span class="sd">    # 3) Upper &amp; lower error bands:</span>
+<span class="sd">    R_upper_rho = R_rho_Mean + R_rho_Std</span>
+<span class="sd">    R_lower_rho= R_rho_Mean - R_rho_Std    </span>
+
+<span class="sd">    # 4) Plotting the central fit, the ±1σ band, and the data points:  </span>
+
+<span class="sd">    Q_vals = RrhoZEUSnH1[&#39;Q&#39;].to_numpy() </span>
+<span class="sd">    R_exp_rho  = RrhoZEUSnH1[&#39;R&#39;].to_numpy()</span>
+<span class="sd">    tot_errors  = RrhoZEUSnH1[&#39;tot_err&#39;].to_numpy()</span>
+<span class="sd">    </span>
+<span class="sd">    import matplotlib.pyplot as plt</span>
+<span class="sd">    plt.figure(figsize=(10, 6))</span>
+<span class="sd">    plt.plot(Q_fit, R_rho_Mean, label=&#39;R(Q^2)&#39;, color=&#39;blue&#39;)</span>
+<span class="sd">    plt.fill_between(Q_fit, R_lower_rho, R_upper_rho, color=&#39;blue&#39;, alpha=0.2, label=&#39;Error Band&#39;)</span>
+<span class="sd">    plt.errorbar(Q_vals, R_exp_rho, yerr=[tot_errors], fmt=&#39;bo&#39;, label=&quot;Experimental Data&quot;, capsize=5)</span>
+<span class="sd">    plt.title(&#39;R(Q) with Variance Error Bands&#39;)</span>
+<span class="sd">    plt.xlabel(&#39;$Q^2$ (GeV$^2$)&#39;)</span>
+<span class="sd">    plt.ylabel(&#39;R($Q^2$)&#39;)</span>
+<span class="sd">    plt.legend()</span>
+<span class="sd">    plt.grid(True)</span>
+<span class="sd">    plt.show()</span>
+<span class="sd">    </span>
+<span class="sd">R_fit_plt()</span>
+<span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">******************************Cross-sections for proton target (currently for virtual photon scattering sub-process)*********************************</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="epsilon">
+<a class="viewcode-back" href="../../gumpgpd.html#gumpgpd.DVMP_xsec.epsilon">[docs]</a>
+<span class="k">def</span> <span class="nf">epsilon</span><span class="p">(</span><span class="n">y</span><span class="p">:</span><span class="nb">float</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; Photon polarizability.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">       y (float): Beam energy lost parameter</span>
+<span class="sd">     </span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        epsilon:  &quot;Eq.(31) in https://arxiv.org/pdf/1112.2597&quot; </span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">y</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">y</span> <span class="o">+</span> <span class="n">y</span><span class="o">**</span><span class="mi">2</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="MassCorr">
+<a class="viewcode-back" href="../../gumpgpd.html#gumpgpd.DVMP_xsec.MassCorr">[docs]</a>
+<span class="k">def</span> <span class="nf">MassCorr</span><span class="p">(</span><span class="n">meson</span><span class="p">:</span><span class="nb">int</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot; Mass corrections </span>
+
+<span class="sd">     Args:</span>
+<span class="sd">         meson:The meson being produced in DVMP process: 1 for rho, 2 for phi, 3 for j/psi</span>
+<span class="sd">      </span>
+
+<span class="sd">     Returns:</span>
+<span class="sd">        mass correction only for j/psi</span>
+<span class="sd">     &quot;&quot;&quot;</span>
+  
+    <span class="k">if</span> <span class="p">(</span><span class="n">meson</span><span class="o">==</span><span class="mi">3</span><span class="p">):</span>
+        <span class="k">return</span>  <span class="n">M_jpsi</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="mi">0</span></div>
+
+
+<span class="c1"># -----------------------------------------------------------------------------</span>
+<span class="c1"># dsigmaL_dt : longitudinal differential cross section (in t)</span>
+<span class="c1"># -----------------------------------------------------------------------------</span>
+
+<span class="nd">@np</span><span class="o">.</span><span class="n">vectorize</span>
+<span class="k">def</span> <span class="nf">dsigmaL_DVMP_dt</span><span class="p">(</span><span class="n">y</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">xB</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">t</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">Q</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">meson</span><span class="p">:</span><span class="nb">int</span><span class="p">,</span> <span class="n">HTFF</span><span class="p">:</span> <span class="nb">complex</span><span class="p">,</span> <span class="n">ETFF</span><span class="p">:</span> <span class="nb">complex</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Longitudinal DVMP cross section differential only in t</span>
+<span class="sd">          </span>
+<span class="sd">      Args:</span>
+<span class="sd">          y (float): Beam energy lost parameter</span>
+<span class="sd">          xB (float): x_bjorken</span>
+<span class="sd">          t (float): momentum transfer square</span>
+<span class="sd">          Q (float): photon virtuality</span>
+<span class="sd">          TFF (complex): Transition form factor H </span>
+<span class="sd">          ETFF (complex): Transition form factor E</span>
+<span class="sd">          MassCorr(int): Mass corrections to the cross section.  Nonzero only for j/psi</span>
+<span class="sd">   </span>
+<span class="sd">      </span>
+
+<span class="sd">      Returns:</span>
+<span class="sd">          </span>
+<span class="sd">          Eq.(2.8) as in https://arxiv.org/pdf/2409.17231&quot;</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">return</span> <span class="n">gevtonb</span> <span class="o">*</span> <span class="p">(</span> <span class="mi">4</span><span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">**</span><span class="mi">2</span>  <span class="o">*</span><span class="n">alphaEM</span> <span class="o">*</span> <span class="n">xB</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">/</span> <span class="p">((</span><span class="n">Q</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="n">MassCorr</span><span class="p">(</span><span class="n">meson</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span><span class="p">))</span> <span class="o">*</span> <span class="p">(</span><span class="n">Q</span><span class="o">/</span> <span class="p">(</span><span class="n">Q</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="n">MassCorr</span><span class="p">(</span><span class="n">meson</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span><span class="p">))</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">*</span> <span class="p">(</span><span class="n">Real</span><span class="p">(</span><span class="n">HTFF</span><span class="o">*</span> <span class="n">Conjugate</span><span class="p">(</span><span class="n">HTFF</span><span class="p">))</span> <span class="o">-</span> <span class="n">t</span><span class="o">/</span><span class="mi">4</span><span class="o">/</span> <span class="n">M_p</span><span class="o">**</span><span class="mi">2</span> <span class="o">*</span> <span class="n">Real</span><span class="p">(</span><span class="n">ETFF</span><span class="o">*</span> <span class="n">Conjugate</span><span class="p">(</span><span class="n">ETFF</span><span class="p">)))</span>
+
+<span class="c1"># -----------------------------------------------------------------------------</span>
+<span class="c1"># dsigma_dt : total differential cross section (only in t)</span>
+<span class="c1"># -----------------------------------------------------------------------------</span>
+
+<span class="nd">@np</span><span class="o">.</span><span class="n">vectorize</span>
+<span class="k">def</span> <span class="nf">dsigma_DVMP_dt</span><span class="p">(</span><span class="n">y</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">xB</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">t</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">Q</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">meson</span><span class="p">:</span><span class="nb">int</span><span class="p">,</span> <span class="n">HTFF</span><span class="p">:</span> <span class="nb">complex</span><span class="p">,</span> <span class="n">ETFF</span><span class="p">:</span> <span class="nb">complex</span><span class="p">,</span><span class="n">a</span><span class="p">:</span><span class="nb">float</span><span class="p">,</span><span class="n">p</span><span class="p">:</span><span class="nb">float</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;The total DVMP cross section differential only in t</span>
+<span class="sd">          </span>
+<span class="sd">      Args:</span>
+<span class="sd">          y (float): Beam energy lost parameter</span>
+<span class="sd">          xB (float): x_bjorken</span>
+<span class="sd">          t (float): momentum transfer square</span>
+<span class="sd">          Q (float): photon virtuality</span>
+<span class="sd">          TFF (complex): Transition form factor H </span>
+<span class="sd">          ETFF (complex): Transition form factor E</span>
+<span class="sd">          MassCorr(int): Mass corrections to the cross section.  Nonzero only for j/psi</span>
+<span class="sd">   </span>
+<span class="sd">      </span>
+
+<span class="sd">      Returns:</span>
+<span class="sd">          </span>
+<span class="sd">          Eq.(2.16) as in https://arxiv.org/pdf/2409.17231&quot;</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">return</span>  <span class="n">dsigmaL_DVMP_dt</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">xB</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="n">Q</span><span class="p">,</span> <span class="n">meson</span><span class="p">,</span> <span class="n">HTFF</span><span class="p">,</span> <span class="n">ETFF</span><span class="p">)</span><span class="o">*</span><span class="p">(</span><span class="n">epsilon</span><span class="p">(</span><span class="n">y</span><span class="p">)</span><span class="o">+</span><span class="mi">1</span><span class="o">/</span><span class="n">R</span><span class="p">(</span><span class="n">Q</span><span class="p">,</span><span class="n">a</span><span class="p">,</span><span class="n">p</span><span class="p">,</span><span class="n">meson</span><span class="p">))</span>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, Yuxun Guo. et. al..</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

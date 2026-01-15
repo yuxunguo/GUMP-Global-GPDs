@@ -1,0 +1,69 @@
+gumpgpd package
+===============
+
+Submodules
+----------
+
+gumpgpd.DVCS\_xsec module
+-------------------------
+
+.. automodule:: gumpgpd.DVCS_xsec
+   :members:
+   :show-inheritance:
+   :undoc-members:
+
+gumpgpd.DVMP\_xsec module
+-------------------------
+
+.. automodule:: gumpgpd.DVMP_xsec
+   :members:
+   :show-inheritance:
+   :undoc-members:
+
+gumpgpd.Evolution module
+------------------------
+
+.. automodule:: gumpgpd.Evolution
+   :members:
+   :show-inheritance:
+   :undoc-members:
+
+gumpgpd.Minimizer module
+------------------------
+
+.. automodule:: gumpgpd.Minimizer
+   :members:
+   :show-inheritance:
+   :undoc-members:
+
+gumpgpd.Observables module
+--------------------------
+
+.. automodule:: gumpgpd.Observables
+   :members:
+   :show-inheritance:
+   :undoc-members:
+
+gumpgpd.Parameters module
+-------------------------
+
+.. automodule:: gumpgpd.Parameters
+   :members:
+   :show-inheritance:
+   :undoc-members:
+
+gumpgpd.config module
+---------------------
+
+.. automodule:: gumpgpd.config
+   :members:
+   :show-inheritance:
+   :undoc-members:
+
+Module contents
+---------------
+
+.. automodule:: gumpgpd
+   :members:
+   :show-inheritance:
+   :undoc-members:
