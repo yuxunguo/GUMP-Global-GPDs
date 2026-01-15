@@ -22,6 +22,40 @@ If you use this package in your research, please cite:
      year = "2025"
      }
 
+where the lastest developments are discussed. Also check 
+
+.. code-block:: py
+     :name: bibitem2
+
+     @article{Guo:2023ahv,
+               author = "Guo, Yuxun and Ji, Xiangdong and Santiago, M. Gabriel and Shiells, Kyle and Yang, Jinghong",
+               title = "{Generalized parton distributions through universal moment parameterization: non-zero skewness case}",
+               eprint = "2302.07279",
+               archivePrefix = "arXiv",
+               primaryClass = "hep-ph",
+               doi = "10.1007/JHEP05(2023)150",
+               journal = "JHEP",
+               volume = "05",
+               pages = "150",
+               year = "2023"
+               }
+     
+     @article{Guo:2022upw,
+               author = "Guo, Yuxun and Ji, Xiangdong and Shiells, Kyle",
+               title = "{Generalized parton distributions through universal moment parameterization: zero skewness case}",
+               eprint = "2207.05768",
+               archivePrefix = "arXiv",
+               primaryClass = "hep-ph",
+               reportNumber = "CNF-UMD-2022",
+               doi = "10.1007/JHEP09(2022)215",
+               journal = "JHEP",
+               volume = "09",
+               pages = "215",
+               year = "2022"
+               }
+               
+for more details.
+
 Acknowledgement
 ---------------
 This package benefits from the open-source `Gepard <https://gepard.phy.hr/>`_ package!

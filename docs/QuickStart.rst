@@ -1,13 +1,19 @@
 
 Quick start
 ===========
+Introducation
+-------------
+Welcome to the GUMP program for the global analyses of Generalized Parton Distributions (GPDs).
+The full name of GUMP is GPDs through Universal Moment Parameterization (GUMP).
+This program aim to deliver the state-of-the-art tool for the global analyses of GPDs via moment-space apporach.
+More resources and references are given at :ref:`Citation/Acknowledgement`.
 
 Installation
 ------------
-We are working to deliver this program as a python package once all the submodules are settled.
-At this point the recommended installation method is to download the source file directly at `GUMP GitHub Page <https://github.com/yuxunguo/GUMP-Global-GPDs>`_,
-and work in the root folder.
-
+There are two ways to access this package: for ordinary user, install the public version with the command ``pip install gumpgpd``.
+For the lastest developper version, download the source code from the `GitHub <https://github.com/yuxunguo/GUMP-Global-GPDs/tree/GUMP1.0>`_ page 
+(make sure that the correct branch is used!), and run ``pip install -e .`` to install in “editable” mode.
+The later allows you to edit the source code to generate results not directly accessible via the given interface.
 
 Parameters and model setting
 ----------------------------
