@@ -5,7 +5,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>gumpgpd.Evolution &mdash; GUMP GPD Analysis 0.5.0 documentation</title>
+  <title>gumpgpd.Evolution &mdash; GUMP GPD Analysis 1.0.2 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=80d5e7a1" />
       <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
@@ -13,7 +13,7 @@
   
       <script src="../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../_static/documentation_options.js?v=1dd76d02"></script>
+      <script src="../../_static/documentation_options.js?v=1ed6394b"></script>
       <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
       <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -115,7 +115,7 @@
 <span class="n">memory</span> <span class="o">=</span> <span class="n">Memory</span><span class="p">(</span><span class="n">location</span><span class="o">=</span><span class="n">cache_dir</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
 
 <div class="viewcode-block" id="Ram_Cache_ArrayFirst">
-<a class="viewcode-back" href="../../gumpgpd.html#gumpgpd.Evolution.Ram_Cache_ArrayFirst">[docs]</a>
+<a class="viewcode-back" href="../../Evolution.html#gumpgpd.Evolution.Ram_Cache_ArrayFirst">[docs]</a>
 <span class="k">def</span> <span class="nf">Ram_Cache_ArrayFirst</span><span class="p">(</span><span class="n">func</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    RAM-only cache: stores results in-process.</span>
@@ -163,7 +163,7 @@
 
 
 <div class="viewcode-block" id="Hybrid_Cache_ArrayFirst">
-<a class="viewcode-back" href="../../gumpgpd.html#gumpgpd.Evolution.Hybrid_Cache_ArrayFirst">[docs]</a>
+<a class="viewcode-back" href="../../Evolution.html#gumpgpd.Evolution.Hybrid_Cache_ArrayFirst">[docs]</a>
 <span class="k">def</span> <span class="nf">Hybrid_Cache_ArrayFirst</span><span class="p">(</span><span class="n">func</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Hybrid cache: RAM (in-process) + disk (joblib.Memory)</span>
@@ -260,7 +260,7 @@
 <span class="n">B11</span> <span class="o">=</span> <span class="o">-</span><span class="mf">20.</span><span class="o">/</span><span class="mf">3.</span> <span class="o">*</span> <span class="n">CA</span><span class="o">*</span><span class="n">TF</span> <span class="o">-</span> <span class="mf">4.</span> <span class="o">*</span> <span class="n">CF</span><span class="o">*</span><span class="n">TF</span>
 
 <div class="viewcode-block" id="beta0">
-<a class="viewcode-back" href="../../gumpgpd.html#gumpgpd.Evolution.beta0">[docs]</a>
+<a class="viewcode-back" href="../../Evolution.html#gumpgpd.Evolution.beta0">[docs]</a>
 <span class="nd">@njit</span><span class="p">([</span><span class="s2">&quot;float64(int32)&quot;</span><span class="p">])</span>
 <span class="k">def</span> <span class="nf">beta0</span><span class="p">(</span><span class="n">nf</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot; LO beta function of pQCD, will be used for LO GPD evolution. &quot;&quot;&quot;</span>
@@ -268,7 +268,7 @@
 
 
 <div class="viewcode-block" id="beta1">
-<a class="viewcode-back" href="../../gumpgpd.html#gumpgpd.Evolution.beta1">[docs]</a>
+<a class="viewcode-back" href="../../Evolution.html#gumpgpd.Evolution.beta1">[docs]</a>
 <span class="nd">@njit</span><span class="p">([</span><span class="s2">&quot;float64(int32)&quot;</span><span class="p">])</span>
 <span class="k">def</span> <span class="nf">beta1</span><span class="p">(</span><span class="n">nf</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot; NLO beta function of pQCD &quot;&quot;&quot;</span>
@@ -280,14 +280,14 @@
     <span class="k">return</span> <span class="n">a</span><span class="o">**</span><span class="mi">2</span> <span class="o">*</span> <span class="p">(</span><span class="n">beta0</span><span class="p">(</span><span class="n">nf</span><span class="p">)</span> <span class="o">+</span> <span class="n">a</span> <span class="o">*</span> <span class="n">beta1</span><span class="p">(</span><span class="n">nf</span><span class="p">))</span>
 
 <div class="viewcode-block" id="AlphaS0">
-<a class="viewcode-back" href="../../gumpgpd.html#gumpgpd.Evolution.AlphaS0">[docs]</a>
+<a class="viewcode-back" href="../../Evolution.html#gumpgpd.Evolution.AlphaS0">[docs]</a>
 <span class="nd">@njit</span><span class="p">([</span><span class="s2">&quot;float64[:](int32, float64[:])&quot;</span><span class="p">,</span> <span class="s2">&quot;float64(int32, float64)&quot;</span><span class="p">])</span>
 <span class="k">def</span> <span class="nf">AlphaS0</span><span class="p">(</span><span class="n">nf</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">Q</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
     <span class="k">return</span> <span class="n">Alpha_Ref</span> <span class="o">/</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">Alpha_Ref</span><span class="o">/</span><span class="mi">2</span><span class="o">/</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="n">beta0</span><span class="p">(</span><span class="n">nf</span><span class="p">)</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">Q</span><span class="o">/</span><span class="n">Ref_Scale</span><span class="p">))</span></div>
 
 
 <div class="viewcode-block" id="AlphaS1">
-<a class="viewcode-back" href="../../gumpgpd.html#gumpgpd.Evolution.AlphaS1">[docs]</a>
+<a class="viewcode-back" href="../../Evolution.html#gumpgpd.Evolution.AlphaS1">[docs]</a>
 <span class="nd">@njit</span><span class="p">([</span><span class="s2">&quot;float64[:](int32, float64[:])&quot;</span><span class="p">,</span> <span class="s2">&quot;float64(int32, float64)&quot;</span><span class="p">])</span>
 <span class="k">def</span> <span class="nf">AlphaS1</span><span class="p">(</span><span class="n">nf</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">Q</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
     <span class="n">NASTPS</span> <span class="o">=</span> <span class="mi">20</span>
@@ -312,7 +312,7 @@
 
 
 <div class="viewcode-block" id="AlphaS">
-<a class="viewcode-back" href="../../gumpgpd.html#gumpgpd.Evolution.AlphaS">[docs]</a>
+<a class="viewcode-back" href="../../Evolution.html#gumpgpd.Evolution.AlphaS">[docs]</a>
 <span class="nd">@njit</span><span class="p">([</span><span class="s2">&quot;float64[:](int32, int32, float64[:])&quot;</span><span class="p">,</span> <span class="s2">&quot;float64(int32, int32, float64)&quot;</span><span class="p">])</span>
 <span class="k">def</span> <span class="nf">AlphaS</span><span class="p">(</span><span class="n">nloop</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">nf</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">Q</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
     <span class="k">if</span> <span class="n">nloop</span><span class="o">==</span><span class="mi">1</span><span class="p">:</span>
@@ -330,7 +330,7 @@
 
 <span class="c1"># Fixed quad function that allow more general function. The func here take input of shape (N,) and output (N,......) which doesn&#39;t have to be (N,)</span>
 <div class="viewcode-block" id="fixed_quadvec">
-<a class="viewcode-back" href="../../gumpgpd.html#gumpgpd.Evolution.fixed_quadvec">[docs]</a>
+<a class="viewcode-back" href="../../Evolution.html#gumpgpd.Evolution.fixed_quadvec">[docs]</a>
 <span class="k">def</span> <span class="nf">fixed_quadvec</span><span class="p">(</span><span class="n">func</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">n</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="p">()):</span>
     <span class="n">rootsNLO</span><span class="p">,</span> <span class="n">weightsNLO</span> <span class="o">=</span> <span class="n">p_roots</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>
     <span class="n">y</span> <span class="o">=</span> <span class="p">(</span><span class="n">b</span><span class="o">-</span><span class="n">a</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">rootsNLO</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span><span class="o">/</span><span class="mf">2.0</span> <span class="o">+</span> <span class="n">a</span>
@@ -339,7 +339,7 @@
 
 
 <div class="viewcode-block" id="pochhammer">
-<a class="viewcode-back" href="../../gumpgpd.html#gumpgpd.Evolution.pochhammer">[docs]</a>
+<a class="viewcode-back" href="../../Evolution.html#gumpgpd.Evolution.pochhammer">[docs]</a>
 <span class="k">def</span> <span class="nf">pochhammer</span><span class="p">(</span><span class="n">z</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">complex</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span> <span class="n">m</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="nb">complex</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Pochhammer symbol.</span>
 
@@ -360,7 +360,7 @@
 <span class="n">poch</span> <span class="o">=</span> <span class="n">pochhammer</span>  <span class="c1"># just an abbreviation</span>
 
 <div class="viewcode-block" id="dpsi_one">
-<a class="viewcode-back" href="../../gumpgpd.html#gumpgpd.Evolution.dpsi_one">[docs]</a>
+<a class="viewcode-back" href="../../Evolution.html#gumpgpd.Evolution.dpsi_one">[docs]</a>
 <span class="k">def</span> <span class="nf">dpsi_one</span><span class="p">(</span><span class="n">z</span><span class="p">:</span> <span class="nb">complex</span><span class="p">,</span> <span class="n">m</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">complex</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Polygamma - m&#39;th derivative of Euler gamma at z.&quot;&quot;&quot;</span>
     <span class="c1"># Algorithm from Vogt, cf. julia&#39;s implementation</span>
@@ -402,35 +402,35 @@
 <span class="n">dpsi</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">vectorize</span><span class="p">(</span><span class="n">dpsi_one</span><span class="p">)</span>
 
 <div class="viewcode-block" id="S1">
-<a class="viewcode-back" href="../../gumpgpd.html#gumpgpd.Evolution.S1">[docs]</a>
+<a class="viewcode-back" href="../../Evolution.html#gumpgpd.Evolution.S1">[docs]</a>
 <span class="k">def</span> <span class="nf">S1</span><span class="p">(</span><span class="n">z</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">complex</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="nb">complex</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Harmonic sum S_1.&quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">euler_gamma</span> <span class="o">+</span> <span class="n">psi</span><span class="p">(</span><span class="n">z</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="S2">
-<a class="viewcode-back" href="../../gumpgpd.html#gumpgpd.Evolution.S2">[docs]</a>
+<a class="viewcode-back" href="../../Evolution.html#gumpgpd.Evolution.S2">[docs]</a>
 <span class="k">def</span> <span class="nf">S2</span><span class="p">(</span><span class="n">z</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">complex</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="nb">complex</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Harmonic sum S_2.&quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="n">zeta</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span> <span class="o">-</span> <span class="n">dpsi</span><span class="p">(</span><span class="n">z</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="S3">
-<a class="viewcode-back" href="../../gumpgpd.html#gumpgpd.Evolution.S3">[docs]</a>
+<a class="viewcode-back" href="../../Evolution.html#gumpgpd.Evolution.S3">[docs]</a>
 <span class="k">def</span> <span class="nf">S3</span><span class="p">(</span><span class="n">z</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">complex</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="nb">complex</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Harmonic sum S_3.&quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="n">zeta</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span> <span class="o">+</span> <span class="n">dpsi</span><span class="p">(</span><span class="n">z</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span></div>
 
 
 <div class="viewcode-block" id="S4">
-<a class="viewcode-back" href="../../gumpgpd.html#gumpgpd.Evolution.S4">[docs]</a>
+<a class="viewcode-back" href="../../Evolution.html#gumpgpd.Evolution.S4">[docs]</a>
 <span class="k">def</span> <span class="nf">S4</span><span class="p">(</span><span class="n">z</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">complex</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="nb">complex</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Harmonic sum S_4.&quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="n">zeta</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span> <span class="o">-</span> <span class="n">dpsi</span><span class="p">(</span><span class="n">z</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span> <span class="o">/</span> <span class="mi">6</span></div>
 
 
 <div class="viewcode-block" id="S2_prime">
-<a class="viewcode-back" href="../../gumpgpd.html#gumpgpd.Evolution.S2_prime">[docs]</a>
+<a class="viewcode-back" href="../../Evolution.html#gumpgpd.Evolution.S2_prime">[docs]</a>
 <span class="k">def</span> <span class="nf">S2_prime</span><span class="p">(</span><span class="n">z</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">complex</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span> <span class="n">prty</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="nb">complex</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;https://www.sciencedirect.com/science/article/pii/0550321380900036?via%3Dihub  Eq. (5.29).&quot;&quot;&quot;</span>
     <span class="c1"># note this is related to delS2</span>
@@ -438,14 +438,14 @@
 
 
 <div class="viewcode-block" id="S3_prime">
-<a class="viewcode-back" href="../../gumpgpd.html#gumpgpd.Evolution.S3_prime">[docs]</a>
+<a class="viewcode-back" href="../../Evolution.html#gumpgpd.Evolution.S3_prime">[docs]</a>
 <span class="k">def</span> <span class="nf">S3_prime</span><span class="p">(</span><span class="n">z</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">complex</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span> <span class="n">prty</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="nb">complex</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;https://www.sciencedirect.com/science/article/pii/0550321380900036?via%3Dihub Eq. (5.29).&quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="p">(</span><span class="mi">1</span><span class="o">+</span><span class="n">prty</span><span class="p">)</span><span class="o">*</span><span class="n">S3</span><span class="p">(</span><span class="n">z</span><span class="p">)</span><span class="o">/</span><span class="mi">2</span> <span class="o">+</span> <span class="p">(</span><span class="mi">1</span><span class="o">-</span><span class="n">prty</span><span class="p">)</span><span class="o">*</span><span class="n">S3</span><span class="p">(</span><span class="n">z</span><span class="o">-</span><span class="mi">1</span><span class="o">/</span><span class="mi">2</span><span class="p">)</span><span class="o">/</span><span class="mi">2</span></div>
 
 
 <div class="viewcode-block" id="delS2">
-<a class="viewcode-back" href="../../gumpgpd.html#gumpgpd.Evolution.delS2">[docs]</a>
+<a class="viewcode-back" href="../../Evolution.html#gumpgpd.Evolution.delS2">[docs]</a>
 <span class="k">def</span> <span class="nf">delS2</span><span class="p">(</span><span class="n">z</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">complex</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="nb">complex</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Return Harmonic sum S_2 difference.</span>
 
@@ -461,7 +461,7 @@
 
 
 <div class="viewcode-block" id="deldelS2">
-<a class="viewcode-back" href="../../gumpgpd.html#gumpgpd.Evolution.deldelS2">[docs]</a>
+<a class="viewcode-back" href="../../Evolution.html#gumpgpd.Evolution.deldelS2">[docs]</a>
 <span class="k">def</span> <span class="nf">deldelS2</span><span class="p">(</span><span class="n">j</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">complex</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span> <span class="n">k</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="nb">complex</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Return diference of harmonic sum S_2 differences.</span>
 
@@ -478,7 +478,7 @@
 
 
 <div class="viewcode-block" id="MellinF2">
-<a class="viewcode-back" href="../../gumpgpd.html#gumpgpd.Evolution.MellinF2">[docs]</a>
+<a class="viewcode-back" href="../../Evolution.html#gumpgpd.Evolution.MellinF2">[docs]</a>
 <span class="k">def</span> <span class="nf">MellinF2</span><span class="p">(</span><span class="n">n</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">complex</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="nb">complex</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Return Mellin transform  i.e. x^(N-1) moment of Li2(x)/(1+x).</span>
 
@@ -506,7 +506,7 @@
 
 
 <div class="viewcode-block" id="SB3">
-<a class="viewcode-back" href="../../gumpgpd.html#gumpgpd.Evolution.SB3">[docs]</a>
+<a class="viewcode-back" href="../../Evolution.html#gumpgpd.Evolution.SB3">[docs]</a>
 <span class="k">def</span> <span class="nf">SB3</span><span class="p">(</span><span class="n">j</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">complex</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="nb">complex</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Eq. (4.44e) of https://arxiv.org/abs/1310.5394&quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="mf">0.5</span><span class="o">*</span><span class="n">S1</span><span class="p">(</span><span class="n">j</span><span class="p">)</span><span class="o">*</span><span class="p">(</span><span class="o">-</span><span class="n">S2</span><span class="p">(</span><span class="o">-</span><span class="mf">0.5</span><span class="o">+</span><span class="mf">0.5</span><span class="o">*</span><span class="n">j</span><span class="p">)</span><span class="o">+</span><span class="n">S2</span><span class="p">(</span><span class="mf">0.5</span><span class="o">*</span><span class="n">j</span><span class="p">))</span><span class="o">+</span><span class="mf">0.125</span><span class="o">*</span><span class="p">(</span><span class="o">-</span><span class="n">S3</span><span class="p">(</span>
@@ -515,14 +515,14 @@
 
 
 <div class="viewcode-block" id="S1_tilde">
-<a class="viewcode-back" href="../../gumpgpd.html#gumpgpd.Evolution.S1_tilde">[docs]</a>
+<a class="viewcode-back" href="../../Evolution.html#gumpgpd.Evolution.S1_tilde">[docs]</a>
 <span class="k">def</span> <span class="nf">S1_tilde</span><span class="p">(</span><span class="n">n</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">complex</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span> <span class="n">sgtr</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="nb">complex</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Eq. (39) of https://arxiv.org/abs/hep-ph/9810241 &quot;&quot;&quot;</span>
     <span class="k">return</span>  <span class="n">sgtr</span> <span class="o">*</span> <span class="p">(</span><span class="n">psi</span><span class="p">((</span><span class="n">n</span><span class="o">+</span><span class="mi">2</span><span class="p">)</span><span class="o">/</span><span class="mi">2</span><span class="p">)</span> <span class="o">-</span> <span class="n">psi</span><span class="p">((</span><span class="n">n</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span><span class="o">/</span><span class="mi">2</span><span class="p">))</span> <span class="o">/</span> <span class="mi">2</span> <span class="o">-</span> <span class="n">log</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>   </div>
 
 
 <div class="viewcode-block" id="S2_tilde">
-<a class="viewcode-back" href="../../gumpgpd.html#gumpgpd.Evolution.S2_tilde">[docs]</a>
+<a class="viewcode-back" href="../../Evolution.html#gumpgpd.Evolution.S2_tilde">[docs]</a>
 <span class="k">def</span> <span class="nf">S2_tilde</span><span class="p">(</span><span class="n">n</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">complex</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span> <span class="n">sgtr</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="nb">complex</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Eq. (41) of  https://arxiv.org/abs/hep-ph/9810241&quot;&quot;&quot;</span>
     <span class="n">G</span> <span class="o">=</span> <span class="n">dpsi</span><span class="p">((</span><span class="n">n</span><span class="o">+</span><span class="mi">2</span><span class="p">)</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span> <span class="o">-</span> <span class="n">dpsi</span><span class="p">((</span><span class="n">n</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span>
@@ -530,14 +530,14 @@
 
 
 <div class="viewcode-block" id="S3_tilde">
-<a class="viewcode-back" href="../../gumpgpd.html#gumpgpd.Evolution.S3_tilde">[docs]</a>
+<a class="viewcode-back" href="../../Evolution.html#gumpgpd.Evolution.S3_tilde">[docs]</a>
 <span class="k">def</span> <span class="nf">S3_tilde</span><span class="p">(</span><span class="n">n</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">complex</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span> <span class="n">sgtr</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="nb">complex</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Eqs. (47) and (37) of https://arxiv.org/abs/hep-ph/9810241&quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="n">sgtr</span><span class="o">*</span><span class="mi">1</span><span class="o">/</span><span class="mi">2</span><span class="o">*</span> <span class="mi">1</span><span class="o">/</span><span class="mi">8</span><span class="o">*</span><span class="p">(</span><span class="n">dpsi</span><span class="p">((</span><span class="n">n</span><span class="o">+</span><span class="mi">2</span><span class="p">)</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span><span class="mi">2</span><span class="p">)</span> <span class="o">-</span> <span class="n">dpsi</span><span class="p">((</span><span class="n">n</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span><span class="mi">2</span><span class="p">))</span> <span class="o">-</span><span class="mi">3</span><span class="o">/</span><span class="mi">4</span><span class="o">*</span><span class="n">zeta</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="S2_tilde_KM">
-<a class="viewcode-back" href="../../gumpgpd.html#gumpgpd.Evolution.S2_tilde_KM">[docs]</a>
+<a class="viewcode-back" href="../../Evolution.html#gumpgpd.Evolution.S2_tilde_KM">[docs]</a>
 <span class="k">def</span> <span class="nf">S2_tilde_KM</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">sgtr</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;S2_tilde from Gepard&quot;&quot;&quot;</span>
     <span class="n">G</span> <span class="o">=</span> <span class="n">psi</span><span class="p">((</span><span class="n">n</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span><span class="o">/</span><span class="mi">2</span><span class="p">)</span> <span class="o">-</span> <span class="n">psi</span><span class="p">(</span><span class="n">n</span><span class="o">/</span><span class="mi">2</span><span class="p">)</span>
@@ -545,14 +545,14 @@
 
 
 <div class="viewcode-block" id="Sm2p1">
-<a class="viewcode-back" href="../../gumpgpd.html#gumpgpd.Evolution.Sm2p1">[docs]</a>
+<a class="viewcode-back" href="../../Evolution.html#gumpgpd.Evolution.Sm2p1">[docs]</a>
 <span class="k">def</span> <span class="nf">Sm2p1</span><span class="p">(</span><span class="n">n</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">complex</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span> <span class="n">sgtr</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="nb">complex</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]:</span> 
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Eq. (50) of https://arxiv.org/abs/hep-ph/9810241&quot;&quot;&quot;</span> 
     <span class="k">return</span> <span class="p">(</span><span class="o">-</span><span class="n">sgtr</span><span class="p">)</span> <span class="o">*</span> <span class="n">MellinF2</span><span class="p">(</span><span class="n">n</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span> <span class="o">+</span> <span class="n">zeta</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span><span class="o">*</span><span class="n">S1_tilde</span><span class="p">(</span><span class="n">n</span><span class="p">,</span><span class="n">sgtr</span><span class="p">)</span> <span class="o">-</span> <span class="p">(</span><span class="mi">5</span><span class="o">/</span><span class="mi">8</span><span class="p">)</span><span class="o">*</span><span class="n">zeta</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span> <span class="o">+</span> <span class="n">zeta</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span> <span class="o">*</span> <span class="n">log</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="Sp1m2">
-<a class="viewcode-back" href="../../gumpgpd.html#gumpgpd.Evolution.Sp1m2">[docs]</a>
+<a class="viewcode-back" href="../../Evolution.html#gumpgpd.Evolution.Sp1m2">[docs]</a>
 <span class="k">def</span> <span class="nf">Sp1m2</span><span class="p">(</span><span class="n">n</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">complex</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span> <span class="n">sgtr</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="nb">complex</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]:</span> 
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Eq. (131) of https://arxiv.org/abs/hep-ph/9810241&quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="n">S1</span><span class="p">(</span><span class="n">n</span><span class="p">)</span><span class="o">*</span><span class="n">S2_tilde</span><span class="p">(</span><span class="n">n</span><span class="p">,</span><span class="n">sgtr</span><span class="p">)</span><span class="o">+</span><span class="n">S3_tilde</span><span class="p">(</span><span class="n">n</span><span class="p">,</span><span class="n">sgtr</span><span class="p">)</span><span class="o">-</span><span class="n">Sm2p1</span><span class="p">(</span><span class="n">n</span><span class="p">,</span><span class="n">sgtr</span><span class="p">)</span></div>
@@ -569,7 +569,7 @@
 <span class="sd">&#39;&#39;&#39;</span>
 
 <div class="viewcode-block" id="non_singlet_LO">
-<a class="viewcode-back" href="../../gumpgpd.html#gumpgpd.Evolution.non_singlet_LO">[docs]</a>
+<a class="viewcode-back" href="../../Evolution.html#gumpgpd.Evolution.non_singlet_LO">[docs]</a>
 <span class="nd">@Ram_Cache_ArrayFirst</span>
 <span class="k">def</span> <span class="nf">non_singlet_LO</span><span class="p">(</span><span class="n">n</span><span class="p">:</span><span class="n">Union</span><span class="p">[</span><span class="nb">complex</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span> <span class="n">nf</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">p</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">prty</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="nb">complex</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Non-singlet LO anomalous dimension.</span>
@@ -589,7 +589,7 @@
 
 
 <div class="viewcode-block" id="singlet_LO">
-<a class="viewcode-back" href="../../gumpgpd.html#gumpgpd.Evolution.singlet_LO">[docs]</a>
+<a class="viewcode-back" href="../../Evolution.html#gumpgpd.Evolution.singlet_LO">[docs]</a>
 <span class="nd">@Ram_Cache_ArrayFirst</span>
 <span class="k">def</span> <span class="nf">singlet_LO</span><span class="p">(</span><span class="n">n</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">complex</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span> <span class="n">nf</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">p</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">prty</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Singlet LO anomalous dimensions.</span>
@@ -627,7 +627,7 @@
 
 
 <div class="viewcode-block" id="non_singlet_NLO">
-<a class="viewcode-back" href="../../gumpgpd.html#gumpgpd.Evolution.non_singlet_NLO">[docs]</a>
+<a class="viewcode-back" href="../../Evolution.html#gumpgpd.Evolution.non_singlet_NLO">[docs]</a>
 <span class="nd">@Ram_Cache_ArrayFirst</span>
 <span class="k">def</span> <span class="nf">non_singlet_NLO</span><span class="p">(</span><span class="n">n</span><span class="p">:</span> <span class="nb">complex</span><span class="p">,</span> <span class="n">nf</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">p</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">prty</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">complex</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Non-singlet anomalous dimension.</span>
@@ -669,7 +669,7 @@
 
 
 <div class="viewcode-block" id="singlet_NLO">
-<a class="viewcode-back" href="../../gumpgpd.html#gumpgpd.Evolution.singlet_NLO">[docs]</a>
+<a class="viewcode-back" href="../../Evolution.html#gumpgpd.Evolution.singlet_NLO">[docs]</a>
 <span class="nd">@Ram_Cache_ArrayFirst</span>
 <span class="k">def</span> <span class="nf">singlet_NLO</span><span class="p">(</span><span class="n">n</span><span class="p">:</span> <span class="nb">complex</span><span class="p">,</span> <span class="n">nf</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">p</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">prty</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Singlet NLO anomalous dimensions matrix.</span>
@@ -750,7 +750,7 @@
 <span class="sd">&quot;&quot;&quot;</span>
 
 <div class="viewcode-block" id="outer_subtract">
-<a class="viewcode-back" href="../../gumpgpd.html#gumpgpd.Evolution.outer_subtract">[docs]</a>
+<a class="viewcode-back" href="../../Evolution.html#gumpgpd.Evolution.outer_subtract">[docs]</a>
 <span class="k">def</span> <span class="nf">outer_subtract</span><span class="p">(</span><span class="n">arr1</span><span class="p">,</span><span class="n">arr2</span><span class="p">):</span>   
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Perform the outer product of two array at the last dimension, each has shape (N,..., m)</span>
 <span class="sd">    </span>
@@ -772,7 +772,7 @@
 
 
 <div class="viewcode-block" id="lambdaf">
-<a class="viewcode-back" href="../../gumpgpd.html#gumpgpd.Evolution.lambdaf">[docs]</a>
+<a class="viewcode-back" href="../../Evolution.html#gumpgpd.Evolution.lambdaf">[docs]</a>
 <span class="k">def</span> <span class="nf">lambdaf</span><span class="p">(</span><span class="n">n</span><span class="p">:</span> <span class="nb">complex</span><span class="p">,</span> <span class="n">nf</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">p</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">prty</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Eigenvalues of the LO singlet anomalous dimensions matrix.</span>
 
@@ -802,7 +802,7 @@
 
 
 <div class="viewcode-block" id="projectors">
-<a class="viewcode-back" href="../../gumpgpd.html#gumpgpd.Evolution.projectors">[docs]</a>
+<a class="viewcode-back" href="../../Evolution.html#gumpgpd.Evolution.projectors">[docs]</a>
 <span class="k">def</span> <span class="nf">projectors</span><span class="p">(</span><span class="n">n</span><span class="p">:</span> <span class="nb">complex</span><span class="p">,</span> <span class="n">nf</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">p</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">prty</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Projectors on evolution quark-gluon singlet eigenaxes.</span>
 
@@ -838,7 +838,7 @@
 
 
 <div class="viewcode-block" id="amuindep">
-<a class="viewcode-back" href="../../gumpgpd.html#gumpgpd.Evolution.amuindep">[docs]</a>
+<a class="viewcode-back" href="../../Evolution.html#gumpgpd.Evolution.amuindep">[docs]</a>
 <span class="k">def</span> <span class="nf">amuindep</span><span class="p">(</span><span class="n">j</span><span class="p">:</span> <span class="nb">complex</span><span class="p">,</span> <span class="n">nf</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">p</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">prty</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Result the P [gamma] P part of the diagonal evolution operator A.</span>
 <span class="sd">    </span>
@@ -865,7 +865,7 @@
 
 
 <div class="viewcode-block" id="amuindepNS">
-<a class="viewcode-back" href="../../gumpgpd.html#gumpgpd.Evolution.amuindepNS">[docs]</a>
+<a class="viewcode-back" href="../../Evolution.html#gumpgpd.Evolution.amuindepNS">[docs]</a>
 <span class="k">def</span> <span class="nf">amuindepNS</span><span class="p">(</span><span class="n">j</span><span class="p">:</span> <span class="nb">complex</span><span class="p">,</span> <span class="n">nf</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">p</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">prty</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Result the [gamma] part of the diagonal evolution operator A.</span>
 <span class="sd">    </span>
@@ -885,7 +885,7 @@
 
 
 <div class="viewcode-block" id="rmudep">
-<a class="viewcode-back" href="../../gumpgpd.html#gumpgpd.Evolution.rmudep">[docs]</a>
+<a class="viewcode-back" href="../../Evolution.html#gumpgpd.Evolution.rmudep">[docs]</a>
 <span class="k">def</span> <span class="nf">rmudep</span><span class="p">(</span><span class="n">nf</span><span class="p">,</span> <span class="n">lamj</span><span class="p">,</span> <span class="n">lamk</span><span class="p">,</span> <span class="n">mu</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Scale dependent part of NLO evolution matrix </span>
 <span class="sd">    </span>
@@ -916,7 +916,7 @@
 
 
 <div class="viewcode-block" id="rmudepNS">
-<a class="viewcode-back" href="../../gumpgpd.html#gumpgpd.Evolution.rmudepNS">[docs]</a>
+<a class="viewcode-back" href="../../Evolution.html#gumpgpd.Evolution.rmudepNS">[docs]</a>
 <span class="k">def</span> <span class="nf">rmudepNS</span><span class="p">(</span><span class="n">nf</span><span class="p">,</span> <span class="n">lamj</span><span class="p">,</span> <span class="n">lamk</span><span class="p">,</span> <span class="n">mu</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Scale dependent part of NLO evolution matrix </span>
 <span class="sd">    </span>
@@ -945,7 +945,7 @@
 
 
 <div class="viewcode-block" id="bmudepNS">
-<a class="viewcode-back" href="../../gumpgpd.html#gumpgpd.Evolution.bmudepNS">[docs]</a>
+<a class="viewcode-back" href="../../Evolution.html#gumpgpd.Evolution.bmudepNS">[docs]</a>
 <span class="k">def</span> <span class="nf">bmudepNS</span><span class="p">(</span><span class="n">mu</span><span class="p">,</span> <span class="n">zn</span><span class="p">,</span> <span class="n">zk</span><span class="p">,</span> <span class="n">nf</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">p</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">prty</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Return the off-diagonal part of the evolution operator B^{jk} combined with (alpha(Q)/alpha(mu_0)) ^ (-b/beta0)</span>
 <span class="sd">    </span>
@@ -987,7 +987,7 @@
 
 
 <div class="viewcode-block" id="bmudep">
-<a class="viewcode-back" href="../../gumpgpd.html#gumpgpd.Evolution.bmudep">[docs]</a>
+<a class="viewcode-back" href="../../Evolution.html#gumpgpd.Evolution.bmudep">[docs]</a>
 <span class="k">def</span> <span class="nf">bmudep</span><span class="p">(</span><span class="n">mu</span><span class="p">,</span> <span class="n">zn</span><span class="p">,</span> <span class="n">zk</span><span class="p">,</span> <span class="n">nf</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">p</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">NS</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">prty</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Return the off-diagonal part of the evolution operator B^{jk} combined with (alpha(Q)/alpha(mu_0)) ^ (-b/beta0)</span>
 <span class="sd">    </span>
@@ -1057,7 +1057,7 @@
 
 <span class="c1">#@np_cache_Evo</span>
 <div class="viewcode-block" id="evolop">
-<a class="viewcode-back" href="../../gumpgpd.html#gumpgpd.Evolution.evolop">[docs]</a>
+<a class="viewcode-back" href="../../Evolution.html#gumpgpd.Evolution.evolop">[docs]</a>
 <span class="nd">@Ram_Cache_ArrayFirst</span>
 <span class="k">def</span> <span class="nf">evolop</span><span class="p">(</span><span class="n">j</span><span class="p">:</span> <span class="nb">complex</span><span class="p">,</span> <span class="n">nf</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">p</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">mu</span><span class="p">:</span> <span class="nb">float</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Leading order GPD evolution operator E(j, nf, mu)[a,b].</span>
@@ -1119,7 +1119,7 @@
 <span class="n">hyp2f1_nparray</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">frompyfunc</span><span class="p">(</span><span class="n">hyp2f1</span><span class="p">,</span><span class="mi">4</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span>
 
 <div class="viewcode-block" id="InvMellinWaveFuncQ">
-<a class="viewcode-back" href="../../gumpgpd.html#gumpgpd.Evolution.InvMellinWaveFuncQ">[docs]</a>
+<a class="viewcode-back" href="../../Evolution.html#gumpgpd.Evolution.InvMellinWaveFuncQ">[docs]</a>
 <span class="nd">@Ram_Cache_ArrayFirst</span>
 <span class="k">def</span> <span class="nf">InvMellinWaveFuncQ</span><span class="p">(</span><span class="n">s</span><span class="p">:</span> <span class="nb">complex</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">complex</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot; Quark wave function for inverse Mellin transformation: x^(-s) for x&gt;0 and 0 for x&lt;0</span>
@@ -1144,7 +1144,7 @@
 
 
 <div class="viewcode-block" id="InvMellinWaveFuncG">
-<a class="viewcode-back" href="../../gumpgpd.html#gumpgpd.Evolution.InvMellinWaveFuncG">[docs]</a>
+<a class="viewcode-back" href="../../Evolution.html#gumpgpd.Evolution.InvMellinWaveFuncG">[docs]</a>
 <span class="nd">@Ram_Cache_ArrayFirst</span>
 <span class="k">def</span> <span class="nf">InvMellinWaveFuncG</span><span class="p">(</span><span class="n">s</span><span class="p">:</span> <span class="nb">complex</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">complex</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot; Gluon wave function for inverse Mellin transformation: x^(-s+1) for x&gt;0 and 0 for x&lt;0</span>
@@ -1167,7 +1167,7 @@
 
 
 <div class="viewcode-block" id="ConfWaveFuncQ">
-<a class="viewcode-back" href="../../gumpgpd.html#gumpgpd.Evolution.ConfWaveFuncQ">[docs]</a>
+<a class="viewcode-back" href="../../Evolution.html#gumpgpd.Evolution.ConfWaveFuncQ">[docs]</a>
 <span class="nd">@Ram_Cache_ArrayFirst</span>
 <span class="k">def</span> <span class="nf">ConfWaveFuncQ</span><span class="p">(</span><span class="n">j</span><span class="p">:</span> <span class="nb">complex</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">xi</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">complex</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Quark conformal wave function p_j(x,xi) </span>
@@ -1191,7 +1191,7 @@
 
 
 <div class="viewcode-block" id="ConfWaveFuncQ_over_sinpij">
-<a class="viewcode-back" href="../../gumpgpd.html#gumpgpd.Evolution.ConfWaveFuncQ_over_sinpij">[docs]</a>
+<a class="viewcode-back" href="../../Evolution.html#gumpgpd.Evolution.ConfWaveFuncQ_over_sinpij">[docs]</a>
 <span class="nd">@Ram_Cache_ArrayFirst</span>
 <span class="k">def</span> <span class="nf">ConfWaveFuncQ_over_sinpij</span><span class="p">(</span><span class="n">j</span><span class="p">:</span> <span class="nb">complex</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">xi</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">complex</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Quark conformal wave function p_j(x,xi)/sin(pi(j+1))</span>
@@ -1215,7 +1215,7 @@
 
 
 <div class="viewcode-block" id="ConfWaveFuncG">
-<a class="viewcode-back" href="../../gumpgpd.html#gumpgpd.Evolution.ConfWaveFuncG">[docs]</a>
+<a class="viewcode-back" href="../../Evolution.html#gumpgpd.Evolution.ConfWaveFuncG">[docs]</a>
 <span class="nd">@Ram_Cache_ArrayFirst</span>
 <span class="k">def</span> <span class="nf">ConfWaveFuncG</span><span class="p">(</span><span class="n">j</span><span class="p">:</span> <span class="nb">complex</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">xi</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">complex</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Gluon conformal wave function p_j(x,xi) </span>
@@ -1241,7 +1241,7 @@
 
 
 <div class="viewcode-block" id="ConfWaveFuncG_over_sinpij">
-<a class="viewcode-back" href="../../gumpgpd.html#gumpgpd.Evolution.ConfWaveFuncG_over_sinpij">[docs]</a>
+<a class="viewcode-back" href="../../Evolution.html#gumpgpd.Evolution.ConfWaveFuncG_over_sinpij">[docs]</a>
 <span class="nd">@Ram_Cache_ArrayFirst</span>
 <span class="k">def</span> <span class="nf">ConfWaveFuncG_over_sinpij</span><span class="p">(</span><span class="n">j</span><span class="p">:</span> <span class="nb">complex</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">xi</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">complex</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Gluon conformal wave function p_j(x,xi)/sin(pi(j+1)) = Minus * p_j(x,xi)/sin(pi*j)</span>
@@ -1265,7 +1265,7 @@
 
 
 <div class="viewcode-block" id="ConfWaveFuncEvo">
-<a class="viewcode-back" href="../../gumpgpd.html#gumpgpd.Evolution.ConfWaveFuncEvo">[docs]</a>
+<a class="viewcode-back" href="../../Evolution.html#gumpgpd.Evolution.ConfWaveFuncEvo">[docs]</a>
 <span class="k">def</span> <span class="nf">ConfWaveFuncEvo</span><span class="p">(</span><span class="n">j</span><span class="p">:</span> <span class="nb">complex</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">xi</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">p</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
     
     
@@ -1273,7 +1273,7 @@
 
 
 <div class="viewcode-block" id="Charge_Factor">
-<a class="viewcode-back" href="../../gumpgpd.html#gumpgpd.Evolution.Charge_Factor">[docs]</a>
+<a class="viewcode-back" href="../../Evolution.html#gumpgpd.Evolution.Charge_Factor">[docs]</a>
 <span class="k">def</span> <span class="nf">Charge_Factor</span><span class="p">(</span><span class="n">particle</span><span class="p">:</span><span class="nb">int</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;The charge factors. For mesons it also multiplies with decay widths (f_m  is for meson m). Output is in evolution basis</span>
 <span class="sd">    </span>
@@ -1300,7 +1300,7 @@
 <span class="c1"># Need Wilson coefficients for evolution. Allows numerical pre-calculation of non-diagonal piece using Mellin-Barnes integral</span>
 
 <div class="viewcode-block" id="WilsonCoef">
-<a class="viewcode-back" href="../../gumpgpd.html#gumpgpd.Evolution.WilsonCoef">[docs]</a>
+<a class="viewcode-back" href="../../Evolution.html#gumpgpd.Evolution.WilsonCoef">[docs]</a>
 <span class="k">def</span> <span class="nf">WilsonCoef</span><span class="p">(</span><span class="n">j</span><span class="p">:</span> <span class="nb">complex</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">complex</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Leading-order Wilson coefficient, elements used in both DVCS and DVMP</span>
 
@@ -1314,7 +1314,7 @@
 
 
 <div class="viewcode-block" id="WilsonCoef_DVCS_LO">
-<a class="viewcode-back" href="../../gumpgpd.html#gumpgpd.Evolution.WilsonCoef_DVCS_LO">[docs]</a>
+<a class="viewcode-back" href="../../Evolution.html#gumpgpd.Evolution.WilsonCoef_DVCS_LO">[docs]</a>
 <span class="k">def</span> <span class="nf">WilsonCoef_DVCS_LO</span><span class="p">(</span><span class="n">j</span><span class="p">:</span> <span class="nb">complex</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">complex</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;LO Wilson coefficient of DVCS in the evolution basis (qVal, q_du_plus, q_du_minus, qSigma, g)</span>
 <span class="sd">        </span>
@@ -1337,7 +1337,7 @@
 
 
 <div class="viewcode-block" id="WilsonCoef_DVCS_NLO">
-<a class="viewcode-back" href="../../gumpgpd.html#gumpgpd.Evolution.WilsonCoef_DVCS_NLO">[docs]</a>
+<a class="viewcode-back" href="../../Evolution.html#gumpgpd.Evolution.WilsonCoef_DVCS_NLO">[docs]</a>
 <span class="k">def</span> <span class="nf">WilsonCoef_DVCS_NLO</span><span class="p">(</span><span class="n">j</span><span class="p">:</span> <span class="nb">complex</span><span class="p">,</span> <span class="n">nf</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">Q</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">mu</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">p</span><span class="p">:</span><span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">complex</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;NLO Wilson coefficient of DVCS in the evolution basis (qVal, q_du_plus, q_du_minus, qSigma, g)</span>
 <span class="sd">    Check eqs. (127)-(130) of https://arxiv.org/pdf/hep-ph/0703179 </span>
@@ -1379,7 +1379,7 @@
 
 
 <div class="viewcode-block" id="WilsonCoef_DVMP_LO">
-<a class="viewcode-back" href="../../gumpgpd.html#gumpgpd.Evolution.WilsonCoef_DVMP_LO">[docs]</a>
+<a class="viewcode-back" href="../../Evolution.html#gumpgpd.Evolution.WilsonCoef_DVMP_LO">[docs]</a>
 <span class="k">def</span> <span class="nf">WilsonCoef_DVMP_LO</span><span class="p">(</span><span class="n">j</span><span class="p">:</span> <span class="nb">complex</span><span class="p">,</span> <span class="n">nf</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">muf</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span><span class="n">meson</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">complex</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;LO Wilson coefficient of DVMP in the evolution basis (qVal, q_du_plus, q_du_minus, qSigma, g)</span>
 
@@ -1418,7 +1418,7 @@
 
 
 <div class="viewcode-block" id="WilsonCoef_DVMP_NLO">
-<a class="viewcode-back" href="../../gumpgpd.html#gumpgpd.Evolution.WilsonCoef_DVMP_NLO">[docs]</a>
+<a class="viewcode-back" href="../../Evolution.html#gumpgpd.Evolution.WilsonCoef_DVMP_NLO">[docs]</a>
 <span class="k">def</span> <span class="nf">WilsonCoef_DVMP_NLO</span><span class="p">(</span><span class="n">j</span><span class="p">:</span> <span class="nb">complex</span><span class="p">,</span> <span class="n">k</span><span class="p">:</span> <span class="nb">complex</span><span class="p">,</span> <span class="n">nf</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">Q</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">muf</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">meson</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">p</span><span class="p">:</span><span class="nb">int</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;NLO Wilson coefficient of DVMP in the evolution basis (qVal, q_du_plus, q_du_minus, qSigma, g)</span>
 <span class="sd">  </span>
@@ -1563,7 +1563,7 @@
 
 
 <div class="viewcode-block" id="Moment_Evo_LO">
-<a class="viewcode-back" href="../../gumpgpd.html#gumpgpd.Evolution.Moment_Evo_LO">[docs]</a>
+<a class="viewcode-back" href="../../Evolution.html#gumpgpd.Evolution.Moment_Evo_LO">[docs]</a>
 <span class="k">def</span> <span class="nf">Moment_Evo_LO</span><span class="p">(</span><span class="n">j</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">,</span> <span class="n">nf</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">p</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">mu</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">ConfFlav</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Leading order evolution of moments in the flavor space </span>
 
@@ -1610,7 +1610,7 @@
 
 
 <div class="viewcode-block" id="Moment_Evo_LO_NSp1">
-<a class="viewcode-back" href="../../gumpgpd.html#gumpgpd.Evolution.Moment_Evo_LO_NSp1">[docs]</a>
+<a class="viewcode-back" href="../../Evolution.html#gumpgpd.Evolution.Moment_Evo_LO_NSp1">[docs]</a>
 <span class="k">def</span> <span class="nf">Moment_Evo_LO_NSp1</span><span class="p">(</span><span class="n">j</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">,</span> <span class="n">nf</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">p</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">mu</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">ConfFlav</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Leading order evolution of moments in the flavor space for non-singlet vector moments</span>
 
@@ -1663,7 +1663,7 @@
 
 
 <div class="viewcode-block" id="CFF_Evo_LO">
-<a class="viewcode-back" href="../../gumpgpd.html#gumpgpd.Evolution.CFF_Evo_LO">[docs]</a>
+<a class="viewcode-back" href="../../Evolution.html#gumpgpd.Evolution.CFF_Evo_LO">[docs]</a>
 <span class="k">def</span> <span class="nf">CFF_Evo_LO</span><span class="p">(</span><span class="n">j</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">,</span> <span class="n">nf</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">p</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">mu</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">ConfFlav</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Leading order evolution of the combination of DVCS Wilson coefficient and conformal moments</span>
 
@@ -1713,7 +1713,7 @@
 
 
 <div class="viewcode-block" id="TFF_Evo_LO">
-<a class="viewcode-back" href="../../gumpgpd.html#gumpgpd.Evolution.TFF_Evo_LO">[docs]</a>
+<a class="viewcode-back" href="../../Evolution.html#gumpgpd.Evolution.TFF_Evo_LO">[docs]</a>
 <span class="k">def</span> <span class="nf">TFF_Evo_LO</span><span class="p">(</span><span class="n">j</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">,</span> <span class="n">nf</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">p</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">mu</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">ConfFlav</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">,</span> <span class="n">meson</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Leading order evolution of the combination of DVMP Wilson coefficient and conformal moments</span>
 
@@ -1764,7 +1764,7 @@
 
 
 <div class="viewcode-block" id="DVMP_WCoef_Evo_NLO">
-<a class="viewcode-back" href="../../gumpgpd.html#gumpgpd.Evolution.DVMP_WCoef_Evo_NLO">[docs]</a>
+<a class="viewcode-back" href="../../Evolution.html#gumpgpd.Evolution.DVMP_WCoef_Evo_NLO">[docs]</a>
 <span class="nd">@Hybrid_Cache_ArrayFirst</span>
 <span class="k">def</span> <span class="nf">DVMP_WCoef_Evo_NLO</span><span class="p">(</span><span class="n">j</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">,</span> <span class="n">nf</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">p</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">Q</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">meson</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">muf</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Next-to-leading order evolution of the DVMP Wilson coefficient (Evolved Wilson coefficient method)</span>
@@ -1897,7 +1897,7 @@
 
 
 <div class="viewcode-block" id="TFF_Evo_NLO_evWC">
-<a class="viewcode-back" href="../../gumpgpd.html#gumpgpd.Evolution.TFF_Evo_NLO_evWC">[docs]</a>
+<a class="viewcode-back" href="../../Evolution.html#gumpgpd.Evolution.TFF_Evo_NLO_evWC">[docs]</a>
 <span class="k">def</span> <span class="nf">TFF_Evo_NLO_evWC</span><span class="p">(</span><span class="n">j</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">,</span> <span class="n">nf</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">p</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">Q</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">ConfFlav</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">,</span> <span class="n">meson</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">muf</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Next-to-leading order evolved DVMP Wilson coefficients in the flavor space combined with the conformal moments (Evolved Wilson coefficient method)</span>
 <span class="sd">    </span>
@@ -1943,7 +1943,7 @@
 
 
 <div class="viewcode-block" id="DVCS_WCoef_Evo_NLO">
-<a class="viewcode-back" href="../../gumpgpd.html#gumpgpd.Evolution.DVCS_WCoef_Evo_NLO">[docs]</a>
+<a class="viewcode-back" href="../../Evolution.html#gumpgpd.Evolution.DVCS_WCoef_Evo_NLO">[docs]</a>
 <span class="nd">@Hybrid_Cache_ArrayFirst</span>
 <span class="k">def</span> <span class="nf">DVCS_WCoef_Evo_NLO</span><span class="p">(</span><span class="n">j</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">,</span> <span class="n">nf</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">p</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">Q</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">muf</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Next-to-leading order evolution of the DVCS Wilson coefficient (Evolved Wilson coefficient method)</span>
@@ -2075,7 +2075,7 @@
 
 
 <div class="viewcode-block" id="CFF_Evo_NLO_evWC">
-<a class="viewcode-back" href="../../gumpgpd.html#gumpgpd.Evolution.CFF_Evo_NLO_evWC">[docs]</a>
+<a class="viewcode-back" href="../../Evolution.html#gumpgpd.Evolution.CFF_Evo_NLO_evWC">[docs]</a>
 <span class="k">def</span> <span class="nf">CFF_Evo_NLO_evWC</span><span class="p">(</span><span class="n">j</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">,</span> <span class="n">nf</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">p</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">Q</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">ConfFlav</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">,</span> <span class="n">muf</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Next-to-leading order evolved DVCS Wilson coefficients in the flavor space combined with the conformal moments (Evolved Wilson coefficient method)</span>
 <span class="sd">    </span>
@@ -2163,7 +2163,7 @@
 <span class="c1"># Turn off the cache to reduce hashing time if only one evolved moment is calculated for a set of parameters at a given kinematics. Otherwise cache it.</span>
 <span class="c1">#@np_cache_GPD_moment</span>
 <div class="viewcode-block" id="Moment_Evo_NLO">
-<a class="viewcode-back" href="../../gumpgpd.html#gumpgpd.Evolution.Moment_Evo_NLO">[docs]</a>
+<a class="viewcode-back" href="../../Evolution.html#gumpgpd.Evolution.Moment_Evo_NLO">[docs]</a>
 <span class="k">def</span> <span class="nf">Moment_Evo_NLO</span><span class="p">(</span><span class="n">j</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">,</span> <span class="n">nf</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">p</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">mu</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">t</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">xi</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">Para</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">,</span> <span class="n">momshift</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Next-to-leading order evolution of the conformal moments (Evolved moment method)</span>
 
@@ -2333,7 +2333,7 @@
 
 
 <div class="viewcode-block" id="TFF_Evo_NLO_evMOM">
-<a class="viewcode-back" href="../../gumpgpd.html#gumpgpd.Evolution.TFF_Evo_NLO_evMOM">[docs]</a>
+<a class="viewcode-back" href="../../Evolution.html#gumpgpd.Evolution.TFF_Evo_NLO_evMOM">[docs]</a>
 <span class="k">def</span> <span class="nf">TFF_Evo_NLO_evMOM</span><span class="p">(</span><span class="n">j</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">,</span> <span class="n">nf</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">p</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">Q</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">t</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">xi</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">Para</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">,</span> <span class="n">momshift</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">meson</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">muf</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Next-to-leading order evolved conformal moments combined with the DVMP Wilson coefficients in the evolution space (Evolved moment method)</span>
 <span class="sd">    </span>
@@ -2393,7 +2393,7 @@
 
 
 <div class="viewcode-block" id="CFF_Evo_NLO_evMOM">
-<a class="viewcode-back" href="../../gumpgpd.html#gumpgpd.Evolution.CFF_Evo_NLO_evMOM">[docs]</a>
+<a class="viewcode-back" href="../../Evolution.html#gumpgpd.Evolution.CFF_Evo_NLO_evMOM">[docs]</a>
 <span class="k">def</span> <span class="nf">CFF_Evo_NLO_evMOM</span><span class="p">(</span><span class="n">j</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">,</span> <span class="n">nf</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">p</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">Q</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">t</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">xi</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">Para</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">,</span> <span class="n">momshift</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">muf</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Next-to-leading order evolved conformal moments combined with the DVCS Wilson coefficients in the evolution space (Evolved moment method)</span>
 <span class="sd">    </span>
@@ -2453,7 +2453,7 @@
 
 
 <div class="viewcode-block" id="GPD_Moment_Evo_NLO">
-<a class="viewcode-back" href="../../gumpgpd.html#gumpgpd.Evolution.GPD_Moment_Evo_NLO">[docs]</a>
+<a class="viewcode-back" href="../../Evolution.html#gumpgpd.Evolution.GPD_Moment_Evo_NLO">[docs]</a>
 <span class="k">def</span> <span class="nf">GPD_Moment_Evo_NLO</span><span class="p">(</span><span class="n">j</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">,</span> <span class="n">nf</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">p</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">mu</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">t</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">xi</span><span class="p">:</span> <span class="nb">complex</span><span class="p">,</span> <span class="n">Para</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">,</span> <span class="n">momshift</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Next-to-leading order evolved conformal moments in the evolution basis (Evolved moment method)</span>
 <span class="sd">    </span>
@@ -2491,7 +2491,7 @@
 
 
 <div class="viewcode-block" id="diagonal_evolution_NLO">
-<a class="viewcode-back" href="../../gumpgpd.html#gumpgpd.Evolution.diagonal_evolution_NLO">[docs]</a>
+<a class="viewcode-back" href="../../Evolution.html#gumpgpd.Evolution.diagonal_evolution_NLO">[docs]</a>
 <span class="nd">@Ram_Cache_ArrayFirst</span>
 <span class="k">def</span> <span class="nf">diagonal_evolution_NLO</span><span class="p">(</span><span class="n">j</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">nf</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">p</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">mu</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
@@ -2569,7 +2569,7 @@
 <span class="sd">&#39;&#39;&#39;</span>
 
 <div class="viewcode-block" id="tPDF_Moment_Evo_NLO">
-<a class="viewcode-back" href="../../gumpgpd.html#gumpgpd.Evolution.tPDF_Moment_Evo_NLO">[docs]</a>
+<a class="viewcode-back" href="../../Evolution.html#gumpgpd.Evolution.tPDF_Moment_Evo_NLO">[docs]</a>
 <span class="k">def</span> <span class="nf">tPDF_Moment_Evo_NLO</span><span class="p">(</span><span class="n">j</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">,</span> <span class="n">nf</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">p</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">mu</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">ConfFlav</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;FORWARD Next-to-leading order evolved conformal moments in the evolution basis (Evolved moment method)    </span>
 <span class="sd">    </span>
@@ -2620,7 +2620,7 @@
 
 
 <div class="viewcode-block" id="tPDF_Moment_Evo_NLO_NSp1">
-<a class="viewcode-back" href="../../gumpgpd.html#gumpgpd.Evolution.tPDF_Moment_Evo_NLO_NSp1">[docs]</a>
+<a class="viewcode-back" href="../../Evolution.html#gumpgpd.Evolution.tPDF_Moment_Evo_NLO_NSp1">[docs]</a>
 <span class="k">def</span> <span class="nf">tPDF_Moment_Evo_NLO_NSp1</span><span class="p">(</span><span class="n">j</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">,</span> <span class="n">nf</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">p</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">mu</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">ConfFlav</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;FORWARD Next-to-leading order evolved conformal moments in the evolution basis (Evolved moment method)    </span>
 <span class="sd">    </span>
@@ -2698,7 +2698,7 @@
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2024, Yuxun Guo. et. al..</p>
+    <p>&#169; Copyright 2026, Yuxun Guo. et. al..</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a

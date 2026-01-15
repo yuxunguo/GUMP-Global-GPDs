@@ -5,7 +5,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>gumpgpd.DVMP_xsec &mdash; GUMP GPD Analysis 0.5.0 documentation</title>
+  <title>gumpgpd.DVMP_xsec &mdash; GUMP GPD Analysis 1.0.2 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=80d5e7a1" />
       <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
@@ -13,7 +13,7 @@
   
       <script src="../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../_static/documentation_options.js?v=1dd76d02"></script>
+      <script src="../../_static/documentation_options.js?v=1ed6394b"></script>
       <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
       <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -112,7 +112,7 @@
 <span class="sd">&quot;&quot;&quot;</span>
 
 <div class="viewcode-block" id="R">
-<a class="viewcode-back" href="../../gumpgpd.html#gumpgpd.DVMP_xsec.R">[docs]</a>
+<a class="viewcode-back" href="../../DVMP_xsec.html#gumpgpd.DVMP_xsec.R">[docs]</a>
 <span class="k">def</span> <span class="nf">R</span><span class="p">(</span><span class="n">Q</span><span class="p">:</span><span class="nb">float</span><span class="p">,</span> <span class="n">a</span><span class="p">:</span><span class="nb">float</span><span class="p">,</span> <span class="n">p</span><span class="p">:</span><span class="nb">float</span><span class="p">,</span> <span class="n">meson</span><span class="p">:</span><span class="nb">int</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot; The R ratio: Longitudinal DVMP cross section/ Transverse DVMP cross section</span>
 <span class="sd">    </span>
@@ -175,7 +175,7 @@
 
 <span class="c1"># Defining the chi² cost function for fitting a, p to the ρ–data:</span>
 <div class="viewcode-block" id="R_rho_cost">
-<a class="viewcode-back" href="../../gumpgpd.html#gumpgpd.DVMP_xsec.R_rho_cost">[docs]</a>
+<a class="viewcode-back" href="../../DVMP_xsec.html#gumpgpd.DVMP_xsec.R_rho_cost">[docs]</a>
 <span class="k">def</span> <span class="nf">R_rho_cost</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">p</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Cost function for R(Q) using H1 and Zeus data combined.</span>
@@ -202,7 +202,7 @@
 
 <span class="c1">#Using iminuit to minimize the cost function and extract best–fit values:</span>
 <div class="viewcode-block" id="R_rho_fit">
-<a class="viewcode-back" href="../../gumpgpd.html#gumpgpd.DVMP_xsec.R_rho_fit">[docs]</a>
+<a class="viewcode-back" href="../../DVMP_xsec.html#gumpgpd.DVMP_xsec.R_rho_fit">[docs]</a>
 <span class="nd">@cache</span>
 <span class="k">def</span> <span class="nf">R_rho_fit</span><span class="p">():</span>
 
@@ -224,7 +224,7 @@
 
 
 <div class="viewcode-block" id="R_fitted">
-<a class="viewcode-back" href="../../gumpgpd.html#gumpgpd.DVMP_xsec.R_fitted">[docs]</a>
+<a class="viewcode-back" href="../../DVMP_xsec.html#gumpgpd.DVMP_xsec.R_fitted">[docs]</a>
 <span class="k">def</span> <span class="nf">R_fitted</span><span class="p">(</span><span class="n">Q</span><span class="p">,</span> <span class="n">meson</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span><span class="mi">1</span><span class="p">):</span>
     
     <span class="k">assert</span> <span class="n">meson</span> <span class="o">==</span> <span class="mi">1</span><span class="p">,</span> <span class="s1">&#39;Not implemented yet, only rho meson (=1) now!&#39;</span>
@@ -283,7 +283,7 @@
 <span class="sd">&quot;&quot;&quot;</span>
 
 <div class="viewcode-block" id="epsilon">
-<a class="viewcode-back" href="../../gumpgpd.html#gumpgpd.DVMP_xsec.epsilon">[docs]</a>
+<a class="viewcode-back" href="../../DVMP_xsec.html#gumpgpd.DVMP_xsec.epsilon">[docs]</a>
 <span class="k">def</span> <span class="nf">epsilon</span><span class="p">(</span><span class="n">y</span><span class="p">:</span><span class="nb">float</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot; Photon polarizability.</span>
 
@@ -298,7 +298,7 @@
 
 
 <div class="viewcode-block" id="MassCorr">
-<a class="viewcode-back" href="../../gumpgpd.html#gumpgpd.DVMP_xsec.MassCorr">[docs]</a>
+<a class="viewcode-back" href="../../DVMP_xsec.html#gumpgpd.DVMP_xsec.MassCorr">[docs]</a>
 <span class="k">def</span> <span class="nf">MassCorr</span><span class="p">(</span><span class="n">meson</span><span class="p">:</span><span class="nb">int</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot; Mass corrections </span>
 
@@ -376,7 +376,7 @@
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2024, Yuxun Guo. et. al..</p>
+    <p>&#169; Copyright 2026, Yuxun Guo. et. al..</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a

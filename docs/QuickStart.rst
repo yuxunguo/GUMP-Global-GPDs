@@ -10,133 +10,175 @@ More resources and references are given at :ref:`Citation/Acknowledgement`.
 
 Installation
 ------------
-There are two ways to access this package: for ordinary user, install the public version with the command ``pip install gumpgpd``.
+There are two ways to access this package: 
+For ordinary user, ``pip install gumpgpd`` install the public version.
 For the lastest developper version, download the source code from the `GitHub <https://github.com/yuxunguo/GUMP-Global-GPDs/tree/GUMP1.0>`_ page 
-(make sure that the correct branch is used!), and run ``pip install -e .`` to install in “editable” mode.
-The later allows you to edit the source code to generate results not directly accessible via the given interface.
+(make sure that the correct branch is used!), and run ``pip install -e .`` in the root folder to install in editable mode.
+
+The later mode allows you to edit the source code to generate results not directly accessible via the integrated interface.
+This mode is only recommended if you are familiar with the GUMP code already. 
+If you need interface for any customized observables not directly accessible in the public version, contact `Yuxun Guo <mailto:youuungx@gmail.com>`_ to request.
 
 Parameters and model setting
 ----------------------------
-To start with, you will need a set of parameter as well as models for the GPDs. 
-In the GUMP framework, we consider modeling in the conformal moment space which have many benefits.
-The details are documented in the :ref:`Parameters module`. 
-In genearl, a GPD model should take a set of parameter and generate moments in the conformal spin j space for all flavors, since they will be mixed under evolutions.
 
-For a quick start, we suggest using the GUMP parameterization and the best-fit parameters we obtained in previous work from 
-`DVMP <https://inspirehep.net/literature/2833822>`_ and `DVCS <https://inspirehep.net/literature/2632776>`_ analyses.
-These parameters are stored within the package:
+The GUMP framework is written in a form that is convenient for cutomized GPD model.
+For ordinary user, the GUMP parameterization will be loaded by default. 
+The parameters are obtained through a global analysis process and they are stored in ``gumpgpd.Minimizer``
+and can be retrieved via:
 
 .. code-block:: py
      :name: parameters input
 
-     import pandas as pd
-     import os
-     dir_path = os.path.dirname(os.path.realpath(__file__))
-
-     Paralst_Unp=pd.read_csv(os.path.join(dir_path,'GUMP_Params/Para_Unp.csv'), header=None).to_numpy()[0]
-     Paralst_Pol=pd.read_csv(os.path.join(dir_path,'GUMP_Params/Para_Pol.csv'), header=None).to_numpy()[0]      
-
-These parameter shall be fed to the parameters managers:
-
-.. code-block:: py
-     :name: parameters managers
+     import gumpgpd.Minimizer as gM
      
-     from Parameters import ParaManager_Unp, ParaManager_Pol
-     Para_Unp = ParaManager_Unp(np.array(Paralst_Unp[:-2]))
-     Para_Pol = ParaManager_Pol(np.array(Paralst_Pol))
+     para_unp  = gM.Para_Unp_off_forward
+     para_pol  = gM.Para_Pol_off_forward
+     para_comb = gM.Para_Comb_off_forward
 
-Note that there are two parameters not needed for the GPDs (they are parameters for the cross-sections only).
-So they shall not be fed to the parameter manager.
-You can make your own model and modfies the parameter managers correspondingly.
+The above three high-dimensional numpy arrays stand for the best-fit parameters for the unpolarized (vector) and polarized (axial-vector) GPDs and their combination, respectively.
 
-Calculation of GPDs and observables
------------------------------------
-With the above model we can in principle calcualte anythings that the :ref:`Observables module` allow to do. 
-In the following, we present some simple examples that calculate the obserbales of interestes.
+**In most case, you won't need to modify them, unless you want to tune the parameters.**
 
-Leading-order Compton Form factors
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+In case when you need to modify the parameterization and modelling of GPDs directly,
+they are provided in the :ref:`Parameters module`.
+Note that the GPD models must be analytic in the complex j-space, 
+so not all models can be directly implemented in the GUMP framework.
 
-For instance, we can use :meth:`Observables.GPDobserv.CFF` to calculate the Compton form factors (CFFs) 
-at leading order (next-to-leading order working in progress). 
-And we can test that the imaginary part of the leading order CFF agree with the GPD at :math:`x=\xi` as shown in the following:
+Calculation observables with existing interface
+------------------------------------------------
 
-.. code-block:: py
-     :name: CFF LO
+With the above model we can in principle calcualte anythings that the :ref:`Observables module` allows. 
+We start with observables with integrated interface, which are also presented 
+in the Example folder of `GitHub <https://github.com/yuxunguo/GUMP-Global-GPDs/tree/GUMP1.0>`_.
 
-     from Observables import GPDobserv
+Samples of GPDs and Generalized Form factors (GFFs)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-     # Test of LO ImCFF and quark GPD evolved to mu =5 GeV
-      
-     Para_H = Para_Unp[0]  # Para_Unp = (Para_H ,Para_E) for the H and E GPDs respectively
-     x=0.0001
-     _GPD_theo = GPDobserv(x,x,0.0,5.0,1)  # Each obserbales requires (x,xi,t,mu,p)
-     _GPD_theo2 = GPDobserv(-x,x,0.0,5.0,1)
-
-     CFF = _GPD_theo.CFF(Para_spe,5.0)
-
-     print(CFF)
-
-     gpd1 = (_GPD_theo.GPD('u',Para_spe))* (2/3) ** 2
-     gpd2 = (_GPD_theo2.GPD('u',Para_spe))* (2/3) ** 2
-     gpd3 = (_GPD_theo.GPD('d',Para_spe))* (1/3) ** 2
-     gpd4 = (_GPD_theo2.GPD('d',Para_spe))* (1/3) ** 2
-
-     print(np.pi*(gpd1-gpd2+gpd3-gpd4))
-
-Leading-order Transition Form factors
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-The same for the LO Transition form factors (TFFs) with :meth:`Observables.GPDobserv.TFF`. 
-Note that in our definition, the TFFs absorp many prefactors like the :math:`1/N_c` color factor and the meson decay constant
-:math:`f_{\phi}` and the charge factor :math:`e_c=2/3` for charm quark, and so on. 
+In the ``gumpgpd`` package, we provide integrated interface to calculate grid of GPDs and their reductions:
+Parton Distributions Functions (PDFs), t-dependent PDFs (tPDFs) and Generalized Form factors (GFFs).
+To do so, we need the ``gM.Para_Comb_off_forward``. An example is presented below:
 
 .. code-block:: py
-     :name: TFF LO
+     :name: GPD and all
 
-     # Test of LO ImTFF and gluon GPD evolved to mu = 5 GeV
+     from gumpgpd.Minimizer import *
 
-     Para_H = Para_Unp[0]
-     x=0.0001
-
-     _GPD_theo = GPDobserv(x,x,0.0,5.0,1)
-     TFF = _GPD_theo.TFF(Para_spe,5.0,3)
-     print(TFF)
-
-     gpd1 = (_GPD_theo.GPD('g',Para_spe))
-     f_jpsi= 0.406
-     CF=4/3
-     NC=3
-     prefact = np.pi * 3 * f_jpsi / NC /x * 2/3
-
-     print(prefact*gpd1)
-
-NLO Transition Form factors
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
-We can also calculate TFF at next-to-leading order (NLO) where we currently only has singlet and gluon contributions (non-singlet working in progress).
-Three functions can do this :meth:`Observables.GPDobserv.TFF` with ``p_order =2`` is equivalent to :meth:`Observables.GPDobserv.TFFNLO` .
-Whereas the :meth:`Observables.GPDobserv.TFFNLO_evMom` uses the eolved moment method that provides a cross-check. 
-
-The results are virtually the same:
-
-.. code-block:: py
-     :name: TFF NLO
-
-     # Test of two methods of calculating TFF evolved to mu =5 GeV
+     if __name__ == '__main__':
      
-     Para_H = Para_Unp[0]
-     x=0.0001
-     _GPD_theo = GPDobserv(x,x,0.0,5.0,1)
-     TFF1 = _GPD_theo.TFFNLO(Para_spe,5.0, meson = 3, flv ='All')
-     print(TFF1)
-     TFF2 = _GPD_theo.TFFNLO_evMom(Para_spe,5.0, meson = 3, flv ='All')
-     print(TFF2)
+          PDF_pred  = PDF_theo(PDF_data,    Para = Para_Comb_off_forward) #  PDF calculation
+          tPDF_pred = tPDF_theo(tPDF_data,  Para = Para_Comb_off_forward) #  tPDF calculation
+          GPD_pred  = GPD_theo(GPD_data,    Para = Para_Comb_off_forward) #  GPD calculation
+          GFF_pred  = GFF_theo(GFF_data,    Para = Para_Comb_off_forward) #  GFF calculation
 
-Some notes on genearl observables
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+We emphasize that it is important to wrap them in ``if __name__ == '__main__':``
+because we have used ``multiprocessing.Pool()`` to parallelize the calculations.
 
-It will be numerically demanding to generate GPDs at different x to calculate TFF/CFFs or other amplitudes,
-since each point would requires an inverse transform to x-space that's essentially one or two (if NLO evolutions are used) layers of integral.
-But this might be the only options if the Wilson coefficients in the conformal spin space are not known.
+The input ``PDF_data``, ``GPD_data``, ``tPDF_data``, ``GFF_data`` are the data we used in the global analysis.
+For customized calcualtions, generate your own dataframe following this example:
 
-Be cautious!
+.. code-block:: py
+     :name: data example
+
+     xarr = np.linspace(0.1, 0.6, 50)    
+     tarr = np.linspace(-0.5, 0., 2)    
+
+     # Create all combinations using meshgrid and flatten
+     X, T = np.meshgrid(xarr, tarr)
+     x_list = X.flatten()
+     t_list = T.flatten()
+
+     # Create a DataFrame
+     GPDs = pd.DataFrame({
+               'x': x_list,
+               'xi':0.3,
+               't': t_list,
+               'Q': 3.0,
+               'spe': 0,
+               'flv': 'NS'
+               })
+
+     result = GPD_theo(GPDs, Para=Para_Comb_off_forward)
+
+The only requirements is that these dataframe must contain the needed columns which are:
+
+.. code-block:: py
+     :name: data format
+
+     PDF_data_names = ['x', 't', 'Q', 'spe', 'flv']
+     tPDF_data_names = ['x', 't', 'Q', 'spe', 'flv'] # The same as PDF
+     GPD_data_names = ['x', 'xi', 't', 'Q', 'spe', 'flv']
+     GFF_data_names = ['j', 't', 'Q', 'spe', 'flv']
+
+
+We note that in the gumpgpd framework, ``'x', 'xi', 't'`` denote the standard GPD variable, 
+``'Q'`` stands for the factorization scale, ``'spe'`` takes 0,1,2,3 for :math:`H,E,\tilde{H},\tilde{E}` GPDs
+and ``'flv'= 'u','d','g','NS','S'`` for up quark, down quark, gluon, u-d, and u+d.
+Again, those code are collected in the Example folder of `GitHub <https://github.com/yuxunguo/GUMP-Global-GPDs/tree/GUMP1.0>`_.
+
+Calculation of experimental cross-sections and asymmetries
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The above workflow can be easily generalized to calculate experimental observables.
+
+.. code-block:: py
+     :name: cross-sections and all
+
+     from gumpgpd.Minimizer import *
+
+     if __name__ == '__main__':
+     
+          DVCS_pred_xBtQ       = DVCSxsec_theo(DVCSxsec_data,
+                                                  Para_Unp = Para_Unp_off_forward, 
+                                                  Para_Pol = Para_Pol_off_forward, 
+                                                  P_order = 2)
+          DVCS_HERA_pred_xBtQ  = DVCSxsecHERA_theo(DVCSxsec_HERA_data, 
+                                                  Para_Unp = Para_Unp_off_forward, 
+                                                  Para_Pol = Para_Pol_off_forward,
+                                                  P_order = 2)
+          DVCS_Asym_pred_xBtQ  = DVCSAsym_theo(DVCSAsym_data, 
+                                                  Para_Unp = Para_Unp_off_forward, 
+                                                  Para_Pol = Para_Pol_off_forward, 
+                                                  P_order = 2)
+          DVrhoPH1_pred_xBtQ   = DVMPxsec_theo(DVrhoPH1xsecL_data, 
+                                                  Para_Unp = Para_Unp_off_forward, 
+                                                  xsec_norm = 1, meson = 1, p_order = 2)
+
+Besides the parameters, we have P_order controlling the perturbative order: 1 for leading-order and 2 for next-to-leading order. 
+(beyond not implemented yet). Meson = 1 for rho meson =3 for J/psi meson (Others not implemented yet). 
+xsec_norm is an extra normalization typically not needed.
+
+An extra care that needs to be taken care of is that, since the Compton/Transition form factors only depends on (xB,t,Q),
+it would be preferrable to calculate cross-sections in groups of (xB,t,Q). 
+The packge provide a ``group_by_unique()`` tool to do this with the following example:
+
+.. code-block:: py
+     :name: cross-sections group
+
+     from gumpgpd.Minimizer import group_by_unique
+
+     DVCSxsec_data = pd.read_csv(_DataFilePath_, header = None, names = ['y', 'xB', 't', 'Q', 'phi', 'f', 'delta f', 'pol'] , dtype = {'y': float, 'xB': float, 't': float, 'Q': float, 'phi': float, 'f': float, 'delta f': float, 'pol': str})
+     DVCSxsec_group_data = group_by_unique(DVCSxsec_data)
+
+Note that ``'f','delta f'`` is not complusory, while ``'pol'`` is. 
+It must take the form of ``'PbPt'`` where ``'Pb'='U' or 'L'`` for beam polarization and 
+``'Pt'='U', 'L', 'Tin', 'Tout'`` for target polarizations.
+So a typical ``'pol'`` would be, e.g., ``'UTin'`` for unpolarized beam and transversely polarized target. 
+Definition of the two different transversely polarizated target can be found here: `DVCS <https://inspirehep.net/literature/1925449>`_
+
+Calculation observables without existing interface
+--------------------------------------------------
+
+There are also ways to calcuate observables that are not directly accessible with the above integrated dataframe interface.
+They require you to directly call the corresponding function for the calculations. Here are some examples:
+
+.. warning::   
+   Working in progress.
+
+
+Other possible calculations
+--------------------------------------------------
+
+The current framework also allows one to calculate things not implemented yet.
+Nevertheless, it's not recommended unless you are familiar with their moment-space implementation as well as the GUMP framework.
+Contact `Yuxun Guo <mailto:youuungx@gmail.com>`_ to request.

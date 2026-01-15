@@ -5,7 +5,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>gumpgpd.Minimizer &mdash; GUMP GPD Analysis 0.5.0 documentation</title>
+  <title>gumpgpd.Minimizer &mdash; GUMP GPD Analysis 1.0.2 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=80d5e7a1" />
       <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
@@ -13,7 +13,7 @@
   
       <script src="../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../_static/documentation_options.js?v=1dd76d02"></script>
+      <script src="../../_static/documentation_options.js?v=1ed6394b"></script>
       <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
       <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -141,7 +141,7 @@
 <span class="n">Paralst_Aux_Names</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;jpsinorm&quot;</span><span class="p">]</span> 
 
 <div class="viewcode-block" id="validate_params">
-<a class="viewcode-back" href="../../gumpgpd.html#gumpgpd.Minimizer.validate_params">[docs]</a>
+<a class="viewcode-back" href="../../Minimizer.html#gumpgpd.Minimizer.validate_params">[docs]</a>
 <span class="k">def</span> <span class="nf">validate_params</span><span class="p">(</span><span class="n">params</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span> <span class="n">required_names</span><span class="p">:</span> <span class="nb">set</span><span class="p">):</span>
     <span class="n">param_keys</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">params</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
 
@@ -165,7 +165,7 @@
 <span class="n">SAVE_TO_FILE</span> <span class="o">=</span> <span class="kc">True</span>
 <span class="n">SAVE_TO_FILE_PATH</span> <span class="o">=</span> <span class="s1">&#39;.&#39;</span>
 <div class="viewcode-block" id="Export_Frame_Append">
-<a class="viewcode-back" href="../../gumpgpd.html#gumpgpd.Minimizer.Export_Frame_Append">[docs]</a>
+<a class="viewcode-back" href="../../Minimizer.html#gumpgpd.Minimizer.Export_Frame_Append">[docs]</a>
 <span class="k">def</span> <span class="nf">Export_Frame_Append</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">filename</span><span class="p">,</span> <span class="n">export_path</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
 
     <span class="k">if</span> <span class="n">export_path</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
@@ -196,7 +196,7 @@
         <span class="n">_pool</span> <span class="o">=</span> <span class="kc">None</span>
 
 <div class="viewcode-block" id="get_pool">
-<a class="viewcode-back" href="../../gumpgpd.html#gumpgpd.Minimizer.get_pool">[docs]</a>
+<a class="viewcode-back" href="../../Minimizer.html#gumpgpd.Minimizer.get_pool">[docs]</a>
 <span class="k">def</span> <span class="nf">get_pool</span><span class="p">(</span><span class="n">processes</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
     <span class="k">global</span> <span class="n">_pool</span>
     <span class="k">if</span> <span class="n">_pool</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
@@ -206,13 +206,13 @@
 
 
 <div class="viewcode-block" id="close_pool">
-<a class="viewcode-back" href="../../gumpgpd.html#gumpgpd.Minimizer.close_pool">[docs]</a>
+<a class="viewcode-back" href="../../Minimizer.html#gumpgpd.Minimizer.close_pool">[docs]</a>
 <span class="k">def</span> <span class="nf">close_pool</span><span class="p">():</span>
     <span class="n">_cleanup_pool</span><span class="p">()</span></div>
 
 
 <div class="viewcode-block" id="group_by_unique">
-<a class="viewcode-back" href="../../gumpgpd.html#gumpgpd.Minimizer.group_by_unique">[docs]</a>
+<a class="viewcode-back" href="../../Minimizer.html#gumpgpd.Minimizer.group_by_unique">[docs]</a>
 <span class="k">def</span> <span class="nf">group_by_unique</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">subset</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;xB&#39;</span><span class="p">,</span> <span class="s1">&#39;t&#39;</span><span class="p">,</span> <span class="s1">&#39;Q&#39;</span><span class="p">]):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Group a DataFrame by unique combinations of specified columns.</span>
@@ -282,7 +282,7 @@
 <span class="sd">&quot;&quot;&quot;</span>
 
 <div class="viewcode-block" id="DVMP_L_Error_Prop">
-<a class="viewcode-back" href="../../gumpgpd.html#gumpgpd.Minimizer.DVMP_L_Error_Prop">[docs]</a>
+<a class="viewcode-back" href="../../Minimizer.html#gumpgpd.Minimizer.DVMP_L_Error_Prop">[docs]</a>
 <span class="k">def</span> <span class="nf">DVMP_L_Error_Prop</span><span class="p">(</span><span class="n">DVMP_tot_xsec</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">meson</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span><span class="mi">1</span><span class="p">):</span> 
 <span class="w">    </span><span class="sd">&quot;&quot;&quot; Error propagation for dσ_L /dt= (dσ_tot /dt) / (ε(y) + 1/R(Q;a,p,meson)).</span>
 
@@ -426,7 +426,7 @@
 
 <span class="c1"># Helper functions now take multiple arguments directly</span>
 <div class="viewcode-block" id="PDF_theo_scalar_helper">
-<a class="viewcode-back" href="../../gumpgpd.html#gumpgpd.Minimizer.PDF_theo_scalar_helper">[docs]</a>
+<a class="viewcode-back" href="../../Minimizer.html#gumpgpd.Minimizer.PDF_theo_scalar_helper">[docs]</a>
 <span class="k">def</span> <span class="nf">PDF_theo_scalar_helper</span><span class="p">(</span><span class="n">x_i</span><span class="p">,</span> <span class="n">xi_i</span><span class="p">,</span> <span class="n">t_i</span><span class="p">,</span> <span class="n">Q_i</span><span class="p">,</span> <span class="n">p_i</span><span class="p">,</span> <span class="n">flv_i</span><span class="p">,</span> <span class="n">Para_i</span><span class="p">,</span> <span class="n">p_order</span><span class="p">):</span>
     <span class="n">_PDF_theo</span> <span class="o">=</span> <span class="n">GPDobserv</span><span class="p">(</span><span class="n">x_i</span><span class="p">,</span> <span class="n">xi_i</span><span class="p">,</span> <span class="n">t_i</span><span class="p">,</span> <span class="n">Q_i</span><span class="p">,</span> <span class="n">p_i</span><span class="p">)</span>  
     <span class="k">return</span> <span class="n">_PDF_theo</span><span class="o">.</span><span class="n">tPDF</span><span class="p">(</span><span class="n">flv_i</span><span class="p">,</span> <span class="n">Para_i</span><span class="p">,</span> <span class="n">p_order</span><span class="p">)</span></div>
@@ -434,21 +434,21 @@
 
 <span class="c1"># Helper function for scalar computation</span>
 <div class="viewcode-block" id="GFF_theo_scalar_helper">
-<a class="viewcode-back" href="../../gumpgpd.html#gumpgpd.Minimizer.GFF_theo_scalar_helper">[docs]</a>
+<a class="viewcode-back" href="../../Minimizer.html#gumpgpd.Minimizer.GFF_theo_scalar_helper">[docs]</a>
 <span class="k">def</span> <span class="nf">GFF_theo_scalar_helper</span><span class="p">(</span><span class="n">j_i</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">xi</span><span class="p">,</span> <span class="n">t_i</span><span class="p">,</span> <span class="n">Q_i</span><span class="p">,</span> <span class="n">p_i</span><span class="p">,</span> <span class="n">flv_i</span><span class="p">,</span> <span class="n">Para_i</span><span class="p">,</span> <span class="n">p_order</span><span class="p">):</span>
     <span class="n">_GFF_theo</span> <span class="o">=</span> <span class="n">GPDobserv</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">xi</span><span class="p">,</span> <span class="n">t_i</span><span class="p">,</span> <span class="n">Q_i</span><span class="p">,</span> <span class="n">p_i</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">_GFF_theo</span><span class="o">.</span><span class="n">GFFj0</span><span class="p">(</span><span class="n">j_i</span><span class="p">,</span> <span class="n">flv_i</span><span class="p">,</span> <span class="n">Para_i</span><span class="p">,</span> <span class="n">p_order</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="GPD_theo_scalar_helper">
-<a class="viewcode-back" href="../../gumpgpd.html#gumpgpd.Minimizer.GPD_theo_scalar_helper">[docs]</a>
+<a class="viewcode-back" href="../../Minimizer.html#gumpgpd.Minimizer.GPD_theo_scalar_helper">[docs]</a>
 <span class="k">def</span> <span class="nf">GPD_theo_scalar_helper</span><span class="p">(</span><span class="n">x_i</span><span class="p">,</span> <span class="n">xi_i</span><span class="p">,</span> <span class="n">t_i</span><span class="p">,</span> <span class="n">Q_i</span><span class="p">,</span> <span class="n">p_i</span><span class="p">,</span> <span class="n">flv_i</span><span class="p">,</span> <span class="n">Para_i</span><span class="p">,</span> <span class="n">p_order</span><span class="p">):</span>
     <span class="n">_GPD_theo</span> <span class="o">=</span> <span class="n">GPDobserv</span><span class="p">(</span><span class="n">x_i</span><span class="p">,</span> <span class="n">xi_i</span><span class="p">,</span> <span class="n">t_i</span><span class="p">,</span> <span class="n">Q_i</span><span class="p">,</span> <span class="n">p_i</span><span class="p">)</span>  
     <span class="k">return</span> <span class="n">_GPD_theo</span><span class="o">.</span><span class="n">GPD</span><span class="p">(</span><span class="n">flv_i</span><span class="p">,</span> <span class="n">Para_i</span><span class="p">,</span> <span class="n">p_order</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="PDF_theo">
-<a class="viewcode-back" href="../../gumpgpd.html#gumpgpd.Minimizer.PDF_theo">[docs]</a>
+<a class="viewcode-back" href="../../Minimizer.html#gumpgpd.Minimizer.PDF_theo">[docs]</a>
 <span class="k">def</span> <span class="nf">PDF_theo</span><span class="p">(</span><span class="n">PDF_input</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">Para</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">,</span> <span class="n">p_order</span> <span class="o">=</span> <span class="mi">2</span><span class="p">,</span> <span class="n">chunksize</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
     
     <span class="n">PDF_input</span> <span class="o">=</span> <span class="n">PDF_input</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
@@ -478,7 +478,7 @@
 <span class="n">tPDF_theo</span> <span class="o">=</span> <span class="n">PDF_theo</span>
 
 <div class="viewcode-block" id="GFF_theo">
-<a class="viewcode-back" href="../../gumpgpd.html#gumpgpd.Minimizer.GFF_theo">[docs]</a>
+<a class="viewcode-back" href="../../Minimizer.html#gumpgpd.Minimizer.GFF_theo">[docs]</a>
 <span class="k">def</span> <span class="nf">GFF_theo</span><span class="p">(</span><span class="n">GFF_input</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">Para</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">,</span> <span class="n">p_order</span> <span class="o">=</span> <span class="mi">2</span><span class="p">,</span> <span class="n">chunksize</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
     
     <span class="n">GFF_input</span> <span class="o">=</span> <span class="n">GFF_input</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
@@ -506,7 +506,7 @@
 
 
 <div class="viewcode-block" id="GPD_theo">
-<a class="viewcode-back" href="../../gumpgpd.html#gumpgpd.Minimizer.GPD_theo">[docs]</a>
+<a class="viewcode-back" href="../../Minimizer.html#gumpgpd.Minimizer.GPD_theo">[docs]</a>
 <span class="k">def</span> <span class="nf">GPD_theo</span><span class="p">(</span><span class="n">GPD_input</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">Para</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">,</span> <span class="n">p_order</span> <span class="o">=</span> <span class="mi">2</span><span class="p">,</span> <span class="n">chunksize</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
     
     <span class="n">GPD_input</span> <span class="o">=</span> <span class="n">GPD_input</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
@@ -533,7 +533,7 @@
 
 
 <div class="viewcode-block" id="DVCSxsec_theo_helper">
-<a class="viewcode-back" href="../../gumpgpd.html#gumpgpd.Minimizer.DVCSxsec_theo_helper">[docs]</a>
+<a class="viewcode-back" href="../../Minimizer.html#gumpgpd.Minimizer.DVCSxsec_theo_helper">[docs]</a>
 <span class="k">def</span> <span class="nf">DVCSxsec_theo_helper</span><span class="p">(</span><span class="n">DVCSxsec_input</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">CFF_input</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">):</span>
     <span class="c1"># CFF_input is a list of np.arrays</span>
     <span class="c1"># [y, xB, t, Q, phi, f, delta_f, pol] = DVCSxsec_input    </span>
@@ -551,7 +551,7 @@
 
 
 <div class="viewcode-block" id="DVCSAsym_theo_helper">
-<a class="viewcode-back" href="../../gumpgpd.html#gumpgpd.Minimizer.DVCSAsym_theo_helper">[docs]</a>
+<a class="viewcode-back" href="../../Minimizer.html#gumpgpd.Minimizer.DVCSAsym_theo_helper">[docs]</a>
 <span class="k">def</span> <span class="nf">DVCSAsym_theo_helper</span><span class="p">(</span><span class="n">DVCSAsym_input</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">CFF_input</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">):</span>
     <span class="c1"># CFF_input is a list of np.arrays</span>
     <span class="c1"># [y, xB, t, Q, phi, f, delta_f, pol] = DVCSxsec_input    </span>
@@ -568,7 +568,7 @@
 
 
 <div class="viewcode-block" id="DVCSxsec_HERA_theo_helper">
-<a class="viewcode-back" href="../../gumpgpd.html#gumpgpd.Minimizer.DVCSxsec_HERA_theo_helper">[docs]</a>
+<a class="viewcode-back" href="../../Minimizer.html#gumpgpd.Minimizer.DVCSxsec_HERA_theo_helper">[docs]</a>
 <span class="k">def</span> <span class="nf">DVCSxsec_HERA_theo_helper</span><span class="p">(</span><span class="n">DVCSxsec_HERA_input</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">CFF_input</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">):</span>
     <span class="c1">#[y, xB, t, Q, f, delta_f, pol]  = DVCSxsec_data_HERA</span>
     <span class="n">y</span> <span class="o">=</span> <span class="n">DVCSxsec_HERA_input</span><span class="p">[</span><span class="s1">&#39;y&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">()</span>
@@ -584,7 +584,7 @@
 
 
 <div class="viewcode-block" id="DVMPxsec_theo_helper">
-<a class="viewcode-back" href="../../gumpgpd.html#gumpgpd.Minimizer.DVMPxsec_theo_helper">[docs]</a>
+<a class="viewcode-back" href="../../Minimizer.html#gumpgpd.Minimizer.DVMPxsec_theo_helper">[docs]</a>
 <span class="k">def</span> <span class="nf">DVMPxsec_theo_helper</span><span class="p">(</span><span class="n">DVMPxsec_input</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span>  <span class="n">TFF_input</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">,</span> <span class="n">meson</span><span class="p">:</span><span class="nb">int</span><span class="p">):</span>
     <span class="n">y</span> <span class="o">=</span> <span class="n">DVMPxsec_input</span><span class="p">[</span><span class="s1">&#39;y&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">()</span>
     <span class="n">xB</span> <span class="o">=</span> <span class="n">DVMPxsec_input</span><span class="p">[</span><span class="s1">&#39;xB&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">()</span>
@@ -601,7 +601,7 @@
 
 
 <div class="viewcode-block" id="CFF_theo">
-<a class="viewcode-back" href="../../gumpgpd.html#gumpgpd.Minimizer.CFF_theo">[docs]</a>
+<a class="viewcode-back" href="../../Minimizer.html#gumpgpd.Minimizer.CFF_theo">[docs]</a>
 <span class="k">def</span> <span class="nf">CFF_theo</span><span class="p">(</span><span class="n">xB</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="n">Q</span><span class="p">,</span> <span class="n">Para_Unp</span><span class="p">,</span> <span class="n">Para_Pol</span><span class="p">,</span> <span class="n">porder</span> <span class="o">=</span> <span class="mi">2</span><span class="p">):</span>
     <span class="n">x</span> <span class="o">=</span> <span class="mi">0</span>
     <span class="n">xi</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span><span class="o">/</span><span class="p">(</span><span class="mi">2</span> <span class="o">-</span> <span class="n">xB</span><span class="p">)</span> <span class="o">-</span> <span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="n">t</span><span class="o">*</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span> <span class="o">+</span> <span class="n">xB</span><span class="p">))</span><span class="o">/</span><span class="p">(</span><span class="n">Q</span><span class="o">**</span><span class="mi">2</span><span class="o">*</span><span class="p">(</span><span class="o">-</span><span class="mi">2</span> <span class="o">+</span> <span class="n">xB</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span><span class="p">))</span><span class="o">*</span><span class="n">xB</span>
@@ -617,7 +617,7 @@
     <span class="c1"># return np.stack([HCFF, ECFF, HtCFF, EtCFF], axis=-1)</span>
 
 <div class="viewcode-block" id="TFF_theo">
-<a class="viewcode-back" href="../../gumpgpd.html#gumpgpd.Minimizer.TFF_theo">[docs]</a>
+<a class="viewcode-back" href="../../Minimizer.html#gumpgpd.Minimizer.TFF_theo">[docs]</a>
 <span class="k">def</span> <span class="nf">TFF_theo</span><span class="p">(</span><span class="n">xB</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="n">Q</span><span class="p">,</span> <span class="n">Para_Unp</span><span class="p">,</span> <span class="n">meson</span><span class="p">:</span><span class="nb">int</span><span class="p">,</span> <span class="n">p_order</span> <span class="o">=</span> <span class="mi">2</span><span class="p">,</span> <span class="n">muset</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">flv</span> <span class="o">=</span> <span class="s1">&#39;All&#39;</span><span class="p">):</span>
     <span class="n">x</span> <span class="o">=</span> <span class="mi">0</span>
     <span class="n">xi</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span><span class="o">/</span><span class="p">(</span><span class="mi">2</span> <span class="o">-</span> <span class="n">xB</span><span class="p">)</span> <span class="o">-</span> <span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="n">t</span><span class="o">*</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span> <span class="o">+</span> <span class="n">xB</span><span class="p">))</span><span class="o">/</span><span class="p">((</span><span class="n">Q</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span><span class="o">*</span><span class="p">(</span><span class="o">-</span><span class="mi">2</span> <span class="o">+</span> <span class="n">xB</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span><span class="p">))</span><span class="o">*</span><span class="n">xB</span>
@@ -631,7 +631,7 @@
 
 
 <div class="viewcode-block" id="DVCSxsec_theo_xBtQ">
-<a class="viewcode-back" href="../../gumpgpd.html#gumpgpd.Minimizer.DVCSxsec_theo_xBtQ">[docs]</a>
+<a class="viewcode-back" href="../../Minimizer.html#gumpgpd.Minimizer.DVCSxsec_theo_xBtQ">[docs]</a>
 <span class="k">def</span> <span class="nf">DVCSxsec_theo_xBtQ</span><span class="p">(</span><span class="n">DVCSxsec_data_xBtQ</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">Para_Unp</span><span class="p">,</span> <span class="n">Para_Pol</span><span class="p">,</span> <span class="n">P_order</span> <span class="o">=</span> <span class="mi">2</span><span class="p">):</span>
     <span class="p">[</span><span class="n">xB</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="n">Q</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">DVCSxsec_data_xBtQ</span><span class="p">[</span><span class="s1">&#39;xB&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">iat</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">DVCSxsec_data_xBtQ</span><span class="p">[</span><span class="s1">&#39;t&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">iat</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">DVCSxsec_data_xBtQ</span><span class="p">[</span><span class="s1">&#39;Q&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">iat</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span> 
     <span class="p">[</span><span class="n">HCFF</span><span class="p">,</span> <span class="n">ECFF</span><span class="p">,</span> <span class="n">HtCFF</span><span class="p">,</span> <span class="n">EtCFF</span><span class="p">]</span> <span class="o">=</span> <span class="n">CFF_theo</span><span class="p">(</span><span class="n">xB</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="n">Q</span><span class="p">,</span> <span class="n">Para_Unp</span><span class="p">,</span> <span class="n">Para_Pol</span><span class="p">,</span> <span class="n">porder</span><span class="o">=</span> <span class="n">P_order</span><span class="p">)</span> <span class="c1"># scalar for each of them</span>
@@ -644,7 +644,7 @@
 
 
 <div class="viewcode-block" id="DVCSAsym_theo_xBtQ">
-<a class="viewcode-back" href="../../gumpgpd.html#gumpgpd.Minimizer.DVCSAsym_theo_xBtQ">[docs]</a>
+<a class="viewcode-back" href="../../Minimizer.html#gumpgpd.Minimizer.DVCSAsym_theo_xBtQ">[docs]</a>
 <span class="k">def</span> <span class="nf">DVCSAsym_theo_xBtQ</span><span class="p">(</span><span class="n">DVCSAsym_data_xBtQ</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">Para_Unp</span><span class="p">,</span> <span class="n">Para_Pol</span><span class="p">,</span> <span class="n">P_order</span> <span class="o">=</span> <span class="mi">2</span><span class="p">):</span>
     <span class="p">[</span><span class="n">xB</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="n">Q</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">DVCSAsym_data_xBtQ</span><span class="p">[</span><span class="s1">&#39;xB&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">iat</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">DVCSAsym_data_xBtQ</span><span class="p">[</span><span class="s1">&#39;t&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">iat</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">DVCSAsym_data_xBtQ</span><span class="p">[</span><span class="s1">&#39;Q&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">iat</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span> 
     <span class="p">[</span><span class="n">HCFF</span><span class="p">,</span> <span class="n">ECFF</span><span class="p">,</span> <span class="n">HtCFF</span><span class="p">,</span> <span class="n">EtCFF</span><span class="p">]</span> <span class="o">=</span> <span class="n">CFF_theo</span><span class="p">(</span><span class="n">xB</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="n">Q</span><span class="p">,</span> <span class="n">Para_Unp</span><span class="p">,</span> <span class="n">Para_Pol</span><span class="p">,</span> <span class="n">porder</span><span class="o">=</span> <span class="n">P_order</span><span class="p">)</span> <span class="c1"># scalar for each of them</span>
@@ -657,7 +657,7 @@
 
 
 <div class="viewcode-block" id="DVCSxsecHERA_theo_xBtQ">
-<a class="viewcode-back" href="../../gumpgpd.html#gumpgpd.Minimizer.DVCSxsecHERA_theo_xBtQ">[docs]</a>
+<a class="viewcode-back" href="../../Minimizer.html#gumpgpd.Minimizer.DVCSxsecHERA_theo_xBtQ">[docs]</a>
 <span class="k">def</span> <span class="nf">DVCSxsecHERA_theo_xBtQ</span><span class="p">(</span><span class="n">DVCSxsec_HERA_data_xBtQ</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">Para_Unp</span><span class="p">,</span> <span class="n">Para_Pol</span> <span class="p">,</span> <span class="n">P_order</span> <span class="o">=</span> <span class="mi">2</span><span class="p">):</span>
 
     <span class="p">[</span><span class="n">xB</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="n">Q</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">DVCSxsec_HERA_data_xBtQ</span><span class="p">[</span><span class="s1">&#39;xB&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">iat</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">DVCSxsec_HERA_data_xBtQ</span><span class="p">[</span><span class="s1">&#39;t&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">iat</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">DVCSxsec_HERA_data_xBtQ</span><span class="p">[</span><span class="s1">&#39;Q&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">iat</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span> 
@@ -671,7 +671,7 @@
 
 
 <div class="viewcode-block" id="DVMPxsec_theo_xBtQ">
-<a class="viewcode-back" href="../../gumpgpd.html#gumpgpd.Minimizer.DVMPxsec_theo_xBtQ">[docs]</a>
+<a class="viewcode-back" href="../../Minimizer.html#gumpgpd.Minimizer.DVMPxsec_theo_xBtQ">[docs]</a>
 <span class="k">def</span> <span class="nf">DVMPxsec_theo_xBtQ</span><span class="p">(</span><span class="n">DVMPxsec_data_xBtQ</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">Para_Unp</span><span class="p">,</span> <span class="n">xsec_norm</span><span class="p">,</span> <span class="n">meson</span><span class="p">:</span><span class="nb">int</span><span class="p">,</span> <span class="n">p_order</span> <span class="o">=</span> <span class="mi">2</span><span class="p">):</span>
 
     <span class="p">[</span><span class="n">xB</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="n">Q</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">DVMPxsec_data_xBtQ</span><span class="p">[</span><span class="s1">&#39;xB&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">iat</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">DVMPxsec_data_xBtQ</span><span class="p">[</span><span class="s1">&#39;t&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">iat</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">DVMPxsec_data_xBtQ</span><span class="p">[</span><span class="s1">&#39;Q&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">iat</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span> 
@@ -685,7 +685,7 @@
 
 
 <div class="viewcode-block" id="DVCSxsec_theo">
-<a class="viewcode-back" href="../../gumpgpd.html#gumpgpd.Minimizer.DVCSxsec_theo">[docs]</a>
+<a class="viewcode-back" href="../../Minimizer.html#gumpgpd.Minimizer.DVCSxsec_theo">[docs]</a>
 <span class="k">def</span> <span class="nf">DVCSxsec_theo</span><span class="p">(</span><span class="n">DVCSxsec_data</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">Para_Unp</span><span class="p">,</span> <span class="n">Para_Pol</span><span class="p">,</span> <span class="n">P_order</span> <span class="o">=</span> <span class="mi">2</span><span class="p">):</span>
     
     <span class="n">DVCSxsec_data_xBtQ</span> <span class="o">=</span> <span class="n">group_by_unique</span><span class="p">(</span><span class="n">DVCSxsec_data</span><span class="p">)</span>
@@ -695,7 +695,7 @@
 
 
 <div class="viewcode-block" id="DVCSAsym_theo">
-<a class="viewcode-back" href="../../gumpgpd.html#gumpgpd.Minimizer.DVCSAsym_theo">[docs]</a>
+<a class="viewcode-back" href="../../Minimizer.html#gumpgpd.Minimizer.DVCSAsym_theo">[docs]</a>
 <span class="k">def</span> <span class="nf">DVCSAsym_theo</span><span class="p">(</span><span class="n">DVCSAsym_data</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">Para_Unp</span><span class="p">,</span> <span class="n">Para_Pol</span><span class="p">,</span> <span class="n">P_order</span> <span class="o">=</span> <span class="mi">2</span><span class="p">):</span>
 
     <span class="n">DVCSAsym_data_xBtQ</span> <span class="o">=</span> <span class="n">group_by_unique</span><span class="p">(</span><span class="n">DVCSAsym_data</span><span class="p">)</span>
@@ -705,7 +705,7 @@
 
 
 <div class="viewcode-block" id="DVMPxsec_theo">
-<a class="viewcode-back" href="../../gumpgpd.html#gumpgpd.Minimizer.DVMPxsec_theo">[docs]</a>
+<a class="viewcode-back" href="../../Minimizer.html#gumpgpd.Minimizer.DVMPxsec_theo">[docs]</a>
 <span class="k">def</span> <span class="nf">DVMPxsec_theo</span><span class="p">(</span><span class="n">DVMPxsec_data</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">Para_Unp</span><span class="p">,</span> <span class="n">xsec_norm</span><span class="p">,</span> <span class="n">meson</span><span class="p">:</span><span class="nb">int</span><span class="p">,</span> <span class="n">p_order</span> <span class="o">=</span> <span class="mi">2</span><span class="p">):</span>
     
     <span class="n">DVMPxsec_data_xBtQ</span> <span class="o">=</span> <span class="n">group_by_unique</span><span class="p">(</span><span class="n">DVMPxsec_data</span><span class="p">)</span>
@@ -715,7 +715,7 @@
 
 
 <div class="viewcode-block" id="DVCSxsecHERA_theo">
-<a class="viewcode-back" href="../../gumpgpd.html#gumpgpd.Minimizer.DVCSxsecHERA_theo">[docs]</a>
+<a class="viewcode-back" href="../../Minimizer.html#gumpgpd.Minimizer.DVCSxsecHERA_theo">[docs]</a>
 <span class="k">def</span> <span class="nf">DVCSxsecHERA_theo</span><span class="p">(</span><span class="n">DVCSxsec_HERA_data</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">Para_Unp</span><span class="p">,</span> <span class="n">Para_Pol</span><span class="p">,</span> <span class="n">P_order</span> <span class="o">=</span> <span class="mi">2</span><span class="p">):</span>
 
     <span class="n">DVCSxsec_HERA_data_xBtQ</span> <span class="o">=</span> <span class="n">group_by_unique</span><span class="p">(</span><span class="n">DVCSxsec_HERA_data</span><span class="p">)</span>
@@ -725,14 +725,14 @@
 
 
 <div class="viewcode-block" id="simple_dispatch">
-<a class="viewcode-back" href="../../gumpgpd.html#gumpgpd.Minimizer.simple_dispatch">[docs]</a>
+<a class="viewcode-back" href="../../Minimizer.html#gumpgpd.Minimizer.simple_dispatch">[docs]</a>
 <span class="k">def</span> <span class="nf">simple_dispatch</span><span class="p">(</span><span class="n">task</span><span class="p">):</span>
     <span class="n">func</span><span class="p">,</span> <span class="n">arg</span> <span class="o">=</span> <span class="n">task</span>
     <span class="k">return</span> <span class="n">func</span><span class="p">(</span><span class="n">arg</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="cost_off_forward_withH_withHt">
-<a class="viewcode-back" href="../../gumpgpd.html#gumpgpd.Minimizer.cost_off_forward_withH_withHt">[docs]</a>
+<a class="viewcode-back" href="../../Minimizer.html#gumpgpd.Minimizer.cost_off_forward_withH_withHt">[docs]</a>
 <span class="k">def</span> <span class="nf">cost_off_forward_withH_withHt</span><span class="p">(</span><span class="n">Norm_HuV</span><span class="p">,</span>    <span class="n">alpha_HuV</span><span class="p">,</span>    <span class="n">beta_HuV</span><span class="p">,</span>    <span class="n">alphap_HuV</span><span class="p">,</span>   <span class="n">Invm2_HuV</span><span class="p">,</span>
                     <span class="n">Norm_Hubar</span><span class="p">,</span>  <span class="n">alpha_Hubar</span><span class="p">,</span>  <span class="n">beta_Hubar</span><span class="p">,</span>  <span class="n">alphap_Hqbar</span><span class="p">,</span>
                     <span class="n">Norm_Hubar_2</span><span class="p">,</span>  <span class="n">alpha_Hubar_2</span><span class="p">,</span>  <span class="n">beta_Hubar_2</span><span class="p">,</span>
@@ -967,7 +967,7 @@
 
 
 <div class="viewcode-block" id="off_forward_fit_withH_withHt">
-<a class="viewcode-back" href="../../gumpgpd.html#gumpgpd.Minimizer.off_forward_fit_withH_withHt">[docs]</a>
+<a class="viewcode-back" href="../../Minimizer.html#gumpgpd.Minimizer.off_forward_fit_withH_withHt">[docs]</a>
 <span class="k">def</span> <span class="nf">off_forward_fit_withH_withHt</span><span class="p">(</span><span class="n">Paralst_Unp</span><span class="p">,</span> <span class="n">Paralst_Pol</span><span class="p">,</span> <span class="n">Paralst_Aux</span><span class="o">=</span><span class="p">[</span><span class="mf">1.0</span><span class="p">]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">Paralst_Aux_Names</span><span class="p">),</span> <span class="n">export_path</span> <span class="o">=</span> <span class="s1">&#39;.&#39;</span><span class="p">):</span>
 
     <span class="k">assert</span> <span class="n">config</span><span class="o">.</span><span class="n">Export_Mode</span> <span class="o">==</span> <span class="kc">False</span><span class="p">,</span> <span class="s2">&quot;Make sure the Export_Mode is set to False in config.py before fitting&quot;</span>
@@ -1184,7 +1184,7 @@
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2024, Yuxun Guo. et. al..</p>
+    <p>&#169; Copyright 2026, Yuxun Guo. et. al..</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a

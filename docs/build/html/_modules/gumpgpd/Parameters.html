@@ -5,7 +5,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>gumpgpd.Parameters &mdash; GUMP GPD Analysis 0.5.0 documentation</title>
+  <title>gumpgpd.Parameters &mdash; GUMP GPD Analysis 1.0.2 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=80d5e7a1" />
       <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
@@ -13,7 +13,7 @@
   
       <script src="../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../_static/documentation_options.js?v=1dd76d02"></script>
+      <script src="../../_static/documentation_options.js?v=1ed6394b"></script>
       <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
       <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -101,7 +101,7 @@
 <span class="kn">import</span> <span class="nn">scipy</span> <span class="k">as</span> <span class="nn">sp</span>
 
 <div class="viewcode-block" id="ParaManager_Unp">
-<a class="viewcode-back" href="../../gumpgpd.html#gumpgpd.Parameters.ParaManager_Unp">[docs]</a>
+<a class="viewcode-back" href="../../Parameters.html#gumpgpd.Parameters.ParaManager_Unp">[docs]</a>
 <span class="k">def</span> <span class="nf">ParaManager_Unp</span><span class="p">(</span><span class="n">Paralst</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Unpolairzed parameters manager that turns all parameters as a list to the wanted form.</span>
 <span class="sd">    </span>
@@ -208,7 +208,7 @@
 
 
 <div class="viewcode-block" id="ParaManager_Pol">
-<a class="viewcode-back" href="../../gumpgpd.html#gumpgpd.Parameters.ParaManager_Pol">[docs]</a>
+<a class="viewcode-back" href="../../Parameters.html#gumpgpd.Parameters.ParaManager_Pol">[docs]</a>
 <span class="k">def</span> <span class="nf">ParaManager_Pol</span><span class="p">(</span><span class="n">Paralst</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Polarized parameters manager that turns all parameters as a list to the wanted form.</span>
 <span class="sd">    </span>
@@ -315,14 +315,14 @@
 
 <span class="c1"># Euler Beta function B(a,b) with complex arguments</span>
 <div class="viewcode-block" id="beta_loggamma">
-<a class="viewcode-back" href="../../gumpgpd.html#gumpgpd.Parameters.beta_loggamma">[docs]</a>
+<a class="viewcode-back" href="../../Parameters.html#gumpgpd.Parameters.beta_loggamma">[docs]</a>
 <span class="k">def</span> <span class="nf">beta_loggamma</span><span class="p">(</span><span class="n">a</span><span class="p">:</span> <span class="nb">complex</span><span class="p">,</span> <span class="n">b</span><span class="p">:</span> <span class="nb">complex</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">complex</span><span class="p">:</span>
     <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">sp</span><span class="o">.</span><span class="n">special</span><span class="o">.</span><span class="n">loggamma</span><span class="p">(</span><span class="n">a</span><span class="p">)</span> <span class="o">+</span> <span class="n">sp</span><span class="o">.</span><span class="n">special</span><span class="o">.</span><span class="n">loggamma</span><span class="p">(</span><span class="n">b</span><span class="p">)</span><span class="o">-</span><span class="n">sp</span><span class="o">.</span><span class="n">special</span><span class="o">.</span><span class="n">loggamma</span><span class="p">(</span><span class="n">a</span> <span class="o">+</span> <span class="n">b</span><span class="p">))</span></div>
 
 
 <span class="c1"># Conformal moment in j space F(j)</span>
 <div class="viewcode-block" id="ConfMoment">
-<a class="viewcode-back" href="../../gumpgpd.html#gumpgpd.Parameters.ConfMoment">[docs]</a>
+<a class="viewcode-back" href="../../Parameters.html#gumpgpd.Parameters.ConfMoment">[docs]</a>
 <span class="k">def</span> <span class="nf">ConfMoment</span><span class="p">(</span><span class="n">j</span><span class="p">:</span> <span class="nb">complex</span><span class="p">,</span> <span class="n">t</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">ParaSets</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Conformal moment in j space F(j)</span>
 
@@ -378,7 +378,7 @@
     <span class="c1"># For the recommended usage, the output is (N, 5, init_NumofAnsatz)</span>
 
 <div class="viewcode-block" id="Moment_Sum">
-<a class="viewcode-back" href="../../gumpgpd.html#gumpgpd.Parameters.Moment_Sum">[docs]</a>
+<a class="viewcode-back" href="../../Parameters.html#gumpgpd.Parameters.Moment_Sum">[docs]</a>
 <span class="k">def</span> <span class="nf">Moment_Sum</span><span class="p">(</span><span class="n">j</span><span class="p">:</span> <span class="nb">complex</span><span class="p">,</span> <span class="n">t</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">ParaSets</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">complex</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Sum of the conformal moments when the ParaSets contain more than just one set of parameters </span>
 
@@ -407,7 +407,7 @@
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2024, Yuxun Guo. et. al..</p>
+    <p>&#169; Copyright 2026, Yuxun Guo. et. al..</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
