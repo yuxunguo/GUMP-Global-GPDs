@@ -8,18 +8,18 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Quick start &mdash; GUMP GPD Analysis 1.0.2 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=80d5e7a1" />
-      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=7ab3649f" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="_static/copybutton.css?v=76b2166b" />
 
   
       <script src="_static/jquery.js?v=5d32c60e"></script>
       <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
       <script src="_static/documentation_options.js?v=1ed6394b"></script>
-      <script src="_static/doctools.js?v=9bcbadda"></script>
-      <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
       <script src="_static/clipboard.min.js?v=a7894cd8"></script>
       <script src="_static/copybutton.js?v=f281be69"></script>
-      <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+      <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-mml-chtml.js"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
@@ -53,12 +53,16 @@
 <li class="toctree-l2"><a class="reference internal" href="#installation">Installation</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#parameters-and-model-setting">Parameters and model setting</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#calculation-observables-with-existing-interface">Calculation observables with existing interface</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#leading-order-compton-form-factors">Leading-order Compton Form factors</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#leading-order-transition-form-factors">Leading-order Transition Form factors</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#nlo-transition-form-factors">NLO Transition Form factors</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#some-notes-on-genearl-observables">Some notes on genearl observables</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#samples-of-gpds-and-generalized-form-factors-gffs">Samples of GPDs and Generalized Form factors (GFFs)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#calculation-of-experimental-cross-sections-and-asymmetries">Calculation of experimental cross-sections and asymmetries</a></li>
 </ul>
 </li>
+<li class="toctree-l2"><a class="reference internal" href="#calculation-observables-without-existing-interface">Calculation observables without existing interface</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#leading-order-transition-form-factors">Leading-order Transition Form factors</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#nlo-transition-form-factors">NLO Transition Form factors</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#other-possible-calculations">Other possible calculations</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="ParametersIntro.html">Parameters Quickguide</a></li>
@@ -131,38 +135,72 @@ and can be retrieved via:</p>
 </pre></div>
 </div>
 <p>The above three high-dimensional numpy arrays stand for the best-fit parameters for the unpolarized (vector) and polarized (axial-vector) GPDs and their combination, respectively.</p>
+<p>In most case, you won’t need to modify them, unless you want to tune the parameters.</p>
 </section>
 <section id="calculation-observables-with-existing-interface">
 <h2>Calculation observables with existing interface<a class="headerlink" href="#calculation-observables-with-existing-interface" title="Link to this heading"></a></h2>
 <p>With the above model we can in principle calcualte anythings that the <a class="reference internal" href="Observables.html#module-gumpgpd.Observables"><span class="std std-ref">Observables module</span></a> allow to do.
-In the following, we present some simple examples that calculate the obserbales of interestes.</p>
-<section id="leading-order-compton-form-factors">
-<h3>Leading-order Compton Form factors<a class="headerlink" href="#leading-order-compton-form-factors" title="Link to this heading"></a></h3>
-<p>For instance, we can use <code class="xref py py-meth docutils literal notranslate"><span class="pre">Observables.GPDobserv.CFF()</span></code> to calculate the Compton form factors (CFFs)
-at leading order (next-to-leading order working in progress).
-And we can test that the imaginary part of the leading order CFF agree with the GPD at <span class="math notranslate nohighlight">\(x=\xi\)</span> as shown in the following:</p>
-<div class="highlight-py notranslate" id="cff-lo"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">Observables</span> <span class="kn">import</span> <span class="n">GPDobserv</span>
+We start with observables where interface are provided as part of the package, which are also presented
+in the Example folder of <a class="reference external" href="https://github.com/yuxunguo/GUMP-Global-GPDs/tree/GUMP1.0">GitHub</a>.</p>
+<section id="samples-of-gpds-and-generalized-form-factors-gffs">
+<h3>Samples of GPDs and Generalized Form factors (GFFs)<a class="headerlink" href="#samples-of-gpds-and-generalized-form-factors-gffs" title="Link to this heading"></a></h3>
+<p>In the <code class="docutils literal notranslate"><span class="pre">gumpgpd</span></code> package, we provide integrated interface to calculate grid of GPDs and Generalized Form factors (GFFs).
+To do so, we need the <code class="docutils literal notranslate"><span class="pre">para_comb</span> <span class="pre">=</span> <span class="pre">gM.Para_Comb_off_forward</span></code>. An example is presented below:</p>
+<div class="highlight-py notranslate" id="gpd-and-all"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">gumpgpd.Minimizer</span> <span class="kn">import</span> <span class="o">*</span>
 
-<span class="c1"># Test of LO ImCFF and quark GPD evolved to mu =5 GeV</span>
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
 
-<span class="n">Para_H</span> <span class="o">=</span> <span class="n">Para_Unp</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>  <span class="c1"># Para_Unp = (Para_H ,Para_E) for the H and E GPDs respectively</span>
-<span class="n">x</span><span class="o">=</span><span class="mf">0.0001</span>
-<span class="n">_GPD_theo</span> <span class="o">=</span> <span class="n">GPDobserv</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">x</span><span class="p">,</span><span class="mf">0.0</span><span class="p">,</span><span class="mf">5.0</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span>  <span class="c1"># Each obserbales requires (x,xi,t,mu,p)</span>
-<span class="n">_GPD_theo2</span> <span class="o">=</span> <span class="n">GPDobserv</span><span class="p">(</span><span class="o">-</span><span class="n">x</span><span class="p">,</span><span class="n">x</span><span class="p">,</span><span class="mf">0.0</span><span class="p">,</span><span class="mf">5.0</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span>
-
-<span class="n">CFF</span> <span class="o">=</span> <span class="n">_GPD_theo</span><span class="o">.</span><span class="n">CFF</span><span class="p">(</span><span class="n">Para_spe</span><span class="p">,</span><span class="mf">5.0</span><span class="p">)</span>
-
-<span class="nb">print</span><span class="p">(</span><span class="n">CFF</span><span class="p">)</span>
-
-<span class="n">gpd1</span> <span class="o">=</span> <span class="p">(</span><span class="n">_GPD_theo</span><span class="o">.</span><span class="n">GPD</span><span class="p">(</span><span class="s1">&#39;u&#39;</span><span class="p">,</span><span class="n">Para_spe</span><span class="p">))</span><span class="o">*</span> <span class="p">(</span><span class="mi">2</span><span class="o">/</span><span class="mi">3</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span>
-<span class="n">gpd2</span> <span class="o">=</span> <span class="p">(</span><span class="n">_GPD_theo2</span><span class="o">.</span><span class="n">GPD</span><span class="p">(</span><span class="s1">&#39;u&#39;</span><span class="p">,</span><span class="n">Para_spe</span><span class="p">))</span><span class="o">*</span> <span class="p">(</span><span class="mi">2</span><span class="o">/</span><span class="mi">3</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span>
-<span class="n">gpd3</span> <span class="o">=</span> <span class="p">(</span><span class="n">_GPD_theo</span><span class="o">.</span><span class="n">GPD</span><span class="p">(</span><span class="s1">&#39;d&#39;</span><span class="p">,</span><span class="n">Para_spe</span><span class="p">))</span><span class="o">*</span> <span class="p">(</span><span class="mi">1</span><span class="o">/</span><span class="mi">3</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span>
-<span class="n">gpd4</span> <span class="o">=</span> <span class="p">(</span><span class="n">_GPD_theo2</span><span class="o">.</span><span class="n">GPD</span><span class="p">(</span><span class="s1">&#39;d&#39;</span><span class="p">,</span><span class="n">Para_spe</span><span class="p">))</span><span class="o">*</span> <span class="p">(</span><span class="mi">1</span><span class="o">/</span><span class="mi">3</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span>
-
-<span class="nb">print</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">*</span><span class="p">(</span><span class="n">gpd1</span><span class="o">-</span><span class="n">gpd2</span><span class="o">+</span><span class="n">gpd3</span><span class="o">-</span><span class="n">gpd4</span><span class="p">))</span>
+     <span class="n">PDF_pred</span>  <span class="o">=</span> <span class="n">PDF_theo</span><span class="p">(</span><span class="n">PDF_data</span><span class="p">,</span>    <span class="n">Para</span> <span class="o">=</span> <span class="n">Para_Comb_off_forward</span><span class="p">)</span> <span class="c1">#  PDF calculation</span>
+     <span class="n">tPDF_pred</span> <span class="o">=</span> <span class="n">tPDF_theo</span><span class="p">(</span><span class="n">tPDF_data</span><span class="p">,</span>  <span class="n">Para</span> <span class="o">=</span> <span class="n">Para_Comb_off_forward</span><span class="p">)</span> <span class="c1">#  tPDF calculation</span>
+     <span class="n">GPD_pred</span>  <span class="o">=</span> <span class="n">GPD_theo</span><span class="p">(</span><span class="n">GPD_data</span><span class="p">,</span>    <span class="n">Para</span> <span class="o">=</span> <span class="n">Para_Comb_off_forward</span><span class="p">)</span> <span class="c1">#  GPD calculation</span>
+     <span class="n">GFF_pred</span>  <span class="o">=</span> <span class="n">GFF_theo</span><span class="p">(</span><span class="n">GFF_data</span><span class="p">,</span>    <span class="n">Para</span> <span class="o">=</span> <span class="n">Para_Comb_off_forward</span><span class="p">)</span> <span class="c1">#  GFF calculation</span>
 </pre></div>
 </div>
+<p>We emphasize that it is important to wrap them in <code class="docutils literal notranslate"><span class="pre">if</span> <span class="pre">__name__</span> <span class="pre">==</span> <span class="pre">'__main__':</span></code>
+because we have used <code class="docutils literal notranslate"><span class="pre">multiprocessing.Pool()</span></code> to parallelize the calculations.</p>
+<p>The input <code class="docutils literal notranslate"><span class="pre">PDF_data</span></code>, <code class="docutils literal notranslate"><span class="pre">GPD_data</span></code>, <code class="docutils literal notranslate"><span class="pre">tPDF_data</span></code>, <code class="docutils literal notranslate"><span class="pre">GFF_data</span></code> are the data we used in the global analysis.
+For customized calcualtions, generate your own dataframe following this example:</p>
+<div class="highlight-py notranslate" id="data-example"><div class="highlight"><pre><span></span><span class="n">xarr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mf">0.1</span><span class="p">,</span> <span class="mf">0.6</span><span class="p">,</span> <span class="mi">50</span><span class="p">)</span>
+<span class="n">tarr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="o">-</span><span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+
+<span class="c1"># Create all combinations using meshgrid and flatten</span>
+<span class="n">X</span><span class="p">,</span> <span class="n">T</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">meshgrid</span><span class="p">(</span><span class="n">xarr</span><span class="p">,</span> <span class="n">tarr</span><span class="p">)</span>
+<span class="n">x_list</span> <span class="o">=</span> <span class="n">X</span><span class="o">.</span><span class="n">flatten</span><span class="p">()</span>
+<span class="n">t_list</span> <span class="o">=</span> <span class="n">T</span><span class="o">.</span><span class="n">flatten</span><span class="p">()</span>
+
+<span class="c1"># Create a DataFrame</span>
+<span class="n">GPDs</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span>
+          <span class="s1">&#39;x&#39;</span><span class="p">:</span> <span class="n">x_list</span><span class="p">,</span>
+          <span class="s1">&#39;xi&#39;</span><span class="p">:</span><span class="mf">0.3</span><span class="p">,</span>
+          <span class="s1">&#39;t&#39;</span><span class="p">:</span> <span class="n">t_list</span><span class="p">,</span>
+          <span class="s1">&#39;Q&#39;</span><span class="p">:</span> <span class="mf">3.0</span><span class="p">,</span>
+          <span class="s1">&#39;spe&#39;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+          <span class="s1">&#39;flv&#39;</span><span class="p">:</span> <span class="s1">&#39;NS&#39;</span>
+          <span class="p">})</span>
+
+<span class="n">result</span> <span class="o">=</span> <span class="n">GPD_theo</span><span class="p">(</span><span class="n">GPDs</span><span class="p">,</span> <span class="n">Para</span><span class="o">=</span><span class="n">Para_Comb_off_forward</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>The only requirements is that these dataframe must contain the needed columns which are:</p>
+<div class="highlight-py notranslate" id="data-format"><div class="highlight"><pre><span></span><span class="n">PDF_data_names</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;x&#39;</span><span class="p">,</span> <span class="s1">&#39;t&#39;</span><span class="p">,</span> <span class="s1">&#39;Q&#39;</span><span class="p">,</span> <span class="s1">&#39;spe&#39;</span><span class="p">,</span> <span class="s1">&#39;flv&#39;</span><span class="p">]</span>
+<span class="n">tPDF_data_names</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;x&#39;</span><span class="p">,</span> <span class="s1">&#39;t&#39;</span><span class="p">,</span> <span class="s1">&#39;Q&#39;</span><span class="p">,</span> <span class="s1">&#39;spe&#39;</span><span class="p">,</span> <span class="s1">&#39;flv&#39;</span><span class="p">]</span> <span class="c1"># The same as PDF</span>
+<span class="n">GPD_data_names</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;x&#39;</span><span class="p">,</span> <span class="s1">&#39;xi&#39;</span><span class="p">,</span> <span class="s1">&#39;t&#39;</span><span class="p">,</span> <span class="s1">&#39;Q&#39;</span><span class="p">,</span> <span class="s1">&#39;spe&#39;</span><span class="p">,</span> <span class="s1">&#39;flv&#39;</span><span class="p">]</span>
+<span class="n">GFF_data_names</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;j&#39;</span><span class="p">,</span> <span class="s1">&#39;t&#39;</span><span class="p">,</span> <span class="s1">&#39;Q&#39;</span><span class="p">,</span> <span class="s1">&#39;spe&#39;</span><span class="p">,</span> <span class="s1">&#39;flv&#39;</span><span class="p">]</span>
+</pre></div>
+</div>
+<p>We note that in the gumpgpd framework, <code class="docutils literal notranslate"><span class="pre">'x',</span> <span class="pre">'xi',</span> <span class="pre">'t'</span></code> denote the standard GPD variable,
+<code class="docutils literal notranslate"><span class="pre">'Q'</span></code> stands for the factorization scale, <code class="docutils literal notranslate"><span class="pre">'spe'</span></code> takes 0,1,2,3 for <span class="math notranslate nohighlight">\(H,E,\tilde{H},\tilde{E}\)</span> GPDs
+and <code class="docutils literal notranslate"><span class="pre">'flv'=</span> <span class="pre">'u','d','g','NS','S'</span></code> for up quark, down quark, gluon, u-d, and u+d.
+Again, those code are collected in the Example folder of <a class="reference external" href="https://github.com/yuxunguo/GUMP-Global-GPDs/tree/GUMP1.0">GitHub</a>.</p>
 </section>
+<section id="calculation-of-experimental-cross-sections-and-asymmetries">
+<h3>Calculation of experimental cross-sections and asymmetries<a class="headerlink" href="#calculation-of-experimental-cross-sections-and-asymmetries" title="Link to this heading"></a></h3>
+</section>
+</section>
+<section id="calculation-observables-without-existing-interface">
+<h2>Calculation observables without existing interface<a class="headerlink" href="#calculation-observables-without-existing-interface" title="Link to this heading"></a></h2>
+<p>There are also ways to calcuate observables that are not directly accessible with the above integrated dataframe interface.
+They require you to directly call the corresponding function for the calculations. Here are some examples:</p>
 <section id="leading-order-transition-form-factors">
 <h3>Leading-order Transition Form factors<a class="headerlink" href="#leading-order-transition-form-factors" title="Link to this heading"></a></h3>
 <p>The same for the LO Transition form factors (TFFs) with <code class="xref py py-meth docutils literal notranslate"><span class="pre">Observables.GPDobserv.TFF()</span></code>.
@@ -205,13 +243,12 @@ Whereas the <code class="xref py py-meth docutils literal notranslate"><span cla
 </pre></div>
 </div>
 </section>
-<section id="some-notes-on-genearl-observables">
-<h3>Some notes on genearl observables<a class="headerlink" href="#some-notes-on-genearl-observables" title="Link to this heading"></a></h3>
-<p>It will be numerically demanding to generate GPDs at different x to calculate TFF/CFFs or other amplitudes,
-since each point would requires an inverse transform to x-space that’s essentially one or two (if NLO evolutions are used) layers of integral.
-But this might be the only options if the Wilson coefficients in the conformal spin space are not known.</p>
-<p>Be cautious!</p>
 </section>
+<section id="other-possible-calculations">
+<h2>Other possible calculations<a class="headerlink" href="#other-possible-calculations" title="Link to this heading"></a></h2>
+<p>The current framework also allows one to calculate things not implemented yet.
+Nevertheless, it’s not recommended unless you are familiar with their moment-space implementation as well as the GUMP framework.
+Contact <a class="reference external" href="mailto:youuungx&#37;&#52;&#48;gmail&#46;com">Yuxun Guo</a> to request.</p>
 </section>
 </section>
 
