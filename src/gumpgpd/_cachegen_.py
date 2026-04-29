@@ -1,8 +1,10 @@
 from .Minimizer import Paralst_Unp_Names, Paralst_Pol_Names,Paralst_Aux_Names, cost_off_forward_withH_withHt, Paralst_Unp_off_forward, Paralst_Pol_off_forward
 from ._helper_ import gump_msg
+from .config import clear_cachedir
 import time
 if __name__ == '__main__':
     
+    clear_cachedir()  # Clear the cache before generating new data to ensure a clean state.
     # Retrieve the best-fit parameters
     Paralst_Unp = Paralst_Unp_off_forward
     # The last parameter of Paralst_Pol_off_forward is the auxiliary parameter not used in the analysis
