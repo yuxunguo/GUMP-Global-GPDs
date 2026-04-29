@@ -937,10 +937,6 @@ def ConfWaveFuncG_over_sinpij(j: complex, x: float, xi: float) -> complex:
 
     return 0
 
-def ConfWaveFuncEvo(j: complex, x: float, xi: float, p: int):
-    
-    
-    return 0
 
 def Charge_Factor(particle:int):
     """The charge factors. For mesons it also multiplies with decay widths (f_m  is for meson m). Output is in evolution basis
@@ -1403,6 +1399,56 @@ def TFF_Evo_LO(j: np.array, nf: int, p: int, mu: float, ConfFlav: np.array, meso
 
     return EvoConf
 
+@Hybrid_Cache
+def diagonal_evolution_NLO(j: np.ndarray, nf: int, p: int, mu: float) -> Tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
+    """
+    Construct LO and diagonal NLO evolution operators for given j, nf, p, mu.
+    This function does NOT depend on the input conformal moments.
+
+    Args:
+        j: conformal spin array (N,)
+        nf: number of flavors
+        p: parity type (1 or -1)
+        mu: final evolution scale
+
+    Returns:
+        - evola0NS: NS LO evolution factor (N,)
+        - evola0: SG LO evolution operator (N, 2, 2)
+        - evola1NS_diag_plus: NS NLO diagonal evolution factor (N, 3)
+        - evola1_diag: SG NLO diagonal evolution operator (N, 2, 2)
+    """
+    
+    Alphafact = np.array(AlphaS(nloop_alphaS, nf, mu)) / np.pi / 2
+    R = np.array(AlphaS(nloop_alphaS, nf, mu) / AlphaS(nloop_alphaS, nf, Init_Scale_Q))
+    b0 = beta0(nf)
+
+    lam, pr = projectors(j + 1, nf, p)
+    pproj = amuindep(j, nf, p)
+    rmu1 = rmudep(nf, lam, lam, mu)
+    Rfact = R[..., np.newaxis] ** (-lam / b0)
+
+    evola0 = np.einsum('...aij,...a->...ij', pr, Rfact)
+    gam0NS = non_singlet_LO(j + 1, nf, p)
+    evola0NS = R ** (-gam0NS / b0)
+
+    # NS NLO
+    amuindepNS_stack = np.stack((
+        amuindepNS(j, nf, p, -1),
+        amuindepNS(j, nf, p, 1),
+        amuindepNS(j, nf, p, -1),
+    ), axis=-1)
+    evola1NS_diag_plus = np.einsum(
+        '...,...i->...i',
+        Alphafact * evola0NS * rmudepNS(nf, gam0NS, gam0NS, mu),
+        amuindepNS_stack
+    )
+
+    # SG NLO
+    evola1_diag_ab = np.einsum('kab,kabij->kabij', rmu1, pproj)
+    evola1_diag = np.einsum('...abij,...b,...->...ij', evola1_diag_ab, Rfact, Alphafact)
+
+    return evola0NS, evola0, evola1NS_diag_plus, evola1_diag
+
 def _WilsonCoef_Evo_NLO_common(j: np.ndarray, nf: int, p: int, Q: float, muf: float,
                                lo_wilson_getter, nlo_wilson_getter) -> Tuple[np.ndarray, np.ndarray]:
     """Shared NLO evolution skeleton for DVCS/DVMP Wilson coefficients."""
@@ -1488,56 +1534,6 @@ def _WilsonCoef_Evo_NLO_common(j: np.ndarray, nf: int, p: int, Q: float, muf: fl
     CWilsonT_ev_SG_tot = CWSG_ev0 + CWSG_ev1 + CWilsonT_1_SG_ev0
 
     return CWilsonT_ev_NS_tot, CWilsonT_ev_SG_tot
-
-@Hybrid_Cache
-def diagonal_evolution_NLO(j: np.ndarray, nf: int, p: int, mu: float) -> Tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
-    """
-    Construct LO and diagonal NLO evolution operators for given j, nf, p, mu.
-    This function does NOT depend on the input conformal moments.
-
-    Args:
-        j: conformal spin array (N,)
-        nf: number of flavors
-        p: parity type (1 or -1)
-        mu: final evolution scale
-
-    Returns:
-        - evola0NS: NS LO evolution factor (N,)
-        - evola0: SG LO evolution operator (N, 2, 2)
-        - evola1NS_diag_plus: NS NLO diagonal evolution factor (N, 3)
-        - evola1_diag: SG NLO diagonal evolution operator (N, 2, 2)
-    """
-    
-    Alphafact = np.array(AlphaS(nloop_alphaS, nf, mu)) / np.pi / 2
-    R = np.array(AlphaS(nloop_alphaS, nf, mu) / AlphaS(nloop_alphaS, nf, Init_Scale_Q))
-    b0 = beta0(nf)
-
-    lam, pr = projectors(j + 1, nf, p)
-    pproj = amuindep(j, nf, p)
-    rmu1 = rmudep(nf, lam, lam, mu)
-    Rfact = R[..., np.newaxis] ** (-lam / b0)
-
-    evola0 = np.einsum('...aij,...a->...ij', pr, Rfact)
-    gam0NS = non_singlet_LO(j + 1, nf, p)
-    evola0NS = R ** (-gam0NS / b0)
-
-    # NS NLO
-    amuindepNS_stack = np.stack((
-        amuindepNS(j, nf, p, -1),
-        amuindepNS(j, nf, p, 1),
-        amuindepNS(j, nf, p, -1),
-    ), axis=-1)
-    evola1NS_diag_plus = np.einsum(
-        '...,...i->...i',
-        Alphafact * evola0NS * rmudepNS(nf, gam0NS, gam0NS, mu),
-        amuindepNS_stack
-    )
-
-    # SG NLO
-    evola1_diag_ab = np.einsum('kab,kabij->kabij', rmu1, pproj)
-    evola1_diag = np.einsum('...abij,...b,...->...ij', evola1_diag_ab, Rfact, Alphafact)
-
-    return evola0NS, evola0, evola1NS_diag_plus, evola1_diag
 
 @Hybrid_Cache
 def DVMP_WCoef_Evo_NLO(j: np.array, nf: int, p: int, Q: float, meson: int, muf: float) -> Tuple[np.ndarray, np.ndarray]:
