@@ -456,7 +456,7 @@ class GPDobserv (object) :
         return np.real(result)
     
     def CFF(self, ParaAll, muf, p_order = 1, flv = 'All'):
-        """Charge averged CFF $\mathcal{F}(xi, t) (\mathcal{F} = Q_u^2 F_u + Q_d^2 F_d)$
+        r"""Charge averged CFF $\mathcal{F}(xi, t) (\mathcal{F} = Q_u^2 F_u + Q_d^2 F_d)$
         
         Args:
             ParaAll: array as [Para_Forward, Para_xi2, Para_xi4]
@@ -523,7 +523,7 @@ class GPDobserv (object) :
         return fixed_quadvec(lambda imJ: Integrand_CFF(imJ)+Integrand_CFF(-imJ), 0,  Max_imJ, n=500) + CFFj0()
 
     def TFF(self, ParaAll, muf , meson, p_order = 1, flv = 'All'):
-        """TFF $\mathcal{F}(xi, t) (\mathcal{F}$
+        r"""TFF $\mathcal{F}(xi, t) (\mathcal{F}$
         
         Args:
             ParaAll: array as [Para_Forward, Para_xi2, Para_xi4]
@@ -592,7 +592,7 @@ class GPDobserv (object) :
         return fixed_quadvec(lambda imJ: Integrand_TFF(imJ)+Integrand_TFF(-imJ), 0,  Max_imJ, n=500) + TFFj0()
     
     def CFFNLO(self, ParaAll, muf: float, flv = 'All'):
-        """CFF $\mathcal{F}(xi, t) (\mathcal{F}$
+        r"""CFF $\mathcal{F}(xi, t) (\mathcal{F}$
         
         A separate function for next-to-leading order CFF, it can be called directly or with CFF() by setting p_order = 2 
         
@@ -654,7 +654,7 @@ class GPDobserv (object) :
         return 1j*fixed_quadvec(lambda imJ: tan_factor(reJ+1j*imJ)*Integrand_Mellin_Barnes_CFF(reJ+1j*imJ)+tan_factor(reJ-1j*imJ)*Integrand_Mellin_Barnes_CFF(reJ-1j*imJ), 0, Max_imJ,n = 300) + CFFj0()
 
     def CFFNLO_evMom(self, ParaAll, muf: float, flv = 'All'):
-        """NLOCFF $\mathcal{F}(xi, t) (\mathcal{F}) $
+        r"""NLOCFF $\mathcal{F}(xi, t) (\mathcal{F}) $
         
         A different function for next-to-leading order TFF using evolved moment method, it can be checked that it generate the same results as the evolve Wilson coefficient method
         
@@ -737,7 +737,7 @@ class GPDobserv (object) :
         return 1j*fixed_quadvec(lambda imJ: tan_factor(reJ+1j*imJ)*Integrand_Mellin_Barnes_CFF(reJ+1j*imJ)+tan_factor(reJ-1j*imJ)*Integrand_Mellin_Barnes_CFF(reJ-1j*imJ), 0, Max_imJ,n = 400) + CFFj0() + CFFj1()
     
     def TFFNLO(self, ParaAll, muf: float, meson: int, flv = 'All'):
-        """TFF $\mathcal{F}(xi, t) (\mathcal{F}$
+        r"""TFF $\mathcal{F}(xi, t) (\mathcal{F}$
         
         A separate function for next-to-leading order TFF, it can be called directly or with TFF() by setting p_order = 2 
         
@@ -799,7 +799,7 @@ class GPDobserv (object) :
         return 1j*fixed_quadvec(lambda imJ: tan_factor(reJ+1j*imJ)*Integrand_Mellin_Barnes_TFF(reJ+1j*imJ)+tan_factor(reJ-1j*imJ)*Integrand_Mellin_Barnes_TFF(reJ-1j*imJ), 0, Max_imJ,n = 300) + TFFj0()
 
     def TFFNLO_evMom(self, ParaAll, muf: float, meson: int, flv = 'All'):
-        """NLOTFF $\mathcal{F}(xi, t) (\mathcal{F}) $
+        r"""NLOTFF $\mathcal{F}(xi, t) (\mathcal{F}) $
         
         A different function for next-to-leading order TFF using evolved moment method, it can be checked that it generate the same results as the evolve Wilson coefficient method
         

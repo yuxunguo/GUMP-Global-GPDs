@@ -11,6 +11,7 @@ Note:
 # from scipy.special import loggamma as clngamma
 # from this import d
 from .Parameters import Moment_Sum
+from .config import Hybrid_Cache
 
 import numpy as np
 from scipy.special import psi, zeta, gamma, loggamma, p_roots
@@ -18,114 +19,6 @@ from math import factorial, log
 from mpmath import mp, hyp2f1
 from typing import Tuple, Union
 from numba import vectorize, njit
-import hashlib
-import functools
-from joblib import Memory
-import os
-
-dir_path = os.path.dirname(os.path.realpath(__file__))
-
-cache_dir = './_joblib_cache_'
-
-if not os.path.exists(cache_dir):
-    os.makedirs(cache_dir)
-
-memory = Memory(location=cache_dir, verbose=0)
-
-def Ram_Cache_ArrayFirst(func):
-    """
-    RAM-only cache: stores results in-process.
-    - First argument must be a NumPy array
-    - Remaining arguments can be any hashable
-    """
-    ram_cache = {}
-
-    def serialize_array(arr: np.ndarray):
-        """
-        Generate a robust hash key for a NumPy array
-        """
-        arr_bytes = np.ascontiguousarray(arr).view(np.uint8)
-        h = hashlib.sha256(arr_bytes).hexdigest()
-        return (h, arr.shape, str(arr.dtype))
-
-    @functools.wraps(func)
-    def wrapper(array_arg: np.ndarray, *args, **kwargs):
-        """
-        array_arg : np.ndarray
-            The first argument (always a NumPy array)
-        *args : any hashable
-            Positional arguments
-        **kwargs : any hashable
-            Keyword arguments
-        """
-        # Serialize the first array argument
-        array_key = serialize_array(array_arg)
-
-        # Build composite key for RAM cache
-        # kwargs sorted for determinism
-        key = (array_key, args, tuple(sorted(kwargs.items())))
-
-        # RAM cache fast path
-        if key in ram_cache:
-            return ram_cache[key]
-
-        # Compute result and store in RAM
-        result = func(array_arg, *args, **kwargs)
-        ram_cache[key] = result
-
-        return result
-
-    return wrapper
-
-def Hybrid_Cache_ArrayFirst(func):
-    """
-    Hybrid cache: RAM (in-process) + disk (joblib.Memory)
-    - First argument must be a NumPy array
-    - Remaining arguments can be any hashable
-    """
-    ram_cache = {}
-
-    def serialize_array(arr: np.ndarray):
-        """
-        Generate a robust hash key for a NumPy array
-        """
-        arr_bytes = np.ascontiguousarray(arr).view(np.uint8)
-        h = hashlib.sha256(arr_bytes).hexdigest()
-        return (h, arr.shape, str(arr.dtype))
-
-    @functools.wraps(func)
-    def wrapper(array_arg: np.ndarray, *args, **kwargs):
-        """
-        array_arg : np.ndarray
-            The first argument (always a NumPy array)
-        *args : any hashable
-            Positional arguments
-        **kwargs : any hashable
-            Keyword arguments
-        """
-        # Serialize the first array argument
-        array_key = serialize_array(array_arg)
-
-        # Create a composite key for RAM cache
-        # Include args and kwargs (kwargs sorted for determinism)
-        key = (array_key, args, tuple(sorted(kwargs.items())))
-
-        # RAM cache fast path
-        if key in ram_cache:
-            return ram_cache[key]
-
-        # Disk cache via joblib.Memory
-        cached_func = memory.cache(func)
-
-        # Compute or load from disk
-        result = cached_func(array_arg, *args, **kwargs)
-
-        # Store in RAM cache
-        ram_cache[key] = result
-
-        return result
-
-    return wrapper
 
 """
 ***********************QCD constants***************************************
@@ -408,7 +301,7 @@ def lsumrev(m: Union[complex, np.ndarray], n: Union[complex, np.ndarray])-> Unio
     return sum((2*l+1)*deldelS2((m+1)/2,l/2)/2 for l in range(1))
 '''
 
-@Ram_Cache_ArrayFirst
+@Hybrid_Cache
 def non_singlet_LO(n:Union[complex, np.ndarray], nf: int, p: int, prty: int = 1) -> Union[complex, np.ndarray]:
     """Non-singlet LO anomalous dimension.
 
@@ -425,7 +318,7 @@ def non_singlet_LO(n:Union[complex, np.ndarray], nf: int, p: int, prty: int = 1)
     """
     return CF*(-3.0-2.0/(n*(1.0+n))+4.0*S1(n))
 
-@Ram_Cache_ArrayFirst
+@Hybrid_Cache
 def singlet_LO(n: Union[complex, np.ndarray], nf: int, p: int, prty: int = 1) -> np.ndarray:
     """Singlet LO anomalous dimensions.
 
@@ -460,7 +353,7 @@ def singlet_LO(n: Union[complex, np.ndarray], nf: int, p: int, prty: int = 1) ->
 
     return np.stack((qq0_qg0, gq0_gg0), axis=-2)# (N, 2, 2)
 
-@Ram_Cache_ArrayFirst
+@Hybrid_Cache
 def non_singlet_NLO(n: complex, nf: int, p: int, prty: int = 1) -> complex:
     """Non-singlet anomalous dimension.
     
@@ -499,7 +392,7 @@ def non_singlet_NLO(n: complex, nf: int, p: int, prty: int = 1) -> complex:
 
     return nlo
 
-@Ram_Cache_ArrayFirst
+@Hybrid_Cache
 def singlet_NLO(n: complex, nf: int, p: int, prty: int = 1) -> np.ndarray:
     """Singlet NLO anomalous dimensions matrix.
     
@@ -857,7 +750,7 @@ def bmudep(mu, zn, zk, nf: int, p: int, NS: bool = False, prty: int = 1):
     return Bjk
 
 #@np_cache_Evo
-@Ram_Cache_ArrayFirst
+@Hybrid_Cache
 def evolop(j: complex, nf: int, p: int, mu: float):
     """Leading order GPD evolution operator E(j, nf, mu)[a,b].
 
@@ -916,7 +809,7 @@ mp.dps = 25
 
 hyp2f1_nparray = np.frompyfunc(hyp2f1,4,1)
 
-@Ram_Cache_ArrayFirst
+@Hybrid_Cache
 def InvMellinWaveFuncQ(s: complex, x: float) -> complex:
     """ Quark wave function for inverse Mellin transformation: x^(-s) for x>0 and 0 for x<0
 
@@ -938,7 +831,7 @@ def InvMellinWaveFuncQ(s: complex, x: float) -> complex:
     '''
     return np.where(x>0, x**(-s), 0)
 
-@Ram_Cache_ArrayFirst
+@Hybrid_Cache
 def InvMellinWaveFuncG(s: complex, x: float) -> complex:
     """ Gluon wave function for inverse Mellin transformation: x^(-s+1) for x>0 and 0 for x<0
 
@@ -958,7 +851,7 @@ def InvMellinWaveFuncG(s: complex, x: float) -> complex:
     '''
     return np.where(x>0, x**(-s+1), 0)
 
-@Ram_Cache_ArrayFirst
+@Hybrid_Cache
 def ConfWaveFuncQ(j: complex, x: float, xi: float) -> complex:
     """Quark conformal wave function p_j(x,xi) 
     
@@ -979,7 +872,7 @@ def ConfWaveFuncQ(j: complex, x: float, xi: float) -> complex:
 
     return 0
 
-@Ram_Cache_ArrayFirst
+@Hybrid_Cache
 def ConfWaveFuncQ_over_sinpij(j: complex, x: float, xi: float) -> complex:
     """Quark conformal wave function p_j(x,xi)/sin(pi(j+1))
     
@@ -1000,7 +893,7 @@ def ConfWaveFuncQ_over_sinpij(j: complex, x: float, xi: float) -> complex:
 
     return 0
 
-@Ram_Cache_ArrayFirst
+@Hybrid_Cache
 def ConfWaveFuncG(j: complex, x: float, xi: float) -> complex:
     """Gluon conformal wave function p_j(x,xi) 
     
@@ -1023,7 +916,7 @@ def ConfWaveFuncG(j: complex, x: float, xi: float) -> complex:
 
     return 0
 
-@Ram_Cache_ArrayFirst
+@Hybrid_Cache
 def ConfWaveFuncG_over_sinpij(j: complex, x: float, xi: float) -> complex:
     """Gluon conformal wave function p_j(x,xi)/sin(pi(j+1)) = Minus * p_j(x,xi)/sin(pi*j)
     
@@ -1510,7 +1403,7 @@ def TFF_Evo_LO(j: np.array, nf: int, p: int, mu: float, ConfFlav: np.array, meso
 
     return EvoConf
 
-@Hybrid_Cache_ArrayFirst
+@Hybrid_Cache
 def DVMP_WCoef_Evo_NLO(j: np.array, nf: int, p: int, Q: float, meson: int, muf: float) -> Tuple[np.ndarray, np.ndarray]:
     """Next-to-leading order evolution of the DVMP Wilson coefficient (Evolved Wilson coefficient method)
 
@@ -1683,7 +1576,7 @@ def TFF_Evo_NLO_evWC(j: np.array, nf: int, p: int, Q: float, ConfFlav: np.array,
     
     return EvoConf
 
-@Hybrid_Cache_ArrayFirst
+@Hybrid_Cache
 def DVCS_WCoef_Evo_NLO(j: np.array, nf: int, p: int, Q: float, muf: float) -> Tuple[np.ndarray, np.ndarray]:
     """Next-to-leading order evolution of the DVCS Wilson coefficient (Evolved Wilson coefficient method)
 
@@ -2213,7 +2106,7 @@ def GPD_Moment_Evo_NLO(j: np.array, nf: int, p: int, mu: float, t: float, xi: co
 
     return EvoConf
 
-@Ram_Cache_ArrayFirst
+@Hybrid_Cache
 def diagonal_evolution_NLO(j: np.ndarray, nf: int, p: int, mu: float) -> Tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
     """
     Construct LO and diagonal NLO evolution operators for given j, nf, p, mu.
