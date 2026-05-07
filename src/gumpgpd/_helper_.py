@@ -2,6 +2,40 @@ import pandas as pd
 import numpy as np
 from sklearn.cluster import DBSCAN
 from sklearn.preprocessing import MaxAbsScaler
+from colorama import init, Fore, Style
+
+_colorama_initialized = False
+
+def _init_colorama():
+    global _colorama_initialized
+    if not _colorama_initialized:
+        init(autoreset=True)
+        _colorama_initialized = True
+
+def gump_msg(message: str, level: str = "INFO"):
+    """
+    Print a formatted GUMP message to the terminal.
+
+    Parameters:
+        message (str): The message text.
+        level (str): One of "INFO", "WARNING", "NOTE". Default is "INFO".
+    """
+    _init_colorama()  # ensure colorama is initialized once
+
+    level = level.upper()
+    prefix = "[GUMP]"
+
+    # Assign colors based on level
+    if level == "INFO":
+        color = Fore.CYAN
+    elif level == "WARNING":
+        color = Fore.YELLOW
+    elif level == "NOTE":
+        color = Fore.MAGENTA
+    else:
+        color = Fore.WHITE  # default for unknown levels
+
+    print(f"{color}{prefix} [{level}] {Style.RESET_ALL}{message}")
 
 def cluster_DVCSAsym(DVCSAsym_data, t_weight=3, eps=0.11, min_samples=5, verbose=False):
     """
