@@ -32,6 +32,7 @@ DVMP_data_names_withf = ['y', 'xB', 't', 'Q', 'f', 'delta f']
 from gumpgpd.Minimizer import GPD_theo, tPDF_theo, Para_Comb_off_forward
 import pandas as pd
 import numpy as np
+import time
 
 if __name__ == '__main__':
     
@@ -54,10 +55,13 @@ if __name__ == '__main__':
     })
 
     # Evaluate your function
+    t0 = time.perf_counter()
     result = GPD_theo(GPDs, Para=Para_Comb_off_forward)
+    t1 = time.perf_counter()
+
+    print(f"Elapsed time: {t1 - t0:.6f} s")
 
     print(result)
     
     result.to_csv("GPDs_results.csv", index=False)
-
-    print("Saved GPD results to GPDs_results.csv")
+    #print("Saved GPD results to GPDs_results.csv")

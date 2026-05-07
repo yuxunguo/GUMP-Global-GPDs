@@ -1,6 +1,22 @@
-"""
-Here we define the GPD ansatz based on the moment space expression norm * x^ alpha  * (1-x)^ beta.
-With the GPDs ansatz, observables with LO evolution are calculated
+r"""
+GPD ansatz and observable calculations with QCD evolution.
+
+The GPD ansatz follows the moment-space form
+:math:`N\,x^{-\alpha}(1-x)^{\beta}` (see :mod:`Parameters`).  Starting
+from those ansatz parameters, this module computes:
+
+* **t-dependent PDFs** (:meth:`GPDobserv.tPDF`) via inverse Mellin transform.
+* **GPDs** in :math:`x`-space (:meth:`GPDobserv.GPD`, :meth:`GPDobserv.GPDNLO_evMom`)
+  via Mellin-Barnes contour integration.
+* **Compton Form Factors** (CFFs, :meth:`GPDobserv.CFF`, :meth:`GPDobserv.CFFNLO`,
+  :meth:`GPDobserv.CFFNLO_evMom`) for DVCS.
+* **Transition Form Factors** (TFFs, :meth:`GPDobserv.TFF`, :meth:`GPDobserv.TFFNLO`,
+  :meth:`GPDobserv.TFFNLO_evMom`) for DVMP.
+* **Generalized Form Factors** (:meth:`GPDobserv.GFFj0`).
+
+All integrals use conformal (Mellin-Barnes) contours and support both
+leading-order (LO, ``p_order=1``) and next-to-leading-order (NLO,
+``p_order=2``) QCD evolution.
 """
 from .Evolution import Moment_Evo_LO,Moment_Evo_LO_NSp1, TFF_Evo_LO, CFF_Evo_LO, TFF_Evo_NLO_evWC, TFF_Evo_NLO_evMOM, CFF_Evo_NLO_evWC,CFF_Evo_NLO_evMOM, GPD_Moment_Evo_NLO,tPDF_Moment_Evo_NLO, tPDF_Moment_Evo_NLO_NSp1, fixed_quadvec, inv_flav_trans
 from .Parameters import Moment_Sum
@@ -11,9 +27,9 @@ import numpy as np
 from scipy.integrate import quad_vec, fixed_quad
 from scipy.special import gamma
 
-"""
-***********************GPD moments***************************************
-"""
+# ---------------------------------------------------------------------------
+# Module-level contour and integration parameters
+# ---------------------------------------------------------------------------
 #intercept for inverse Mellin transformation
 inv_Mellin_intercept = 0.25
 
@@ -33,14 +49,15 @@ NFEFF = 2
 Prec_Goal = 1e-3
    
 
-def flv_to_indx(flv:str):
-    """flv is the flavor. It is a string
-    
+def flv_to_indx(flv: str) -> int:
+    """Map a flavor string to its integer index.
+
     Args:
-        flv (str): the flavor in string, e.g., 'u', 'd' , 'g'
+        flv (str): flavor label — ``'u'``, ``'d'``, ``'g'``,
+            ``'NS'`` (non-singlet), or ``'S'`` (singlet).
 
     Returns:
-        flv (scalar): flavor converted to scalar 
+        int: index ``0`` (u), ``1`` (d), ``2`` (g), ``3`` (NS), or ``4`` (S).
     """
     if(flv=="u"):
         return 0
@@ -53,34 +70,54 @@ def flv_to_indx(flv:str):
     if(flv=="S"):
         return 4
 
-def flvs_to_indx(flvs):
-    """ Cast :func:`flv_to_indx` for each flv in the list flvs
+def flvs_to_indx(flvs: list) -> np.ndarray:
+    """Apply :func:`flv_to_indx` to every element of a flavor list.
 
     Args:
-        flvs (list of str): list of flavors
+        flvs (list of str): list of flavor labels accepted by
+            :func:`flv_to_indx`.
+
     Returns:
-        flvs (list of scalar): flavors converted to scalar 
+        np.ndarray: integer index array of dtype ``int32``.
     """
 
     output = [flv_to_indx(flv) for flv in flvs]
     return np.array(output, dtype=np.int32)
 
-#The flavor interpreter to return the corresponding flavor combination 
-def Flv_Intp(Flv_array: np.array, flv):
-    """Return the wave function for each flavor
-    
-    Flv_array: (N, 3) complex, the wave function of u,d,g
-    flv: (N) str
+def Flv_Intp(Flv_array: np.ndarray, flv: str) -> np.ndarray:
+    """Extract or combine flavor components from an array in the ``[u, d, g]`` basis.
 
-    return result: (N) complex
+    Args:
+        Flv_array (np.ndarray): shape ``(..., 5)`` complex array in the flavor
+            basis ``[u_V + u-bar, u-bar, d_V + d-bar, d-bar, g]``.
+        flv (str): flavor selector — ``'u'``, ``'d'``, ``'g'``,
+            ``'NS'`` (:math:`u - d`), or ``'S'`` (:math:`u + d`).
+
+    Returns:
+        np.ndarray: shape ``(...)`` complex array for the requested flavor
+        combination.
     """
     _flv_index = flv_to_indx(flv)
     return np.choose(_flv_index, [Flv_array[...,0], Flv_array[..., 1], Flv_array[..., 2],\
                         Flv_array[..., 0]-Flv_array[..., 1], Flv_array[..., 0]+Flv_array[..., 1]])
     # return np.einsum('...j,...j', Flv_array, _helper) # (N)
     
-# This is in evolution basis!!!
-def flvmask(flv: str):
+def flvmask(flv: str) -> np.ndarray:
+    """Return a binary flavor mask in the evolution basis.
+
+    Used to project evolved conformal moments onto a quark, gluon, or all-flavor
+    combination when computing CFFs and TFFs.
+
+    Args:
+        flv (str): ``'All'`` (all flavors), ``'q'`` (quarks only), or
+            ``'g'`` (gluon only).
+
+    Returns:
+        np.ndarray: length-5 integer mask, with ``1`` for active and ``0`` for
+        inactive flavors in the evolution basis
+        ``[uV, u-bar, dV, d-bar, g]``.
+    """
+    # Note: this mask operates in the evolution basis.
     if (flv == 'All'):
         return np.array([1,1,1,1,1])
     elif (flv == 'g'):
@@ -106,22 +143,24 @@ WF_helper3 = np.array([[0, 0, 0, 0, 0],
                     [0, 0, 0, 0, 1]])
 
 
-"""
-***********************Observables***************************************
-"""
+# ---------------------------------------------------------------------------
+# GPDobserv class
+# ---------------------------------------------------------------------------
 
 # Class for observables
 class GPDobserv (object) :
     #Initialization of observables. Each is a function of (x, xi ,t, Q), p for parity: p = 1 for vector GPDs (H, E) and p = -1 for axial-vector GPDs (Ht, Et)
     def __init__(self, init_x: float, init_xi: float, init_t: float, init_Q: float, p: int) -> None:
-        """Initialization of GPD-related observables
+        r"""Initialize a GPD kinematics point.
 
         Args:
-            init_x (float): the momentum fraction x
-            init_xi (float): the skewness parameter xi
-            init_t (float): the momentum transfer square t
-            init_Q (float): photon virtuality/the scale of this observables
-            p (int): p=1 for vector-like GPDs and p=-1 for axial-vector ones
+            init_x (float): momentum fraction :math:`x`.
+            init_xi (float): skewness parameter :math:`\xi`.
+            init_t (float): squared momentum transfer :math:`t` in GeV\ :sup:`2`.
+            init_Q (float): hard scale :math:`Q` (photon virtuality or
+                factorization scale) in GeV.
+            p (int): parity — ``+1`` for vector-like GPDs (:math:`H`, :math:`E`),
+                ``-1`` for axial-vector-like GPDs (:math:`\tilde{H}`, :math:`\tilde{E}`).
         """
         self.x = init_x
         self.xi = init_xi
@@ -129,23 +168,28 @@ class GPDobserv (object) :
         self.Q = init_Q
         self.p = p
 
-    def tPDF(self, flv, ParaAll, p_order = 1):
-        """t-denpendent PDF for given flavor 
-        
-        Cross-ref: :func:`Evolution.Moment_Evo_LO` and :func:`Evolution.tPDF_Moment_Evo_NLO`
-        
+    def tPDF(self, flv: str, ParaAll: np.ndarray, p_order: int = 1) -> np.ndarray:
+        r"""t-dependent PDF :math:`f(x, t)` for a given flavor.
+
+        Computes the impact-parameter-space PDF via the inverse Mellin
+        transform along a straight contour with real part
+        ``reS = 1.25``.
+
+        See also: :func:`Evolution.Moment_Evo_LO`,
+        :func:`Evolution.tPDF_Moment_Evo_NLO`.
+
         Args:
-            flv (str): "u", "d", "S", "NS" or "g"
-            ParaAll: array as [Para_Forward, Para_xi2,...] 
-            
-                - Para_Forward: array as [Para_Forward_uV, Para_Forward_ubar, Para_Forward_dV, Para_Forward_dbar, Para_Forward_g],
-                  where Para_Forward_i is parameter sets for valence u quark (uV), sea u quark (ubar), valence d quark (dV), sea d quark (dbar) and gluon (g)
-                - Para_xi2: only matter for non-zero xi (NOT needed here but the parameters are passed for consistency with GPDs)
-                 
-            p_order: 1 for leading-order evolution (default); 2 for next-to-leading-order evolution ; higher order not implemented yet
+            flv (str): flavor — ``'u'``, ``'d'``, ``'g'``, ``'S'``, or ``'NS'``.
+            ParaAll (np.ndarray): shape ``(..., 3, 5, n_ansatz, 6)`` parameter
+                array. ``ParaAll[..., 0, ...]`` contains the forward
+                (:math:`\xi^0`) parameters for the five flavors
+                ``[uV, ubar, dV, dbar, g]``; the :math:`\xi^2` slice is
+                accepted for interface consistency but is not used here.
+            p_order (int): perturbative order — ``1`` for LO (default),
+                ``2`` for NLO.
 
         Returns:
-            f(x,t) in for the given flavor
+            np.ndarray: :math:`f(x, t)` for the requested flavor.
         """
         # originally, all parameters should be (4, 3, 5, 1, 5)
         # ParaAll would be a ( 3, 5, 1, 5) matrix
@@ -193,23 +237,28 @@ class GPDobserv (object) :
         
         return 1/(2 * np.pi) * np.real(fixed_quadvec(lambda imS : Integrand_inv_Mellin(reS + 1j * imS) + Integrand_inv_Mellin(reS - 1j * imS) ,0, + Max_imS, n=300))
 
-    def GPD(self, flv, ParaAll, p_order = 1):
-        """GPD F(x, xi, t) in flavor space (flv = "u", "d", "S", "NS" or "g")
-        
+    def GPD(self, flv: str, ParaAll: np.ndarray, p_order: int = 1) -> float:
+        r"""GPD :math:`F(x, \xi, t)` in flavor space.
+
+        Evaluates the GPD at the kinematics ``(self.x, self.xi, self.t)``
+        using a Mellin-Barnes contour integral.  Dispatches to
+        :meth:`GPDNLO_evMom` automatically when ``p_order=2``.
+
         Args:
-            flv (str): "u", "d", "S", "NS" or "g"
-            ParaAll: array as [Para_Forward, Para_xi2, Para_xi4]
-            
-                - Para_Forward = array as [Para_Forward_uV, Para_Forward_ubar, Para_Forward_dV, Para_Forward_dbar, Para_Forward_g]
-                  where Para_Forward_i is forward parameter sets for valence u quark (uV), sea u quark (ubar), valence d quark (dV), sea d quark (dbar) and gluon (g)
-                - Para_xi2 = array as [Para_xi2_uV, Para_xi2_ubar, Para_xi2_dV, Para_xi2_dbar, Para_xi2_g]
-                  where Para_xi2_i is xi^2 parameter sets for valence u quark (uV), sea u quark (ubar), valence d quark (dV), sea d quark (dbar) and gluon (g)
-                - Para_xi4 = array as [Para_xi4_uV, Para_xi4_ubar, Para_xi4_dV, Para_xi4_dbar, Para_xi4_g]
-                  where Para_xi4_i is xi^4 parameter sets for valence u quark (uV), sea u quark (ubar), valence d quark (dV), sea d quark (dbar) and gluon (g)
-            p_order: 1 for leading-order evolution (default); 2 for next-to-leading-order evolution ; higher order not implemented yet
+            flv (str): flavor — ``'u'``, ``'d'``, ``'g'``, ``'S'``, or ``'NS'``.
+            ParaAll (np.ndarray): shape ``(..., 3, 5, n_ansatz, 6)`` parameter
+                array with slices:
+
+                * ``[..., 0, ...]`` — :math:`\xi^0` (forward) parameters;
+                  flavors ``[uV, ubar, dV, dbar, g]``
+                * ``[..., 1, ...]`` — :math:`\xi^2` correction parameters
+                * ``[..., 2, ...]`` — :math:`\xi^4` correction parameters
+
+            p_order (int): perturbative order — ``1`` for LO (default),
+                ``2`` for NLO.
 
         Returns:
-            f(x,xi,t) for given flavor flv
+            float: :math:`F(x, \xi, t)` for the requested flavor.
         """
         #[Para_Forward, Para_xi2, Para_xi4] = ParaAll
         if (p_order == 2):
@@ -305,23 +354,25 @@ class GPDobserv (object) :
         Max_imJ = 180
         return 1/2*np.real(fixed_quadvec(lambda imJ : Integrand_Mellin_Barnes(reJ + 1j* imJ) + Integrand_Mellin_Barnes(reJ - 1j* imJ),0, Max_imJ, n=300)) + np.real(GPD0())[0]
     
-    def GPDNLO_evMom(self, flv, ParaAll):
-        """GPD F(x, xi, t) in flavor space (flv = "u", "d", "S", "NS" or "g")
-        
+    def GPDNLO_evMom(self, flv: str, ParaAll: np.ndarray) -> float:
+        r"""NLO GPD :math:`F(x, \xi, t)` using the evolved-moment method.
+
+        Equivalent to :meth:`GPD` with ``p_order=2`` but uses moment evolution
+        (:func:`Evolution.GPD_Moment_Evo_NLO`) instead of evolved Wilson
+        coefficients.  Both approaches yield numerically consistent results.
+
         Args:
-            flv (str): "u", "d", "S", "NS" or "g"
-            ParaAll: array as [Para_Forward, Para_xi2, Para_xi4]
-            
-                - Para_Forward = array as [Para_Forward_uV, Para_Forward_ubar, Para_Forward_dV, Para_Forward_dbar, Para_Forward_g]
-                  where Para_Forward_i is forward parameter sets for valence u quark (uV), sea u quark (ubar), valence d quark (dV), sea d quark (dbar) and gluon (g)
-                - Para_xi2 = array as [Para_xi2_uV, Para_xi2_ubar, Para_xi2_dV, Para_xi2_dbar, Para_xi2_g]
-                  where Para_xi2_i is xi^2 parameter sets for valence u quark (uV), sea u quark (ubar), valence d quark (dV), sea d quark (dbar) and gluon (g)
-                - Para_xi4 = array as [Para_xi4_uV, Para_xi4_ubar, Para_xi4_dV, Para_xi4_dbar, Para_xi4_g]
-                  where Para_xi4_i is xi^4 parameter sets for valence u quark (uV), sea u quark (ubar), valence d quark (dV), sea d quark (dbar) and gluon (g)
-            p_order: 1 for leading-order evolution (default); 2 for next-to-leading-order evolution ; higher order not implemented yet
+            flv (str): flavor — ``'u'``, ``'d'``, ``'g'``, ``'S'``, or ``'NS'``.
+            ParaAll (np.ndarray): shape ``(..., 3, 5, n_ansatz, 6)`` parameter
+                array with slices:
+
+                * ``[..., 0, ...]`` — :math:`\xi^0` (forward) parameters;
+                  flavors ``[uV, ubar, dV, dbar, g]``
+                * ``[..., 1, ...]`` — :math:`\xi^2` correction parameters
+                * ``[..., 2, ...]`` — :math:`\xi^4` correction parameters
 
         Returns:
-            f(x,xi,t) for given flavor flv
+            float: :math:`F(x, \xi, t)` for the requested flavor at NLO.
         """
         
         Para_Forward = ParaAll[..., 0, :, :, :]  # each (N, 5, 1, 5)
@@ -411,12 +462,28 @@ class GPDobserv (object) :
         Max_imJ = 180
         return 1/2*np.real(fixed_quadvec(lambda imJ : Integrand_Mellin_Barnes(reJ + 1j* imJ) + Integrand_Mellin_Barnes(reJ - 1j* imJ),0, Max_imJ, n=300)) + np.real(GPD0())[0]
     
-    def GFFj0(self, j: int, flv, ParaAll, p_order):
-        """Generalized Form Factors A_{j0}(t) which is the xi^0 term of the nth (n= j+1) Mellin moment of GPD int dx x^j F(x,xi,t) for quark and int dx x^(j-1) F(x,xi,t) for gluon
-            
-            Note for gluon, GPD reduce to x*g(x), not g(x) so the Mellin moment will have a mismatch
-            
-            Only leading order implemented yet NOT well-maintained (TO BE FIXED)
+    def GFFj0(self, j: int, flv: str, ParaAll: np.ndarray, p_order: int) -> float:
+        r"""Generalized Form Factor :math:`A_{j+1,0}(t)` (the :math:`\xi^0` Mellin moment).
+
+        Computes :math:`\int dx\, x^j F(x, \xi, t)` for quarks and
+        :math:`\int dx\, x^{j-1} F(x, \xi, t)` for gluons at
+        :math:`\xi = 0`.
+
+        Note:
+            Only LO and NLO evolution are implemented.  Gluon GPDs reduce to
+            :math:`x g(x)`, so there is a moment index shift relative to
+            quarks.  This method is **not well-maintained** and is marked for
+            future revision.
+
+        Args:
+            j (int): Mellin moment index (:math:`n = j + 1`).
+            flv (str): flavor — ``'u'``, ``'d'``, ``'g'``, ``'S'``, or ``'NS'``.
+            ParaAll (np.ndarray): shape ``(..., 3, 5, n_ansatz, 6)`` parameter
+                array; only the :math:`\xi^0` slice is used.
+            p_order (int): perturbative order — ``1`` for LO, ``2`` for NLO.
+
+        Returns:
+            float: :math:`A_{j+1,0}(t)` for the requested flavor.
         """
 
         # j, flv both have shape (N)
@@ -455,24 +522,29 @@ class GPDobserv (object) :
         
         return np.real(result)
     
-    def CFF(self, ParaAll, muf, p_order = 1, flv = 'All'):
-        """Charge averged CFF $\mathcal{F}(xi, t) (\mathcal{F} = Q_u^2 F_u + Q_d^2 F_d)$
-        
+    def CFF(self, ParaAll: np.ndarray, muf: float, p_order: int = 1, flv: str = 'All') -> np.ndarray:
+        r"""Charge-weighted Compton Form Factor :math:`\mathcal{F}(\xi, t)`.
+
+        Computes :math:`\mathcal{F} = Q_u^2 F_u + Q_d^2 F_d` via a
+        Mellin-Barnes contour integral.  Dispatches to :meth:`CFFNLO`
+        automatically when ``p_order=2``.
+
         Args:
-            ParaAll: array as [Para_Forward, Para_xi2, Para_xi4]
-            
-                - Para_Forward = array as [Para_Forward_uV, Para_Forward_ubar, Para_Forward_dV, Para_Forward_dbar, Para_Forward_g]
-                  where Para_Forward_i is forward parameter sets for valence u quark (uV), sea u quark (ubar), valence d quark (dV), sea d quark (dbar) and gluon (g)
-                - Para_xi2 = array as [Para_xi2_uV, Para_xi2_ubar, Para_xi2_dV, Para_xi2_dbar, Para_xi2_g]
-                  where Para_xi2_i is xi^2 parameter sets for valence u quark (uV), sea u quark (ubar), valence d quark (dV), sea d quark (dbar) and gluon (g)
-                - Para_xi4 = array as [Para_xi4_uV, Para_xi4_ubar, Para_xi4_dV, Para_xi4_dbar, Para_xi4_g]
-                  where Para_xi4_i is xi^4 parameter sets for valence u quark (uV), sea u quark (ubar), valence d quark (dV), sea d quark (dbar) and gluon (g)
-            muf: factorization scale
-            p_order: 1 for leading-order evolution (default); 2 for next-to-leading-order evolution ; higher order not implemented yet
-            flv: "q", "g", or "All"
+            ParaAll (np.ndarray): shape ``(..., 3, 5, n_ansatz, 6)`` parameter
+                array with slices:
+
+                * ``[..., 0, ...]`` — :math:`\xi^0` (forward) parameters
+                * ``[..., 1, ...]`` — :math:`\xi^2` correction parameters
+                * ``[..., 2, ...]`` — :math:`\xi^4` correction parameters
+
+                Flavor axis order: ``[uV, ubar, dV, dbar, g]``.
+            muf (float): factorization scale in GeV.
+            p_order (int): perturbative order — ``1`` for LO (default),
+                ``2`` for NLO.
+            flv (str): flavor filter — ``'All'``, ``'q'``, or ``'g'``.
 
         Returns:
-            CFF \mathcal{F}(xi, t) = Q_u^2 F_u + Q_d^2 F_d
+            np.ndarray: :math:`\mathcal{F}(\xi, t) = Q_u^2 F_u + Q_d^2 F_d`.
         """
         if (p_order == 2):
             return self.CFFNLO(ParaAll, muf, flv)
@@ -522,25 +594,30 @@ class GPDobserv (object) :
         Max_imJ = 180 
         return fixed_quadvec(lambda imJ: Integrand_CFF(imJ)+Integrand_CFF(-imJ), 0,  Max_imJ, n=500) + CFFj0()
 
-    def TFF(self, ParaAll, muf , meson, p_order = 1, flv = 'All'):
-        """TFF $\mathcal{F}(xi, t) (\mathcal{F}$
-        
+    def TFF(self, ParaAll: np.ndarray, muf: float, meson: int, p_order: int = 1, flv: str = 'All') -> np.ndarray:
+        r"""Transition Form Factor :math:`\mathcal{F}(\xi, t)` for meson production.
+
+        Computes the TFF via a Mellin-Barnes contour integral.  Dispatches to
+        :meth:`TFFNLO` automatically when ``p_order=2``.
+
         Args:
-            ParaAll: array as [Para_Forward, Para_xi2, Para_xi4]
-        
-                - Para_Forward = array as [Para_Forward_uV, Para_Forward_ubar, Para_Forward_dV, Para_Forward_dbar, Para_Forward_g]
-                    where Para_Forward_i is forward parameter sets for valence u quark (uV), sea u quark (ubar), valence d quark (dV), sea d quark (dbar) and gluon (g)
-                - Para_xi2 = array as [Para_xi2_uV, Para_xi2_ubar, Para_xi2_dV, Para_xi2_dbar, Para_xi2_g]
-                    where Para_xi2_i is xi^2 parameter sets for valence u quark (uV), sea u quark (ubar), valence d quark (dV), sea d quark (dbar) and gluon (g)
-                - Para_xi4 = array as [Para_xi4_uV, Para_xi4_ubar, Para_xi4_dV, Para_xi4_dbar, Para_xi4_g]
-                    where Para_xi4_i is xi^4 parameter sets for valence u quark (uV), sea u quark (ubar), valence d quark (dV), sea d quark (dbar) and gluon (g)
-            muf: factorization scale
-            meson: [1 for rho, 2 for phi, 3 for jpsi]
-            p_order: 1 for leading-order evolution (default); 2 for next-to-leading-order evolution ; higher order not implemented yet
-            flv: "q", "g", or "All"
-            
+            ParaAll (np.ndarray): shape ``(..., 3, 5, n_ansatz, 6)`` parameter
+                array with slices:
+
+                * ``[..., 0, ...]`` — :math:`\xi^0` (forward) parameters
+                * ``[..., 1, ...]`` — :math:`\xi^2` correction parameters
+                * ``[..., 2, ...]`` — :math:`\xi^4` correction parameters
+
+                Flavor axis order: ``[uV, ubar, dV, dbar, g]``.
+            muf (float): factorization scale in GeV.
+            meson (int): meson code — ``1`` for :math:`\rho^0`, ``2`` for
+                :math:`\phi`, ``3`` for :math:`J/\psi`.
+            p_order (int): perturbative order — ``1`` for LO (default),
+                ``2`` for NLO.
+            flv (str): flavor filter — ``'All'``, ``'q'``, or ``'g'``.
+
         Returns:
-            TFF \mathcal{F}(xi, t)
+            np.ndarray: :math:`\mathcal{F}(\xi, t)` for the requested meson.
         """
         if (p_order == 2):
             return self.TFFNLO(ParaAll, muf, meson, flv)
@@ -591,25 +668,27 @@ class GPDobserv (object) :
         
         return fixed_quadvec(lambda imJ: Integrand_TFF(imJ)+Integrand_TFF(-imJ), 0,  Max_imJ, n=500) + TFFj0()
     
-    def CFFNLO(self, ParaAll, muf: float, flv = 'All'):
-        """CFF $\mathcal{F}(xi, t) (\mathcal{F}$
-        
-        A separate function for next-to-leading order CFF, it can be called directly or with CFF() by setting p_order = 2 
-        
+    def CFFNLO(self, ParaAll: np.ndarray, muf: float, flv: str = 'All') -> np.ndarray:
+        r"""NLO Compton Form Factor :math:`\mathcal{F}(\xi, t)` via evolved Wilson coefficients.
+
+        Implements the NLO CFF using the evolved-Wilson-coefficient (evWC)
+        method.  Can be called directly or via :meth:`CFF` with
+        ``p_order=2``.
+
         Args:
-            ParaAll: array as [Para_Forward, Para_xi2, Para_xi4]
-        
-                - Para_Forward = array as [Para_Forward_uV, Para_Forward_ubar, Para_Forward_dV, Para_Forward_dbar, Para_Forward_g]
-                    where Para_Forward_i is forward parameter sets for valence u quark (uV), sea u quark (ubar), valence d quark (dV), sea d quark (dbar) and gluon (g)
-                - Para_xi2 = array as [Para_xi2_uV, Para_xi2_ubar, Para_xi2_dV, Para_xi2_dbar, Para_xi2_g]
-                    where Para_xi2_i is xi^2 parameter sets for valence u quark (uV), sea u quark (ubar), valence d quark (dV), sea d quark (dbar) and gluon (g)
-                - Para_xi4 = array as [Para_xi4_uV, Para_xi4_ubar, Para_xi4_dV, Para_xi4_dbar, Para_xi4_g]
-                    where Para_xi4_i is xi^4 parameter sets for valence u quark (uV), sea u quark (ubar), valence d quark (dV), sea d quark (dbar) and gluon (g)
-            muf: factorization scale
-            flv: "q", "g", or "All"
-            
+            ParaAll (np.ndarray): shape ``(..., 3, 5, n_ansatz, 6)`` parameter
+                array with slices:
+
+                * ``[..., 0, ...]`` — :math:`\xi^0` (forward) parameters
+                * ``[..., 1, ...]`` — :math:`\xi^2` correction parameters
+                * ``[..., 2, ...]`` — :math:`\xi^4` correction parameters
+
+                Flavor axis order: ``[uV, ubar, dV, dbar, g]``.
+            muf (float): factorization scale in GeV.
+            flv (str): flavor filter — ``'All'``, ``'q'``, or ``'g'``.
+
         Returns:
-            CFF \mathcal{F}(xi, t)
+            np.ndarray: NLO :math:`\mathcal{F}(\xi, t)`.
         """
         #[Para_Forward, Para_xi2, Para_xi4] = ParaAll  # each (N, 5, 1, 5)
         Para_Forward = ParaAll[..., 0, :, :, :]  # each (N, 5, 1, 5)
@@ -653,25 +732,32 @@ class GPDobserv (object) :
         
         return 1j*fixed_quadvec(lambda imJ: tan_factor(reJ+1j*imJ)*Integrand_Mellin_Barnes_CFF(reJ+1j*imJ)+tan_factor(reJ-1j*imJ)*Integrand_Mellin_Barnes_CFF(reJ-1j*imJ), 0, Max_imJ,n = 300) + CFFj0()
 
-    def CFFNLO_evMom(self, ParaAll, muf: float, flv = 'All'):
-        """NLOCFF $\mathcal{F}(xi, t) (\mathcal{F}) $
-        
-        A different function for next-to-leading order TFF using evolved moment method, it can be checked that it generate the same results as the evolve Wilson coefficient method
-        
+    def CFFNLO_evMom(self, ParaAll: np.ndarray, muf: float, flv: str = 'All') -> np.ndarray:
+        r"""NLO Compton Form Factor :math:`\mathcal{F}(\xi, t)` via evolved moments.
+
+        Alternative NLO implementation using moment evolution
+        (:func:`Evolution.CFF_Evo_NLO_evMOM`) instead of evolved Wilson
+        coefficients.  Both methods produce numerically consistent results and
+        can be used to cross-check each other.
+
+        The :math:`j = 0` pole term is added back using the evWC method
+        because the double-sum formula excludes it by construction.  For the
+        same reason a :math:`j = 1` pole term is also restored.
+
         Args:
-            ParaAll: array as [Para_Forward, Para_xi2, Para_xi4]
-        
-                - Para_Forward = array as [Para_Forward_uV, Para_Forward_ubar, Para_Forward_dV, Para_Forward_dbar, Para_Forward_g]
-                    where Para_Forward_i is forward parameter sets for valence u quark (uV), sea u quark (ubar), valence d quark (dV), sea d quark (dbar) and gluon (g)
-                - Para_xi2 = array as [Para_xi2_uV, Para_xi2_ubar, Para_xi2_dV, Para_xi2_dbar, Para_xi2_g]
-                    where Para_xi2_i is xi^2 parameter sets for valence u quark (uV), sea u quark (ubar), valence d quark (dV), sea d quark (dbar) and gluon (g)
-                - Para_xi4 = array as [Para_xi4_uV, Para_xi4_ubar, Para_xi4_dV, Para_xi4_dbar, Para_xi4_g]
-                    where Para_xi4_i is xi^4 parameter sets for valence u quark (uV), sea u quark (ubar), valence d quark (dV), sea d quark (dbar) and gluon (g)
-            muf: factorization scale
-            flv: "q", "g", or "All"
-            
+            ParaAll (np.ndarray): shape ``(..., 3, 5, n_ansatz, 6)`` parameter
+                array with slices:
+
+                * ``[..., 0, ...]`` — :math:`\xi^0` (forward) parameters
+                * ``[..., 1, ...]`` — :math:`\xi^2` correction parameters
+                * ``[..., 2, ...]`` — :math:`\xi^4` correction parameters
+
+                Flavor axis order: ``[uV, ubar, dV, dbar, g]``.
+            muf (float): factorization scale in GeV.
+            flv (str): flavor filter — ``'All'``, ``'q'``, or ``'g'``.
+
         Returns:
-            CFF \mathcal{F}(xi, t)
+            np.ndarray: NLO :math:`\mathcal{F}(\xi, t)` (evolved-moment method).
         """
         Para_Forward = ParaAll[..., 0, :, :, :]  # each (N, 5, 1, 5)
         Para_xi2     = ParaAll[..., 1, :, :, :]
@@ -736,26 +822,29 @@ class GPDobserv (object) :
 
         return 1j*fixed_quadvec(lambda imJ: tan_factor(reJ+1j*imJ)*Integrand_Mellin_Barnes_CFF(reJ+1j*imJ)+tan_factor(reJ-1j*imJ)*Integrand_Mellin_Barnes_CFF(reJ-1j*imJ), 0, Max_imJ,n = 400) + CFFj0() + CFFj1()
     
-    def TFFNLO(self, ParaAll, muf: float, meson: int, flv = 'All'):
-        """TFF $\mathcal{F}(xi, t) (\mathcal{F}$
-        
-        A separate function for next-to-leading order TFF, it can be called directly or with TFF() by setting p_order = 2 
-        
+    def TFFNLO(self, ParaAll: np.ndarray, muf: float, meson: int, flv: str = 'All') -> np.ndarray:
+        r"""NLO Transition Form Factor :math:`\mathcal{F}(\xi, t)` via evolved Wilson coefficients.
+
+        Implements the NLO TFF using the evolved-Wilson-coefficient (evWC)
+        method.  Can be called directly or via :meth:`TFF` with
+        ``p_order=2``.
+
         Args:
-            ParaAll: array as [Para_Forward, Para_xi2, Para_xi4]
-        
-                - Para_Forward = array as [Para_Forward_uV, Para_Forward_ubar, Para_Forward_dV, Para_Forward_dbar, Para_Forward_g]
-                    where Para_Forward_i is forward parameter sets for valence u quark (uV), sea u quark (ubar), valence d quark (dV), sea d quark (dbar) and gluon (g)
-                - Para_xi2 = array as [Para_xi2_uV, Para_xi2_ubar, Para_xi2_dV, Para_xi2_dbar, Para_xi2_g]
-                    where Para_xi2_i is xi^2 parameter sets for valence u quark (uV), sea u quark (ubar), valence d quark (dV), sea d quark (dbar) and gluon (g)
-                - Para_xi4 = array as [Para_xi4_uV, Para_xi4_ubar, Para_xi4_dV, Para_xi4_dbar, Para_xi4_g]
-                    where Para_xi4_i is xi^4 parameter sets for valence u quark (uV), sea u quark (ubar), valence d quark (dV), sea d quark (dbar) and gluon (g)
-            muf: factorization scale
-            meson: [1 for rho, 2 for phi, 3 for jpsi]
-            flv: "q", "g", or "All"
-            
+            ParaAll (np.ndarray): shape ``(..., 3, 5, n_ansatz, 6)`` parameter
+                array with slices:
+
+                * ``[..., 0, ...]`` — :math:`\xi^0` (forward) parameters
+                * ``[..., 1, ...]`` — :math:`\xi^2` correction parameters
+                * ``[..., 2, ...]`` — :math:`\xi^4` correction parameters
+
+                Flavor axis order: ``[uV, ubar, dV, dbar, g]``.
+            muf (float): factorization scale in GeV.
+            meson (int): meson code — ``1`` for :math:`\rho^0`, ``2`` for
+                :math:`\phi`, ``3`` for :math:`J/\psi`.
+            flv (str): flavor filter — ``'All'``, ``'q'``, or ``'g'``.
+
         Returns:
-            TFF \mathcal{F}(xi, t)
+            np.ndarray: NLO :math:`\mathcal{F}(\xi, t)` for the requested meson.
         """
         Para_Forward = ParaAll[..., 0, :, :, :]  # each (N, 5, 1, 5)
         Para_xi2     = ParaAll[..., 1, :, :, :]
@@ -798,26 +887,34 @@ class GPDobserv (object) :
         
         return 1j*fixed_quadvec(lambda imJ: tan_factor(reJ+1j*imJ)*Integrand_Mellin_Barnes_TFF(reJ+1j*imJ)+tan_factor(reJ-1j*imJ)*Integrand_Mellin_Barnes_TFF(reJ-1j*imJ), 0, Max_imJ,n = 300) + TFFj0()
 
-    def TFFNLO_evMom(self, ParaAll, muf: float, meson: int, flv = 'All'):
-        """NLOTFF $\mathcal{F}(xi, t) (\mathcal{F}) $
-        
-        A different function for next-to-leading order TFF using evolved moment method, it can be checked that it generate the same results as the evolve Wilson coefficient method
-        
+    def TFFNLO_evMom(self, ParaAll: np.ndarray, muf: float, meson: int, flv: str = 'All') -> np.ndarray:
+        r"""NLO Transition Form Factor :math:`\mathcal{F}(\xi, t)` via evolved moments.
+
+        Alternative NLO implementation using moment evolution
+        (:func:`Evolution.TFF_Evo_NLO_evMOM`) instead of evolved Wilson
+        coefficients.  Both methods produce numerically consistent results and
+        can be used to cross-check each other.
+
+        The :math:`j = 0` and :math:`j = 1` pole terms are added back
+        separately (see :meth:`CFFNLO_evMom` for the rationale).
+
         Args:
-            ParaAll: array as [Para_Forward, Para_xi2, Para_xi4]
-        
-                - Para_Forward = array as [Para_Forward_uV, Para_Forward_ubar, Para_Forward_dV, Para_Forward_dbar, Para_Forward_g]
-                    where Para_Forward_i is forward parameter sets for valence u quark (uV), sea u quark (ubar), valence d quark (dV), sea d quark (dbar) and gluon (g)
-                - Para_xi2 = array as [Para_xi2_uV, Para_xi2_ubar, Para_xi2_dV, Para_xi2_dbar, Para_xi2_g]
-                    where Para_xi2_i is xi^2 parameter sets for valence u quark (uV), sea u quark (ubar), valence d quark (dV), sea d quark (dbar) and gluon (g)
-                - Para_xi4 = array as [Para_xi4_uV, Para_xi4_ubar, Para_xi4_dV, Para_xi4_dbar, Para_xi4_g]
-                    where Para_xi4_i is xi^4 parameter sets for valence u quark (uV), sea u quark (ubar), valence d quark (dV), sea d quark (dbar) and gluon (g)
-            muf: factorization scale
-            meson: [1 for rho, 2 for phi, 3 for jpsi]
-            flv: "q", "g", or "All"
-            
+            ParaAll (np.ndarray): shape ``(..., 3, 5, n_ansatz, 6)`` parameter
+                array with slices:
+
+                * ``[..., 0, ...]`` — :math:`\xi^0` (forward) parameters
+                * ``[..., 1, ...]`` — :math:`\xi^2` correction parameters
+                * ``[..., 2, ...]`` — :math:`\xi^4` correction parameters
+
+                Flavor axis order: ``[uV, ubar, dV, dbar, g]``.
+            muf (float): factorization scale in GeV.
+            meson (int): meson code — ``1`` for :math:`\rho^0`, ``2`` for
+                :math:`\phi`, ``3`` for :math:`J/\psi`.
+            flv (str): flavor filter — ``'All'``, ``'q'``, or ``'g'``.
+
         Returns:
-            TFF \mathcal{F}(xi, t)
+            np.ndarray: NLO :math:`\mathcal{F}(\xi, t)` for the requested
+            meson (evolved-moment method).
         """
 
         Para_Forward = ParaAll[..., 0, :, :, :]  # each (N, 5, 1, 5)

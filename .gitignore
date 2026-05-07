@@ -19,3 +19,7 @@ GUMP_Results/
 
 # PyPI dist files 
 dist/
+
+# Otherspip 
+.venv/
+docs/
