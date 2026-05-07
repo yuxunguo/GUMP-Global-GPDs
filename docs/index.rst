@@ -8,6 +8,9 @@ GUMP GPD Analysis Documentation
 
 .. warning::
    This documentation is still being expanded and polished.
+   Parts of the writing were prepared with GitHub Copilot assistance; if any
+   confusion arises, please refer to the source code and in-code docstrings as
+   the authoritative reference.
 
 This is the official documentation website for GUMP
 (GPDs through Universal Moment Parameterization), a framework for global GPD

@@ -51,6 +51,7 @@
 <li class="toctree-l1"><a class="reference internal" href="QuickStart.html">Quick Start</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Parameters Quick Guide</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#parameter-managers">Parameter Managers</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#input-output-mapping">Input-Output Mapping</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#implementation-details-from-source-code">Implementation details from source code</a></li>
 </ul>
 </li>
@@ -121,6 +122,42 @@ throughout the code.</p>
 <li><p>ansatz-term index,</p></li>
 <li><p>parameter index inside each ansatz term (normalization/intercepts/powers/slopes).</p></li>
 </ol>
+<section id="input-output-mapping">
+<h3>Input-Output Mapping<a class="headerlink" href="#input-output-mapping" title="Link to this heading"></a></h3>
+<p>The input to each manager is a 1-D parameter list from the fitter. The output
+is a structured tensor where each element is a physically meaningful ansatz
+coefficient block.</p>
+<p>At the single-term level, each ansatz row is:</p>
+<div class="math notranslate nohighlight">
+\[[N,\alpha,\beta,\alpha',b_{\rm exp},m^{-2}]\]</div>
+<p>and controls the conformal moment behavior as follows:</p>
+<ul class="simple">
+<li><p><span class="math notranslate nohighlight">\(N\)</span> (<code class="docutils literal notranslate"><span class="pre">norm</span></code>): overall amplitude.</p></li>
+<li><p><span class="math notranslate nohighlight">\(\alpha\)</span> (<code class="docutils literal notranslate"><span class="pre">alpha</span></code>): small-<span class="math notranslate nohighlight">\(x\)</span> Regge intercept.</p></li>
+<li><p><span class="math notranslate nohighlight">\(\beta\)</span> (<code class="docutils literal notranslate"><span class="pre">beta</span></code>): large-<span class="math notranslate nohighlight">\(x\)</span> falloff power.</p></li>
+<li><p><span class="math notranslate nohighlight">\(\alpha'\)</span> (<code class="docutils literal notranslate"><span class="pre">alphap</span></code>): <span class="math notranslate nohighlight">\(t\)</span>-dependence in the Regge shift.</p></li>
+<li><p><span class="math notranslate nohighlight">\(b_{\rm exp}\)</span> (<code class="docutils literal notranslate"><span class="pre">bexp</span></code>): exponential <span class="math notranslate nohighlight">\(t\)</span> slope.</p></li>
+<li><p><span class="math notranslate nohighlight">\(m^{-2}\)</span> (<code class="docutils literal notranslate"><span class="pre">invm2</span></code>): dipole residual mass scale term.</p></li>
+</ul>
+<p>For skewness blocks:</p>
+<ul class="simple">
+<li><p>axis-1 slice <code class="docutils literal notranslate"><span class="pre">0</span></code> is the base <span class="math notranslate nohighlight">\(\xi^0\)</span> block,</p></li>
+<li><p>slices <code class="docutils literal notranslate"><span class="pre">1</span></code> and <code class="docutils literal notranslate"><span class="pre">2</span></code> are <span class="math notranslate nohighlight">\(\xi^2\)</span> and <span class="math notranslate nohighlight">\(\xi^4\)</span> blocks,
+generated from the base block by rescaling only the normalization entry via
+the corresponding <span class="math notranslate nohighlight">\(R_{\xi^2}\)</span> and <span class="math notranslate nohighlight">\(R_{\xi^4}\)</span> prefactors.</p></li>
+</ul>
+<p>For species coupling:</p>
+<ul class="simple">
+<li><p>in <code class="xref py py-func docutils literal notranslate"><span class="pre">Parameters.ParaManager_Unp()</span></code>, sea/gluon <code class="docutils literal notranslate"><span class="pre">E</span></code> sectors are linked to
+the corresponding <code class="docutils literal notranslate"><span class="pre">H</span></code> sectors by ratio parameters
+(<span class="math notranslate nohighlight">\(R_{E,\bar u}\)</span>, <span class="math notranslate nohighlight">\(R_{E,\bar d}\)</span>, <span class="math notranslate nohighlight">\(R_{E,g}\)</span>),</p></li>
+<li><p>in <code class="xref py py-func docutils literal notranslate"><span class="pre">Parameters.ParaManager_Pol()</span></code>, <code class="docutils literal notranslate"><span class="pre">\tilde</span> <span class="pre">E</span></code> sea/gluon sectors are
+linked to <code class="docutils literal notranslate"><span class="pre">\tilde</span> <span class="pre">H</span></code> through <code class="docutils literal notranslate"><span class="pre">R_Et_Sea</span></code>.</p></li>
+</ul>
+<p>So, the relation is: a flat fitter vector first selects physics coefficients,
+then manager logic injects symmetry/ratio constraints, and finally produces the
+full tensor consumed by moment evolution and observable reconstruction.</p>
+</section>
 <section id="implementation-details-from-source-code">
 <h3>Implementation details from source code<a class="headerlink" href="#implementation-details-from-source-code" title="Link to this heading"></a></h3>
 <p>The managers do more than reshaping flat lists:</p>

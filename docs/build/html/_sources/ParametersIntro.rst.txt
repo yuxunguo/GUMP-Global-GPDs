@@ -31,6 +31,47 @@ Axis meaning:
 4. ansatz-term index,
 5. parameter index inside each ansatz term (normalization/intercepts/powers/slopes).
 
+Input-Output Mapping
+~~~~~~~~~~~~~~~~~~~~
+
+The input to each manager is a 1-D parameter list from the fitter. The output
+is a structured tensor where each element is a physically meaningful ansatz
+coefficient block.
+
+At the single-term level, each ansatz row is:
+
+.. math::
+
+   [N,\alpha,\beta,\alpha',b_{\rm exp},m^{-2}]
+
+and controls the conformal moment behavior as follows:
+
+- :math:`N` (``norm``): overall amplitude.
+- :math:`\alpha` (``alpha``): small-:math:`x` Regge intercept.
+- :math:`\beta` (``beta``): large-:math:`x` falloff power.
+- :math:`\alpha'` (``alphap``): :math:`t`-dependence in the Regge shift.
+- :math:`b_{\rm exp}` (``bexp``): exponential :math:`t` slope.
+- :math:`m^{-2}` (``invm2``): dipole residual mass scale term.
+
+For skewness blocks:
+
+- axis-1 slice ``0`` is the base :math:`\xi^0` block,
+- slices ``1`` and ``2`` are :math:`\xi^2` and :math:`\xi^4` blocks,
+  generated from the base block by rescaling only the normalization entry via
+  the corresponding :math:`R_{\xi^2}` and :math:`R_{\xi^4}` prefactors.
+
+For species coupling:
+
+- in :func:`Parameters.ParaManager_Unp`, sea/gluon ``E`` sectors are linked to
+  the corresponding ``H`` sectors by ratio parameters
+  (:math:`R_{E,\bar u}`, :math:`R_{E,\bar d}`, :math:`R_{E,g}`),
+- in :func:`Parameters.ParaManager_Pol`, ``\tilde E`` sea/gluon sectors are
+  linked to ``\tilde H`` through ``R_Et_Sea``.
+
+So, the relation is: a flat fitter vector first selects physics coefficients,
+then manager logic injects symmetry/ratio constraints, and finally produces the
+full tensor consumed by moment evolution and observable reconstruction.
+
 Implementation details from source code
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
