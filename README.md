@@ -47,6 +47,10 @@ After installation, refer to the example scripts in `/Examples` for typical work
 - **V1.0.2** Improved caching behavior and user-facing messages.
 - **V1.0.3** Introduced hybrid caching with `diskcache`; minor code restructuring.
 
+## Change log
+
+- ** v.1.0.1 **: bug fix in GPD calculations.
+
 ## Documentation
 
 Full documentation is available at:  
