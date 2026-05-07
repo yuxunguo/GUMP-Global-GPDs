@@ -1,0 +1,224 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Minimizer Quick Guide &mdash; GUMP GPD Analysis 1.0.2 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="_static/copybutton.css?v=76b2166b" />
+
+  
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=1ed6394b"></script>
+      <script src="_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
+      <script src="_static/clipboard.min.js?v=a7894cd8"></script>
+      <script src="_static/copybutton.js?v=f281be69"></script>
+      <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-mml-chtml.js"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="DVCS Quick Guide" href="DVCSIntro.html" />
+    <link rel="prev" title="Evolution Quick Guide" href="EvolutionIntro.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            GUMP GPD Analysis
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="QuickStart.html">Quick Start</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ParametersIntro.html">Parameters Quick Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ObservablesIntro.html">Observables Quick Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="EvolutionIntro.html">Evolution Quick Guide</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Minimizer Quick Guide</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#what-this-module-does">What this module does</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#core-apis">Core APIs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#fit-parameters">Fit parameters</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#cost-function-structure">Cost-function structure</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#running-a-fit">Running a fit</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#reference">Reference</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="DVCSIntro.html">DVCS Quick Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="DVMPIntro.html">DVMP Quick Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="modules.html">Submodule API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Citation.html">Citation/Acknowledgement</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">GUMP GPD Analysis</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Minimizer Quick Guide</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/MinimizerIntro.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="minimizer-quick-guide">
+<h1>Minimizer Quick Guide<a class="headerlink" href="#minimizer-quick-guide" title="Link to this heading"></a></h1>
+<p>This page introduces <a class="reference internal" href="Minimizer.html#module-gumpgpd.Minimizer"><span class="std std-ref">Minimizer module</span></a>, which provides the global-fit
+cost function and iMinuit-based minimization driver used in GUMP.</p>
+<p>The module is analysis-specific (data selection, cuts, and fit strategy are
+hard-wired), but it is the central entry point for reproducing the published
+fit workflow.</p>
+<section id="what-this-module-does">
+<h2>What this module does<a class="headerlink" href="#what-this-module-does" title="Link to this heading"></a></h2>
+<p>At a high level, <code class="xref py py-mod docutils literal notranslate"><span class="pre">Minimizer</span></code>:</p>
+<ul class="simple">
+<li><p>loads and preprocesses all fit datasets (PDF/tPDF, GFF, GPD, DVCS, DVMP),</p></li>
+<li><p>computes theory predictions from parameter vectors,</p></li>
+<li><p>builds per-point residual costs,</p></li>
+<li><p>adds sum-rule penalty terms,</p></li>
+<li><p>minimizes the total <span class="math notranslate nohighlight">\(\chi^2\)</span> with iMinuit.</p></li>
+</ul>
+</section>
+<section id="core-apis">
+<h2>Core APIs<a class="headerlink" href="#core-apis" title="Link to this heading"></a></h2>
+<p>Primary fit interfaces:</p>
+<ul class="simple">
+<li><p><code class="xref py py-func docutils literal notranslate"><span class="pre">Minimizer.cost_off_forward_withH_withHt()</span></code>:
+full global cost function.</p></li>
+<li><p><code class="xref py py-func docutils literal notranslate"><span class="pre">Minimizer.off_forward_fit_withH_withHt()</span></code>:
+iMinuit setup + MIGRAD + HESSE driver.</p></li>
+</ul>
+<p>Important theory wrappers used inside the cost function:</p>
+<ul class="simple">
+<li><p>PDF/GFF/GPD sector:
+<code class="xref py py-func docutils literal notranslate"><span class="pre">Minimizer.PDF_theo()</span></code>,
+<code class="xref py py-func docutils literal notranslate"><span class="pre">Minimizer.GFF_theo()</span></code>,
+<code class="xref py py-func docutils literal notranslate"><span class="pre">Minimizer.GPD_theo()</span></code></p></li>
+<li><p>DVCS/DVMP sector:
+<code class="xref py py-func docutils literal notranslate"><span class="pre">Minimizer.DVCSxsec_theo()</span></code>,
+<code class="xref py py-func docutils literal notranslate"><span class="pre">Minimizer.DVCSAsym_theo()</span></code>,
+<code class="xref py py-func docutils literal notranslate"><span class="pre">Minimizer.DVCSxsecHERA_theo()</span></code>,
+<code class="xref py py-func docutils literal notranslate"><span class="pre">Minimizer.DVMPxsec_theo()</span></code></p></li>
+<li><p>Amplitude-level helpers:
+<code class="xref py py-func docutils literal notranslate"><span class="pre">Minimizer.CFF_theo()</span></code>,
+<code class="xref py py-func docutils literal notranslate"><span class="pre">Minimizer.TFF_theo()</span></code></p></li>
+</ul>
+<p>Parallel execution is handled through a shared process pool:</p>
+<ul class="simple">
+<li><p><code class="xref py py-func docutils literal notranslate"><span class="pre">Minimizer.get_pool()</span></code></p></li>
+<li><p><code class="xref py py-func docutils literal notranslate"><span class="pre">Minimizer.close_pool()</span></code></p></li>
+<li><p><code class="xref py py-func docutils literal notranslate"><span class="pre">Minimizer.group_by_unique()</span></code></p></li>
+</ul>
+</section>
+<section id="fit-parameters">
+<h2>Fit parameters<a class="headerlink" href="#fit-parameters" title="Link to this heading"></a></h2>
+<p>The iMinuit cost signature is flat (one argument per parameter), while the
+implementation groups parameters into three blocks:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">Paralst_Unp_Names</span></code>: unpolarized parameters,</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">Paralst_Pol_Names</span></code>: polarized parameters,</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">Paralst_Aux_Names</span></code>: auxiliary parameters (currently <code class="docutils literal notranslate"><span class="pre">jpsinorm</span></code>).</p></li>
+</ul>
+<p>Internally these are validated by <code class="xref py py-func docutils literal notranslate"><span class="pre">Minimizer.validate_params()</span></code> and then
+converted with <a class="reference internal" href="Parameters.html#gumpgpd.Parameters.ParaManager_Unp" title="gumpgpd.Parameters.ParaManager_Unp"><code class="xref py py-func docutils literal notranslate"><span class="pre">gumpgpd.Parameters.ParaManager_Unp()</span></code></a> and
+<a class="reference internal" href="Parameters.html#gumpgpd.Parameters.ParaManager_Pol" title="gumpgpd.Parameters.ParaManager_Pol"><code class="xref py py-func docutils literal notranslate"><span class="pre">gumpgpd.Parameters.ParaManager_Pol()</span></code></a>.</p>
+</section>
+<section id="cost-function-structure">
+<h2>Cost-function structure<a class="headerlink" href="#cost-function-structure" title="Link to this heading"></a></h2>
+<p>The total objective is:</p>
+<div class="math notranslate nohighlight">
+\[\chi^2_{\mathrm{total}} = \chi^2_{\mathrm{exp}} + \chi^2_{\mathrm{PDF/GFF/GPD}} + \chi^2_{\mathrm{penalty}}.\]</div>
+<p>where:</p>
+<ul class="simple">
+<li><p><span class="math notranslate nohighlight">\(\chi^2_{\mathrm{exp}}\)</span> comes from DVCS/DVMP observables,</p></li>
+<li><p><span class="math notranslate nohighlight">\(\chi^2_{\mathrm{PDF/GFF/GPD}}\)</span> comes from PDF-like constraints,</p></li>
+<li><p><span class="math notranslate nohighlight">\(\chi^2_{\mathrm{penalty}}\)</span> enforces sum-rule constraints with
+configurable tolerances.</p></li>
+</ul>
+<p>In export mode (<code class="docutils literal notranslate"><span class="pre">config.Export_Mode</span> <span class="pre">=</span> <span class="pre">True</span></code>), the cost function can return
+grouped prediction DataFrames and write CSV outputs via
+<code class="xref py py-func docutils literal notranslate"><span class="pre">Minimizer.Export_Frame_Append()</span></code>.</p>
+</section>
+<section id="running-a-fit">
+<h2>Running a fit<a class="headerlink" href="#running-a-fit" title="Link to this heading"></a></h2>
+<p>Use <code class="xref py py-func docutils literal notranslate"><span class="pre">Minimizer.off_forward_fit_withH_withHt()</span></code> with initial parameter
+arrays in the exact order of <code class="docutils literal notranslate"><span class="pre">Paralst_Unp_Names</span></code>, <code class="docutils literal notranslate"><span class="pre">Paralst_Pol_Names</span></code>, and
+<code class="docutils literal notranslate"><span class="pre">Paralst_Aux_Names</span></code>.</p>
+<p>The routine:</p>
+<ol class="arabic simple">
+<li><p>builds a <code class="xref py py-class docutils literal notranslate"><span class="pre">iminuit.Minuit</span></code> object,</p></li>
+<li><p>applies parameter bounds/fixes,</p></li>
+<li><p>runs <code class="docutils literal notranslate"><span class="pre">migrad</span></code> then <code class="docutils literal notranslate"><span class="pre">hesse</span></code>,</p></li>
+<li><p>writes a fit summary under <code class="docutils literal notranslate"><span class="pre">GUMP_Output</span></code>.</p></li>
+</ol>
+<p>Note: keep <code class="docutils literal notranslate"><span class="pre">config.Export_Mode</span> <span class="pre">=</span> <span class="pre">False</span></code> during minimization. Use export mode
+only for post-fit prediction dumping.</p>
+</section>
+<section id="reference">
+<h2>Reference<a class="headerlink" href="#reference" title="Link to this heading"></a></h2>
+<p>Minimization backend: <a class="reference external" href="https://pypi.org/project/iminuit/">iminuit documentation</a>.</p>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="EvolutionIntro.html" class="btn btn-neutral float-left" title="Evolution Quick Guide" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="DVCSIntro.html" class="btn btn-neutral float-right" title="DVCS Quick Guide" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2026, Yuxun Guo. et. al..</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

@@ -9,7 +9,8 @@ cross-sections are expressed in terms of helicity Transition Form Factors
 
 Key components:
 
-* :func:`R` — L/T ratio parametrization (Eq. (32) of :arxiv:`1112.2597`).
+* :func:`R` — L/T ratio parametrization (Eq. (32) of
+    `arXiv:1112.2597 <https://arxiv.org/abs/1112.2597>`_).
 * :func:`R_rho_fit` — iMinuit fit of ``R`` parameters to combined H1+ZEUS data.
 * :func:`R_fitted` — best-fit :math:`R` with propagated uncertainty.
 * :func:`dsigmaL_DVMP_dt` — longitudinal differential cross-section

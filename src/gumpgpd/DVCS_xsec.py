@@ -159,7 +159,7 @@ def B_BH(y: float, xB: float, t: float, Q: float, phi: float):
 
 @njit
 def At_BH_L(y: float, xB: float, t: float, Q: float, phi: float):
-    """ Kinematical variable for polarized BH cross-section
+    r""" Kinematical variable for polarized BH cross-section
     
     | Defined in the appendix of https://inspirehep.net/literature/1925449 
     | Code converted from the Mathematica master code and numerically checked
@@ -178,7 +178,7 @@ def At_BH_L(y: float, xB: float, t: float, Q: float, phi: float):
 
 @njit
 def Bt_BH_L(y: float, xB: float, t: float, Q: float, phi: float):
-    """ Kinematical variable for polarized BH cross-section
+    r""" Kinematical variable for polarized BH cross-section
     
     | Defined in the appendix of https://inspirehep.net/literature/1925449 
     | Code converted from the Mathematica master code and numerically checked
@@ -197,7 +197,7 @@ def Bt_BH_L(y: float, xB: float, t: float, Q: float, phi: float):
 
 @njit
 def At_BH_Tin(y: float, xB: float, t: float, Q: float, phi: float):
-    """Kinematical variable for polarized BH cross-section
+    r"""Kinematical variable for polarized BH cross-section
     
     | Defined in the appendix of https://inspirehep.net/literature/1925449 
     | Code converted from the Mathematica master code and numerically checked  
@@ -216,7 +216,7 @@ def At_BH_Tin(y: float, xB: float, t: float, Q: float, phi: float):
 
 @njit
 def Bt_BH_Tin(y: float, xB: float, t: float, Q: float, phi: float):
-    """ Kinematical variable for polarized BH cross-section
+    r""" Kinematical variable for polarized BH cross-section
     
     | Defined in the appendix of https://inspirehep.net/literature/1925449 
     | Code converted from the Mathematica master code and numerically checked
@@ -235,7 +235,7 @@ def Bt_BH_Tin(y: float, xB: float, t: float, Q: float, phi: float):
 
 @njit
 def At_BH_Tout(y: float, xB: float, t: float, Q: float, phi: float):
-    """ Kinematical variable for polarized BH cross-section
+    r""" Kinematical variable for polarized BH cross-section
 
     | Defined in the appendix of https://inspirehep.net/literature/1925449 
     | Code converted from the Mathematica master code and numerically checked
@@ -254,7 +254,7 @@ def At_BH_Tout(y: float, xB: float, t: float, Q: float, phi: float):
 
 @njit
 def Bt_BH_Tout(y: float, xB: float, t: float, Q: float, phi: float):
-    """ Kinematical variable for polarized BH cross-section
+    r""" Kinematical variable for polarized BH cross-section
     
     | Defined in the appendix of https://inspirehep.net/literature/1925449 
     | Code converted from the Mathematica master code and numerically checked
@@ -330,7 +330,7 @@ def C_INT_unp(y: float, xB: float, t: float, Q: float, phi: float):
 
 @njit
 def At_INT_unp(y: float, xB: float, t: float, Q: float, phi: float):
-    """ Kinematical variable for interference cross-section with polarized beam
+    r""" Kinematical variable for interference cross-section with polarized beam
     
     | Defined in the appendix of https://inspirehep.net/literature/1925449 
     | Code converted from the Mathematica master code and numerically checked
@@ -349,7 +349,7 @@ def At_INT_unp(y: float, xB: float, t: float, Q: float, phi: float):
 
 @njit
 def Bt_INT_unp(y: float, xB: float, t: float, Q: float, phi: float):
-    """ Kinematical variable for interference cross-section with polarized beam
+    r""" Kinematical variable for interference cross-section with polarized beam
     
     | Defined in the appendix of https://inspirehep.net/literature/1925449 
     | Code converted from the Mathematica master code and numerically checked
@@ -368,7 +368,7 @@ def Bt_INT_unp(y: float, xB: float, t: float, Q: float, phi: float):
 
 @njit
 def Ct_INT_unp(y: float, xB: float, t: float, Q: float, phi: float):
-    """ Kinematical variable for interference cross-section with polarized beam
+    r""" Kinematical variable for interference cross-section with polarized beam
     
     | Defined in the appendix of https://inspirehep.net/literature/1925449 
     | Code converted from the Mathematica master code and numerically checked
@@ -444,7 +444,7 @@ def C_INT_pol(y: float, xB: float, t: float, Q: float, phi: float):
 
 @njit
 def At_INT_pol(y: float, xB: float, t: float, Q: float, phi: float):
-    """ Kinematical variable for interference cross-section with polarized beam and longitudinally polarized target
+    r""" Kinematical variable for interference cross-section with polarized beam and longitudinally polarized target
     
     | Defined in the appendix of https://inspirehep.net/literature/1925449 
     | Code converted from the Mathematica master code and numerically checked
@@ -463,7 +463,7 @@ def At_INT_pol(y: float, xB: float, t: float, Q: float, phi: float):
 
 @njit
 def Bt_INT_pol(y: float, xB: float, t: float, Q: float, phi: float):
-    """ Kinematical variable for interference cross-section with polarized beam and longitudinally polarized target
+    r""" Kinematical variable for interference cross-section with polarized beam and longitudinally polarized target
     
     | Defined in the appendix of https://inspirehep.net/literature/1925449 
     | Code converted from the Mathematica master code and numerically checked
@@ -482,7 +482,7 @@ def Bt_INT_pol(y: float, xB: float, t: float, Q: float, phi: float):
 
 @njit
 def Ct_INT_pol(y: float, xB: float, t: float, Q: float, phi: float):
-    """ Kinematical variable for interference cross-section with polarized beam and longitudinally polarized target
+    r""" Kinematical variable for interference cross-section with polarized beam and longitudinally polarized target
     
     | Defined in the appendix of https://inspirehep.net/literature/1925449 
     | Code converted from the Mathematica master code and numerically checked
@@ -554,7 +554,7 @@ def F2_FF(t):
 
 # The total cross-section is given by the sum of Bethe-Heitler (BH), pure DVCS and interference (INT) contributions
 def dsigma_DVCS_TOT(y: float, xB: float, t: float, Q: float, phi: float, pol, HCFF: complex, ECFF: complex, HtCFF: complex, EtCFF: complex):
-    """ Combining the BH, pure DVCS, and interference cross-sections.
+    r""" Combining the BH, pure DVCS, and interference cross-sections.
 
     Args:
         y (float): Beam energy lost parameter
@@ -575,7 +575,7 @@ def dsigma_DVCS_TOT(y: float, xB: float, t: float, Q: float, phi: float, pol, HC
 
 
 def Asymmetry_DVCS_TOT(y: float, xB: float, t: float, Q: float, phi: float, pol, HCFF: complex, ECFF: complex, HtCFF: complex, EtCFF: complex):
-    """ DVCS single/double spin asymmetry.
+    r""" DVCS single/double spin asymmetry.
 
     Defined as the ratio of the polarized total cross-section to the
     unpolarized one at the same kinematics.
@@ -600,7 +600,7 @@ def Asymmetry_DVCS_TOT(y: float, xB: float, t: float, Q: float, phi: float, pol,
 
 # The total cross-section integrated over phi
 def dsigma_DVCS_HERA(y: float, xB: float, t: float, Q: float, pol, HCFF: complex, ECFF: complex, HtCFF: complex, EtCFF: complex):
-    """Virtual-photon–proton cross-section, integrated over :math:`\phi`.
+    r"""Virtual-photon–proton cross-section, integrated over :math:`\phi`.
 
     | The leptonic flux factor is divided out relative to the lepton–proton cross-section.
     | HERA measures the virtual-photon–proton cross-section, integrated over :math:`\phi`.
@@ -726,7 +726,7 @@ def __dsigma_BH(y: float, xB: float, t: float, Q: float, phi: float, pol_index: 
 
 
 def dsigma_DVCS(y: float, xB: float, t: float, Q: float, phi: float, pol, HCFF: complex, ECFF: complex, HtCFF: complex, EtCFF: complex):
-    """Pure DVCS differential cross-section.
+    r"""Pure DVCS differential cross-section.
 
     Thin wrapper that converts the ``pol`` string to an integer index and
     delegates to :func:`__dsigma_DVCS`.
@@ -753,7 +753,7 @@ def dsigma_DVCS(y: float, xB: float, t: float, Q: float, phi: float, pol, HCFF: 
 @vectorize(["float64(float64, float64, float64, float64, float64, int32, complex128, complex128, complex128, complex128)",
             "float64(float64, float64, float64, float64, float64, int64, complex128, complex128, complex128, complex128)"])
 def __dsigma_DVCS(y: float, xB: float, t: float, Q: float, phi: float, pol_index, HCFF: complex, ECFF: complex, HtCFF: complex, EtCFF: complex):
-    """The actual pure DVCS cross-section formula.
+    r"""The actual pure DVCS cross-section formula.
 
     See `Guo et al. (2022) <https://inspirehep.net/literature/1925449>`_ for
     the full expressions.
@@ -794,7 +794,7 @@ def __dsigma_DVCS(y: float, xB: float, t: float, Q: float, phi: float, pol_index
     return 0
 
 def dsigma_INT(y: float, xB: float, t: float, Q: float, phi: float, pol, HCFF: complex, ECFF: complex, HtCFF: complex, EtCFF: complex):
-    """BH–DVCS interference differential cross-section.
+    r"""BH–DVCS interference differential cross-section.
 
     Thin wrapper that converts the ``pol`` string to an integer index and
     delegates to :func:`__dsigma_INT`.
@@ -821,7 +821,7 @@ def dsigma_INT(y: float, xB: float, t: float, Q: float, phi: float, pol, HCFF: c
 @vectorize(["float64(float64, float64, float64, float64, float64, int32, complex128, complex128, complex128, complex128)",
             "float64(float64, float64, float64, float64, float64, int64, complex128, complex128, complex128, complex128)"])
 def __dsigma_INT(y: float, xB: float, t: float, Q: float, phi: float, pol_index, HCFF: complex, ECFF: complex, HtCFF: complex, EtCFF: complex):
-    """The actual BH–DVCS interference cross-section formula.
+    r"""The actual BH–DVCS interference cross-section formula.
 
     See `Guo et al. (2022) <https://inspirehep.net/literature/1925449>`_ for
     the full expressions.

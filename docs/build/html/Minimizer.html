@@ -1,0 +1,940 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Minimizer module &mdash; GUMP GPD Analysis 1.0.2 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="_static/copybutton.css?v=76b2166b" />
+
+  
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=1ed6394b"></script>
+      <script src="_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
+      <script src="_static/clipboard.min.js?v=a7894cd8"></script>
+      <script src="_static/copybutton.js?v=f281be69"></script>
+      <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-mml-chtml.js"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Observables module" href="Observables.html" />
+    <link rel="prev" title="Evolution module" href="Evolution.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            GUMP GPD Analysis
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="QuickStart.html">Quick Start</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ParametersIntro.html">Parameters Quick Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ObservablesIntro.html">Observables Quick Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="EvolutionIntro.html">Evolution Quick Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="MinimizerIntro.html">Minimizer Quick Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="DVCSIntro.html">DVCS Quick Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="DVMPIntro.html">DVMP Quick Guide</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="modules.html">Submodule API Reference</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="DVCS_xsec.html">DVCS_xsec module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="DVMP_xsec.html">DVMP_xsec module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Evolution.html">Evolution module</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Minimizer module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#gumpgpd.Minimizer.CFF_theo"><code class="docutils literal notranslate"><span class="pre">CFF_theo()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#gumpgpd.Minimizer.DVCSAsym_theo"><code class="docutils literal notranslate"><span class="pre">DVCSAsym_theo()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#gumpgpd.Minimizer.DVCSAsym_theo_helper"><code class="docutils literal notranslate"><span class="pre">DVCSAsym_theo_helper()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#gumpgpd.Minimizer.DVCSAsym_theo_xBtQ"><code class="docutils literal notranslate"><span class="pre">DVCSAsym_theo_xBtQ()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#gumpgpd.Minimizer.DVCSxsecHERA_theo"><code class="docutils literal notranslate"><span class="pre">DVCSxsecHERA_theo()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#gumpgpd.Minimizer.DVCSxsecHERA_theo_xBtQ"><code class="docutils literal notranslate"><span class="pre">DVCSxsecHERA_theo_xBtQ()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#gumpgpd.Minimizer.DVCSxsec_HERA_theo_helper"><code class="docutils literal notranslate"><span class="pre">DVCSxsec_HERA_theo_helper()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#gumpgpd.Minimizer.DVCSxsec_theo"><code class="docutils literal notranslate"><span class="pre">DVCSxsec_theo()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#gumpgpd.Minimizer.DVCSxsec_theo_helper"><code class="docutils literal notranslate"><span class="pre">DVCSxsec_theo_helper()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#gumpgpd.Minimizer.DVCSxsec_theo_xBtQ"><code class="docutils literal notranslate"><span class="pre">DVCSxsec_theo_xBtQ()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#gumpgpd.Minimizer.DVJpsiPZEUSxsec_group_data"><code class="docutils literal notranslate"><span class="pre">DVJpsiPZEUSxsec_group_data</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#gumpgpd.Minimizer.DVMP_L_Error_Prop"><code class="docutils literal notranslate"><span class="pre">DVMP_L_Error_Prop()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#gumpgpd.Minimizer.DVMPxsec_theo"><code class="docutils literal notranslate"><span class="pre">DVMPxsec_theo()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#gumpgpd.Minimizer.DVMPxsec_theo_helper"><code class="docutils literal notranslate"><span class="pre">DVMPxsec_theo_helper()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#gumpgpd.Minimizer.DVMPxsec_theo_xBtQ"><code class="docutils literal notranslate"><span class="pre">DVMPxsec_theo_xBtQ()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#gumpgpd.Minimizer.Export_Frame_Append"><code class="docutils literal notranslate"><span class="pre">Export_Frame_Append()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#gumpgpd.Minimizer.GFF_theo"><code class="docutils literal notranslate"><span class="pre">GFF_theo()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#gumpgpd.Minimizer.GFF_theo_scalar_helper"><code class="docutils literal notranslate"><span class="pre">GFF_theo_scalar_helper()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#gumpgpd.Minimizer.GPD_theo"><code class="docutils literal notranslate"><span class="pre">GPD_theo()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#gumpgpd.Minimizer.GPD_theo_scalar_helper"><code class="docutils literal notranslate"><span class="pre">GPD_theo_scalar_helper()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#gumpgpd.Minimizer.PDF_theo"><code class="docutils literal notranslate"><span class="pre">PDF_theo()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#gumpgpd.Minimizer.PDF_theo_scalar_helper"><code class="docutils literal notranslate"><span class="pre">PDF_theo_scalar_helper()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#gumpgpd.Minimizer.TFF_theo"><code class="docutils literal notranslate"><span class="pre">TFF_theo()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#gumpgpd.Minimizer.close_pool"><code class="docutils literal notranslate"><span class="pre">close_pool()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#gumpgpd.Minimizer.cost_off_forward_withH_withHt"><code class="docutils literal notranslate"><span class="pre">cost_off_forward_withH_withHt()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#gumpgpd.Minimizer.get_pool"><code class="docutils literal notranslate"><span class="pre">get_pool()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#gumpgpd.Minimizer.group_by_unique"><code class="docutils literal notranslate"><span class="pre">group_by_unique()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#gumpgpd.Minimizer.off_forward_fit_withH_withHt"><code class="docutils literal notranslate"><span class="pre">off_forward_fit_withH_withHt()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#gumpgpd.Minimizer.simple_dispatch"><code class="docutils literal notranslate"><span class="pre">simple_dispatch()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#gumpgpd.Minimizer.tPDF_theo"><code class="docutils literal notranslate"><span class="pre">tPDF_theo()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#gumpgpd.Minimizer.validate_params"><code class="docutils literal notranslate"><span class="pre">validate_params()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="Observables.html">Observables module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Parameters.html">Parameters module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="config.html">config module</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="Citation.html">Citation/Acknowledgement</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">GUMP GPD Analysis</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="modules.html">Submodule API Reference</a></li>
+      <li class="breadcrumb-item active">Minimizer module</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/Minimizer.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="module-gumpgpd.Minimizer">
+<span id="minimizer-module"></span><h1>Minimizer module<a class="headerlink" href="#module-gumpgpd.Minimizer" title="Link to this heading"></a></h1>
+<p>GUMP GPD global fit: cost function and iMinuit-based fitting interface.</p>
+<p>Loads and preprocesses all experimental datasets (PDFs, tPDFs, GFFs, GPDs,
+DVCS cross-sections and asymmetries, DVMP cross-sections for rho, phi, and
+J/psi), builds NLO theory predictions via <a class="reference internal" href="Observables.html#module-gumpgpd.Observables" title="gumpgpd.Observables"><code class="xref py py-mod docutils literal notranslate"><span class="pre">gumpgpd.Observables</span></code></a>,
+<a class="reference internal" href="DVCS_xsec.html#module-gumpgpd.DVCS_xsec" title="gumpgpd.DVCS_xsec"><code class="xref py py-mod docutils literal notranslate"><span class="pre">gumpgpd.DVCS_xsec</span></code></a>, and <a class="reference internal" href="DVMP_xsec.html#module-gumpgpd.DVMP_xsec" title="gumpgpd.DVMP_xsec"><code class="xref py py-mod docutils literal notranslate"><span class="pre">gumpgpd.DVMP_xsec</span></code></a>, and exposes a
+single iMinuit-based fit driver: <a class="reference internal" href="#gumpgpd.Minimizer.off_forward_fit_withH_withHt" title="gumpgpd.Minimizer.off_forward_fit_withH_withHt"><code class="xref py py-func docutils literal notranslate"><span class="pre">off_forward_fit_withH_withHt()</span></code></a>.</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="gumpgpd.Minimizer.CFF_theo">
+<span class="sig-prename descclassname"><span class="pre">gumpgpd.Minimizer.</span></span><span class="sig-name descname"><span class="pre">CFF_theo</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">xB</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">t</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Q</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Para_Unp</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Para_Pol</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">porder</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gumpgpd/Minimizer.html#CFF_theo"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gumpgpd.Minimizer.CFF_theo" title="Link to this definition"></a></dt>
+<dd><p>Compute the four Compton form factors (CFFs) at a given kinematic point.</p>
+<p>The skewness is derived from <span class="math notranslate nohighlight">\(x_B\)</span>, <span class="math notranslate nohighlight">\(t\)</span>, and <span class="math notranslate nohighlight">\(Q\)</span> via the
+exact kinematic relation.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>xB</strong> (<em>float</em>) – Bjorken-<span class="math notranslate nohighlight">\(x\)</span> variable.</p></li>
+<li><p><strong>t</strong> (<em>float</em>) – Momentum transfer squared <span class="math notranslate nohighlight">\(t\)</span>.</p></li>
+<li><p><strong>Q</strong> (<em>float</em>) – Photon virtuality <span class="math notranslate nohighlight">\(Q\)</span>.</p></li>
+<li><p><strong>Para_Unp</strong> (<em>np.ndarray</em>) – Unpolarized GPD parameter array (species-stacked).</p></li>
+<li><p><strong>Para_Pol</strong> (<em>np.ndarray</em>) – Polarized GPD parameter array (species-stacked).</p></li>
+<li><p><strong>porder</strong> (<em>int</em><em>, </em><em>optional</em>) – Perturbative order.  Defaults to 2 (NLO).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><code class="docutils literal notranslate"><span class="pre">[HCFF,</span> <span class="pre">ECFF,</span> <span class="pre">HtCFF,</span> <span class="pre">EtCFF]</span></code> — the four CFFs as scalars (or
+arrays if the input parameters have a batch dimension).</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="gumpgpd.Minimizer.DVCSAsym_theo">
+<span class="sig-prename descclassname"><span class="pre">gumpgpd.Minimizer.</span></span><span class="sig-name descname"><span class="pre">DVCSAsym_theo</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">DVCSAsym_data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">DataFrame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Para_Unp</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Para_Pol</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">P_order</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gumpgpd/Minimizer.html#DVCSAsym_theo"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gumpgpd.Minimizer.DVCSAsym_theo" title="Link to this definition"></a></dt>
+<dd><p>Compute DVCS asymmetry predictions for a full dataset using a parallel pool.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>DVCSAsym_data</strong> (<em>pd.DataFrame</em>) – Full DVCS asymmetry dataset.</p></li>
+<li><p><strong>Para_Unp</strong> (<em>np.ndarray</em>) – Unpolarized parameter array.</p></li>
+<li><p><strong>Para_Pol</strong> (<em>np.ndarray</em>) – Polarized parameter array.</p></li>
+<li><p><strong>P_order</strong> (<em>int</em><em>, </em><em>optional</em>) – Perturbative order.  Defaults to 2.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Concatenated results with <code class="docutils literal notranslate"><span class="pre">'pred</span> <span class="pre">f'</span></code> and <code class="docutils literal notranslate"><span class="pre">'cost'</span></code> columns.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>pd.DataFrame</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="gumpgpd.Minimizer.DVCSAsym_theo_helper">
+<span class="sig-prename descclassname"><span class="pre">gumpgpd.Minimizer.</span></span><span class="sig-name descname"><span class="pre">DVCSAsym_theo_helper</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">DVCSAsym_input</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">DataFrame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">CFF_input</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">array</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gumpgpd/Minimizer.html#DVCSAsym_theo_helper"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gumpgpd.Minimizer.DVCSAsym_theo_helper" title="Link to this definition"></a></dt>
+<dd><p>Compute DVCS beam-spin asymmetry predictions for a single kinematic group.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>DVCSAsym_input</strong> (<em>pd.DataFrame</em>) – Rows sharing a common <span class="math notranslate nohighlight">\((x_B, t, Q)\)</span>
+with columns <code class="docutils literal notranslate"><span class="pre">y</span></code>, <code class="docutils literal notranslate"><span class="pre">xB</span></code>, <code class="docutils literal notranslate"><span class="pre">t</span></code>, <code class="docutils literal notranslate"><span class="pre">Q</span></code>, <code class="docutils literal notranslate"><span class="pre">phi</span></code>, <code class="docutils literal notranslate"><span class="pre">pol</span></code>.</p></li>
+<li><p><strong>CFF_input</strong> (<em>list</em><em> of </em><em>array-like</em>) – <code class="docutils literal notranslate"><span class="pre">[HCFF,</span> <span class="pre">ECFF,</span> <span class="pre">HtCFF,</span> <span class="pre">EtCFF]</span></code> —
+Compton form factors; each element may be scalar or 1-D array <code class="docutils literal notranslate"><span class="pre">(N,)</span></code>.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Theory asymmetry predictions with the same length as
+<em>DVCSAsym_input</em>.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>np.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="gumpgpd.Minimizer.DVCSAsym_theo_xBtQ">
+<span class="sig-prename descclassname"><span class="pre">gumpgpd.Minimizer.</span></span><span class="sig-name descname"><span class="pre">DVCSAsym_theo_xBtQ</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">DVCSAsym_data_xBtQ</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">DataFrame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Para_Unp</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Para_Pol</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">P_order</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gumpgpd/Minimizer.html#DVCSAsym_theo_xBtQ"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gumpgpd.Minimizer.DVCSAsym_theo_xBtQ" title="Link to this definition"></a></dt>
+<dd><p>Add DVCS asymmetry theory predictions for a single <span class="math notranslate nohighlight">\((x_B, t, Q)\)</span> group.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>DVCSAsym_data_xBtQ</strong> (<em>pd.DataFrame</em>) – Rows with identical <code class="docutils literal notranslate"><span class="pre">xB</span></code>, <code class="docutils literal notranslate"><span class="pre">t</span></code>, <code class="docutils literal notranslate"><span class="pre">Q</span></code>.</p></li>
+<li><p><strong>Para_Unp</strong> (<em>np.ndarray</em>) – Unpolarized parameter array.</p></li>
+<li><p><strong>Para_Pol</strong> (<em>np.ndarray</em>) – Polarized parameter array.</p></li>
+<li><p><strong>P_order</strong> (<em>int</em><em>, </em><em>optional</em>) – Perturbative order.  Defaults to 2.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Input DataFrame with added <code class="docutils literal notranslate"><span class="pre">'pred</span> <span class="pre">f'</span></code> and <code class="docutils literal notranslate"><span class="pre">'cost'</span></code> columns.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>pd.DataFrame</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="gumpgpd.Minimizer.DVCSxsecHERA_theo">
+<span class="sig-prename descclassname"><span class="pre">gumpgpd.Minimizer.</span></span><span class="sig-name descname"><span class="pre">DVCSxsecHERA_theo</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">DVCSxsec_HERA_data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">DataFrame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Para_Unp</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Para_Pol</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">P_order</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gumpgpd/Minimizer.html#DVCSxsecHERA_theo"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gumpgpd.Minimizer.DVCSxsecHERA_theo" title="Link to this definition"></a></dt>
+<dd><p>Compute HERA DVCS cross-section predictions for a full dataset using a parallel pool.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>DVCSxsec_HERA_data</strong> (<em>pd.DataFrame</em>) – Full HERA DVCS dataset.</p></li>
+<li><p><strong>Para_Unp</strong> (<em>np.ndarray</em>) – Unpolarized parameter array.</p></li>
+<li><p><strong>Para_Pol</strong> (<em>np.ndarray</em>) – Polarized parameter array.</p></li>
+<li><p><strong>P_order</strong> (<em>int</em><em>, </em><em>optional</em>) – Perturbative order.  Defaults to 2.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Concatenated results with <code class="docutils literal notranslate"><span class="pre">'pred</span> <span class="pre">f'</span></code> and <code class="docutils literal notranslate"><span class="pre">'cost'</span></code> columns.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>pd.DataFrame</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="gumpgpd.Minimizer.DVCSxsecHERA_theo_xBtQ">
+<span class="sig-prename descclassname"><span class="pre">gumpgpd.Minimizer.</span></span><span class="sig-name descname"><span class="pre">DVCSxsecHERA_theo_xBtQ</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">DVCSxsec_HERA_data_xBtQ</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">DataFrame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Para_Unp</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Para_Pol</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">P_order</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gumpgpd/Minimizer.html#DVCSxsecHERA_theo_xBtQ"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gumpgpd.Minimizer.DVCSxsecHERA_theo_xBtQ" title="Link to this definition"></a></dt>
+<dd><p>Add HERA DVCS cross-section theory predictions for a single <span class="math notranslate nohighlight">\((x_B, t, Q)\)</span> group.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>DVCSxsec_HERA_data_xBtQ</strong> (<em>pd.DataFrame</em>) – Rows with identical <code class="docutils literal notranslate"><span class="pre">xB</span></code>, <code class="docutils literal notranslate"><span class="pre">t</span></code>, <code class="docutils literal notranslate"><span class="pre">Q</span></code>.</p></li>
+<li><p><strong>Para_Unp</strong> (<em>np.ndarray</em>) – Unpolarized parameter array.</p></li>
+<li><p><strong>Para_Pol</strong> (<em>np.ndarray</em>) – Polarized parameter array.</p></li>
+<li><p><strong>P_order</strong> (<em>int</em><em>, </em><em>optional</em>) – Perturbative order.  Defaults to 2.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Input DataFrame with added <code class="docutils literal notranslate"><span class="pre">'pred</span> <span class="pre">f'</span></code> and <code class="docutils literal notranslate"><span class="pre">'cost'</span></code> columns.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>pd.DataFrame</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="gumpgpd.Minimizer.DVCSxsec_HERA_theo_helper">
+<span class="sig-prename descclassname"><span class="pre">gumpgpd.Minimizer.</span></span><span class="sig-name descname"><span class="pre">DVCSxsec_HERA_theo_helper</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">DVCSxsec_HERA_input</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">DataFrame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">CFF_input</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">array</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gumpgpd/Minimizer.html#DVCSxsec_HERA_theo_helper"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gumpgpd.Minimizer.DVCSxsec_HERA_theo_helper" title="Link to this definition"></a></dt>
+<dd><p>Compute DVCS cross-section predictions for HERA kinematics (no azimuthal angle).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>DVCSxsec_HERA_input</strong> (<em>pd.DataFrame</em>) – Rows sharing a common
+<span class="math notranslate nohighlight">\((x_B, t, Q)\)</span> with columns <code class="docutils literal notranslate"><span class="pre">y</span></code>, <code class="docutils literal notranslate"><span class="pre">xB</span></code>, <code class="docutils literal notranslate"><span class="pre">t</span></code>, <code class="docutils literal notranslate"><span class="pre">Q</span></code>,
+<code class="docutils literal notranslate"><span class="pre">pol</span></code>.</p></li>
+<li><p><strong>CFF_input</strong> (<em>list</em><em> of </em><em>array-like</em>) – <code class="docutils literal notranslate"><span class="pre">[HCFF,</span> <span class="pre">ECFF,</span> <span class="pre">HtCFF,</span> <span class="pre">EtCFF]</span></code> —
+Compton form factors; each element may be scalar or 1-D array <code class="docutils literal notranslate"><span class="pre">(N,)</span></code>.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Theory HERA cross-section predictions.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>np.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="gumpgpd.Minimizer.DVCSxsec_theo">
+<span class="sig-prename descclassname"><span class="pre">gumpgpd.Minimizer.</span></span><span class="sig-name descname"><span class="pre">DVCSxsec_theo</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">DVCSxsec_data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">DataFrame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Para_Unp</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Para_Pol</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">P_order</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gumpgpd/Minimizer.html#DVCSxsec_theo"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gumpgpd.Minimizer.DVCSxsec_theo" title="Link to this definition"></a></dt>
+<dd><p>Compute DVCS cross-section predictions for a full dataset using a parallel pool.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>DVCSxsec_data</strong> (<em>pd.DataFrame</em>) – Full DVCS cross-section dataset.</p></li>
+<li><p><strong>Para_Unp</strong> (<em>np.ndarray</em>) – Unpolarized parameter array.</p></li>
+<li><p><strong>Para_Pol</strong> (<em>np.ndarray</em>) – Polarized parameter array.</p></li>
+<li><p><strong>P_order</strong> (<em>int</em><em>, </em><em>optional</em>) – Perturbative order.  Defaults to 2.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Concatenated results with <code class="docutils literal notranslate"><span class="pre">'pred</span> <span class="pre">f'</span></code> and <code class="docutils literal notranslate"><span class="pre">'cost'</span></code> columns.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>pd.DataFrame</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="gumpgpd.Minimizer.DVCSxsec_theo_helper">
+<span class="sig-prename descclassname"><span class="pre">gumpgpd.Minimizer.</span></span><span class="sig-name descname"><span class="pre">DVCSxsec_theo_helper</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">DVCSxsec_input</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">DataFrame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">CFF_input</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">array</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gumpgpd/Minimizer.html#DVCSxsec_theo_helper"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gumpgpd.Minimizer.DVCSxsec_theo_helper" title="Link to this definition"></a></dt>
+<dd><p>Compute DVCS differential cross-section predictions for a single kinematic group.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>DVCSxsec_input</strong> (<em>pd.DataFrame</em>) – Rows sharing a common <span class="math notranslate nohighlight">\((x_B, t, Q)\)</span>
+with columns <code class="docutils literal notranslate"><span class="pre">y</span></code>, <code class="docutils literal notranslate"><span class="pre">xB</span></code>, <code class="docutils literal notranslate"><span class="pre">t</span></code>, <code class="docutils literal notranslate"><span class="pre">Q</span></code>, <code class="docutils literal notranslate"><span class="pre">phi</span></code>, <code class="docutils literal notranslate"><span class="pre">pol</span></code>.</p></li>
+<li><p><strong>CFF_input</strong> (<em>list</em><em> of </em><em>array-like</em>) – <code class="docutils literal notranslate"><span class="pre">[HCFF,</span> <span class="pre">ECFF,</span> <span class="pre">HtCFF,</span> <span class="pre">EtCFF]</span></code> —
+Compton form factors evaluated at the kinematics of this group;
+each element may be a scalar or a 1-D array of shape <code class="docutils literal notranslate"><span class="pre">(N,)</span></code>.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Theory cross-section predictions with the same length as
+<em>DVCSxsec_input</em>.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>np.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="gumpgpd.Minimizer.DVCSxsec_theo_xBtQ">
+<span class="sig-prename descclassname"><span class="pre">gumpgpd.Minimizer.</span></span><span class="sig-name descname"><span class="pre">DVCSxsec_theo_xBtQ</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">DVCSxsec_data_xBtQ</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">DataFrame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Para_Unp</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Para_Pol</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">P_order</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gumpgpd/Minimizer.html#DVCSxsec_theo_xBtQ"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gumpgpd.Minimizer.DVCSxsec_theo_xBtQ" title="Link to this definition"></a></dt>
+<dd><p>Add DVCS cross-section theory predictions for a single <span class="math notranslate nohighlight">\((x_B, t, Q)\)</span> group.</p>
+<p>Computes the CFFs once for the shared kinematics, then fills predictions
+for all phi/polarization rows in the group.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>DVCSxsec_data_xBtQ</strong> (<em>pd.DataFrame</em>) – Rows with identical <code class="docutils literal notranslate"><span class="pre">xB</span></code>, <code class="docutils literal notranslate"><span class="pre">t</span></code>, <code class="docutils literal notranslate"><span class="pre">Q</span></code>.</p></li>
+<li><p><strong>Para_Unp</strong> (<em>np.ndarray</em>) – Unpolarized parameter array.</p></li>
+<li><p><strong>Para_Pol</strong> (<em>np.ndarray</em>) – Polarized parameter array.</p></li>
+<li><p><strong>P_order</strong> (<em>int</em><em>, </em><em>optional</em>) – Perturbative order.  Defaults to 2.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Input DataFrame with added <code class="docutils literal notranslate"><span class="pre">'pred</span> <span class="pre">f'</span></code> and <code class="docutils literal notranslate"><span class="pre">'cost'</span></code> columns.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>pd.DataFrame</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="gumpgpd.Minimizer.DVJpsiPZEUSxsec_group_data">
+<span class="sig-prename descclassname"><span class="pre">gumpgpd.Minimizer.</span></span><span class="sig-name descname"><span class="pre">DVJpsiPZEUSxsec_group_data</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">[</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">y</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">xB</span>&#160;&#160;&#160;&#160; <span class="pre">t</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">Q</span>&#160;&#160;&#160;&#160; <span class="pre">f</span>&#160;&#160;&#160; <span class="pre">delta</span> <span class="pre">f</span> <span class="pre">4</span>&#160; <span class="pre">0.089979</span>&#160; <span class="pre">0.002022</span> <span class="pre">-0.05</span>&#160; <span class="pre">2.607681</span>&#160; <span class="pre">75.6</span>&#160; <span class="pre">12.766362,</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">y</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">xB</span>&#160;&#160;&#160;&#160; <span class="pre">t</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">Q</span>&#160;&#160;&#160;&#160; <span class="pre">f</span>&#160;&#160; <span class="pre">delta</span> <span class="pre">f</span> <span class="pre">5</span>&#160; <span class="pre">0.089979</span>&#160; <span class="pre">0.002022</span> <span class="pre">-0.15</span>&#160; <span class="pre">2.607681</span>&#160; <span class="pre">39.6</span>&#160; <span class="pre">5.456189,</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">y</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">xB</span>&#160;&#160;&#160;&#160; <span class="pre">t</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">Q</span>&#160;&#160;&#160;&#160; <span class="pre">f</span>&#160;&#160; <span class="pre">delta</span> <span class="pre">f</span> <span class="pre">6</span>&#160; <span class="pre">0.089979</span>&#160; <span class="pre">0.002022</span> <span class="pre">-0.29</span>&#160; <span class="pre">2.607681</span>&#160; <span class="pre">23.9</span>&#160; <span class="pre">3.189044,</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">y</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">xB</span>&#160;&#160;&#160;&#160; <span class="pre">t</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">Q</span>&#160;&#160;&#160; <span class="pre">f</span>&#160;&#160; <span class="pre">delta</span> <span class="pre">f</span> <span class="pre">7</span>&#160; <span class="pre">0.089979</span>&#160; <span class="pre">0.002022</span> <span class="pre">-0.58</span>&#160; <span class="pre">2.607681</span>&#160; <span class="pre">6.5</span>&#160; <span class="pre">0.848528,</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">y</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">xB</span>&#160;&#160;&#160;&#160; <span class="pre">t</span>&#160;&#160;&#160; <span class="pre">Q</span>&#160;&#160;&#160;&#160; <span class="pre">f</span>&#160;&#160; <span class="pre">delta</span> <span class="pre">f</span> <span class="pre">8</span>&#160; <span class="pre">0.090081</span>&#160; <span class="pre">0.003153</span> <span class="pre">-0.05</span>&#160; <span class="pre">4.0</span>&#160; <span class="pre">28.0</span>&#160; <span class="pre">4.404543,</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">y</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">xB</span>&#160;&#160;&#160;&#160; <span class="pre">t</span>&#160;&#160;&#160; <span class="pre">Q</span>&#160;&#160;&#160;&#160; <span class="pre">f</span>&#160;&#160; <span class="pre">delta</span> <span class="pre">f</span> <span class="pre">9</span>&#160; <span class="pre">0.090081</span>&#160; <span class="pre">0.003153</span> <span class="pre">-0.15</span>&#160; <span class="pre">4.0</span>&#160; <span class="pre">15.6</span>&#160; <span class="pre">2.828427,</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">y</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">xB</span>&#160;&#160;&#160;&#160; <span class="pre">t</span>&#160;&#160;&#160; <span class="pre">Q</span>&#160;&#160;&#160; <span class="pre">f</span>&#160;&#160; <span class="pre">delta</span> <span class="pre">f</span> <span class="pre">10</span>&#160; <span class="pre">0.090081</span>&#160; <span class="pre">0.003153</span> <span class="pre">-0.29</span>&#160; <span class="pre">4.0</span>&#160; <span class="pre">9.4</span>&#160; <span class="pre">1.720465,</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">y</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">xB</span>&#160;&#160;&#160;&#160; <span class="pre">t</span>&#160;&#160;&#160; <span class="pre">Q</span>&#160;&#160;&#160; <span class="pre">f</span>&#160;&#160; <span class="pre">delta</span> <span class="pre">f</span> <span class="pre">11</span>&#160; <span class="pre">0.090081</span>&#160; <span class="pre">0.003153</span> <span class="pre">-0.58</span>&#160; <span class="pre">4.0</span>&#160; <span class="pre">1.8</span>&#160; <span class="pre">0.282843,</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">y</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">xB</span>&#160;&#160;&#160;&#160; <span class="pre">t</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">Q</span>&#160;&#160;&#160;&#160;&#160; <span class="pre">f</span>&#160;&#160; <span class="pre">delta</span> <span class="pre">f</span> <span class="pre">12</span>&#160; <span class="pre">0.019571</span>&#160; <span class="pre">0.009256</span> <span class="pre">-0.05</span>&#160; <span class="pre">2.607681</span>&#160; <span class="pre">16.41</span>&#160; <span class="pre">5.388451,</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">y</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">xB</span>&#160;&#160;&#160;&#160; <span class="pre">t</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">Q</span>&#160;&#160;&#160;&#160;&#160; <span class="pre">f</span>&#160;&#160; <span class="pre">delta</span> <span class="pre">f</span> <span class="pre">13</span>&#160; <span class="pre">0.046918</span>&#160; <span class="pre">0.003873</span> <span class="pre">-0.05</span>&#160; <span class="pre">2.607681</span>&#160; <span class="pre">15.76</span>&#160; <span class="pre">3.674139,</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">y</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">xB</span>&#160;&#160;&#160;&#160; <span class="pre">t</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">Q</span>&#160;&#160;&#160;&#160;&#160; <span class="pre">f</span>&#160;&#160; <span class="pre">delta</span> <span class="pre">f</span> <span class="pre">14</span>&#160; <span class="pre">0.080255</span>&#160; <span class="pre">0.002267</span> <span class="pre">-0.05</span>&#160; <span class="pre">2.607681</span>&#160; <span class="pre">20.71</span>&#160; <span class="pre">4.887955,</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">y</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">xB</span>&#160;&#160;&#160;&#160; <span class="pre">t</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">Q</span>&#160;&#160;&#160;&#160;&#160; <span class="pre">f</span>&#160;&#160; <span class="pre">delta</span> <span class="pre">f</span> <span class="pre">15</span>&#160; <span class="pre">0.122482</span>&#160; <span class="pre">0.001486</span> <span class="pre">-0.05</span>&#160; <span class="pre">2.607681</span>&#160; <span class="pre">32.42</span>&#160; <span class="pre">6.346534,</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">y</span>&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">xB</span>&#160;&#160;&#160;&#160; <span class="pre">t</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">Q</span>&#160;&#160;&#160;&#160;&#160; <span class="pre">f</span>&#160;&#160; <span class="pre">delta</span> <span class="pre">f</span> <span class="pre">16</span>&#160; <span class="pre">0.187767</span>&#160; <span class="pre">0.00097</span> <span class="pre">-0.05</span>&#160; <span class="pre">2.607681</span>&#160; <span class="pre">34.53</span>&#160; <span class="pre">6.473407,</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">y</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">xB</span>&#160;&#160;&#160;&#160; <span class="pre">t</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">Q</span>&#160;&#160;&#160;&#160;&#160; <span class="pre">f</span>&#160;&#160; <span class="pre">delta</span> <span class="pre">f</span> <span class="pre">17</span>&#160; <span class="pre">0.360007</span>&#160; <span class="pre">0.000506</span> <span class="pre">-0.05</span>&#160; <span class="pre">2.607681</span>&#160; <span class="pre">43.41</span>&#160; <span class="pre">9.460048,</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">y</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">xB</span>&#160;&#160;&#160; <span class="pre">t</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">Q</span>&#160;&#160;&#160;&#160;&#160; <span class="pre">f</span>&#160;&#160; <span class="pre">delta</span> <span class="pre">f</span> <span class="pre">18</span>&#160; <span class="pre">0.019571</span>&#160; <span class="pre">0.009256</span> <span class="pre">-0.2</span>&#160; <span class="pre">2.607681</span>&#160; <span class="pre">11.22</span>&#160; <span class="pre">2.667902,</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">y</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">xB</span>&#160;&#160;&#160; <span class="pre">t</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">Q</span>&#160;&#160;&#160;&#160;&#160; <span class="pre">f</span>&#160;&#160; <span class="pre">delta</span> <span class="pre">f</span> <span class="pre">19</span>&#160; <span class="pre">0.046918</span>&#160; <span class="pre">0.003873</span> <span class="pre">-0.2</span>&#160; <span class="pre">2.607681</span>&#160; <span class="pre">10.63</span>&#160; <span class="pre">1.810193,</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">y</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">xB</span>&#160;&#160;&#160; <span class="pre">t</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">Q</span>&#160;&#160;&#160;&#160;&#160; <span class="pre">f</span>&#160;&#160; <span class="pre">delta</span> <span class="pre">f</span> <span class="pre">20</span>&#160; <span class="pre">0.080255</span>&#160; <span class="pre">0.002267</span> <span class="pre">-0.2</span>&#160; <span class="pre">2.607681</span>&#160; <span class="pre">12.47</span>&#160; <span class="pre">1.888068,</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">y</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">xB</span>&#160;&#160;&#160; <span class="pre">t</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">Q</span>&#160;&#160;&#160;&#160;&#160; <span class="pre">f</span>&#160;&#160; <span class="pre">delta</span> <span class="pre">f</span> <span class="pre">21</span>&#160; <span class="pre">0.122482</span>&#160; <span class="pre">0.001486</span> <span class="pre">-0.2</span>&#160; <span class="pre">2.607681</span>&#160; <span class="pre">16.01</span>&#160; <span class="pre">4.031935,</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">y</span>&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">xB</span>&#160;&#160;&#160; <span class="pre">t</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">Q</span>&#160;&#160;&#160;&#160;&#160; <span class="pre">f</span>&#160;&#160; <span class="pre">delta</span> <span class="pre">f</span> <span class="pre">22</span>&#160; <span class="pre">0.187767</span>&#160; <span class="pre">0.00097</span> <span class="pre">-0.2</span>&#160; <span class="pre">2.607681</span>&#160; <span class="pre">17.52</span>&#160; <span class="pre">2.468542,</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">y</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">xB</span>&#160;&#160;&#160; <span class="pre">t</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">Q</span>&#160;&#160;&#160;&#160;&#160; <span class="pre">f</span>&#160;&#160; <span class="pre">delta</span> <span class="pre">f</span> <span class="pre">23</span>&#160; <span class="pre">0.360007</span>&#160; <span class="pre">0.000506</span> <span class="pre">-0.2</span>&#160; <span class="pre">2.607681</span>&#160; <span class="pre">26.15</span>&#160; <span class="pre">5.752356]</span></span><a class="headerlink" href="#gumpgpd.Minimizer.DVJpsiPZEUSxsec_group_data" title="Link to this definition"></a></dt>
+<dd><p>For Jpsi we used NRQCD framework that predict the R ratio, the following code not in use</p>
+<p>R = sigma_L / sigma_T values hardcoded and used to convert data xsec simga_tot to sigma_L
+DVJpsiPH1xsec_L_data = DVJpsiPH1xsec_data.copy()
+R_H1 = DVJpsiPH1xsec_L_data[‘f’].copy()
+R_H1[(DVJpsiPH1xsec_L_data[‘Q’]**2 &gt; 1) &amp; (DVJpsiPH1xsec_L_data[‘Q’]**2 &lt; 5)] = 0.052
+R_H1[(DVJpsiPH1xsec_L_data[‘Q’]**2 &gt; 5) &amp; (DVJpsiPH1xsec_L_data[‘Q’]**2 &lt; 10)] = 0.23
+R_H1[(DVJpsiPH1xsec_L_data[‘Q’]**2 &gt; 10)] = 0.62
+R_H1_err = DVJpsiPH1xsec_L_data[‘f’].copy()
+R_H1_err[(DVJpsiPH1xsec_L_data[‘Q’]**2 &gt; 2) &amp; (DVJpsiPH1xsec_L_data[‘Q’]**2 &lt; 5)] = 0.113
+R_H1_err[(DVJpsiPH1xsec_L_data[‘Q’]**2 &gt; 5) &amp; (DVJpsiPH1xsec_L_data[‘Q’]**2 &lt; 10)] = 0.27
+R_H1_err[(DVJpsiPH1xsec_L_data[‘Q’]**2 &gt; 10)] = 0.61
+DVJpsiPH1xsec_L_data[‘f’] = DVJpsiPH1xsec_L_data[‘f’] / ((1 - DVJpsiPH1xsec_L_data[‘y’]) / (1 - DVJpsiPH1xsec_L_data[‘y’] - DVJpsiPH1xsec_L_data[‘y’]**2 / 2) + (1 / R_H1))
+DVJpsiPH1xsec_L_data[‘delta f’] = np.sqrt((DVJpsiPH1xsec_L_data[‘delta f’] / ((1 - DVJpsiPH1xsec_L_data[‘y’]) / (1 - DVJpsiPH1xsec_L_data[‘y’] - DVJpsiPH1xsec_L_data[‘y’]**2 / 2) + (1 / R_H1)))**2 + (R_H1_err * DVJpsiPH1xsec_L_data[‘f’] / (1 + (1 - DVJpsiPH1xsec_L_data[‘y’]) / (1 - DVJpsiPH1xsec_L_data[‘y’] - DVJpsiPH1xsec_L_data[‘y’]**2 / 2) * R_H1)**2)**2)
+DVJpsiPH1xsec_group_data = list(map(lambda set: DVJpsiPH1xsec_data[(DVJpsiPH1xsec_data[‘xB’] == set[0]) &amp; (DVJpsiPH1xsec_data[‘t’] == set[1]) &amp; ((DVJpsiPH1xsec_data[‘Q’] == set[2]))], xBtQlst_JpsiH))
+DVJpsiPH1xsec_L_group_data = list(map(lambda set: DVJpsiPH1xsec_L_data[(DVJpsiPH1xsec_data[‘xB’] == set[0]) &amp; (DVJpsiPH1xsec_L_data[‘t’] == set[1]) &amp; ((DVJpsiPH1xsec_L_data[‘Q’] == set[2]))], xBtQlst_JpsiH))</p>
+<p>DVJpsiPZEUSxsec_data = pd.read_csv(os.path.join(dir_path,’GUMPDATA/DVMP_HERA/DVJpsiPZEUSdt_w_mass.csv’), header = None, names = [‘y’, ‘xB’, ‘t’, ‘Q’, ‘f’, ‘delta f’] , dtype = {‘y’: float, ‘xB’: float, ‘t’: float, ‘Q’: float, ‘f’: float, ‘delta f’: float})
+DVJpsiPZEUSxsec_data[‘Q’] = np.sqrt(DVJpsiPZEUSxsec_data[‘Q’])
+DVJpsiPZEUSxsec_data[‘t’] = -1 * DVJpsiPZEUSxsec_data[‘t’]
+DVJpsiPZEUSxsec_data = DVJpsiPZEUSxsec_data[(DVJpsiPZEUSxsec_data[‘Q’]&gt;Q_threshold)]
+xBtQlst_JpsiZ = DVJpsiPZEUSxsec_data.drop_duplicates(subset = [‘xB’, ‘t’, ‘Q’], keep = ‘first’)[[‘xB’,’t’,’Q’]].values.tolist()
+DVJpsiPZEUSxsec_L_data = DVJpsiPZEUSxsec_data.copy()
+R_ZEUS = DVJpsiPZEUSxsec_L_data[‘f’].copy()
+R_ZEUS[(DVJpsiPZEUSxsec_L_data[‘Q’]**2 &gt; 2) &amp; (DVJpsiPZEUSxsec_L_data[‘Q’]**2 &lt; 5)] = 0.13
+R_ZEUS[(DVJpsiPZEUSxsec_L_data[‘Q’]**2 &gt; 5) &amp; (DVJpsiPZEUSxsec_L_data[‘Q’]**2 &lt; 10)] = 0.33
+R_ZEUS[(DVJpsiPZEUSxsec_L_data[‘Q’]**2 &gt; 10)] = 1.19
+R_ZEUS_err = DVJpsiPZEUSxsec_L_data[‘f’].copy()
+R_ZEUS_err[(DVJpsiPZEUSxsec_L_data[‘Q’]**2 &gt; 2) &amp; (DVJpsiPZEUSxsec_L_data[‘Q’]**2 &lt; 5)] = 0.19
+R_ZEUS_err[(DVJpsiPZEUSxsec_L_data[‘Q’]**2 &gt; 5) &amp; (DVJpsiPZEUSxsec_L_data[‘Q’]**2 &lt; 10)] = 0.25
+R_ZEUS_err[(DVJpsiPZEUSxsec_L_data[‘Q’]**2 &gt; 10)] = 0.58
+DVJpsiPZEUSxsec_L_data[‘f’] = DVJpsiPZEUSxsec_L_data[‘f’] / ((1 - DVJpsiPZEUSxsec_L_data[‘y’]) / (1 - DVJpsiPZEUSxsec_L_data[‘y’] - DVJpsiPZEUSxsec_L_data[‘y’]**2 / 2) + (1 / R_ZEUS))
+DVJpsiPZEUSxsec_L_data[‘delta f’] = np.sqrt((DVJpsiPZEUSxsec_L_data[‘delta f’] / ((1 - DVJpsiPZEUSxsec_L_data[‘y’]) / (1 - DVJpsiPZEUSxsec_L_data[‘y’] - DVJpsiPZEUSxsec_L_data[‘y’]**2 / 2) + (1 / R_ZEUS)))**2 + (R_ZEUS_err * DVJpsiPZEUSxsec_L_data[‘f’] / (1 + (1 - DVJpsiPZEUSxsec_L_data[‘y’]) / (1 - DVJpsiPZEUSxsec_L_data[‘y’] - DVJpsiPZEUSxsec_L_data[‘y’]**2 / 2) * R_ZEUS)**2)**2)
+DVJpsiPZEUSxsec_group_data = list(map(lambda set: DVJpsiPZEUSxsec_data[(DVJpsiPZEUSxsec_data[‘xB’] == set[0]) &amp; (DVJpsiPZEUSxsec_data[‘t’] == set[1]) &amp; ((DVJpsiPZEUSxsec_data[‘Q’] == set[2]))], xBtQlst_JpsiZ))
+DVJpsiPZEUSxsec_L_group_data = list(map(lambda set: DVJpsiPZEUSxsec_L_data[(DVJpsiPZEUSxsec_data[‘xB’] == set[0]) &amp; (DVJpsiPZEUSxsec_L_data[‘t’] == set[1]) &amp; ((DVJpsiPZEUSxsec_L_data[‘Q’] == set[2]))], xBtQlst_JpsiZ))</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="gumpgpd.Minimizer.DVMP_L_Error_Prop">
+<span class="sig-prename descclassname"><span class="pre">gumpgpd.Minimizer.</span></span><span class="sig-name descname"><span class="pre">DVMP_L_Error_Prop</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">DVMP_tot_xsec</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">DataFrame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">meson</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gumpgpd/Minimizer.html#DVMP_L_Error_Prop"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gumpgpd.Minimizer.DVMP_L_Error_Prop" title="Link to this definition"></a></dt>
+<dd><p>Error propagation for dσ_L /dt= (dσ_tot /dt) / (ε(y) + 1/R(Q;a,p,meson)).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>DVMP_tot_xsec</strong> (<em>DataFrame</em>) – total cross-sections including at least four column:
+‘y’, ‘Q’, ‘f’ and ‘delta f’ for lepton energy loss, photon virtuality, total cross-sections and uncertainties of total cross-sections.</p></li>
+<li><p><strong>meson</strong> – 1 for rho production</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>dσ_L(y,Q,a,p,meson) / dt with standart deviation</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="gumpgpd.Minimizer.DVMPxsec_theo">
+<span class="sig-prename descclassname"><span class="pre">gumpgpd.Minimizer.</span></span><span class="sig-name descname"><span class="pre">DVMPxsec_theo</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">DVMPxsec_data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">DataFrame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Para_Unp</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xsec_norm</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">meson</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p_order</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gumpgpd/Minimizer.html#DVMPxsec_theo"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gumpgpd.Minimizer.DVMPxsec_theo" title="Link to this definition"></a></dt>
+<dd><p>Compute DVMP cross-section predictions for a full dataset using a parallel pool.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>DVMPxsec_data</strong> (<em>pd.DataFrame</em>) – Full DVMP cross-section dataset.</p></li>
+<li><p><strong>Para_Unp</strong> (<em>np.ndarray</em>) – Unpolarized parameter array.</p></li>
+<li><p><strong>xsec_norm</strong> (<em>float</em>) – Overall normalization applied as <code class="docutils literal notranslate"><span class="pre">theory</span> <span class="pre">*=</span> <span class="pre">xsec_norm**2</span></code>.</p></li>
+<li><p><strong>meson</strong> (<em>int</em>) – Meson type: 1 for <span class="math notranslate nohighlight">\(\rho^0\)</span>, 3 for J/psi.</p></li>
+<li><p><strong>p_order</strong> (<em>int</em><em>, </em><em>optional</em>) – Perturbative order.  Defaults to 2.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Concatenated results with <code class="docutils literal notranslate"><span class="pre">'pred</span> <span class="pre">f'</span></code> and <code class="docutils literal notranslate"><span class="pre">'cost'</span></code> columns.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>pd.DataFrame</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="gumpgpd.Minimizer.DVMPxsec_theo_helper">
+<span class="sig-prename descclassname"><span class="pre">gumpgpd.Minimizer.</span></span><span class="sig-name descname"><span class="pre">DVMPxsec_theo_helper</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">DVMPxsec_input</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">DataFrame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">TFF_input</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">array</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">meson</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gumpgpd/Minimizer.html#DVMPxsec_theo_helper"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gumpgpd.Minimizer.DVMPxsec_theo_helper" title="Link to this definition"></a></dt>
+<dd><p>Compute DVMP differential cross-section predictions for a single kinematic group.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>DVMPxsec_input</strong> (<em>pd.DataFrame</em>) – Rows sharing a common <span class="math notranslate nohighlight">\((x_B, t, Q)\)</span>
+with columns <code class="docutils literal notranslate"><span class="pre">y</span></code>, <code class="docutils literal notranslate"><span class="pre">xB</span></code>, <code class="docutils literal notranslate"><span class="pre">t</span></code>, <code class="docutils literal notranslate"><span class="pre">Q</span></code>.</p></li>
+<li><p><strong>TFF_input</strong> (<em>list</em><em> of </em><em>array-like</em>) – <code class="docutils literal notranslate"><span class="pre">[HTFF,</span> <span class="pre">ETFF]</span></code> — transition form
+factors; each element may be scalar or 1-D array <code class="docutils literal notranslate"><span class="pre">(N,)</span></code>.</p></li>
+<li><p><strong>meson</strong> (<em>int</em>) – Meson type: 1 for <span class="math notranslate nohighlight">\(\rho^0\)</span>, 2 for <span class="math notranslate nohighlight">\(\phi\)</span>,
+3 for J/psi.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Theory <span class="math notranslate nohighlight">\(d\sigma/dt\)</span> predictions.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>np.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="gumpgpd.Minimizer.DVMPxsec_theo_xBtQ">
+<span class="sig-prename descclassname"><span class="pre">gumpgpd.Minimizer.</span></span><span class="sig-name descname"><span class="pre">DVMPxsec_theo_xBtQ</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">DVMPxsec_data_xBtQ</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">DataFrame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Para_Unp</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xsec_norm</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">meson</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p_order</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gumpgpd/Minimizer.html#DVMPxsec_theo_xBtQ"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gumpgpd.Minimizer.DVMPxsec_theo_xBtQ" title="Link to this definition"></a></dt>
+<dd><p>Add DVMP cross-section theory predictions for a single <span class="math notranslate nohighlight">\((x_B, t, Q)\)</span> group.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>DVMPxsec_data_xBtQ</strong> (<em>pd.DataFrame</em>) – Rows with identical <code class="docutils literal notranslate"><span class="pre">xB</span></code>, <code class="docutils literal notranslate"><span class="pre">t</span></code>, <code class="docutils literal notranslate"><span class="pre">Q</span></code>.</p></li>
+<li><p><strong>Para_Unp</strong> (<em>np.ndarray</em>) – Unpolarized parameter array.</p></li>
+<li><p><strong>xsec_norm</strong> (<em>float</em>) – Overall normalization factor applied as
+<code class="docutils literal notranslate"><span class="pre">theory</span> <span class="pre">*=</span> <span class="pre">xsec_norm**2</span></code>.</p></li>
+<li><p><strong>meson</strong> (<em>int</em>) – Meson type: 1 for <span class="math notranslate nohighlight">\(\rho^0\)</span>, 3 for J/psi.</p></li>
+<li><p><strong>p_order</strong> (<em>int</em><em>, </em><em>optional</em>) – Perturbative order.  Defaults to 2.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Input DataFrame with added <code class="docutils literal notranslate"><span class="pre">'pred</span> <span class="pre">f'</span></code> and <code class="docutils literal notranslate"><span class="pre">'cost'</span></code> columns.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>pd.DataFrame</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="gumpgpd.Minimizer.Export_Frame_Append">
+<span class="sig-prename descclassname"><span class="pre">gumpgpd.Minimizer.</span></span><span class="sig-name descname"><span class="pre">Export_Frame_Append</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filename</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">export_path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gumpgpd/Minimizer.html#Export_Frame_Append"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gumpgpd.Minimizer.Export_Frame_Append" title="Link to this definition"></a></dt>
+<dd><p>Append (or create) a CSV file inside <code class="docutils literal notranslate"><span class="pre">&lt;export_path&gt;/GUMP_Results/</span></code>.</p>
+<p>On the first call for a given <em>filename</em> the file is created and the header
+row is written.  Subsequent calls append rows without repeating the header.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>df</strong> (<em>pd.DataFrame</em>) – Data to write.</p></li>
+<li><p><strong>filename</strong> (<em>str</em>) – Name of the CSV file (e.g. <code class="docutils literal notranslate"><span class="pre">'PDFcomp.csv'</span></code>).</p></li>
+<li><p><strong>export_path</strong> (<em>str</em><em>, </em><em>optional</em>) – Root directory for output.  Defaults to
+the module-level <code class="xref py py-data docutils literal notranslate"><span class="pre">SAVE_TO_FILE_PATH</span></code>.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="gumpgpd.Minimizer.GFF_theo">
+<span class="sig-prename descclassname"><span class="pre">gumpgpd.Minimizer.</span></span><span class="sig-name descname"><span class="pre">GFF_theo</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">GFF_input</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">DataFrame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Para</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">array</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p_order</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">chunksize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gumpgpd/Minimizer.html#GFF_theo"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gumpgpd.Minimizer.GFF_theo" title="Link to this definition"></a></dt>
+<dd><p>Compute NLO GFF theory predictions for an entire dataset in parallel.</p>
+<p>Adds a <code class="docutils literal notranslate"><span class="pre">'pred</span> <span class="pre">f'</span></code> column with the theory prediction and, if <code class="docutils literal notranslate"><span class="pre">'f'</span></code> and
+<code class="docutils literal notranslate"><span class="pre">'delta</span> <span class="pre">f'</span></code> columns are present, a <code class="docutils literal notranslate"><span class="pre">'cost'</span></code> column with the
+per-point <span class="math notranslate nohighlight">\(\chi^2\)</span> contribution.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>GFF_input</strong> (<em>pd.DataFrame</em>) – Input data with columns <code class="docutils literal notranslate"><span class="pre">j</span></code>, <code class="docutils literal notranslate"><span class="pre">t</span></code>, <code class="docutils literal notranslate"><span class="pre">Q</span></code>,
+<code class="docutils literal notranslate"><span class="pre">flv</span></code>, <code class="docutils literal notranslate"><span class="pre">spe</span></code>, and optionally <code class="docutils literal notranslate"><span class="pre">f</span></code>/<code class="docutils literal notranslate"><span class="pre">delta</span> <span class="pre">f</span></code>.</p></li>
+<li><p><strong>Para</strong> (<em>np.ndarray</em>) – Full stacked parameter array indexed by species.</p></li>
+<li><p><strong>p_order</strong> (<em>int</em><em>, </em><em>optional</em>) – Perturbative order.  Defaults to 2 (NLO).</p></li>
+<li><p><strong>chunksize</strong> (<em>int</em><em>, </em><em>optional</em>) – Pool map chunksize for performance tuning.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Copy of <em>GFF_input</em> with added <code class="docutils literal notranslate"><span class="pre">'pred</span> <span class="pre">f'</span></code> and
+(if data present) <code class="docutils literal notranslate"><span class="pre">'cost'</span></code> columns.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>pd.DataFrame</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="gumpgpd.Minimizer.GFF_theo_scalar_helper">
+<span class="sig-prename descclassname"><span class="pre">gumpgpd.Minimizer.</span></span><span class="sig-name descname"><span class="pre">GFF_theo_scalar_helper</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">j_i</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xi</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">t_i</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Q_i</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p_i</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">flv_i</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Para_i</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p_order</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gumpgpd/Minimizer.html#GFF_theo_scalar_helper"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gumpgpd.Minimizer.GFF_theo_scalar_helper" title="Link to this definition"></a></dt>
+<dd><p>Compute a single GFF theory value for use with <code class="xref py py-func docutils literal notranslate"><span class="pre">multiprocessing.Pool.starmap()</span></code>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>j_i</strong> (<em>int</em>) – Mellin moment index <span class="math notranslate nohighlight">\(j\)</span>.</p></li>
+<li><p><strong>x</strong> (<em>float</em>) – Momentum fraction (set to 0 for GFFs).</p></li>
+<li><p><strong>xi</strong> (<em>float</em>) – Skewness (set to 0 for GFFs).</p></li>
+<li><p><strong>t_i</strong> (<em>float</em>) – Momentum transfer squared <span class="math notranslate nohighlight">\(t\)</span>.</p></li>
+<li><p><strong>Q_i</strong> (<em>float</em>) – Factorization/evolution scale <span class="math notranslate nohighlight">\(Q\)</span>.</p></li>
+<li><p><strong>p_i</strong> (<em>int</em>) – 1 for vector GPDs (H, E), -1 for axial-vector GPDs (Ht, Et).</p></li>
+<li><p><strong>flv_i</strong> (<em>str</em>) – Flavor label.</p></li>
+<li><p><strong>Para_i</strong> (<em>np.ndarray</em>) – Parameter array for this kinematic point.</p></li>
+<li><p><strong>p_order</strong> (<em>int</em>) – Perturbative order (1 = LO, 2 = NLO).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Theory prediction for the <span class="math notranslate nohighlight">\(j=0\)</span> GFF moment.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="gumpgpd.Minimizer.GPD_theo">
+<span class="sig-prename descclassname"><span class="pre">gumpgpd.Minimizer.</span></span><span class="sig-name descname"><span class="pre">GPD_theo</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">GPD_input</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">DataFrame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Para</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">array</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p_order</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">chunksize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gumpgpd/Minimizer.html#GPD_theo"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gumpgpd.Minimizer.GPD_theo" title="Link to this definition"></a></dt>
+<dd><p>Compute NLO off-forward GPD theory predictions for an entire dataset in parallel.</p>
+<p>Adds a <code class="docutils literal notranslate"><span class="pre">'pred</span> <span class="pre">f'</span></code> column with the theory prediction and, if <code class="docutils literal notranslate"><span class="pre">'f'</span></code> and
+<code class="docutils literal notranslate"><span class="pre">'delta</span> <span class="pre">f'</span></code> columns are present, a <code class="docutils literal notranslate"><span class="pre">'cost'</span></code> column with the
+per-point <span class="math notranslate nohighlight">\(\chi^2\)</span> contribution.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>GPD_input</strong> (<em>pd.DataFrame</em>) – Input data with columns <code class="docutils literal notranslate"><span class="pre">x</span></code>, <code class="docutils literal notranslate"><span class="pre">xi</span></code>, <code class="docutils literal notranslate"><span class="pre">t</span></code>,
+<code class="docutils literal notranslate"><span class="pre">Q</span></code>, <code class="docutils literal notranslate"><span class="pre">flv</span></code>, <code class="docutils literal notranslate"><span class="pre">spe</span></code>, and optionally <code class="docutils literal notranslate"><span class="pre">f</span></code>/<code class="docutils literal notranslate"><span class="pre">delta</span> <span class="pre">f</span></code>.</p></li>
+<li><p><strong>Para</strong> (<em>np.ndarray</em>) – Full stacked parameter array indexed by species.</p></li>
+<li><p><strong>p_order</strong> (<em>int</em><em>, </em><em>optional</em>) – Perturbative order.  Defaults to 2 (NLO).</p></li>
+<li><p><strong>chunksize</strong> (<em>int</em><em>, </em><em>optional</em>) – Pool map chunksize for performance tuning.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Copy of <em>GPD_input</em> with added <code class="docutils literal notranslate"><span class="pre">'pred</span> <span class="pre">f'</span></code> and
+(if data present) <code class="docutils literal notranslate"><span class="pre">'cost'</span></code> columns.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>pd.DataFrame</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="gumpgpd.Minimizer.GPD_theo_scalar_helper">
+<span class="sig-prename descclassname"><span class="pre">gumpgpd.Minimizer.</span></span><span class="sig-name descname"><span class="pre">GPD_theo_scalar_helper</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x_i</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xi_i</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">t_i</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Q_i</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p_i</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">flv_i</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Para_i</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p_order</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gumpgpd/Minimizer.html#GPD_theo_scalar_helper"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gumpgpd.Minimizer.GPD_theo_scalar_helper" title="Link to this definition"></a></dt>
+<dd><p>Compute a single GPD theory value for use with <code class="xref py py-func docutils literal notranslate"><span class="pre">multiprocessing.Pool.starmap()</span></code>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>x_i</strong> (<em>float</em>) – Longitudinal momentum fraction <span class="math notranslate nohighlight">\(x\)</span>.</p></li>
+<li><p><strong>xi_i</strong> (<em>float</em>) – Skewness <span class="math notranslate nohighlight">\(\xi\)</span>.</p></li>
+<li><p><strong>t_i</strong> (<em>float</em>) – Momentum transfer squared <span class="math notranslate nohighlight">\(t\)</span>.</p></li>
+<li><p><strong>Q_i</strong> (<em>float</em>) – Factorization/evolution scale <span class="math notranslate nohighlight">\(Q\)</span>.</p></li>
+<li><p><strong>p_i</strong> (<em>int</em>) – 1 for vector GPDs (H, E), -1 for axial-vector GPDs (Ht, Et).</p></li>
+<li><p><strong>flv_i</strong> (<em>str</em>) – Flavor label.</p></li>
+<li><p><strong>Para_i</strong> (<em>np.ndarray</em>) – Parameter array for this kinematic point.</p></li>
+<li><p><strong>p_order</strong> (<em>int</em>) – Perturbative order (1 = LO, 2 = NLO).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Theory prediction for the off-forward GPD at the given kinematics.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="gumpgpd.Minimizer.PDF_theo">
+<span class="sig-prename descclassname"><span class="pre">gumpgpd.Minimizer.</span></span><span class="sig-name descname"><span class="pre">PDF_theo</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">PDF_input</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">DataFrame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Para</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">array</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p_order</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">chunksize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gumpgpd/Minimizer.html#PDF_theo"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gumpgpd.Minimizer.PDF_theo" title="Link to this definition"></a></dt>
+<dd><p>Compute NLO tPDF/PDF theory predictions for an entire dataset in parallel.</p>
+<p>Adds a <code class="docutils literal notranslate"><span class="pre">'pred</span> <span class="pre">f'</span></code> column with the theory prediction and, if <code class="docutils literal notranslate"><span class="pre">'f'</span></code> and
+<code class="docutils literal notranslate"><span class="pre">'delta</span> <span class="pre">f'</span></code> columns are present, a <code class="docutils literal notranslate"><span class="pre">'cost'</span></code> column with the
+per-point <span class="math notranslate nohighlight">\(\chi^2\)</span> contribution.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>PDF_input</strong> (<em>pd.DataFrame</em>) – Input data with columns <code class="docutils literal notranslate"><span class="pre">x</span></code>, <code class="docutils literal notranslate"><span class="pre">t</span></code>, <code class="docutils literal notranslate"><span class="pre">Q</span></code>,
+<code class="docutils literal notranslate"><span class="pre">flv</span></code>, <code class="docutils literal notranslate"><span class="pre">spe</span></code> (species index), and optionally <code class="docutils literal notranslate"><span class="pre">f</span></code>/<code class="docutils literal notranslate"><span class="pre">delta</span> <span class="pre">f</span></code>.</p></li>
+<li><p><strong>Para</strong> (<em>np.ndarray</em>) – Full stacked parameter array indexed by species.</p></li>
+<li><p><strong>p_order</strong> (<em>int</em><em>, </em><em>optional</em>) – Perturbative order.  Defaults to 2 (NLO).</p></li>
+<li><p><strong>chunksize</strong> (<em>int</em><em>, </em><em>optional</em>) – Pool map chunksize for performance tuning.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Copy of <em>PDF_input</em> with added <code class="docutils literal notranslate"><span class="pre">'pred</span> <span class="pre">f'</span></code> and
+(if data present) <code class="docutils literal notranslate"><span class="pre">'cost'</span></code> columns.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>pd.DataFrame</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="gumpgpd.Minimizer.PDF_theo_scalar_helper">
+<span class="sig-prename descclassname"><span class="pre">gumpgpd.Minimizer.</span></span><span class="sig-name descname"><span class="pre">PDF_theo_scalar_helper</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x_i</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xi_i</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">t_i</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Q_i</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p_i</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">flv_i</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Para_i</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p_order</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gumpgpd/Minimizer.html#PDF_theo_scalar_helper"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gumpgpd.Minimizer.PDF_theo_scalar_helper" title="Link to this definition"></a></dt>
+<dd><p>Compute a single tPDF/PDF theory value for use with <code class="xref py py-func docutils literal notranslate"><span class="pre">multiprocessing.Pool.starmap()</span></code>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>x_i</strong> (<em>float</em>) – Longitudinal momentum fraction <span class="math notranslate nohighlight">\(x\)</span>.</p></li>
+<li><p><strong>xi_i</strong> (<em>float</em>) – Skewness <span class="math notranslate nohighlight">\(\xi\)</span> (zero in the forward limit).</p></li>
+<li><p><strong>t_i</strong> (<em>float</em>) – Momentum transfer squared <span class="math notranslate nohighlight">\(t\)</span>.</p></li>
+<li><p><strong>Q_i</strong> (<em>float</em>) – Factorization/evolution scale <span class="math notranslate nohighlight">\(Q\)</span>.</p></li>
+<li><p><strong>p_i</strong> (<em>int</em>) – 1 for vector GPDs (H, E), -1 for axial-vector GPDs (Ht, Et).</p></li>
+<li><p><strong>flv_i</strong> (<em>str</em>) – Flavor label (e.g. <code class="docutils literal notranslate"><span class="pre">'u'</span></code>, <code class="docutils literal notranslate"><span class="pre">'d'</span></code>, <code class="docutils literal notranslate"><span class="pre">'g'</span></code>).</p></li>
+<li><p><strong>Para_i</strong> (<em>np.ndarray</em>) – Parameter array for this kinematic point.</p></li>
+<li><p><strong>p_order</strong> (<em>int</em>) – Perturbative order (1 = LO, 2 = NLO).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Theory prediction for the tPDF/PDF at the given kinematics.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="gumpgpd.Minimizer.TFF_theo">
+<span class="sig-prename descclassname"><span class="pre">gumpgpd.Minimizer.</span></span><span class="sig-name descname"><span class="pre">TFF_theo</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">xB</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">t</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Q</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Para_Unp</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">meson</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p_order</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">muset</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">flv</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'All'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gumpgpd/Minimizer.html#TFF_theo"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gumpgpd.Minimizer.TFF_theo" title="Link to this definition"></a></dt>
+<dd><p>Compute the two transition form factors (TFFs) for DVMP at a given kinematic point.</p>
+<p>The skewness is derived from <span class="math notranslate nohighlight">\(x_B\)</span>, <span class="math notranslate nohighlight">\(t\)</span>, and <span class="math notranslate nohighlight">\(Q\)</span>.  For
+J/psi production the J/psi mass enters the skewness formula.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>xB</strong> (<em>float</em>) – Bjorken-<span class="math notranslate nohighlight">\(x\)</span> variable.</p></li>
+<li><p><strong>t</strong> (<em>float</em>) – Momentum transfer squared <span class="math notranslate nohighlight">\(t\)</span>.</p></li>
+<li><p><strong>Q</strong> (<em>float</em>) – Photon virtuality <span class="math notranslate nohighlight">\(Q\)</span>.</p></li>
+<li><p><strong>Para_Unp</strong> (<em>np.ndarray</em>) – Unpolarized GPD parameter array (species-stacked).</p></li>
+<li><p><strong>meson</strong> (<em>int</em>) – Meson type: 1 for <span class="math notranslate nohighlight">\(\\rho^0\)</span>, 2 for <span class="math notranslate nohighlight">\(\\phi\)</span>,
+3 for J/psi.</p></li>
+<li><p><strong>p_order</strong> (<em>int</em><em>, </em><em>optional</em>) – Perturbative order.  Defaults to 2 (NLO).</p></li>
+<li><p><strong>muset</strong> (<em>float</em><em>, </em><em>optional</em>) – Scale factor applied to <span class="math notranslate nohighlight">\(Q\)</span> when
+evaluating the TFF (used for scale-uncertainty studies).</p></li>
+<li><p><strong>flv</strong> (<em>str</em><em>, </em><em>optional</em>) – Flavor channel.  Defaults to <code class="docutils literal notranslate"><span class="pre">'All'</span></code>.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><code class="docutils literal notranslate"><span class="pre">[HTFF,</span> <span class="pre">ETFF]</span></code> — the H- and E-type TFFs.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="gumpgpd.Minimizer.close_pool">
+<span class="sig-prename descclassname"><span class="pre">gumpgpd.Minimizer.</span></span><span class="sig-name descname"><span class="pre">close_pool</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/gumpgpd/Minimizer.html#close_pool"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gumpgpd.Minimizer.close_pool" title="Link to this definition"></a></dt>
+<dd><p>Close and join the global worker pool (calls <code class="xref py py-func docutils literal notranslate"><span class="pre">_cleanup_pool()</span></code>).</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="gumpgpd.Minimizer.cost_off_forward_withH_withHt">
+<span class="sig-prename descclassname"><span class="pre">gumpgpd.Minimizer.</span></span><span class="sig-name descname"><span class="pre">cost_off_forward_withH_withHt</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">Norm_HuV</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alpha_HuV</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">beta_HuV</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alphap_HuV</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Invm2_HuV</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Norm_Hubar</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alpha_Hubar</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">beta_Hubar</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alphap_Hqbar</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Norm_Hubar_2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alpha_Hubar_2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">beta_Hubar_2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Norm_HdV</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alpha_HdV</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">beta_HdV</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alphap_HdV</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Invm2_HdV</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Norm_Hdbar</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alpha_Hdbar</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">beta_Hdbar</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Norm_Hdbar_2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alpha_Hdbar_2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">beta_Hdbar_2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Norm_Hg</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alpha_Hg</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">beta_Hg</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alphap_Hg</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Invm2_Hg</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Norm_Hg_2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alpha_Hg_2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">beta_Hg_2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Norm_EuV</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alpha_EuV</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">beta_EuV</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alphap_EuV</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Norm_EdV</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alpha_EdV</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">beta_EdV</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alphap_EdV</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">R_E_ubar</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">R_E_dbar</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">R_E_g</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">R_Hu_xi2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">R_Hd_xi2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">R_Hg_xi2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">R_Eu_xi2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">R_Ed_xi2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">R_Eg_xi2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">R_Hu_xi4</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">R_Hd_xi4</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">R_Hg_xi4</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">R_Eu_xi4</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">R_Ed_xi4</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">R_Eg_xi4</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bexp_HSea</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bexp_Hg</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Norm_HtuV</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alpha_HtuV</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">beta_HtuV</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alphap_HtuV</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Norm_Htubar</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alpha_Htubar</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">beta_Htubar</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alphap_Htqbar</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Norm_HtdV</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alpha_HtdV</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">beta_HtdV</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alphap_HtdV</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Norm_Htdbar</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alpha_Htdbar</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">beta_Htdbar</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Norm_Htg</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alpha_Htg</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">beta_Htg</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alphap_Htg</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Norm_EtuV</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alpha_EtuV</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">beta_EtuV</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alphap_EtuV</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Norm_EtdV</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">R_Et_Sea</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">R_Htu_xi2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">R_Htd_xi2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">R_Htg_xi2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">R_Etu_xi2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">R_Etd_xi2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">R_Etg_xi2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">R_Htu_xi4</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">R_Htd_xi4</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">R_Htg_xi4</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">R_Etu_xi4</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">R_Etd_xi4</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">R_Etg_xi4</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bexp_HtSea</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">jpsinorm</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gumpgpd/Minimizer.html#cost_off_forward_withH_withHt"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gumpgpd.Minimizer.cost_off_forward_withH_withHt" title="Link to this definition"></a></dt>
+<dd><p>Total <span class="math notranslate nohighlight">\(\chi^2\)</span> cost function for the GUMP global GPD fit.</p>
+<p>Accepts all GPD model parameters as individual keyword arguments (the
+iMinuit interface requires a flat parameter signature).  Internally the
+flat list is split into unpolarized (<code class="xref py py-data docutils literal notranslate"><span class="pre">Paralst_Unp_Names</span></code>), polarized
+(<code class="xref py py-data docutils literal notranslate"><span class="pre">Paralst_Pol_Names</span></code>), and auxiliary (<code class="xref py py-data docutils literal notranslate"><span class="pre">Paralst_Aux_Names</span></code>)
+groups, assembled via <a class="reference internal" href="Parameters.html#gumpgpd.Parameters.ParaManager_Unp" title="gumpgpd.Parameters.ParaManager_Unp"><code class="xref py py-func docutils literal notranslate"><span class="pre">ParaManager_Unp()</span></code></a> and
+<a class="reference internal" href="Parameters.html#gumpgpd.Parameters.ParaManager_Pol" title="gumpgpd.Parameters.ParaManager_Pol"><code class="xref py py-func docutils literal notranslate"><span class="pre">ParaManager_Pol()</span></code></a>, and passed to all theory
+prediction functions in parallel.</p>
+<p>The returned scalar is:</p>
+<div class="math notranslate nohighlight">
+\[\chi^2_\text{total} = \chi^2_\text{exp} + \chi^2_\text{PDF/GFF/GPD}
++ \chi^2_\text{penalty}\]</div>
+<p>where the penalty encodes the quark-number sum rules and the
+momentum/gravitomagnetic sum rules with tolerances given by
+<code class="docutils literal notranslate"><span class="pre">tolerances</span></code>.</p>
+<p>When <code class="xref py py-attr docutils literal notranslate"><span class="pre">Export_Mode</span></code> is <code class="docutils literal notranslate"><span class="pre">True</span></code> the function prints
+a per-dataset <span class="math notranslate nohighlight">\(\chi^2\)</span> breakdown, saves results to CSV via
+<a class="reference internal" href="#gumpgpd.Minimizer.Export_Frame_Append" title="gumpgpd.Minimizer.Export_Frame_Append"><code class="xref py py-func docutils literal notranslate"><span class="pre">Export_Frame_Append()</span></code></a>, and returns a <code class="docutils literal notranslate"><span class="pre">dict</span></code> of result DataFrames
+instead of a scalar.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>Norm_HuV</strong> – All GPD model parameters
+listed in <code class="xref py py-data docutils literal notranslate"><span class="pre">Paralst_Unp_Names</span></code>, <code class="xref py py-data docutils literal notranslate"><span class="pre">Paralst_Pol_Names</span></code>,
+and <code class="xref py py-data docutils literal notranslate"><span class="pre">Paralst_Aux_Names</span></code>.</p></li>
+<li><p><strong>alpha_HuV</strong> – All GPD model parameters
+listed in <code class="xref py py-data docutils literal notranslate"><span class="pre">Paralst_Unp_Names</span></code>, <code class="xref py py-data docutils literal notranslate"><span class="pre">Paralst_Pol_Names</span></code>,
+and <code class="xref py py-data docutils literal notranslate"><span class="pre">Paralst_Aux_Names</span></code>.</p></li>
+<li><p><strong>beta_HuV</strong> – All GPD model parameters
+listed in <code class="xref py py-data docutils literal notranslate"><span class="pre">Paralst_Unp_Names</span></code>, <code class="xref py py-data docutils literal notranslate"><span class="pre">Paralst_Pol_Names</span></code>,
+and <code class="xref py py-data docutils literal notranslate"><span class="pre">Paralst_Aux_Names</span></code>.</p></li>
+<li><p><strong>...</strong> – All GPD model parameters
+listed in <code class="xref py py-data docutils literal notranslate"><span class="pre">Paralst_Unp_Names</span></code>, <code class="xref py py-data docutils literal notranslate"><span class="pre">Paralst_Pol_Names</span></code>,
+and <code class="xref py py-data docutils literal notranslate"><span class="pre">Paralst_Aux_Names</span></code>.</p></li>
+<li><p><strong>jpsinorm</strong> – All GPD model parameters
+listed in <code class="xref py py-data docutils literal notranslate"><span class="pre">Paralst_Unp_Names</span></code>, <code class="xref py py-data docutils literal notranslate"><span class="pre">Paralst_Pol_Names</span></code>,
+and <code class="xref py py-data docutils literal notranslate"><span class="pre">Paralst_Aux_Names</span></code>.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Total <span class="math notranslate nohighlight">\(\chi^2\)</span> (fit mode).
+dict: Mapping of task name → result DataFrame (export mode).</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="gumpgpd.Minimizer.get_pool">
+<span class="sig-prename descclassname"><span class="pre">gumpgpd.Minimizer.</span></span><span class="sig-name descname"><span class="pre">get_pool</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">processes</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gumpgpd/Minimizer.html#get_pool"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gumpgpd.Minimizer.get_pool" title="Link to this definition"></a></dt>
+<dd><p>Return the module-level <code class="xref py py-class docutils literal notranslate"><span class="pre">multiprocessing.Pool</span></code>, creating it on first call.</p>
+<p>The pool is registered with <code class="xref py py-func docutils literal notranslate"><span class="pre">atexit()</span></code> so it is cleanly shut down when
+the interpreter exits.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>processes</strong> (<em>int</em><em>, </em><em>optional</em>) – Number of worker processes.  Defaults to
+<code class="docutils literal notranslate"><span class="pre">os.cpu_count()</span></code>.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The shared worker pool.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>multiprocessing.Pool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="gumpgpd.Minimizer.group_by_unique">
+<span class="sig-prename descclassname"><span class="pre">gumpgpd.Minimizer.</span></span><span class="sig-name descname"><span class="pre">group_by_unique</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">subset</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">['xB',</span> <span class="pre">'t',</span> <span class="pre">'Q']</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gumpgpd/Minimizer.html#group_by_unique"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gumpgpd.Minimizer.group_by_unique" title="Link to this definition"></a></dt>
+<dd><p>Split a DataFrame into groups of identical kinematics.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>data</strong> (<em>pd.DataFrame</em>) – Input data table.</p></li>
+<li><p><strong>subset</strong> (<em>list</em><em> of </em><em>str</em><em>, </em><em>optional</em>) – Columns that define a unique kinematic
+point.  Defaults to <code class="docutils literal notranslate"><span class="pre">['xB',</span> <span class="pre">'t',</span> <span class="pre">'Q']</span></code>.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>One sub-DataFrame per unique combination of
+<em>subset</em> values, preserving the original row order.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list of pd.DataFrame</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="gumpgpd.Minimizer.off_forward_fit_withH_withHt">
+<span class="sig-prename descclassname"><span class="pre">gumpgpd.Minimizer.</span></span><span class="sig-name descname"><span class="pre">off_forward_fit_withH_withHt</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">Paralst_Unp</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Paralst_Pol</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Paralst_Aux</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[1.0]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">export_path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'.'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gumpgpd/Minimizer.html#off_forward_fit_withH_withHt"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gumpgpd.Minimizer.off_forward_fit_withH_withHt" title="Link to this definition"></a></dt>
+<dd><p>Run the GUMP global GPD fit using iMinuit (MIGRAD + HESSE).</p>
+<p>Sets up a <code class="xref py py-class docutils literal notranslate"><span class="pre">iminuit.Minuit</span></code> instance with
+<a class="reference internal" href="#gumpgpd.Minimizer.cost_off_forward_withH_withHt" title="gumpgpd.Minimizer.cost_off_forward_withH_withHt"><code class="xref py py-func docutils literal notranslate"><span class="pre">cost_off_forward_withH_withHt()</span></code></a> as the cost function, applies
+parameter limits and fixes (see source for details), and calls
+<code class="xref py py-meth docutils literal notranslate"><span class="pre">migrad()</span></code> followed by <code class="xref py py-meth docutils literal notranslate"><span class="pre">hesse()</span></code>.
+The fit summary (timing, <span class="math notranslate nohighlight">\(\chi^2/\text{dof}\)</span>, parameter values and
+uncertainties) is written to a text file under <code class="docutils literal notranslate"><span class="pre">&lt;export_path&gt;/GUMP_Output/</span></code>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>Paralst_Unp</strong> (<em>array-like</em>) – Initial values for all unpolarized parameters
+in the order defined by <code class="xref py py-data docutils literal notranslate"><span class="pre">Paralst_Unp_Names</span></code>.</p></li>
+<li><p><strong>Paralst_Pol</strong> (<em>array-like</em>) – Initial values for all polarized parameters
+in the order defined by <code class="xref py py-data docutils literal notranslate"><span class="pre">Paralst_Pol_Names</span></code>.</p></li>
+<li><p><strong>Paralst_Aux</strong> (<em>array-like</em><em>, </em><em>optional</em>) – Initial values for auxiliary
+parameters (currently only <code class="docutils literal notranslate"><span class="pre">jpsinorm</span></code>).  Defaults to <code class="docutils literal notranslate"><span class="pre">[1.0]</span></code>.</p></li>
+<li><p><strong>export_path</strong> (<em>str</em><em>, </em><em>optional</em>) – Root directory for the output text file.
+Defaults to the current working directory.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The fitted Minuit object (values, errors, covariance
+matrix, and status flags accessible via the standard iMinuit API).</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>iminuit.Minuit</p>
+</dd>
+</dl>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p><code class="xref py py-attr docutils literal notranslate"><span class="pre">Export_Mode</span></code> must be <code class="docutils literal notranslate"><span class="pre">False</span></code> when calling
+this function; use the cost function directly with
+<code class="docutils literal notranslate"><span class="pre">config.Export_Mode</span> <span class="pre">=</span> <span class="pre">True</span></code> to export predictions after fitting.</p>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="gumpgpd.Minimizer.simple_dispatch">
+<span class="sig-prename descclassname"><span class="pre">gumpgpd.Minimizer.</span></span><span class="sig-name descname"><span class="pre">simple_dispatch</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">task</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gumpgpd/Minimizer.html#simple_dispatch"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gumpgpd.Minimizer.simple_dispatch" title="Link to this definition"></a></dt>
+<dd><p>Unpack and call a <code class="docutils literal notranslate"><span class="pre">(func,</span> <span class="pre">arg)</span></code> task tuple.</p>
+<p>Used as the target for <code class="xref py py-meth docutils literal notranslate"><span class="pre">multiprocessing.Pool.map()</span></code> to dispatch
+heterogeneous tasks in a single pool call, reducing scheduling overhead.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>task</strong> (<em>tuple</em>) – A <code class="docutils literal notranslate"><span class="pre">(callable,</span> <span class="pre">arg)</span></code> pair where <em>callable</em> accepts a
+single positional argument.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Return value of <code class="docutils literal notranslate"><span class="pre">func(arg)</span></code>.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Any</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="gumpgpd.Minimizer.tPDF_theo">
+<span class="sig-prename descclassname"><span class="pre">gumpgpd.Minimizer.</span></span><span class="sig-name descname"><span class="pre">tPDF_theo</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">PDF_input</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">DataFrame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Para</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">array</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p_order</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">chunksize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#gumpgpd.Minimizer.tPDF_theo" title="Link to this definition"></a></dt>
+<dd><p>Compute NLO tPDF/PDF theory predictions for an entire dataset in parallel.</p>
+<p>Adds a <code class="docutils literal notranslate"><span class="pre">'pred</span> <span class="pre">f'</span></code> column with the theory prediction and, if <code class="docutils literal notranslate"><span class="pre">'f'</span></code> and
+<code class="docutils literal notranslate"><span class="pre">'delta</span> <span class="pre">f'</span></code> columns are present, a <code class="docutils literal notranslate"><span class="pre">'cost'</span></code> column with the
+per-point <span class="math notranslate nohighlight">\(\chi^2\)</span> contribution.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>PDF_input</strong> (<em>pd.DataFrame</em>) – Input data with columns <code class="docutils literal notranslate"><span class="pre">x</span></code>, <code class="docutils literal notranslate"><span class="pre">t</span></code>, <code class="docutils literal notranslate"><span class="pre">Q</span></code>,
+<code class="docutils literal notranslate"><span class="pre">flv</span></code>, <code class="docutils literal notranslate"><span class="pre">spe</span></code> (species index), and optionally <code class="docutils literal notranslate"><span class="pre">f</span></code>/<code class="docutils literal notranslate"><span class="pre">delta</span> <span class="pre">f</span></code>.</p></li>
+<li><p><strong>Para</strong> (<em>np.ndarray</em>) – Full stacked parameter array indexed by species.</p></li>
+<li><p><strong>p_order</strong> (<em>int</em><em>, </em><em>optional</em>) – Perturbative order.  Defaults to 2 (NLO).</p></li>
+<li><p><strong>chunksize</strong> (<em>int</em><em>, </em><em>optional</em>) – Pool map chunksize for performance tuning.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Copy of <em>PDF_input</em> with added <code class="docutils literal notranslate"><span class="pre">'pred</span> <span class="pre">f'</span></code> and
+(if data present) <code class="docutils literal notranslate"><span class="pre">'cost'</span></code> columns.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>pd.DataFrame</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="gumpgpd.Minimizer.validate_params">
+<span class="sig-prename descclassname"><span class="pre">gumpgpd.Minimizer.</span></span><span class="sig-name descname"><span class="pre">validate_params</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">params</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">required_names</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">set</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gumpgpd/Minimizer.html#validate_params"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gumpgpd.Minimizer.validate_params" title="Link to this definition"></a></dt>
+<dd><p>Validate that a parameter dictionary contains exactly the required keys with non-None values.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>params</strong> (<em>dict</em>) – Dictionary of parameter names to values (typically from <code class="docutils literal notranslate"><span class="pre">locals()</span></code>).</p></li>
+<li><p><strong>required_names</strong> (<em>set</em>) – Set of parameter names that must be present and non-None.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>ValueError</strong> – If any required key is missing, an extra key is present, or any
+    required value is <code class="docutils literal notranslate"><span class="pre">None</span></code>.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="Evolution.html" class="btn btn-neutral float-left" title="Evolution module" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="Observables.html" class="btn btn-neutral float-right" title="Observables module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2026, Yuxun Guo. et. al..</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

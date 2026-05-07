@@ -1,0 +1,301 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DVMP_xsec module &mdash; GUMP GPD Analysis 1.0.2 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="_static/copybutton.css?v=76b2166b" />
+
+  
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=1ed6394b"></script>
+      <script src="_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
+      <script src="_static/clipboard.min.js?v=a7894cd8"></script>
+      <script src="_static/copybutton.js?v=f281be69"></script>
+      <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-mml-chtml.js"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Evolution module" href="Evolution.html" />
+    <link rel="prev" title="DVCS_xsec module" href="DVCS_xsec.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            GUMP GPD Analysis
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="QuickStart.html">Quick Start</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ParametersIntro.html">Parameters Quick Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ObservablesIntro.html">Observables Quick Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="EvolutionIntro.html">Evolution Quick Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="MinimizerIntro.html">Minimizer Quick Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="DVCSIntro.html">DVCS Quick Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="DVMPIntro.html">DVMP Quick Guide</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="modules.html">Submodule API Reference</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="DVCS_xsec.html">DVCS_xsec module</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">DVMP_xsec module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#gumpgpd.DVMP_xsec.MassCorr"><code class="docutils literal notranslate"><span class="pre">MassCorr()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#gumpgpd.DVMP_xsec.R"><code class="docutils literal notranslate"><span class="pre">R()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#gumpgpd.DVMP_xsec.R_fitted"><code class="docutils literal notranslate"><span class="pre">R_fitted()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#gumpgpd.DVMP_xsec.R_rho_cost"><code class="docutils literal notranslate"><span class="pre">R_rho_cost()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#gumpgpd.DVMP_xsec.R_rho_fit"><code class="docutils literal notranslate"><span class="pre">R_rho_fit()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#gumpgpd.DVMP_xsec.epsilon"><code class="docutils literal notranslate"><span class="pre">epsilon()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="Evolution.html">Evolution module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Minimizer.html">Minimizer module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Observables.html">Observables module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Parameters.html">Parameters module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="config.html">config module</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="Citation.html">Citation/Acknowledgement</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">GUMP GPD Analysis</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="modules.html">Submodule API Reference</a></li>
+      <li class="breadcrumb-item active">DVMP_xsec module</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/DVMP_xsec.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="module-gumpgpd.DVMP_xsec">
+<span id="id1"></span><span id="dvmp-xsec-module"></span><h1>DVMP_xsec module<a class="headerlink" href="#module-gumpgpd.DVMP_xsec" title="Link to this heading"></a></h1>
+<p>Deeply Virtual Meson Production (DVMP) cross-section calculations.</p>
+<p>This module implements the differential cross-sections and the
+<span class="math notranslate nohighlight">\(R = \sigma_L / \sigma_T\)</span> ratio for exclusive meson production
+(<span class="math notranslate nohighlight">\(\rho^0\)</span>, <span class="math notranslate nohighlight">\(\phi\)</span>, <span class="math notranslate nohighlight">\(J/\psi\)</span>) off the proton.  The
+cross-sections are expressed in terms of helicity Transition Form Factors
+(TFFs) <span class="math notranslate nohighlight">\(\mathcal{H}\)</span> and <span class="math notranslate nohighlight">\(\mathcal{E}\)</span> computed from GPDs.</p>
+<p>Key components:</p>
+<ul class="simple">
+<li><dl class="simple">
+<dt><a class="reference internal" href="#gumpgpd.DVMP_xsec.R" title="gumpgpd.DVMP_xsec.R"><code class="xref py py-func docutils literal notranslate"><span class="pre">R()</span></code></a> — L/T ratio parametrization (Eq. (32) of</dt><dd><p><a class="reference external" href="https://arxiv.org/abs/1112.2597">arXiv:1112.2597</a>).</p>
+</dd>
+</dl>
+</li>
+<li><p><a class="reference internal" href="#gumpgpd.DVMP_xsec.R_rho_fit" title="gumpgpd.DVMP_xsec.R_rho_fit"><code class="xref py py-func docutils literal notranslate"><span class="pre">R_rho_fit()</span></code></a> — iMinuit fit of <code class="docutils literal notranslate"><span class="pre">R</span></code> parameters to combined H1+ZEUS data.</p></li>
+<li><p><a class="reference internal" href="#gumpgpd.DVMP_xsec.R_fitted" title="gumpgpd.DVMP_xsec.R_fitted"><code class="xref py py-func docutils literal notranslate"><span class="pre">R_fitted()</span></code></a> — best-fit <span class="math notranslate nohighlight">\(R\)</span> with propagated uncertainty.</p></li>
+<li><p><code class="xref py py-func docutils literal notranslate"><span class="pre">dsigmaL_DVMP_dt()</span></code> — longitudinal differential cross-section
+<span class="math notranslate nohighlight">\(d\sigma_L/dt\)</span>.</p></li>
+<li><p><code class="xref py py-func docutils literal notranslate"><span class="pre">dsigma_DVMP_dt()</span></code> — total <span class="math notranslate nohighlight">\(d\sigma/dt\)</span> after L/T unseparation.</p></li>
+</ul>
+<dl class="py function">
+<dt class="sig sig-object py" id="gumpgpd.DVMP_xsec.MassCorr">
+<span class="sig-prename descclassname"><span class="pre">gumpgpd.DVMP_xsec.</span></span><span class="sig-name descname"><span class="pre">MassCorr</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">meson</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span><a class="reference internal" href="_modules/gumpgpd/DVMP_xsec.html#MassCorr"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gumpgpd.DVMP_xsec.MassCorr" title="Link to this definition"></a></dt>
+<dd><p>Meson mass correction entering the propagator denominator.</p>
+<p>Returns <span class="math notranslate nohighlight">\(M_{J/\psi}\)</span> for <span class="math notranslate nohighlight">\(J/\psi\)</span> production and <code class="docutils literal notranslate"><span class="pre">0</span></code> for
+lighter mesons, where the mass correction to <span class="math notranslate nohighlight">\(Q^2\)</span> is negligible.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>meson</strong> (<em>int</em>) – meson code — <code class="docutils literal notranslate"><span class="pre">1</span></code> for <span class="math notranslate nohighlight">\(\rho^0\)</span>, <code class="docutils literal notranslate"><span class="pre">2</span></code> for
+<span class="math notranslate nohighlight">\(\phi\)</span>, <code class="docutils literal notranslate"><span class="pre">3</span></code> for <span class="math notranslate nohighlight">\(J/\psi\)</span>.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>mass correction in GeV (<span class="math notranslate nohighlight">\(M_{J/\psi}\)</span> for <code class="docutils literal notranslate"><span class="pre">meson=3</span></code>,
+<code class="docutils literal notranslate"><span class="pre">0</span></code> otherwise).</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="gumpgpd.DVMP_xsec.R">
+<span class="sig-prename descclassname"><span class="pre">gumpgpd.DVMP_xsec.</span></span><span class="sig-name descname"><span class="pre">R</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">Q</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">a</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">meson</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span><a class="reference internal" href="_modules/gumpgpd/DVMP_xsec.html#R"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gumpgpd.DVMP_xsec.R" title="Link to this definition"></a></dt>
+<dd><p>L/T cross-section ratio <span class="math notranslate nohighlight">\(R = \sigma_L / \sigma_T\)</span> parametrization.</p>
+<p>For <span class="math notranslate nohighlight">\(\rho^0\)</span> (<code class="docutils literal notranslate"><span class="pre">meson=1</span></code>) the parametrization follows Eq. (32) of
+<a class="reference external" href="https://arxiv.org/pdf/1112.2597">arXiv:1112.2597</a>:</p>
+<div class="math notranslate nohighlight">
+\[R(Q) = \frac{Q^2}{M_{\rho}^2}\left(1 + e^a \frac{Q^2}{M_{\rho}^2}\right)^{-p}\]</div>
+<p>For <span class="math notranslate nohighlight">\(J/\psi\)</span> (<code class="docutils literal notranslate"><span class="pre">meson=3</span></code>) the simple ratio <span class="math notranslate nohighlight">\(Q^2 / M_{J/\psi}^2\)</span> is used.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>Q</strong> (<em>float</em>) – photon virtuality <span class="math notranslate nohighlight">\(Q\)</span> in GeV.</p></li>
+<li><p><strong>a</strong> (<em>float</em>) – fit parameter controlling the transition scale.</p></li>
+<li><p><strong>p</strong> (<em>float</em>) – fit parameter controlling the power-law fall-off.</p></li>
+<li><p><strong>meson</strong> (<em>int</em>) – meson code — <code class="docutils literal notranslate"><span class="pre">1</span></code> for <span class="math notranslate nohighlight">\(\rho^0\)</span>, <code class="docutils literal notranslate"><span class="pre">3</span></code> for
+<span class="math notranslate nohighlight">\(J/\psi\)</span>; <code class="docutils literal notranslate"><span class="pre">2</span></code> is reserved for <span class="math notranslate nohighlight">\(\phi\)</span>.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="math notranslate nohighlight">\(R = \sigma_L / \sigma_T\)</span>.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="gumpgpd.DVMP_xsec.R_fitted">
+<span class="sig-prename descclassname"><span class="pre">gumpgpd.DVMP_xsec.</span></span><span class="sig-name descname"><span class="pre">R_fitted</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">Q</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">meson</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">tuple</span></span></span><a class="reference internal" href="_modules/gumpgpd/DVMP_xsec.html#R_fitted"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gumpgpd.DVMP_xsec.R_fitted" title="Link to this definition"></a></dt>
+<dd><p>Evaluate the fitted <a class="reference internal" href="#gumpgpd.DVMP_xsec.R" title="gumpgpd.DVMP_xsec.R"><code class="xref py py-func docutils literal notranslate"><span class="pre">R()</span></code></a> ratio with propagated <span class="math notranslate nohighlight">\(1\sigma\)</span> uncertainty.</p>
+<p>Calls <a class="reference internal" href="#gumpgpd.DVMP_xsec.R_rho_fit" title="gumpgpd.DVMP_xsec.R_rho_fit"><code class="xref py py-func docutils literal notranslate"><span class="pre">R_rho_fit()</span></code></a> to obtain best-fit parameters, then propagates
+their uncertainties analytically via first-order error propagation:</p>
+<div class="math notranslate nohighlight">
+\[\sigma_R^2 = \left(\frac{\partial R}{\partial a}\right)^2 \sigma_a^2
+           + \left(\frac{\partial R}{\partial p}\right)^2 \sigma_p^2
+           + 2\,\frac{\partial R}{\partial a}\frac{\partial R}{\partial p}\,
+             \mathrm{cov}(a,\,p)\]</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>Q</strong> (<em>float</em>) – photon virtuality in GeV (scalar or array).</p></li>
+<li><p><strong>meson</strong> (<em>int</em>) – meson code; currently only <code class="docutils literal notranslate"><span class="pre">1</span></code> (<span class="math notranslate nohighlight">\(\rho^0\)</span>) is
+implemented.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><code class="docutils literal notranslate"><span class="pre">(R_mean,</span> <span class="pre">R_std)</span></code> — central value and <span class="math notranslate nohighlight">\(1\sigma\)</span>
+uncertainty of <span class="math notranslate nohighlight">\(R(Q)\)</span>.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>tuple</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="gumpgpd.DVMP_xsec.R_rho_cost">
+<span class="sig-prename descclassname"><span class="pre">gumpgpd.DVMP_xsec.</span></span><span class="sig-name descname"><span class="pre">R_rho_cost</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">a</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span><a class="reference internal" href="_modules/gumpgpd/DVMP_xsec.html#R_rho_cost"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gumpgpd.DVMP_xsec.R_rho_cost" title="Link to this definition"></a></dt>
+<dd><p>Reduced <span class="math notranslate nohighlight">\(\chi^2\)</span> cost function for fitting <a class="reference internal" href="#gumpgpd.DVMP_xsec.R" title="gumpgpd.DVMP_xsec.R"><code class="xref py py-func docutils literal notranslate"><span class="pre">R()</span></code></a> to combined H1+ZEUS <span class="math notranslate nohighlight">\(\rho\)</span> data.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>a</strong> (<em>float</em>) – fit parameter <span class="math notranslate nohighlight">\(a\)</span> of <a class="reference internal" href="#gumpgpd.DVMP_xsec.R" title="gumpgpd.DVMP_xsec.R"><code class="xref py py-func docutils literal notranslate"><span class="pre">R()</span></code></a>.</p></li>
+<li><p><strong>p</strong> (<em>float</em>) – fit parameter <span class="math notranslate nohighlight">\(p\)</span> of <a class="reference internal" href="#gumpgpd.DVMP_xsec.R" title="gumpgpd.DVMP_xsec.R"><code class="xref py py-func docutils literal notranslate"><span class="pre">R()</span></code></a>.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="math notranslate nohighlight">\(\chi^2_{\rm red} = \sum_i [(R_i^{\rm exp} - R_i^{\rm pred}) /
+\sigma_i]^2 \,/\, N_{\rm dof}\)</span>.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="gumpgpd.DVMP_xsec.R_rho_fit">
+<span class="sig-prename descclassname"><span class="pre">gumpgpd.DVMP_xsec.</span></span><span class="sig-name descname"><span class="pre">R_rho_fit</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">tuple</span></span></span><a class="reference internal" href="_modules/gumpgpd/DVMP_xsec.html#R_rho_fit"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gumpgpd.DVMP_xsec.R_rho_fit" title="Link to this definition"></a></dt>
+<dd><p>Fit <a class="reference internal" href="#gumpgpd.DVMP_xsec.R" title="gumpgpd.DVMP_xsec.R"><code class="xref py py-func docutils literal notranslate"><span class="pre">R()</span></code></a> parameters <code class="docutils literal notranslate"><span class="pre">(a,</span> <span class="pre">p)</span></code> to the combined H1+ZEUS <span class="math notranslate nohighlight">\(\rho\)</span> data.</p>
+<p>Uses iMinuit <code class="docutils literal notranslate"><span class="pre">migrad</span></code> for minimization and <code class="docutils literal notranslate"><span class="pre">hesse</span></code> for uncertainty
+estimation.  The result is cached so the fit runs only once per session.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><p><code class="docutils literal notranslate"><span class="pre">(val_a,</span> <span class="pre">var_a,</span> <span class="pre">val_p,</span> <span class="pre">var_p,</span> <span class="pre">corr_ap)</span></code> where</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">val_a</span></code> — best-fit value of <span class="math notranslate nohighlight">\(a\)</span></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">var_a</span></code> — <span class="math notranslate nohighlight">\(1\sigma\)</span> uncertainty on <span class="math notranslate nohighlight">\(a\)</span></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">val_p</span></code> — best-fit value of <span class="math notranslate nohighlight">\(p\)</span></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">var_p</span></code> — <span class="math notranslate nohighlight">\(1\sigma\)</span> uncertainty on <span class="math notranslate nohighlight">\(p\)</span></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">corr_ap</span></code> — covariance between <span class="math notranslate nohighlight">\(a\)</span> and <span class="math notranslate nohighlight">\(p\)</span></p></li>
+</ul>
+</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>tuple</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="gumpgpd.DVMP_xsec.epsilon">
+<span class="sig-prename descclassname"><span class="pre">gumpgpd.DVMP_xsec.</span></span><span class="sig-name descname"><span class="pre">epsilon</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">y</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span><a class="reference internal" href="_modules/gumpgpd/DVMP_xsec.html#epsilon"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gumpgpd.DVMP_xsec.epsilon" title="Link to this definition"></a></dt>
+<dd><p>Virtual photon polarization parameter <span class="math notranslate nohighlight">\(\varepsilon\)</span>.</p>
+<div class="math notranslate nohighlight">
+\[\varepsilon = \frac{1 - y}{1 - y + y^2/2}\]</div>
+<p>See Eq. (31) of <a class="reference external" href="https://arxiv.org/pdf/1112.2597">arXiv:1112.2597</a>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>y</strong> (<em>float</em>) – inelasticity (beam energy loss fraction).</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="math notranslate nohighlight">\(\varepsilon \in (0, 1)\)</span>.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="DVCS_xsec.html" class="btn btn-neutral float-left" title="DVCS_xsec module" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="Evolution.html" class="btn btn-neutral float-right" title="Evolution module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2026, Yuxun Guo. et. al..</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

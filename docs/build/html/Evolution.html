@@ -1,0 +1,1713 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Evolution module &mdash; GUMP GPD Analysis 1.0.2 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="_static/copybutton.css?v=76b2166b" />
+
+  
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=1ed6394b"></script>
+      <script src="_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
+      <script src="_static/clipboard.min.js?v=a7894cd8"></script>
+      <script src="_static/copybutton.js?v=f281be69"></script>
+      <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-mml-chtml.js"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Minimizer module" href="Minimizer.html" />
+    <link rel="prev" title="DVMP_xsec module" href="DVMP_xsec.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            GUMP GPD Analysis
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="QuickStart.html">Quick Start</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ParametersIntro.html">Parameters Quick Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ObservablesIntro.html">Observables Quick Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="EvolutionIntro.html">Evolution Quick Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="MinimizerIntro.html">Minimizer Quick Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="DVCSIntro.html">DVCS Quick Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="DVMPIntro.html">DVMP Quick Guide</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="modules.html">Submodule API Reference</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="DVCS_xsec.html">DVCS_xsec module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="DVMP_xsec.html">DVMP_xsec module</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Evolution module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#gumpgpd.Evolution.AlphaS"><code class="docutils literal notranslate"><span class="pre">AlphaS()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#gumpgpd.Evolution.AlphaS0"><code class="docutils literal notranslate"><span class="pre">AlphaS0()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#gumpgpd.Evolution.AlphaS1"><code class="docutils literal notranslate"><span class="pre">AlphaS1()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#gumpgpd.Evolution.CFF_Evo_LO"><code class="docutils literal notranslate"><span class="pre">CFF_Evo_LO()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#gumpgpd.Evolution.CFF_Evo_NLO_evMOM"><code class="docutils literal notranslate"><span class="pre">CFF_Evo_NLO_evMOM()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#gumpgpd.Evolution.CFF_Evo_NLO_evWC"><code class="docutils literal notranslate"><span class="pre">CFF_Evo_NLO_evWC()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#gumpgpd.Evolution.Charge_Factor"><code class="docutils literal notranslate"><span class="pre">Charge_Factor()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#gumpgpd.Evolution.ConfWaveFuncG"><code class="docutils literal notranslate"><span class="pre">ConfWaveFuncG()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#gumpgpd.Evolution.ConfWaveFuncG_over_sinpij"><code class="docutils literal notranslate"><span class="pre">ConfWaveFuncG_over_sinpij()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#gumpgpd.Evolution.ConfWaveFuncQ"><code class="docutils literal notranslate"><span class="pre">ConfWaveFuncQ()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#gumpgpd.Evolution.ConfWaveFuncQ_over_sinpij"><code class="docutils literal notranslate"><span class="pre">ConfWaveFuncQ_over_sinpij()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#gumpgpd.Evolution.DVCS_WCoef_Evo_NLO"><code class="docutils literal notranslate"><span class="pre">DVCS_WCoef_Evo_NLO()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#gumpgpd.Evolution.DVMP_WCoef_Evo_NLO"><code class="docutils literal notranslate"><span class="pre">DVMP_WCoef_Evo_NLO()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#gumpgpd.Evolution.GPD_Moment_Evo_NLO"><code class="docutils literal notranslate"><span class="pre">GPD_Moment_Evo_NLO()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#gumpgpd.Evolution.InvMellinWaveFuncG"><code class="docutils literal notranslate"><span class="pre">InvMellinWaveFuncG()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#gumpgpd.Evolution.InvMellinWaveFuncQ"><code class="docutils literal notranslate"><span class="pre">InvMellinWaveFuncQ()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#gumpgpd.Evolution.MellinF2"><code class="docutils literal notranslate"><span class="pre">MellinF2()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#gumpgpd.Evolution.Moment_Evo_LO"><code class="docutils literal notranslate"><span class="pre">Moment_Evo_LO()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#gumpgpd.Evolution.Moment_Evo_LO_NSp1"><code class="docutils literal notranslate"><span class="pre">Moment_Evo_LO_NSp1()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#gumpgpd.Evolution.Moment_Evo_NLO"><code class="docutils literal notranslate"><span class="pre">Moment_Evo_NLO()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#gumpgpd.Evolution.S1"><code class="docutils literal notranslate"><span class="pre">S1()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#gumpgpd.Evolution.S1_tilde"><code class="docutils literal notranslate"><span class="pre">S1_tilde()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#gumpgpd.Evolution.S2"><code class="docutils literal notranslate"><span class="pre">S2()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#gumpgpd.Evolution.S2_prime"><code class="docutils literal notranslate"><span class="pre">S2_prime()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#gumpgpd.Evolution.S2_tilde"><code class="docutils literal notranslate"><span class="pre">S2_tilde()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#gumpgpd.Evolution.S2_tilde_KM"><code class="docutils literal notranslate"><span class="pre">S2_tilde_KM()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#gumpgpd.Evolution.S3"><code class="docutils literal notranslate"><span class="pre">S3()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#gumpgpd.Evolution.S3_prime"><code class="docutils literal notranslate"><span class="pre">S3_prime()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#gumpgpd.Evolution.S3_tilde"><code class="docutils literal notranslate"><span class="pre">S3_tilde()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#gumpgpd.Evolution.S4"><code class="docutils literal notranslate"><span class="pre">S4()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#gumpgpd.Evolution.SB3"><code class="docutils literal notranslate"><span class="pre">SB3()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#gumpgpd.Evolution.Sm2p1"><code class="docutils literal notranslate"><span class="pre">Sm2p1()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#gumpgpd.Evolution.Sp1m2"><code class="docutils literal notranslate"><span class="pre">Sp1m2()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#gumpgpd.Evolution.TFF_Evo_LO"><code class="docutils literal notranslate"><span class="pre">TFF_Evo_LO()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#gumpgpd.Evolution.TFF_Evo_NLO_evMOM"><code class="docutils literal notranslate"><span class="pre">TFF_Evo_NLO_evMOM()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#gumpgpd.Evolution.TFF_Evo_NLO_evWC"><code class="docutils literal notranslate"><span class="pre">TFF_Evo_NLO_evWC()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#gumpgpd.Evolution.WilsonCoef"><code class="docutils literal notranslate"><span class="pre">WilsonCoef()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#gumpgpd.Evolution.WilsonCoef_DVCS_LO"><code class="docutils literal notranslate"><span class="pre">WilsonCoef_DVCS_LO()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#gumpgpd.Evolution.WilsonCoef_DVCS_NLO"><code class="docutils literal notranslate"><span class="pre">WilsonCoef_DVCS_NLO()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#gumpgpd.Evolution.WilsonCoef_DVMP_LO"><code class="docutils literal notranslate"><span class="pre">WilsonCoef_DVMP_LO()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#gumpgpd.Evolution.WilsonCoef_DVMP_NLO"><code class="docutils literal notranslate"><span class="pre">WilsonCoef_DVMP_NLO()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#gumpgpd.Evolution.amuindep"><code class="docutils literal notranslate"><span class="pre">amuindep()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#gumpgpd.Evolution.amuindepNS"><code class="docutils literal notranslate"><span class="pre">amuindepNS()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#gumpgpd.Evolution.beta0"><code class="docutils literal notranslate"><span class="pre">beta0()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#gumpgpd.Evolution.beta1"><code class="docutils literal notranslate"><span class="pre">beta1()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#gumpgpd.Evolution.bmudep"><code class="docutils literal notranslate"><span class="pre">bmudep()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#gumpgpd.Evolution.bmudepNS"><code class="docutils literal notranslate"><span class="pre">bmudepNS()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#gumpgpd.Evolution.delS2"><code class="docutils literal notranslate"><span class="pre">delS2()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#gumpgpd.Evolution.deldelS2"><code class="docutils literal notranslate"><span class="pre">deldelS2()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#gumpgpd.Evolution.diagonal_evolution_NLO"><code class="docutils literal notranslate"><span class="pre">diagonal_evolution_NLO()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#gumpgpd.Evolution.dpsi_one"><code class="docutils literal notranslate"><span class="pre">dpsi_one()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#gumpgpd.Evolution.evolop"><code class="docutils literal notranslate"><span class="pre">evolop()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#gumpgpd.Evolution.fixed_quadvec"><code class="docutils literal notranslate"><span class="pre">fixed_quadvec()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#gumpgpd.Evolution.lambdaf"><code class="docutils literal notranslate"><span class="pre">lambdaf()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#gumpgpd.Evolution.non_singlet_LO"><code class="docutils literal notranslate"><span class="pre">non_singlet_LO()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#gumpgpd.Evolution.non_singlet_NLO"><code class="docutils literal notranslate"><span class="pre">non_singlet_NLO()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#gumpgpd.Evolution.outer_subtract"><code class="docutils literal notranslate"><span class="pre">outer_subtract()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#gumpgpd.Evolution.poch"><code class="docutils literal notranslate"><span class="pre">poch()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#gumpgpd.Evolution.pochhammer"><code class="docutils literal notranslate"><span class="pre">pochhammer()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#gumpgpd.Evolution.projectors"><code class="docutils literal notranslate"><span class="pre">projectors()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#gumpgpd.Evolution.rmudep"><code class="docutils literal notranslate"><span class="pre">rmudep()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#gumpgpd.Evolution.rmudepNS"><code class="docutils literal notranslate"><span class="pre">rmudepNS()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#gumpgpd.Evolution.singlet_LO"><code class="docutils literal notranslate"><span class="pre">singlet_LO()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#gumpgpd.Evolution.singlet_NLO"><code class="docutils literal notranslate"><span class="pre">singlet_NLO()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#gumpgpd.Evolution.tPDF_Moment_Evo_NLO"><code class="docutils literal notranslate"><span class="pre">tPDF_Moment_Evo_NLO()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#gumpgpd.Evolution.tPDF_Moment_Evo_NLO_NSp1"><code class="docutils literal notranslate"><span class="pre">tPDF_Moment_Evo_NLO_NSp1()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="Minimizer.html">Minimizer module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Observables.html">Observables module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Parameters.html">Parameters module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="config.html">config module</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="Citation.html">Citation/Acknowledgement</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">GUMP GPD Analysis</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="modules.html">Submodule API Reference</a></li>
+      <li class="breadcrumb-item active">Evolution module</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/Evolution.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="module-gumpgpd.Evolution">
+<span id="evolution-module"></span><h1>Evolution module<a class="headerlink" href="#module-gumpgpd.Evolution" title="Link to this heading"></a></h1>
+<p>NLO QCD evolution of moment space GPD. Many credits to K. Kumericki at <a class="reference external" href="https://github.com/kkumer/gepard">https://github.com/kkumer/gepard</a>.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Functions in this module have as first argument Mellin moment
+n = j + 1, where j is conformal moment used everywhere else.
+Thus, they should always be called as f(j+1, …).</p>
+</div>
+<dl class="py function">
+<dt class="sig sig-object py" id="gumpgpd.Evolution.AlphaS">
+<span class="sig-prename descclassname"><span class="pre">gumpgpd.Evolution.</span></span><span class="sig-name descname"><span class="pre">AlphaS</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">nloop</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nf</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Q</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span><a class="reference internal" href="_modules/gumpgpd/Evolution.html#AlphaS"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gumpgpd.Evolution.AlphaS" title="Link to this definition"></a></dt>
+<dd><p>Running strong coupling <span class="math notranslate nohighlight">\(\alpha_s(Q)\)</span> at LO or NLO.</p>
+<p>Dispatches to <a class="reference internal" href="#gumpgpd.Evolution.AlphaS0" title="gumpgpd.Evolution.AlphaS0"><code class="xref py py-func docutils literal notranslate"><span class="pre">AlphaS0()</span></code></a> (one-loop) or <a class="reference internal" href="#gumpgpd.Evolution.AlphaS1" title="gumpgpd.Evolution.AlphaS1"><code class="xref py py-func docutils literal notranslate"><span class="pre">AlphaS1()</span></code></a> (two-loop
+Runge-Kutta).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>nloop</strong> (<em>int</em>) – Loop order; 1 for LO, 2 for NLO.</p></li>
+<li><p><strong>nf</strong> (<em>int</em>) – Number of active quark flavors.</p></li>
+<li><p><strong>Q</strong> (<em>float</em>) – Renormalization scale in GeV.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="math notranslate nohighlight">\(\alpha_s(Q)\)</span>.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>ValueError</strong> – If <code class="docutils literal notranslate"><span class="pre">nloop</span></code> is not 1 or 2.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="gumpgpd.Evolution.AlphaS0">
+<span class="sig-prename descclassname"><span class="pre">gumpgpd.Evolution.</span></span><span class="sig-name descname"><span class="pre">AlphaS0</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">nf</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Q</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span><a class="reference internal" href="_modules/gumpgpd/Evolution.html#AlphaS0"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gumpgpd.Evolution.AlphaS0" title="Link to this definition"></a></dt>
+<dd><p>One-loop running strong coupling <span class="math notranslate nohighlight">\(\alpha_s(Q)\)</span>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>nf</strong> (<em>int</em>) – Number of active quark flavors.</p></li>
+<li><p><strong>Q</strong> (<em>float</em>) – Renormalization scale in GeV.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="math notranslate nohighlight">\(\alpha_s(Q)\)</span> at leading order.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="gumpgpd.Evolution.AlphaS1">
+<span class="sig-prename descclassname"><span class="pre">gumpgpd.Evolution.</span></span><span class="sig-name descname"><span class="pre">AlphaS1</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">nf</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Q</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span><a class="reference internal" href="_modules/gumpgpd/Evolution.html#AlphaS1"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gumpgpd.Evolution.AlphaS1" title="Link to this definition"></a></dt>
+<dd><p>Two-loop running strong coupling <span class="math notranslate nohighlight">\(\alpha_s(Q)\)</span> via 4th-order Runge-Kutta.</p>
+<p>Evolves the coupling from <code class="docutils literal notranslate"><span class="pre">Ref_Scale</span></code> to <code class="docutils literal notranslate"><span class="pre">Q</span></code> by integrating the two-loop
+beta function with <code class="docutils literal notranslate"><span class="pre">NASTPS</span> <span class="pre">=</span> <span class="pre">20</span></code> equal logarithmic steps.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>nf</strong> (<em>int</em>) – Number of active quark flavors.</p></li>
+<li><p><strong>Q</strong> (<em>float</em>) – Renormalization scale in GeV.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="math notranslate nohighlight">\(\alpha_s(Q)\)</span> at next-to-leading order.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="gumpgpd.Evolution.CFF_Evo_LO">
+<span class="sig-prename descclassname"><span class="pre">gumpgpd.Evolution.</span></span><span class="sig-name descname"><span class="pre">CFF_Evo_LO</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">j</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">array</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nf</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mu</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ConfFlav</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">array</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">array</span></span></span><a class="reference internal" href="_modules/gumpgpd/Evolution.html#CFF_Evo_LO"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gumpgpd.Evolution.CFF_Evo_LO" title="Link to this definition"></a></dt>
+<dd><p>Leading order evolution of the combination of DVCS Wilson coefficient and conformal moments</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>j</strong> – conformal spin j (conformal spin is actually j+2 but anyway): array (N,)</p></li>
+<li><p><strong>nf</strong> – number of effective fermions; scalar</p></li>
+<li><p><strong>p</strong> (<em>int</em>) – 1 for vector-like GPD (Ht, Et), -1 for axial-vector-like GPDs (Ht, Et); scalars</p></li>
+<li><p><strong>mu</strong> – final evolution scale; scalar</p></li>
+<li><p><strong>ConfFlav</strong> – uneolved conformal moments in flavor space ConfFlav = [ConfMoment_uV, ConfMoment_ubar, ConfMoment_dV, ConfMoment_dbar, ConfMoment_g]; shape (N,5)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Evolved conformal moments times the DVCS Wilson coefficients in the evolution basis (qVal, q_du_plus, q_du_minus, qSigma, g);
+ingredients for the Mellin-Barnes integral for CFF
+return shape (N, 5)</p>
+</dd>
+</dl>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p><code class="docutils literal notranslate"><span class="pre">j</span></code> accepts 1-D array input for the Mellin-Barnes contour integral;
+all other arguments should be scalar (or broadcastable with <code class="docutils literal notranslate"><span class="pre">j</span></code>).</p>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="gumpgpd.Evolution.CFF_Evo_NLO_evMOM">
+<span class="sig-prename descclassname"><span class="pre">gumpgpd.Evolution.</span></span><span class="sig-name descname"><span class="pre">CFF_Evo_NLO_evMOM</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">j</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">array</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nf</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Q</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">t</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xi</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Para</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">array</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">momshift</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">muf</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">array</span></span></span><a class="reference internal" href="_modules/gumpgpd/Evolution.html#CFF_Evo_NLO_evMOM"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gumpgpd.Evolution.CFF_Evo_NLO_evMOM" title="Link to this definition"></a></dt>
+<dd><p>Next-to-leading order evolved conformal moments combined with the DVCS Wilson coefficients in the evolution space (Evolved moment method)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>j</strong> – conformal spin j (conformal spin is actually j+2 but anyway): array (N,)</p></li>
+<li><p><strong>nf</strong> – number of effective fermions;</p></li>
+<li><p><strong>p</strong> (<em>int</em>) – 1 for vector-like GPD (Ht, Et), -1 for axial-vector-like GPDs (Ht, Et): scalar</p></li>
+<li><p><strong>Q</strong> – final evolution scale: scalar</p></li>
+<li><p><strong>t</strong> – momentum transfer squared</p></li>
+<li><p><strong>xi</strong> – skewness</p></li>
+<li><p><strong>ConfFlav</strong> – unevolved conformal moments</p></li>
+<li><p><strong>Para</strong> – parameters of the conformal moments</p></li>
+<li><p><strong>momshift</strong> – shift of moments</p></li>
+<li><p><strong>muset</strong> – offset in the scale mu to study the scale dependence of the CFF</p></li>
+<li><p><strong>above</strong> (<em>More notes in Moment_Evo_NLO</em><em>(</em><em>) </em><em>function</em>)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Next-to-leading order evolved conformal moments combined with the DVCS Wilson coefficients in the evolution basis (qVal, q_du_plus, q_du_minus, qSigma, g);
+return shape (N, 5)</p>
+</dd>
+</dl>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p><code class="docutils literal notranslate"><span class="pre">j</span></code> accepts 1-D array input for the Mellin-Barnes contour integral;
+all other arguments should be scalar (or broadcastable with <code class="docutils literal notranslate"><span class="pre">j</span></code>).</p>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="gumpgpd.Evolution.CFF_Evo_NLO_evWC">
+<span class="sig-prename descclassname"><span class="pre">gumpgpd.Evolution.</span></span><span class="sig-name descname"><span class="pre">CFF_Evo_NLO_evWC</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">j</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">array</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nf</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Q</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ConfFlav</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">array</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">muf</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">array</span></span></span><a class="reference internal" href="_modules/gumpgpd/Evolution.html#CFF_Evo_NLO_evWC"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gumpgpd.Evolution.CFF_Evo_NLO_evWC" title="Link to this definition"></a></dt>
+<dd><p>Next-to-leading order evolved DVCS Wilson coefficients in the flavor space combined with the conformal moments (Evolved Wilson coefficient method)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>j</strong> – conformal spin j (conformal spin is actually j+2 but anyway): array (N,)</p></li>
+<li><p><strong>nf</strong> – number of effective fermions; scalars</p></li>
+<li><p><strong>p</strong> (<em>int</em>) – 1 for vector-like GPD (Ht, Et), -1 for axial-vector-like GPDs (Ht, Et); scalars</p></li>
+<li><p><strong>Q</strong> (<em>float</em>) – photon virtuality. At NLO the scale Q enters the amplitudes through logs.</p></li>
+<li><p><strong>ConfFlav</strong> – uneolved conformal moments in flavor space ConfFlav = [ConfMoment_uV, ConfMoment_ubar, ConfMoment_dV, ConfMoment_dbar, ConfMoment_g]; shape (N,5)</p></li>
+<li><p><strong>meson</strong> (<em>int</em>) – 1 for rho, 2 for phi, 3 for Jpsi</p></li>
+<li><p><strong>muf</strong> – factorization evolution scale; scalar</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Evolved conformal moments times the DVCS Wilson coefficients in the evolution basis (qVal, q_du_plus, q_du_minus, qSigma, g);
+Ingredients for the Mellin-Barnes integral for TFF
+return shape (N, 5)</p>
+</dd>
+</dl>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p><code class="docutils literal notranslate"><span class="pre">j</span></code> accepts 1-D array input for the Mellin-Barnes contour integral;
+all other arguments should be scalar (or broadcastable with <code class="docutils literal notranslate"><span class="pre">j</span></code>).</p>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="gumpgpd.Evolution.Charge_Factor">
+<span class="sig-prename descclassname"><span class="pre">gumpgpd.Evolution.</span></span><span class="sig-name descname"><span class="pre">Charge_Factor</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">particle</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gumpgpd/Evolution.html#Charge_Factor"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gumpgpd.Evolution.Charge_Factor" title="Link to this definition"></a></dt>
+<dd><p>Charge factors for DVCS and DVMP processes in the evolution basis.</p>
+<p>For DVMP, also multiplies by the meson decay constant f_m.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>particle</strong> (<em>int</em>) – Process code:
+0 for DVCS, 1 for rho (rho0), 3 for J/psi.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Shape <code class="docutils literal notranslate"><span class="pre">(5,)</span></code> charge factors in the evolution basis,
+multiplied by the meson decay constant for DVMP processes.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>np.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="gumpgpd.Evolution.ConfWaveFuncG">
+<span class="sig-prename descclassname"><span class="pre">gumpgpd.Evolution.</span></span><span class="sig-name descname"><span class="pre">ConfWaveFuncG</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">j</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">complex</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xi</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">complex</span></span></span><a class="reference internal" href="_modules/gumpgpd/Evolution.html#ConfWaveFuncG"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gumpgpd.Evolution.ConfWaveFuncG" title="Link to this definition"></a></dt>
+<dd><p>Gluon conformal wave function p_j(x,xi)</p>
+<p>Check e.g. <a class="reference external" href="https://arxiv.org/pdf/hep-ph/0509204.pdf">https://arxiv.org/pdf/hep-ph/0509204.pdf</a></p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>j</strong> – conformal spin j (actually conformal spin is j+2 but anyway)</p></li>
+<li><p><strong>x</strong> – momentum fraction x</p></li>
+<li><p><strong>xi</strong> – skewness parameter xi</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>gluon conformal wave function p_j(x,xi)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="gumpgpd.Evolution.ConfWaveFuncG_over_sinpij">
+<span class="sig-prename descclassname"><span class="pre">gumpgpd.Evolution.</span></span><span class="sig-name descname"><span class="pre">ConfWaveFuncG_over_sinpij</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">j</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">complex</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xi</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">complex</span></span></span><a class="reference internal" href="_modules/gumpgpd/Evolution.html#ConfWaveFuncG_over_sinpij"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gumpgpd.Evolution.ConfWaveFuncG_over_sinpij" title="Link to this definition"></a></dt>
+<dd><p>Gluon conformal wave function p_j(x,xi)/sin(pi(j+1)) = Minus * p_j(x,xi)/sin(pi*j)</p>
+<p>Check e.g. <a class="reference external" href="https://arxiv.org/pdf/hep-ph/0509204.pdf">https://arxiv.org/pdf/hep-ph/0509204.pdf</a></p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>j</strong> – conformal spin j (actually conformal spin is j+2 but anyway)</p></li>
+<li><p><strong>x</strong> – momentum fraction x</p></li>
+<li><p><strong>xi</strong> – skewness parameter xi</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>gluon conformal wave function p_j(x,xi)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="gumpgpd.Evolution.ConfWaveFuncQ">
+<span class="sig-prename descclassname"><span class="pre">gumpgpd.Evolution.</span></span><span class="sig-name descname"><span class="pre">ConfWaveFuncQ</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">j</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">complex</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xi</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">complex</span></span></span><a class="reference internal" href="_modules/gumpgpd/Evolution.html#ConfWaveFuncQ"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gumpgpd.Evolution.ConfWaveFuncQ" title="Link to this definition"></a></dt>
+<dd><p>Quark conformal wave function p_j(x,xi)</p>
+<p>Check e.g. <a class="reference external" href="https://arxiv.org/pdf/hep-ph/0509204.pdf">https://arxiv.org/pdf/hep-ph/0509204.pdf</a></p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>j</strong> – conformal spin j (conformal spin is actually j+2 but anyway)</p></li>
+<li><p><strong>x</strong> – momentum fraction x</p></li>
+<li><p><strong>xi</strong> – skewness parameter xi</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>quark conformal wave function p_j(x,xi)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="gumpgpd.Evolution.ConfWaveFuncQ_over_sinpij">
+<span class="sig-prename descclassname"><span class="pre">gumpgpd.Evolution.</span></span><span class="sig-name descname"><span class="pre">ConfWaveFuncQ_over_sinpij</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">j</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">complex</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xi</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">complex</span></span></span><a class="reference internal" href="_modules/gumpgpd/Evolution.html#ConfWaveFuncQ_over_sinpij"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gumpgpd.Evolution.ConfWaveFuncQ_over_sinpij" title="Link to this definition"></a></dt>
+<dd><p>Quark conformal wave function p_j(x,xi)/sin(pi(j+1))</p>
+<p>Check e.g. <a class="reference external" href="https://arxiv.org/pdf/hep-ph/0509204.pdf">https://arxiv.org/pdf/hep-ph/0509204.pdf</a></p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>j</strong> – conformal spin j (conformal spin is actually j+2 but anyway)</p></li>
+<li><p><strong>x</strong> – momentum fraction x</p></li>
+<li><p><strong>xi</strong> – skewness parameter xi</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>quark conformal wave function p_j(x,xi)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="gumpgpd.Evolution.DVCS_WCoef_Evo_NLO">
+<span class="sig-prename descclassname"><span class="pre">gumpgpd.Evolution.</span></span><span class="sig-name descname"><span class="pre">DVCS_WCoef_Evo_NLO</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">j</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">array</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nf</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Q</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">muf</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">ndarray</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">ndarray</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="_modules/gumpgpd/Evolution.html#DVCS_WCoef_Evo_NLO"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gumpgpd.Evolution.DVCS_WCoef_Evo_NLO" title="Link to this definition"></a></dt>
+<dd><p>Next-to-leading order evolution of the DVCS Wilson coefficient (Evolved Wilson coefficient method)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>j</strong> – conformal spin j (conformal spin is actually j+2 but anyway): array (N,)</p></li>
+<li><p><strong>nf</strong> – number of effective fermions; scalars</p></li>
+<li><p><strong>p</strong> (<em>int</em>) – 1 for vector-like GPD (Ht, Et), -1 for axial-vector-like GPDs (Ht, Et); scalars</p></li>
+<li><p><strong>Q</strong> (<em>float</em>) – photon virtuality. At NLO the scale Q enters the amplitudes through logs.</p></li>
+<li><p><strong>muf</strong> – factorization evolution scale; scalar</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Evolved DVCS Wilson coefficients in the evolution basis;
+CWilsonT_ev_NS_tot: Non-singlet evolved Wilson coefficient with shape (N,3)
+CWilsonT_ev_SG_tot Singlet/Gluon evolved Wilson coefficient with shape (N,2)</p>
+</dd>
+</dl>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p><code class="docutils literal notranslate"><span class="pre">j</span></code> accepts 1-D array input for the Mellin-Barnes contour integral;
+all other arguments should be scalar (or broadcastable with <code class="docutils literal notranslate"><span class="pre">j</span></code>).</p>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="gumpgpd.Evolution.DVMP_WCoef_Evo_NLO">
+<span class="sig-prename descclassname"><span class="pre">gumpgpd.Evolution.</span></span><span class="sig-name descname"><span class="pre">DVMP_WCoef_Evo_NLO</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">j</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">array</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nf</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Q</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">meson</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">muf</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">ndarray</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">ndarray</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="_modules/gumpgpd/Evolution.html#DVMP_WCoef_Evo_NLO"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gumpgpd.Evolution.DVMP_WCoef_Evo_NLO" title="Link to this definition"></a></dt>
+<dd><p>Next-to-leading order evolution of the DVMP Wilson coefficient (Evolved Wilson coefficient method)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>j</strong> – conformal spin j (conformal spin is actually j+2 but anyway): array (N,)</p></li>
+<li><p><strong>nf</strong> – number of effective fermions; scalars</p></li>
+<li><p><strong>p</strong> (<em>int</em>) – 1 for vector-like GPD (Ht, Et), -1 for axial-vector-like GPDs (Ht, Et); scalars</p></li>
+<li><p><strong>Q</strong> (<em>float</em>) – photon virtuality. At NLO the scale Q enters the amplitudes through logs.</p></li>
+<li><p><strong>meson</strong> (<em>int</em>) – 1 for rho, 2 for phi, 3 for Jpsi</p></li>
+<li><p><strong>muf</strong> – factorization evolution scale; scalar</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Evolved DVMP Wilson coefficients in the evolution basis;
+CWilsonT_ev_NS_tot: Non-singlet evolved Wilson coefficient with shape (N,3)
+CWilsonT_ev_SG_tot Singlet/Gluon evolved Wilson coefficient with shape (N,2)</p>
+</dd>
+</dl>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p><code class="docutils literal notranslate"><span class="pre">j</span></code> accepts 1-D array input for the Mellin-Barnes contour integral;
+all other arguments should be scalar (or broadcastable with <code class="docutils literal notranslate"><span class="pre">j</span></code>).</p>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="gumpgpd.Evolution.GPD_Moment_Evo_NLO">
+<span class="sig-prename descclassname"><span class="pre">gumpgpd.Evolution.</span></span><span class="sig-name descname"><span class="pre">GPD_Moment_Evo_NLO</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">j</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">array</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nf</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mu</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">t</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xi</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">complex</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Para</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">array</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">momshift</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">array</span></span></span><a class="reference internal" href="_modules/gumpgpd/Evolution.html#GPD_Moment_Evo_NLO"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gumpgpd.Evolution.GPD_Moment_Evo_NLO" title="Link to this definition"></a></dt>
+<dd><p>Next-to-leading order evolved conformal moments in the evolution basis (Evolved moment method)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>j</strong> – conformal spin j (conformal spin is actually j+2 but anyway): array (N,)</p></li>
+<li><p><strong>nf</strong> – number of effective fermions;</p></li>
+<li><p><strong>p</strong> (<em>int</em>) – 1 for vector-like GPD (Ht, Et), -1 for axial-vector-like GPDs (Ht, Et): scalar</p></li>
+<li><p><strong>Q</strong> – final evolution scale: scalar</p></li>
+<li><p><strong>t</strong> – momentum transfer squared</p></li>
+<li><p><strong>xi</strong> – skewness</p></li>
+<li><p><strong>ConfFlav</strong> – unevolved conformal moments</p></li>
+<li><p><strong>Para</strong> – parameters of the conformal moments</p></li>
+<li><p><strong>momshift</strong> – shift of moments</p></li>
+<li><p><strong>muset</strong> – offset in the scale mu to study the scale dependence of the TFF</p></li>
+<li><p><strong>above</strong> (<em>More notes in Moment_Evo_NLO</em><em>(</em><em>) </em><em>function</em>)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Next-to-leading order evolved conformal moments in the evolution basis (to be combined with conformal wave function)
+return shape (N, 5)</p>
+</dd>
+</dl>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p><code class="docutils literal notranslate"><span class="pre">j</span></code> accepts 1-D array input for the Mellin-Barnes contour integral;
+all other arguments should be scalar (or broadcastable with <code class="docutils literal notranslate"><span class="pre">j</span></code>).</p>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="gumpgpd.Evolution.InvMellinWaveFuncG">
+<span class="sig-prename descclassname"><span class="pre">gumpgpd.Evolution.</span></span><span class="sig-name descname"><span class="pre">InvMellinWaveFuncG</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">s</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">complex</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">complex</span></span></span><a class="reference internal" href="_modules/gumpgpd/Evolution.html#InvMellinWaveFuncG"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gumpgpd.Evolution.InvMellinWaveFuncG" title="Link to this definition"></a></dt>
+<dd><p>Gluon wave function for inverse Mellin transformation: x^(-s+1) for x&gt;0 and 0 for x&lt;0</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>s</strong> – Mellin moment s (= n)</p></li>
+<li><p><strong>x</strong> – momentum fraction x</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>x^(-s+1) for x&gt;0 and 0 for x&lt;0</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Gluon wave function for inverse Mellin transformation</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="gumpgpd.Evolution.InvMellinWaveFuncQ">
+<span class="sig-prename descclassname"><span class="pre">gumpgpd.Evolution.</span></span><span class="sig-name descname"><span class="pre">InvMellinWaveFuncQ</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">s</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">complex</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">complex</span></span></span><a class="reference internal" href="_modules/gumpgpd/Evolution.html#InvMellinWaveFuncQ"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gumpgpd.Evolution.InvMellinWaveFuncQ" title="Link to this definition"></a></dt>
+<dd><p>Quark wave function for inverse Mellin transformation: x^(-s) for x&gt;0 and 0 for x&lt;0</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>s</strong> – Mellin moment s (= n)</p></li>
+<li><p><strong>x</strong> – momentum fraction x</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>x^(-s) for x&gt;0 and 0 for x&lt;0</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Wave function for inverse Mellin transformation</p>
+</dd>
+</dl>
+<p>vectorized version of InvMellinWaveFuncQ</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="gumpgpd.Evolution.MellinF2">
+<span class="sig-prename descclassname"><span class="pre">gumpgpd.Evolution.</span></span><span class="sig-name descname"><span class="pre">MellinF2</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">n</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">complex</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">ndarray</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">complex</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">ndarray</span></span></span><a class="reference internal" href="_modules/gumpgpd/Evolution.html#MellinF2"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gumpgpd.Evolution.MellinF2" title="Link to this definition"></a></dt>
+<dd><p>Return Mellin transform  i.e. x^(N-1) moment of Li2(x)/(1+x).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>n</strong> – complex argument</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>//arxiv.org/abs/hep-ph/9708388</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>According to Eq. (33) in https</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="gumpgpd.Evolution.Moment_Evo_LO">
+<span class="sig-prename descclassname"><span class="pre">gumpgpd.Evolution.</span></span><span class="sig-name descname"><span class="pre">Moment_Evo_LO</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">j</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">array</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nf</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mu</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ConfFlav</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">array</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">array</span></span></span><a class="reference internal" href="_modules/gumpgpd/Evolution.html#Moment_Evo_LO"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gumpgpd.Evolution.Moment_Evo_LO" title="Link to this definition"></a></dt>
+<dd><p>Leading order evolution of moments in the flavor space</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>j</strong> – conformal spin j (conformal spin is actually j+2 but anyway): shape (N,)</p></li>
+<li><p><strong>nf</strong> – number of effective fermions, scalar</p></li>
+<li><p><strong>p</strong> (<em>int</em>) – 1 for vector-like GPD (Ht, Et), -1 for axial-vector-like GPDs (Ht, Et), scalars</p></li>
+<li><p><strong>mu</strong> – final evolution scale: array(N,), scalar</p></li>
+<li><p><strong>ConfFlav</strong> – uneolved conformal moments in flavor space ConfFlav = [ConfMoment_uV, ConfMoment_ubar, ConfMoment_dV, ConfMoment_dbar, ConfMoment_g] shape (N,5)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Evolved conformal moments in the evolution basis (qVal, q_du_plus, q_du_minus, qSigma, g)
+return shape (N, 5)</p>
+</dd>
+</dl>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p><code class="docutils literal notranslate"><span class="pre">j</span></code> accepts 1-D array input for the Mellin-Barnes contour integral;
+all other arguments should be scalar (or broadcastable with <code class="docutils literal notranslate"><span class="pre">j</span></code>).</p>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="gumpgpd.Evolution.Moment_Evo_LO_NSp1">
+<span class="sig-prename descclassname"><span class="pre">gumpgpd.Evolution.</span></span><span class="sig-name descname"><span class="pre">Moment_Evo_LO_NSp1</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">j</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">array</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nf</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mu</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ConfFlav</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">array</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">array</span></span></span><a class="reference internal" href="_modules/gumpgpd/Evolution.html#Moment_Evo_LO_NSp1"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gumpgpd.Evolution.Moment_Evo_LO_NSp1" title="Link to this definition"></a></dt>
+<dd><p>Leading order evolution of moments in the flavor space for non-singlet vector moments</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>j</strong> – conformal spin j (conformal spin is actually j+2 but anyway): shape (N,)</p></li>
+<li><p><strong>nf</strong> – number of effective fermions, scalar</p></li>
+<li><p><strong>p</strong> (<em>int</em>) – 1 for vector-like GPD (Ht, Et), -1 for axial-vector-like GPDs (Ht, Et), scalars</p></li>
+<li><p><strong>mu</strong> – final evolution scale: array(N,), scalar</p></li>
+<li><p><strong>ConfFlav</strong> – uneolved conformal moments in flavor space ConfFlav = [ConfMoment_uV, ConfMoment_ubar, ConfMoment_dV, ConfMoment_dbar, ConfMoment_g] shape (N,5)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Evolved conformal moments in the evolution basis (qVal, q_du_plus, q_du_minus, qSigma, g)
+return shape (N, 5)</p>
+</dd>
+</dl>
+<p>This function deals with the j=0 singularity in the Moment_Evo_LO(). We only evaluate the j=0 contributions for the charge odd terms</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="gumpgpd.Evolution.Moment_Evo_NLO">
+<span class="sig-prename descclassname"><span class="pre">gumpgpd.Evolution.</span></span><span class="sig-name descname"><span class="pre">Moment_Evo_NLO</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">j</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">array</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nf</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mu</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">t</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xi</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Para</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">array</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">momshift</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">array</span></span></span><a class="reference internal" href="_modules/gumpgpd/Evolution.html#Moment_Evo_NLO"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gumpgpd.Evolution.Moment_Evo_NLO" title="Link to this definition"></a></dt>
+<dd><p>Next-to-leading order evolution of the conformal moments (Evolved moment method)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>j</strong> – conformal spin j (conformal spin is actually j+2 but anyway): array (N,)</p></li>
+<li><p><strong>nf</strong> – number of effective fermions; scalars</p></li>
+<li><p><strong>p</strong> (<em>int</em>) – 1 for vector-like GPD (Ht, Et), -1 for axial-vector-like GPDs (Ht, Et); scalars</p></li>
+<li><p><strong>mu</strong> – factorization evolution scale; scalar</p></li>
+<li><p><strong>t</strong> – momentum transfer squared</p></li>
+<li><p><strong>xi</strong> – skewness</p></li>
+<li><p><strong>Para</strong> – parameters of the conformal moments</p></li>
+<li><p><strong>momshift</strong> (<em>CAUTION!</em>) – shift of moments</p></li>
+<li><p><strong>Note</strong> – xi,t are need when for the evolution of moments:
+We need Para for the parameters rather than just the unevolved moment ConFlav;
+Because the off-diagonal terms requires shift of moments.</p></li>
+<li><p><strong>momshift</strong> – When we shift the moment by j -&gt; j+2 for xi^2 terms, only the evolution kernel E_{jk} should be shifted into E_{j+2,k+2}, whereas terms like xi^{-j-1} should not be shifted
+therefore, we should write the expression as E_{j,k+momshift} and x^{-j+momshift-1} to compensate/cancel the shift of j when j-&gt;j+2 is performed (momshift=2 in this case)
+Only relevant in the off-diagonal part</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Evolved conformal moment in evolution basis (qVal, q_du_plus, q_du_minus, qSigma, g);
+To be combined with the corresponding Wilson coefficient (for TFF/CFF) or conformal wave function (for GPD)
+return shape (N, 5)</p>
+</dd>
+</dl>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p><code class="docutils literal notranslate"><span class="pre">j</span></code> accepts 1-D array input for the Mellin-Barnes contour integral;
+all other arguments should be scalar (or broadcastable with <code class="docutils literal notranslate"><span class="pre">j</span></code>).</p>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="gumpgpd.Evolution.S1">
+<span class="sig-prename descclassname"><span class="pre">gumpgpd.Evolution.</span></span><span class="sig-name descname"><span class="pre">S1</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">z</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">complex</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">ndarray</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">complex</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">ndarray</span></span></span><a class="reference internal" href="_modules/gumpgpd/Evolution.html#S1"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gumpgpd.Evolution.S1" title="Link to this definition"></a></dt>
+<dd><p>Harmonic sum S_1(z).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>z</strong> – Complex argument.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>S_1(z) = sum_{k=1}^{z} 1/k (analytically continued via the digamma function).</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="gumpgpd.Evolution.S1_tilde">
+<span class="sig-prename descclassname"><span class="pre">gumpgpd.Evolution.</span></span><span class="sig-name descname"><span class="pre">S1_tilde</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">n</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">complex</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sgtr</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">complex</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">ndarray</span></span></span><a class="reference internal" href="_modules/gumpgpd/Evolution.html#S1_tilde"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gumpgpd.Evolution.S1_tilde" title="Link to this definition"></a></dt>
+<dd><p>Alternating harmonic sum S1-tilde with signature sgtr.</p>
+<p>Defined in Eq. (39) of <a class="reference external" href="https://arxiv.org/abs/hep-ph/9810241">https://arxiv.org/abs/hep-ph/9810241</a>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>n</strong> – Complex Mellin moment.</p></li>
+<li><p><strong>sgtr</strong> (<em>int</em>) – Signature factor sgtr = p * prty; +1 or -1.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><code class="docutils literal notranslate"><span class="pre">sgtr</span> <span class="pre">*</span> <span class="pre">(psi((n+2)/2)</span> <span class="pre">-</span> <span class="pre">psi((n+1)/2))</span> <span class="pre">/</span> <span class="pre">2</span> <span class="pre">-</span> <span class="pre">log(2)</span></code>.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="gumpgpd.Evolution.S2">
+<span class="sig-prename descclassname"><span class="pre">gumpgpd.Evolution.</span></span><span class="sig-name descname"><span class="pre">S2</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">z</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">complex</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">ndarray</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">complex</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">ndarray</span></span></span><a class="reference internal" href="_modules/gumpgpd/Evolution.html#S2"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gumpgpd.Evolution.S2" title="Link to this definition"></a></dt>
+<dd><p>Harmonic sum S_2(z).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>z</strong> – Complex argument.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>S_2(z) = sum_{k=1}^{z} 1/k^2 (analytically continued via the trigamma function).</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="gumpgpd.Evolution.S2_prime">
+<span class="sig-prename descclassname"><span class="pre">gumpgpd.Evolution.</span></span><span class="sig-name descname"><span class="pre">S2_prime</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">z</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">complex</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prty</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">complex</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">ndarray</span></span></span><a class="reference internal" href="_modules/gumpgpd/Evolution.html#S2_prime"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gumpgpd.Evolution.S2_prime" title="Link to this definition"></a></dt>
+<dd><p>Symmetrized harmonic sum S_2’ used in NLO splitting functions.</p>
+<p>Defined in Eq. (5.29) of
+<a class="reference external" href="https://www.sciencedirect.com/science/article/pii/0550321380900036">https://www.sciencedirect.com/science/article/pii/0550321380900036</a></p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>z</strong> – Complex argument.</p></li>
+<li><p><strong>prty</strong> (<em>int</em>) – Signature factor; +1 or -1.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><code class="docutils literal notranslate"><span class="pre">(1</span> <span class="pre">+</span> <span class="pre">prty)/2</span> <span class="pre">*</span> <span class="pre">S2(z)</span> <span class="pre">+</span> <span class="pre">(1</span> <span class="pre">-</span> <span class="pre">prty)/2</span> <span class="pre">*</span> <span class="pre">S2(z</span> <span class="pre">-</span> <span class="pre">1/2)</span></code>.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="gumpgpd.Evolution.S2_tilde">
+<span class="sig-prename descclassname"><span class="pre">gumpgpd.Evolution.</span></span><span class="sig-name descname"><span class="pre">S2_tilde</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">n</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">complex</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sgtr</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">complex</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">ndarray</span></span></span><a class="reference internal" href="_modules/gumpgpd/Evolution.html#S2_tilde"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gumpgpd.Evolution.S2_tilde" title="Link to this definition"></a></dt>
+<dd><p>Alternating harmonic sum S2-tilde with signature sgtr.</p>
+<p>Defined in Eq. (41) of <a class="reference external" href="https://arxiv.org/abs/hep-ph/9810241">https://arxiv.org/abs/hep-ph/9810241</a>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>n</strong> – Complex Mellin moment.</p></li>
+<li><p><strong>sgtr</strong> (<em>int</em>) – Signature factor; +1 or -1.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><code class="docutils literal notranslate"><span class="pre">-zeta(2)/2</span> <span class="pre">-</span> <span class="pre">sgtr</span> <span class="pre">*</span> <span class="pre">(psi^(1)((n+2)/2)</span> <span class="pre">-</span> <span class="pre">psi^(1)((n+1)/2))</span> <span class="pre">/</span> <span class="pre">4</span></code>.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="gumpgpd.Evolution.S2_tilde_KM">
+<span class="sig-prename descclassname"><span class="pre">gumpgpd.Evolution.</span></span><span class="sig-name descname"><span class="pre">S2_tilde_KM</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">n</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sgtr</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gumpgpd/Evolution.html#S2_tilde_KM"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gumpgpd.Evolution.S2_tilde_KM" title="Link to this definition"></a></dt>
+<dd><p>Alternating harmonic sum S2-tilde as implemented in Gepard (K. Kumericki).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>n</strong> – Complex Mellin moment.</p></li>
+<li><p><strong>sgtr</strong> (<em>int</em>) – Signature factor; +1 or -1.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><code class="docutils literal notranslate"><span class="pre">-5/8*zeta(3)</span> <span class="pre">+</span> <span class="pre">sgtr*(S1(n)/n^2</span> <span class="pre">-</span> <span class="pre">zeta(2)/2*G</span> <span class="pre">+</span> <span class="pre">MellinF2(n))</span></code>
+where <code class="docutils literal notranslate"><span class="pre">G</span> <span class="pre">=</span> <span class="pre">psi((n+1)/2)</span> <span class="pre">-</span> <span class="pre">psi(n/2)</span></code>.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="gumpgpd.Evolution.S3">
+<span class="sig-prename descclassname"><span class="pre">gumpgpd.Evolution.</span></span><span class="sig-name descname"><span class="pre">S3</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">z</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">complex</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">ndarray</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">complex</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">ndarray</span></span></span><a class="reference internal" href="_modules/gumpgpd/Evolution.html#S3"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gumpgpd.Evolution.S3" title="Link to this definition"></a></dt>
+<dd><p>Harmonic sum S_3(z).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>z</strong> – Complex argument.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>S_3(z) = sum_{k=1}^{z} 1/k^3 (analytically continued via the polygamma function).</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="gumpgpd.Evolution.S3_prime">
+<span class="sig-prename descclassname"><span class="pre">gumpgpd.Evolution.</span></span><span class="sig-name descname"><span class="pre">S3_prime</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">z</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">complex</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prty</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">complex</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">ndarray</span></span></span><a class="reference internal" href="_modules/gumpgpd/Evolution.html#S3_prime"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gumpgpd.Evolution.S3_prime" title="Link to this definition"></a></dt>
+<dd><p>Symmetrized harmonic sum S_3’ used in NLO splitting functions.</p>
+<p>Defined in Eq. (5.29) of
+<a class="reference external" href="https://www.sciencedirect.com/science/article/pii/0550321380900036">https://www.sciencedirect.com/science/article/pii/0550321380900036</a></p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>z</strong> – Complex argument.</p></li>
+<li><p><strong>prty</strong> (<em>int</em>) – Signature factor; +1 or -1.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><code class="docutils literal notranslate"><span class="pre">(1</span> <span class="pre">+</span> <span class="pre">prty)/2</span> <span class="pre">*</span> <span class="pre">S3(z)</span> <span class="pre">+</span> <span class="pre">(1</span> <span class="pre">-</span> <span class="pre">prty)/2</span> <span class="pre">*</span> <span class="pre">S3(z</span> <span class="pre">-</span> <span class="pre">1/2)</span></code>.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="gumpgpd.Evolution.S3_tilde">
+<span class="sig-prename descclassname"><span class="pre">gumpgpd.Evolution.</span></span><span class="sig-name descname"><span class="pre">S3_tilde</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">n</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">complex</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sgtr</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">complex</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">ndarray</span></span></span><a class="reference internal" href="_modules/gumpgpd/Evolution.html#S3_tilde"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gumpgpd.Evolution.S3_tilde" title="Link to this definition"></a></dt>
+<dd><p>Alternating harmonic sum S3-tilde with signature sgtr.</p>
+<p>Defined in Eqs. (47) and (37) of <a class="reference external" href="https://arxiv.org/abs/hep-ph/9810241">https://arxiv.org/abs/hep-ph/9810241</a>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>n</strong> – Complex Mellin moment.</p></li>
+<li><p><strong>sgtr</strong> (<em>int</em>) – Signature factor; +1 or -1.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><code class="docutils literal notranslate"><span class="pre">sgtr/2</span> <span class="pre">*</span> <span class="pre">psi^(2)((n+2)/2</span> <span class="pre">-</span> <span class="pre">psi^(2)((n+1)/2))</span> <span class="pre">/</span> <span class="pre">8</span> <span class="pre">-</span> <span class="pre">3/4</span> <span class="pre">*</span> <span class="pre">zeta(3)</span></code>.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="gumpgpd.Evolution.S4">
+<span class="sig-prename descclassname"><span class="pre">gumpgpd.Evolution.</span></span><span class="sig-name descname"><span class="pre">S4</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">z</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">complex</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">ndarray</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">complex</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">ndarray</span></span></span><a class="reference internal" href="_modules/gumpgpd/Evolution.html#S4"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gumpgpd.Evolution.S4" title="Link to this definition"></a></dt>
+<dd><p>Harmonic sum S_4(z).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>z</strong> – Complex argument.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>S_4(z) = sum_{k=1}^{z} 1/k^4 (analytically continued via the polygamma function).</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="gumpgpd.Evolution.SB3">
+<span class="sig-prename descclassname"><span class="pre">gumpgpd.Evolution.</span></span><span class="sig-name descname"><span class="pre">SB3</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">j</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">complex</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">ndarray</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">complex</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">ndarray</span></span></span><a class="reference internal" href="_modules/gumpgpd/Evolution.html#SB3"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gumpgpd.Evolution.SB3" title="Link to this definition"></a></dt>
+<dd><p>Special harmonic-sum combination SB3.</p>
+<p>Defined in Eq. (4.44e) of <a class="reference external" href="https://arxiv.org/abs/1310.5394">https://arxiv.org/abs/1310.5394</a>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>j</strong> – Complex argument.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The combination <code class="docutils literal notranslate"><span class="pre">0.5*S1(j)*(-S2(-0.5+0.5*j)+S2(0.5*j))</span> <span class="pre">+</span> <span class="pre">...</span></code>.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="gumpgpd.Evolution.Sm2p1">
+<span class="sig-prename descclassname"><span class="pre">gumpgpd.Evolution.</span></span><span class="sig-name descname"><span class="pre">Sm2p1</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">n</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">complex</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sgtr</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">complex</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">ndarray</span></span></span><a class="reference internal" href="_modules/gumpgpd/Evolution.html#Sm2p1"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gumpgpd.Evolution.Sm2p1" title="Link to this definition"></a></dt>
+<dd><p>Special combination Sm2p1 appearing in NLO DGLAP kernels.</p>
+<p>Defined in Eq. (50) of <a class="reference external" href="https://arxiv.org/abs/hep-ph/9810241">https://arxiv.org/abs/hep-ph/9810241</a>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>n</strong> – Complex Mellin moment.</p></li>
+<li><p><strong>sgtr</strong> (<em>int</em>) – Signature factor; +1 or -1.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><code class="docutils literal notranslate"><span class="pre">-sgtr</span> <span class="pre">*</span> <span class="pre">MellinF2(n+1)</span> <span class="pre">+</span> <span class="pre">zeta(2)*S1_tilde(n,</span> <span class="pre">sgtr)</span> <span class="pre">-</span> <span class="pre">5/8*zeta(3)</span> <span class="pre">+</span> <span class="pre">zeta(2)*log(2)</span></code>.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="gumpgpd.Evolution.Sp1m2">
+<span class="sig-prename descclassname"><span class="pre">gumpgpd.Evolution.</span></span><span class="sig-name descname"><span class="pre">Sp1m2</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">n</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">complex</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sgtr</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">complex</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">ndarray</span></span></span><a class="reference internal" href="_modules/gumpgpd/Evolution.html#Sp1m2"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gumpgpd.Evolution.Sp1m2" title="Link to this definition"></a></dt>
+<dd><p>Special combination Sp1m2 appearing in NLO DGLAP kernels.</p>
+<p>Defined in Eq. (131) of <a class="reference external" href="https://arxiv.org/abs/hep-ph/9810241">https://arxiv.org/abs/hep-ph/9810241</a>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>n</strong> – Complex Mellin moment.</p></li>
+<li><p><strong>sgtr</strong> (<em>int</em>) – Signature factor; +1 or -1.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><code class="docutils literal notranslate"><span class="pre">S1(n)*S2_tilde(n,</span> <span class="pre">sgtr)</span> <span class="pre">+</span> <span class="pre">S3_tilde(n,</span> <span class="pre">sgtr)</span> <span class="pre">-</span> <span class="pre">Sm2p1(n,</span> <span class="pre">sgtr)</span></code>.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="gumpgpd.Evolution.TFF_Evo_LO">
+<span class="sig-prename descclassname"><span class="pre">gumpgpd.Evolution.</span></span><span class="sig-name descname"><span class="pre">TFF_Evo_LO</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">j</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">array</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nf</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mu</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ConfFlav</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">array</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">meson</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">array</span></span></span><a class="reference internal" href="_modules/gumpgpd/Evolution.html#TFF_Evo_LO"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gumpgpd.Evolution.TFF_Evo_LO" title="Link to this definition"></a></dt>
+<dd><p>Leading order evolution of the combination of DVMP Wilson coefficient and conformal moments</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>j</strong> – conformal spin j (conformal spin is actually j+2 but anyway): array (N,)</p></li>
+<li><p><strong>nf</strong> – number of effective fermions; scalar</p></li>
+<li><p><strong>p</strong> (<em>int</em>) – 1 for vector-like GPD (Ht, Et), -1 for axial-vector-like GPDs (Ht, Et); scalar</p></li>
+<li><p><strong>mu</strong> – final evolution scale; scalar</p></li>
+<li><p><strong>ConfFlav</strong> – uneolved conformal moments in flavor space ConfFlav = [ConfMoment_uV, ConfMoment_ubar, ConfMoment_dV, ConfMoment_dbar, ConfMoment_g]; shape (N,5)</p></li>
+<li><p><strong>meson</strong> (<em>int</em>) – 1 for rho, 2 for phi, 3 for Jpsi</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Evolved conformal moments times the DVMP Wilson coefficients in the evolution basis (qVal, q_du_plus, q_du_minus, qSigma, g);
+Ingredients for the Mellin-Barnes integral for TFF
+return shape (N, 5)</p>
+</dd>
+</dl>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p><code class="docutils literal notranslate"><span class="pre">j</span></code> accepts 1-D array input for the Mellin-Barnes contour integral;
+all other arguments should be scalar (or broadcastable with <code class="docutils literal notranslate"><span class="pre">j</span></code>).</p>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="gumpgpd.Evolution.TFF_Evo_NLO_evMOM">
+<span class="sig-prename descclassname"><span class="pre">gumpgpd.Evolution.</span></span><span class="sig-name descname"><span class="pre">TFF_Evo_NLO_evMOM</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">j</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">array</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nf</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Q</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">t</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xi</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Para</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">array</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">momshift</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">meson</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">muf</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">array</span></span></span><a class="reference internal" href="_modules/gumpgpd/Evolution.html#TFF_Evo_NLO_evMOM"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gumpgpd.Evolution.TFF_Evo_NLO_evMOM" title="Link to this definition"></a></dt>
+<dd><p>Next-to-leading order evolved conformal moments combined with the DVMP Wilson coefficients in the evolution space (Evolved moment method)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>j</strong> – conformal spin j (conformal spin is actually j+2 but anyway): array (N,)</p></li>
+<li><p><strong>nf</strong> – number of effective fermions;</p></li>
+<li><p><strong>p</strong> (<em>int</em>) – 1 for vector-like GPD (Ht, Et), -1 for axial-vector-like GPDs (Ht, Et): scalar</p></li>
+<li><p><strong>Q</strong> – final evolution scale: scalar</p></li>
+<li><p><strong>t</strong> – momentum transfer squared</p></li>
+<li><p><strong>xi</strong> – skewness</p></li>
+<li><p><strong>ConfFlav</strong> – unevolved conformal moments</p></li>
+<li><p><strong>Para</strong> – parameters of the conformal moments</p></li>
+<li><p><strong>momshift</strong> – shift of moments</p></li>
+<li><p><strong>muset</strong> – offset in the scale mu to study the scale dependence of the TFF</p></li>
+<li><p><strong>above</strong> (<em>More notes in Moment_Evo_NLO</em><em>(</em><em>) </em><em>function</em>)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Next-to-leading order evolved conformal moments combined with the DVMP Wilson coefficients in the evolution basis (qVal, q_du_plus, q_du_minus, qSigma, g);
+return shape (N, 5)</p>
+</dd>
+</dl>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p><code class="docutils literal notranslate"><span class="pre">j</span></code> accepts 1-D array input for the Mellin-Barnes contour integral;
+all other arguments should be scalar (or broadcastable with <code class="docutils literal notranslate"><span class="pre">j</span></code>).</p>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="gumpgpd.Evolution.TFF_Evo_NLO_evWC">
+<span class="sig-prename descclassname"><span class="pre">gumpgpd.Evolution.</span></span><span class="sig-name descname"><span class="pre">TFF_Evo_NLO_evWC</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">j</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">array</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nf</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Q</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ConfFlav</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">array</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">meson</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">muf</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">array</span></span></span><a class="reference internal" href="_modules/gumpgpd/Evolution.html#TFF_Evo_NLO_evWC"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gumpgpd.Evolution.TFF_Evo_NLO_evWC" title="Link to this definition"></a></dt>
+<dd><p>Next-to-leading order evolved DVMP Wilson coefficients in the flavor space combined with the conformal moments (Evolved Wilson coefficient method)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>j</strong> – conformal spin j (conformal spin is actually j+2 but anyway): array (N,)</p></li>
+<li><p><strong>nf</strong> – number of effective fermions; scalars</p></li>
+<li><p><strong>p</strong> (<em>int</em>) – 1 for vector-like GPD (Ht, Et), -1 for axial-vector-like GPDs (Ht, Et); scalars</p></li>
+<li><p><strong>Q</strong> (<em>float</em>) – photon virtuality. At NLO the scale Q enters the amplitudes through logs.</p></li>
+<li><p><strong>ConfFlav</strong> – uneolved conformal moments in flavor space ConfFlav = [ConfMoment_uV, ConfMoment_ubar, ConfMoment_dV, ConfMoment_dbar, ConfMoment_g]; shape (N,5)</p></li>
+<li><p><strong>meson</strong> (<em>int</em>) – 1 for rho, 2 for phi, 3 for Jpsi</p></li>
+<li><p><strong>muf</strong> – factorization evolution scale; scalar</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Evolved conformal moments times the DVMP Wilson coefficients in the evolution basis (qVal, q_du_plus, q_du_minus, qSigma, g);
+Ingredients for the Mellin-Barnes integral for TFF
+return shape (N, 5)</p>
+</dd>
+</dl>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p><code class="docutils literal notranslate"><span class="pre">j</span></code> accepts 1-D array input for the Mellin-Barnes contour integral;
+all other arguments should be scalar (or broadcastable with <code class="docutils literal notranslate"><span class="pre">j</span></code>).</p>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="gumpgpd.Evolution.WilsonCoef">
+<span class="sig-prename descclassname"><span class="pre">gumpgpd.Evolution.</span></span><span class="sig-name descname"><span class="pre">WilsonCoef</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">j</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">complex</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">complex</span></span></span><a class="reference internal" href="_modules/gumpgpd/Evolution.html#WilsonCoef"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gumpgpd.Evolution.WilsonCoef" title="Link to this definition"></a></dt>
+<dd><p>Leading-order Wilson coefficient, elements used in both DVCS and DVMP</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>j</strong> (<em>complex array</em>) – shape(N,) conformal spin j</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Leading-order Wilson coefficient (complex, could be an array)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="gumpgpd.Evolution.WilsonCoef_DVCS_LO">
+<span class="sig-prename descclassname"><span class="pre">gumpgpd.Evolution.</span></span><span class="sig-name descname"><span class="pre">WilsonCoef_DVCS_LO</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">j</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">complex</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">complex</span></span></span><a class="reference internal" href="_modules/gumpgpd/Evolution.html#WilsonCoef_DVCS_LO"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gumpgpd.Evolution.WilsonCoef_DVCS_LO" title="Link to this definition"></a></dt>
+<dd><p>LO Wilson coefficient of DVCS in the evolution basis (qVal, q_du_plus, q_du_minus, qSigma, g).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>j</strong> (<em>complex</em>) – Shape <code class="docutils literal notranslate"><span class="pre">(N,)</span></code> conformal spin j.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Shape <code class="docutils literal notranslate"><span class="pre">(5,</span> <span class="pre">N)</span></code> Wilson coefficient in the evolution basis
+(qVal, q_du_plus, q_du_minus, qSigma, g).</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>np.ndarray</p>
+</dd>
+</dl>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Charge factors are constructed so that the sum over the evolution basis
+is identical to the sum over the flavor basis.  The gluon charge factor
+equals the singlet one, but the LO DVCS gluon Wilson coefficient is zero.</p>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="gumpgpd.Evolution.WilsonCoef_DVCS_NLO">
+<span class="sig-prename descclassname"><span class="pre">gumpgpd.Evolution.</span></span><span class="sig-name descname"><span class="pre">WilsonCoef_DVCS_NLO</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">j</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">complex</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nf</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Q</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mu</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">complex</span></span></span><a class="reference internal" href="_modules/gumpgpd/Evolution.html#WilsonCoef_DVCS_NLO"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gumpgpd.Evolution.WilsonCoef_DVCS_NLO" title="Link to this definition"></a></dt>
+<dd><p>NLO Wilson coefficient of DVCS in the evolution basis (qVal, q_du_plus, q_du_minus, qSigma, g).</p>
+<p>See Eqs. (127)-(130) of <a class="reference external" href="https://arxiv.org/pdf/hep-ph/0703179">https://arxiv.org/pdf/hep-ph/0703179</a>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>j</strong> (<em>complex</em>) – Shape <code class="docutils literal notranslate"><span class="pre">(N,)</span></code> conformal spin j.</p></li>
+<li><p><strong>nf</strong> (<em>int</em>) – Number of active quark flavors.</p></li>
+<li><p><strong>Q</strong> (<em>float</em>) – Photon virtuality.</p></li>
+<li><p><strong>mu</strong> (<em>float</em>) – Factorization scale.</p></li>
+<li><p><strong>p</strong> (<em>int</em>) – 1 for vector-like GPDs (H, E), -1 for axial-vector-like GPDs (Ht, Et).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Shape <code class="docutils literal notranslate"><span class="pre">(5,</span> <span class="pre">N)</span></code> Wilson coefficient in the evolution basis
+(qVal, q_du_plus, q_du_minus, qSigma, g).</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>np.ndarray</p>
+</dd>
+</dl>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Charge factors are constructed so that the sum over the evolution basis
+is identical to the sum over the flavor basis.  The gluon charge factor
+equals the singlet one.</p>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="gumpgpd.Evolution.WilsonCoef_DVMP_LO">
+<span class="sig-prename descclassname"><span class="pre">gumpgpd.Evolution.</span></span><span class="sig-name descname"><span class="pre">WilsonCoef_DVMP_LO</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">j</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">complex</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nf</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">muf</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">meson</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">complex</span></span></span><a class="reference internal" href="_modules/gumpgpd/Evolution.html#WilsonCoef_DVMP_LO"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gumpgpd.Evolution.WilsonCoef_DVMP_LO" title="Link to this definition"></a></dt>
+<dd><p>LO Wilson coefficient of DVMP in the evolution basis (qVal, q_du_plus, q_du_minus, qSigma, g).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>j</strong> (<em>complex</em>) – Shape <code class="docutils literal notranslate"><span class="pre">(N,)</span></code> conformal spin j.</p></li>
+<li><p><strong>nf</strong> (<em>int</em>) – Number of active quark flavors.</p></li>
+<li><p><strong>muf</strong> (<em>float</em>) – Factorization scale.</p></li>
+<li><p><strong>meson</strong> (<em>int</em>) – Meson code: 1 for rho, 2 for phi, 3 for J/psi.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Shape <code class="docutils literal notranslate"><span class="pre">(5,</span> <span class="pre">N)</span></code> Wilson coefficient in the evolution basis
+(qVal, q_du_plus, q_du_minus, qSigma, g).</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>np.ndarray</p>
+</dd>
+</dl>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Charge factors, the meson decay constant, CF/NC, and the quark charge eq
+are all included in the prefactor.  For J/psi (meson=3) all quark
+components are set to zero.</p>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="gumpgpd.Evolution.WilsonCoef_DVMP_NLO">
+<span class="sig-prename descclassname"><span class="pre">gumpgpd.Evolution.</span></span><span class="sig-name descname"><span class="pre">WilsonCoef_DVMP_NLO</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">j</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">complex</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">k</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">complex</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nf</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Q</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">muf</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">meson</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gumpgpd/Evolution.html#WilsonCoef_DVMP_NLO"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gumpgpd.Evolution.WilsonCoef_DVMP_NLO" title="Link to this definition"></a></dt>
+<dd><p>NLO Wilson coefficient of DVMP in the evolution basis (qVal, q_du_plus, q_du_minus, qSigma, g).</p>
+<p>The factorization and renormalization scales are both set to <code class="docutils literal notranslate"><span class="pre">muf</span></code>.
+Only the singlet contribution is currently implemented.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>j</strong> (<em>complex</em>) – Shape <code class="docutils literal notranslate"><span class="pre">(N,)</span></code> conformal spin j of the GPD moment.</p></li>
+<li><p><strong>k</strong> (<em>complex</em>) – Shape <code class="docutils literal notranslate"><span class="pre">(N,)</span></code> conformal spin k of the meson DA.</p></li>
+<li><p><strong>nf</strong> (<em>int</em>) – Number of active quark flavors.</p></li>
+<li><p><strong>Q</strong> (<em>float</em>) – Photon virtuality.</p></li>
+<li><p><strong>muf</strong> (<em>float</em>) – Factorization (and renormalization) scale.</p></li>
+<li><p><strong>meson</strong> (<em>int</em>) – Meson code: 1 for rho, 2 for phi, 3 for J/psi.</p></li>
+<li><p><strong>p</strong> (<em>int</em>) – 1 for vector-like GPDs (H, E), -1 for axial-vector-like GPDs (Ht, Et).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Wilson coefficient of shape <code class="docutils literal notranslate"><span class="pre">(5,</span> <span class="pre">N)</span></code> in the evolution basis
+(qVal, q_du_plus, q_du_minus, qSigma, g). Charge factors, the meson
+decay constant, CF/NC, and eq are all included.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>np.ndarray</p>
+</dd>
+</dl>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>GPD charge parity is <code class="docutils literal notranslate"><span class="pre">prty</span></code>; DA charge parity is <code class="docutils literal notranslate"><span class="pre">ptyk</span></code> (fixed to 1
+since only vector meson data are used).</p>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="gumpgpd.Evolution.amuindep">
+<span class="sig-prename descclassname"><span class="pre">gumpgpd.Evolution.</span></span><span class="sig-name descname"><span class="pre">amuindep</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">j</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">complex</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nf</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prty</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gumpgpd/Evolution.html#amuindep"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gumpgpd.Evolution.amuindep" title="Link to this definition"></a></dt>
+<dd><p>Scale-independent part of the singlet diagonal NLO evolution operator.</p>
+<p>Computes the P[gamma]P projector contraction appearing in the NLO
+singlet evolution matrix <code class="docutils literal notranslate"><span class="pre">A</span></code> (Eq. (124) of
+<a class="reference external" href="https://arxiv.org/abs/hep-ph/0703179">https://arxiv.org/abs/hep-ph/0703179</a>).  Unlike the Gepard implementation,
+there is no extra <code class="docutils literal notranslate"><span class="pre">1/beta_0</span></code> prefactor here; it cancels with the
+corresponding factor in <a class="reference internal" href="#gumpgpd.Evolution.rmudep" title="gumpgpd.Evolution.rmudep"><code class="xref py py-func docutils literal notranslate"><span class="pre">rmudep()</span></code></a>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>j</strong> (<em>complex</em>) – Conformal spin j (note: <code class="docutils literal notranslate"><span class="pre">n</span> <span class="pre">=</span> <span class="pre">j</span> <span class="pre">+</span> <span class="pre">1</span></code> is passed internally).</p></li>
+<li><p><strong>nf</strong> (<em>int</em>) – Number of active quark flavors.</p></li>
+<li><p><strong>p</strong> (<em>int</em>) – 1 for vector-like GPDs (H, E), -1 for axial-vector-like GPDs (Ht, Et).</p></li>
+<li><p><strong>prty</strong> (<em>int</em><em>, </em><em>optional</em>) – C-parity; +1 for singlet, -1 for minus-sector. Defaults to 1.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Shape <code class="docutils literal notranslate"><span class="pre">(N,</span> <span class="pre">2,</span> <span class="pre">2,</span> <span class="pre">2,</span> <span class="pre">2)</span></code> — the P[gamma]P part of the
+diagonal NLO evolution operator <code class="docutils literal notranslate"><span class="pre">A</span></code> at conformal spin <code class="docutils literal notranslate"><span class="pre">j</span></code>.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>np.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="gumpgpd.Evolution.amuindepNS">
+<span class="sig-prename descclassname"><span class="pre">gumpgpd.Evolution.</span></span><span class="sig-name descname"><span class="pre">amuindepNS</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">j</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">complex</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nf</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prty</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gumpgpd/Evolution.html#amuindepNS"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gumpgpd.Evolution.amuindepNS" title="Link to this definition"></a></dt>
+<dd><p>Scale-independent part of the non-singlet diagonal NLO evolution operator.</p>
+<p>Computes the anomalous-dimension factor in the NLO NS evolution matrix
+<code class="docutils literal notranslate"><span class="pre">A</span></code> (Eq. (124) of <a class="reference external" href="https://arxiv.org/abs/hep-ph/0703179">https://arxiv.org/abs/hep-ph/0703179</a>).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>j</strong> (<em>complex</em>) – Conformal spin j (note: <code class="docutils literal notranslate"><span class="pre">n</span> <span class="pre">=</span> <span class="pre">j</span> <span class="pre">+</span> <span class="pre">1</span></code> is passed internally).</p></li>
+<li><p><strong>nf</strong> (<em>int</em>) – Number of active quark flavors.</p></li>
+<li><p><strong>p</strong> (<em>int</em>) – 1 for vector-like GPDs (H, E), -1 for axial-vector-like GPDs (Ht, Et).</p></li>
+<li><p><strong>prty</strong> (<em>int</em><em>, </em><em>optional</em>) – C-parity; +1 for NS+, -1 for NS-. Defaults to 1.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The scale-independent NS part of the diagonal
+NLO evolution operator <code class="docutils literal notranslate"><span class="pre">A</span></code> at conformal spin <code class="docutils literal notranslate"><span class="pre">j</span></code>.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>complex or np.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="gumpgpd.Evolution.beta0">
+<span class="sig-prename descclassname"><span class="pre">gumpgpd.Evolution.</span></span><span class="sig-name descname"><span class="pre">beta0</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">nf</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span><a class="reference internal" href="_modules/gumpgpd/Evolution.html#beta0"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gumpgpd.Evolution.beta0" title="Link to this definition"></a></dt>
+<dd><p>LO beta function of pQCD, will be used for LO GPD evolution.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="gumpgpd.Evolution.beta1">
+<span class="sig-prename descclassname"><span class="pre">gumpgpd.Evolution.</span></span><span class="sig-name descname"><span class="pre">beta1</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">nf</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gumpgpd/Evolution.html#beta1"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gumpgpd.Evolution.beta1" title="Link to this definition"></a></dt>
+<dd><p>NLO beta function of pQCD</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="gumpgpd.Evolution.bmudep">
+<span class="sig-prename descclassname"><span class="pre">gumpgpd.Evolution.</span></span><span class="sig-name descname"><span class="pre">bmudep</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mu</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">zn</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">zk</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nf</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">NS</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prty</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gumpgpd/Evolution.html#bmudep"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gumpgpd.Evolution.bmudep" title="Link to this definition"></a></dt>
+<dd><p>Return the off-diagonal part of the evolution operator B^{jk} combined with (alpha(Q)/alpha(mu_0)) ^ (-b/beta0)</p>
+<p>Check eq. (140) in <a class="reference external" href="https://arxiv.org/abs/hep-ph/0703179">https://arxiv.org/abs/hep-ph/0703179</a> for the expression of B^{jk}, and eq. (137) for the following factor</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>mu</strong> (<em>float</em>) – scale evolved to from the initial scale Init_Scale_Q</p></li>
+<li><p><strong>zn</strong> (<em>np.array</em>) – shape (N,) moment j</p></li>
+<li><p><strong>zk</strong> (<em>np.array</em>) – shape (N,) moment k that differs from j for off-diagonal term</p></li>
+<li><p><strong>nf</strong> (<em>int</em>) – number of effective fermions</p></li>
+<li><p><strong>p</strong> (<em>int</em>) – parity of the GPDs</p></li>
+<li><p><strong>NS</strong> (<em>bool</em><em>, </em><em>optional</em>) – True for non-singlet. NOT used here so set to default False.</p></li>
+<li><p><strong>prty</strong> (<em>int</em><em>, </em><em>optional</em>) – Parity of the parton distributions: +1 for S/G; not used for NS, defaults to 1.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>B^{jk}</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="gumpgpd.Evolution.bmudepNS">
+<span class="sig-prename descclassname"><span class="pre">gumpgpd.Evolution.</span></span><span class="sig-name descname"><span class="pre">bmudepNS</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mu</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">zn</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">zk</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nf</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prty</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gumpgpd/Evolution.html#bmudepNS"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gumpgpd.Evolution.bmudepNS" title="Link to this definition"></a></dt>
+<dd><p>Return the off-diagonal part of the evolution operator B^{jk} combined with (alpha(Q)/alpha(mu_0)) ^ (-b/beta0)</p>
+<p>Check eq. (140) in hep-ph/0703179 for the expression of B^{jk}, and eq. (137) for the following factor
+:param mu: scale evolved to from the initial scale Init_Scale_Q
+:type mu: float
+:param zn: shape (N,) moment j
+:type zn: np.array
+:param zk: shape (N,) moment k that differs from j for off-diagonal term
+:type zk: np.array
+:param nf: number of effective fermions
+:type nf: int
+:param p: parity of the GPDs
+:type p: int
+:param prty: Parity of the parton distributions: +1 for the + basis, -1 for the minus and valence basis.
+:type prty: int, optional</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>B^{jk}</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="gumpgpd.Evolution.delS2">
+<span class="sig-prename descclassname"><span class="pre">gumpgpd.Evolution.</span></span><span class="sig-name descname"><span class="pre">delS2</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">z</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">complex</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">ndarray</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">complex</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">ndarray</span></span></span><a class="reference internal" href="_modules/gumpgpd/Evolution.html#delS2"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gumpgpd.Evolution.delS2" title="Link to this definition"></a></dt>
+<dd><p>Return Harmonic sum S_2 difference.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>z</strong> – complex argument</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>//arxiv.org/abs/1310.5394
+Note halving of the argument.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>delS2((z+1)/2) From Eq. (4.13) of https</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="gumpgpd.Evolution.deldelS2">
+<span class="sig-prename descclassname"><span class="pre">gumpgpd.Evolution.</span></span><span class="sig-name descname"><span class="pre">deldelS2</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">j</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">complex</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">k</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">complex</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">ndarray</span></span></span><a class="reference internal" href="_modules/gumpgpd/Evolution.html#deldelS2"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gumpgpd.Evolution.deldelS2" title="Link to this definition"></a></dt>
+<dd><p>Return difference of harmonic sum S_2 differences.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>j</strong> – complex argument</p></li>
+<li><p><strong>k</strong> – integer index</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>//arxiv.org/abs/1310.5394
+Note halving of the argument.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Equal to delS2((j+1)/2, (k+1)/2) From Eq. (4.38) of https</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="gumpgpd.Evolution.diagonal_evolution_NLO">
+<span class="sig-prename descclassname"><span class="pre">gumpgpd.Evolution.</span></span><span class="sig-name descname"><span class="pre">diagonal_evolution_NLO</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">j</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nf</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mu</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">ndarray</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">ndarray</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">ndarray</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">ndarray</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="_modules/gumpgpd/Evolution.html#diagonal_evolution_NLO"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gumpgpd.Evolution.diagonal_evolution_NLO" title="Link to this definition"></a></dt>
+<dd><p>Construct LO and diagonal NLO evolution operators for given j, nf, p, mu.
+This function does NOT depend on the input conformal moments.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>j</strong> – conformal spin array (N,)</p></li>
+<li><p><strong>nf</strong> – number of flavors</p></li>
+<li><p><strong>p</strong> – parity type (1 or -1)</p></li>
+<li><p><strong>mu</strong> – final evolution scale</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>NS LO evolution factor (N,)
+- evola0: SG LO evolution operator (N, 2, 2)
+- evola1NS_diag_plus: NS NLO diagonal evolution factor (N, 3)
+- evola1_diag: SG NLO diagonal evolution operator (N, 2, 2)</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><ul class="simple">
+<li><p>evola0NS</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="gumpgpd.Evolution.dpsi_one">
+<span class="sig-prename descclassname"><span class="pre">gumpgpd.Evolution.</span></span><span class="sig-name descname"><span class="pre">dpsi_one</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">z</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">complex</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">m</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">complex</span></span></span><a class="reference internal" href="_modules/gumpgpd/Evolution.html#dpsi_one"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gumpgpd.Evolution.dpsi_one" title="Link to this definition"></a></dt>
+<dd><p>m-th derivative of the digamma function psi at z.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>z</strong> (<em>complex</em>) – Complex argument.</p></li>
+<li><p><strong>m</strong> (<em>int</em>) – Derivative order (m &gt;= 1).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The m-th polygamma value psi^(m)(z).</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>complex</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="gumpgpd.Evolution.evolop">
+<span class="sig-prename descclassname"><span class="pre">gumpgpd.Evolution.</span></span><span class="sig-name descname"><span class="pre">evolop</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">j</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">complex</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nf</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mu</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gumpgpd/Evolution.html#evolop"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gumpgpd.Evolution.evolop" title="Link to this definition"></a></dt>
+<dd><p>Leading order GPD evolution operator E(j, nf, mu)[a,b].</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>j</strong> – MB contour points (note: n = j + 1 is passed internally).</p></li>
+<li><p><strong>nf</strong> – Number of active quark flavors.</p></li>
+<li><p><strong>p</strong> (<em>int</em>) – 1 for vector-like GPDs (H, E), -1 for axial-vector-like GPDs (Ht, Et).</p></li>
+<li><p><strong>mu</strong> – Final scale of evolution.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><strong>evola0NS</strong> (np.ndarray): Shape <code class="docutils literal notranslate"><span class="pre">(N,)</span></code> — non-singlet LO evolution factor.</p></li>
+<li><p><strong>evola0</strong> (np.ndarray): Shape <code class="docutils literal notranslate"><span class="pre">(N,</span> <span class="pre">2,</span> <span class="pre">2)</span></code> — singlet LO evolution matrix
+in the (quark-singlet, gluon) basis.</p></li>
+</ul>
+</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>List <code class="docutils literal notranslate"><span class="pre">[evola0NS,</span> <span class="pre">evola0]</span></code></p>
+</dd>
+</dl>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>In the original Gepard implementation <code class="docutils literal notranslate"><span class="pre">j</span></code>, <code class="docutils literal notranslate"><span class="pre">nf</span></code>, <code class="docutils literal notranslate"><span class="pre">p</span></code>, and <code class="docutils literal notranslate"><span class="pre">mu</span></code>
+are all scalars.  Here <code class="docutils literal notranslate"><span class="pre">j</span></code> and <code class="docutils literal notranslate"><span class="pre">nf</span></code> are scalars while <code class="docutils literal notranslate"><span class="pre">p</span></code> and
+<code class="docutils literal notranslate"><span class="pre">mu</span></code> have shape <code class="docutils literal notranslate"><span class="pre">(N,)</span></code>.</p>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="gumpgpd.Evolution.fixed_quadvec">
+<span class="sig-prename descclassname"><span class="pre">gumpgpd.Evolution.</span></span><span class="sig-name descname"><span class="pre">fixed_quadvec</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">func</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">a</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">b</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">100</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">args</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">()</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gumpgpd/Evolution.html#fixed_quadvec"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gumpgpd.Evolution.fixed_quadvec" title="Link to this definition"></a></dt>
+<dd><p>Gaussian quadrature integration for vector-valued integrands.</p>
+<p>Integrates <code class="docutils literal notranslate"><span class="pre">func</span></code> over <code class="docutils literal notranslate"><span class="pre">[a,</span> <span class="pre">b]</span></code> using an <code class="docutils literal notranslate"><span class="pre">n</span></code>-point Gauss-Legendre
+rule.  Unlike <code class="xref py py-func docutils literal notranslate"><span class="pre">scipy.integrate.fixed_quad()</span></code>, the integrand may return
+an array of any trailing shape (not just a scalar), making it suitable for
+batched Mellin-Barnes contour integrals.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>func</strong> – Callable with signature <code class="docutils literal notranslate"><span class="pre">func(y)</span> <span class="pre">-&gt;</span> <span class="pre">np.ndarray</span></code>, where <code class="docutils literal notranslate"><span class="pre">y</span></code>
+has shape <code class="docutils literal notranslate"><span class="pre">(n,)</span></code> and the output has shape <code class="docutils literal notranslate"><span class="pre">(n,</span> <span class="pre">...)</span></code>.</p></li>
+<li><p><strong>a</strong> (<em>float</em>) – Lower integration limit.</p></li>
+<li><p><strong>b</strong> (<em>float</em>) – Upper integration limit.</p></li>
+<li><p><strong>n</strong> (<em>int</em>) – Number of quadrature points. Defaults to 100.</p></li>
+<li><p><strong>args</strong> (<em>tuple</em>) – Reserved for API compatibility; not forwarded to <code class="docutils literal notranslate"><span class="pre">func</span></code>.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Approximation of <span class="math notranslate nohighlight">\(\int_a^b \mathrm{func}(y)\,dy\)</span>,
+with shape matching the trailing dimensions of <code class="docutils literal notranslate"><span class="pre">func</span></code>’s output.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>np.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="gumpgpd.Evolution.lambdaf">
+<span class="sig-prename descclassname"><span class="pre">gumpgpd.Evolution.</span></span><span class="sig-name descname"><span class="pre">lambdaf</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">n</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">complex</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nf</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prty</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">ndarray</span></span></span><a class="reference internal" href="_modules/gumpgpd/Evolution.html#lambdaf"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gumpgpd.Evolution.lambdaf" title="Link to this definition"></a></dt>
+<dd><p>Eigenvalues of the LO singlet anomalous dimensions matrix.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>n</strong> (<em>complex</em>) – which moment (= Mellin moment for integer n)</p></li>
+<li><p><strong>nf</strong> (<em>int</em>) – number of active quark flavors</p></li>
+<li><p><strong>p</strong> (<em>int</em>) – 1 for vector-like GPDs (H, E), -1 for axial-vector-like GPDs (Ht, Et)</p></li>
+<li><p><strong>prty</strong> (<em>int</em>) – 1 for NS^{+}, -1 for NS^{-}, irrelevant at LO</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>lam[a, k] where a in [+, -] and k is the MB contour point index.</p>
+</dd>
+</dl>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p><code class="docutils literal notranslate"><span class="pre">n</span></code> and <code class="docutils literal notranslate"><span class="pre">nf</span></code> are normally scalars; <code class="docutils literal notranslate"><span class="pre">p</span></code> has shape <code class="docutils literal notranslate"><span class="pre">(N,)</span></code>.</p>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="gumpgpd.Evolution.non_singlet_LO">
+<span class="sig-prename descclassname"><span class="pre">gumpgpd.Evolution.</span></span><span class="sig-name descname"><span class="pre">non_singlet_LO</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">n</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">complex</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nf</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prty</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">complex</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">ndarray</span></span></span><a class="reference internal" href="_modules/gumpgpd/Evolution.html#non_singlet_LO"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gumpgpd.Evolution.non_singlet_LO" title="Link to this definition"></a></dt>
+<dd><p>Non-singlet LO anomalous dimension.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>n</strong> (<em>complex</em>) – which moment (= Mellin moment for integer n)</p></li>
+<li><p><strong>nf</strong> (<em>int</em>) – number of active quark flavors</p></li>
+<li><p><strong>p</strong> (<em>int</em>) – 1 for vector-like GPDs (H, E), -1 for axial-vector-like GPDs (Ht, Et)</p></li>
+<li><p><strong>prty</strong> (<em>int</em>) – 1 for NS^{+}, -1 for NS^{-}, irrelevant at LO</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Non-singlet LO anomalous dimension.</p>
+</dd>
+</dl>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>This is an algebraic equation; any shape of <code class="docutils literal notranslate"><span class="pre">n</span></code> is accepted.</p>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="gumpgpd.Evolution.non_singlet_NLO">
+<span class="sig-prename descclassname"><span class="pre">gumpgpd.Evolution.</span></span><span class="sig-name descname"><span class="pre">non_singlet_NLO</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">n</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">complex</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nf</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prty</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">complex</span></span></span><a class="reference internal" href="_modules/gumpgpd/Evolution.html#non_singlet_NLO"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gumpgpd.Evolution.non_singlet_NLO" title="Link to this definition"></a></dt>
+<dd><p>Non-singlet anomalous dimension.</p>
+<p>Eq. (5.30) in <a class="reference external" href="https://www.sciencedirect.com/science/article/pii/0550321380900036?via%3Dihub">https://www.sciencedirect.com/science/article/pii/0550321380900036?via%3Dihub</a>
+The same of vector (p=1) and axial-vector (p=-1) GPDs, check <a class="reference external" href="https://arxiv.org/pdf/hep-ph/9506451">https://arxiv.org/pdf/hep-ph/9506451</a> page 17</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>n</strong> (<em>complex</em>) – which moment (= Mellin moment for integer n)</p></li>
+<li><p><strong>nf</strong> (<em>int</em>) – number of active quark flavors</p></li>
+<li><p><strong>p</strong> (<em>int</em>) – 1 for vector-like GPDs (H, E), -1 for axial-vector-like GPDs (Ht, Et)</p></li>
+<li><p><strong>prty</strong> (<em>int</em>) – 1 for NS^{+}, -1 for NS^{-}</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Non-singlet NLO anomalous dimension.</p>
+</dd>
+</dl>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>This function works for any broadcastable combination of <code class="docutils literal notranslate"><span class="pre">n</span></code>, <code class="docutils literal notranslate"><span class="pre">nf</span></code>,
+and <code class="docutils literal notranslate"><span class="pre">prty</span></code>.</p>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="gumpgpd.Evolution.outer_subtract">
+<span class="sig-prename descclassname"><span class="pre">gumpgpd.Evolution.</span></span><span class="sig-name descname"><span class="pre">outer_subtract</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">arr1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">arr2</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gumpgpd/Evolution.html#outer_subtract"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gumpgpd.Evolution.outer_subtract" title="Link to this definition"></a></dt>
+<dd><p>Outer subtraction of two arrays along their last axis.</p>
+<p>For inputs of shape <code class="docutils literal notranslate"><span class="pre">(N,</span> <span class="pre">...,</span> <span class="pre">m)</span></code>, produces output of shape
+<code class="docutils literal notranslate"><span class="pre">(N,</span> <span class="pre">...,</span> <span class="pre">m,</span> <span class="pre">m)</span></code> where <code class="docutils literal notranslate"><span class="pre">result[...,</span> <span class="pre">i,</span> <span class="pre">j]</span> <span class="pre">=</span> <span class="pre">arr1[...,</span> <span class="pre">i]</span> <span class="pre">-</span> <span class="pre">arr2[...,</span> <span class="pre">j]</span></code>.
+Here <code class="docutils literal notranslate"><span class="pre">m</span> <span class="pre">=</span> <span class="pre">2</span></code> for the singlet/gluon (S/G) basis.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>arr1</strong> (<em>np.ndarray</em>) – First array, shape <code class="docutils literal notranslate"><span class="pre">(N,</span> <span class="pre">...,</span> <span class="pre">m)</span></code>.</p></li>
+<li><p><strong>arr2</strong> (<em>np.ndarray</em>) – Second array, shape <code class="docutils literal notranslate"><span class="pre">(N,</span> <span class="pre">...,</span> <span class="pre">m)</span></code>.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Shape <code class="docutils literal notranslate"><span class="pre">(N,</span> <span class="pre">...,</span> <span class="pre">m,</span> <span class="pre">m)</span></code> outer difference.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>np.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="gumpgpd.Evolution.poch">
+<span class="sig-prename descclassname"><span class="pre">gumpgpd.Evolution.</span></span><span class="sig-name descname"><span class="pre">poch</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">z</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">complex</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">m</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">complex</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">ndarray</span></span></span><a class="headerlink" href="#gumpgpd.Evolution.poch" title="Link to this definition"></a></dt>
+<dd><p>Pochhammer symbol.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>z</strong> – complex argument</p></li>
+<li><p><strong>m</strong> – integer index</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>pochhammer(z,m)</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>complex</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="gumpgpd.Evolution.pochhammer">
+<span class="sig-prename descclassname"><span class="pre">gumpgpd.Evolution.</span></span><span class="sig-name descname"><span class="pre">pochhammer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">z</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">complex</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">m</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">complex</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">ndarray</span></span></span><a class="reference internal" href="_modules/gumpgpd/Evolution.html#pochhammer"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gumpgpd.Evolution.pochhammer" title="Link to this definition"></a></dt>
+<dd><p>Pochhammer symbol.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>z</strong> – complex argument</p></li>
+<li><p><strong>m</strong> – integer index</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>pochhammer(z,m)</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>complex</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="gumpgpd.Evolution.projectors">
+<span class="sig-prename descclassname"><span class="pre">gumpgpd.Evolution.</span></span><span class="sig-name descname"><span class="pre">projectors</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">n</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">complex</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nf</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prty</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">ndarray</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">ndarray</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="_modules/gumpgpd/Evolution.html#projectors"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gumpgpd.Evolution.projectors" title="Link to this definition"></a></dt>
+<dd><p>Projectors on evolution quark-gluon singlet eigenaxes.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>n</strong> (<em>complex</em>) – which moment (= Mellin moment for integer n)</p></li>
+<li><p><strong>nf</strong> (<em>int</em>) – number of active quark flavors</p></li>
+<li><p><strong>p</strong> (<em>int</em>) – 1 for vector-like GPDs (H, E), -1 for axial-vector-like GPDs (Ht, Et)</p></li>
+<li><p><strong>prty</strong> (<em>int</em>) – 1 for NS^{+}, -1 for NS^{-}, irrelevant at LO</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><strong>lam</strong> (np.ndarray): Shape <code class="docutils literal notranslate"><span class="pre">(N,</span> <span class="pre">2)</span></code> — eigenvalues of the LO singlet
+anomalous dimension matrix (Eq. (123) of hep-ph/0703179).</p></li>
+<li><p><strong>pr</strong> (np.ndarray): Shape <code class="docutils literal notranslate"><span class="pre">(N,</span> <span class="pre">2,</span> <span class="pre">2,</span> <span class="pre">2)</span></code> — projectors
+<code class="docutils literal notranslate"><span class="pre">pr[k,</span> <span class="pre">a,</span> <span class="pre">i,</span> <span class="pre">j]</span></code> (Eq. (122)), where <code class="docutils literal notranslate"><span class="pre">a</span></code> in <code class="docutils literal notranslate"><span class="pre">{+,</span> <span class="pre">-}</span></code> and
+<code class="docutils literal notranslate"><span class="pre">i,</span> <span class="pre">j</span></code> in <code class="docutils literal notranslate"><span class="pre">{Q,</span> <span class="pre">G}</span></code>.</p></li>
+</ul>
+</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Tuple of</p>
+</dd>
+</dl>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p><code class="docutils literal notranslate"><span class="pre">n</span></code> and <code class="docutils literal notranslate"><span class="pre">nf</span></code> are normally scalars; <code class="docutils literal notranslate"><span class="pre">p</span></code> has shape <code class="docutils literal notranslate"><span class="pre">(N,)</span></code>.</p>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="gumpgpd.Evolution.rmudep">
+<span class="sig-prename descclassname"><span class="pre">gumpgpd.Evolution.</span></span><span class="sig-name descname"><span class="pre">rmudep</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">nf</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lamj</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lamk</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mu</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gumpgpd/Evolution.html#rmudep"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gumpgpd.Evolution.rmudep" title="Link to this definition"></a></dt>
+<dd><p>Scale-dependent part of the singlet NLO evolution matrix.</p>
+<p>Computes the ratio factor in Eq. (126) of <a class="reference external" href="https://arxiv.org/abs/hep-ph/0703179">https://arxiv.org/abs/hep-ph/0703179</a>.
+Unlike the Gepard implementation, there is no extra <code class="docutils literal notranslate"><span class="pre">beta_0</span></code> prefactor
+here; it cancels with the corresponding factor in <a class="reference internal" href="#gumpgpd.Evolution.amuindep" title="gumpgpd.Evolution.amuindep"><code class="xref py py-func docutils literal notranslate"><span class="pre">amuindep()</span></code></a>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>nf</strong> (<em>int</em>) – Number of active quark flavors.</p></li>
+<li><p><strong>lamj</strong> (<em>np.ndarray</em>) – Shape <code class="docutils literal notranslate"><span class="pre">(N,</span> <span class="pre">2)</span></code> LO singlet anomalous dimension eigenvalues for moment j.</p></li>
+<li><p><strong>lamk</strong> (<em>np.ndarray</em>) – Shape <code class="docutils literal notranslate"><span class="pre">(N,</span> <span class="pre">2)</span></code> LO singlet anomalous dimension eigenvalues for moment k.</p></li>
+<li><p><strong>mu</strong> (<em>float</em>) – Final scale evolved to from <code class="docutils literal notranslate"><span class="pre">Init_Scale_Q</span></code>.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Shape <code class="docutils literal notranslate"><span class="pre">(N,</span> <span class="pre">2,</span> <span class="pre">2)</span></code> — scale-dependent factor
+R^{ab}_{jk}(Q) of Eq. (126) in hep-ph/0703179.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>np.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="gumpgpd.Evolution.rmudepNS">
+<span class="sig-prename descclassname"><span class="pre">gumpgpd.Evolution.</span></span><span class="sig-name descname"><span class="pre">rmudepNS</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">nf</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lamj</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lamk</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mu</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gumpgpd/Evolution.html#rmudepNS"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gumpgpd.Evolution.rmudepNS" title="Link to this definition"></a></dt>
+<dd><p>Scale-dependent part of the non-singlet NLO evolution matrix.</p>
+<p>Computes the ratio factor in Eq. (126) of <a class="reference external" href="https://arxiv.org/abs/hep-ph/0703179">https://arxiv.org/abs/hep-ph/0703179</a>.
+Unlike the Gepard implementation, there is no extra <code class="docutils literal notranslate"><span class="pre">beta_0</span></code> prefactor
+here; it cancels with the corresponding factor in <a class="reference internal" href="#gumpgpd.Evolution.amuindepNS" title="gumpgpd.Evolution.amuindepNS"><code class="xref py py-func docutils literal notranslate"><span class="pre">amuindepNS()</span></code></a>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>nf</strong> (<em>int</em>) – Number of active quark flavors.</p></li>
+<li><p><strong>lamj</strong> (<em>np.ndarray</em>) – Shape <code class="docutils literal notranslate"><span class="pre">(N,)</span></code>, LO NS anomalous dimension for moment j.</p></li>
+<li><p><strong>lamk</strong> (<em>np.ndarray</em>) – Shape <code class="docutils literal notranslate"><span class="pre">(N,)</span></code>, LO NS anomalous dimension for moment k.</p></li>
+<li><p><strong>mu</strong> (<em>float</em>) – Final scale evolved to from <code class="docutils literal notranslate"><span class="pre">Init_Scale_Q</span></code>.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Shape <code class="docutils literal notranslate"><span class="pre">(N,)</span></code> — scale-dependent factor
+R^{ab}_{jk}(Q)|_{n=1} of Eq. (126) in hep-ph/0703179.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>np.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="gumpgpd.Evolution.singlet_LO">
+<span class="sig-prename descclassname"><span class="pre">gumpgpd.Evolution.</span></span><span class="sig-name descname"><span class="pre">singlet_LO</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">n</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">complex</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nf</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prty</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">ndarray</span></span></span><a class="reference internal" href="_modules/gumpgpd/Evolution.html#singlet_LO"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gumpgpd.Evolution.singlet_LO" title="Link to this definition"></a></dt>
+<dd><p>Singlet LO anomalous dimensions.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>n</strong> (<em>complex</em>) – which moment (= Mellin moment for integer n)</p></li>
+<li><p><strong>nf</strong> (<em>int</em>) – number of active quark flavors</p></li>
+<li><p><strong>p</strong> (<em>int</em>) – 1 for vector-like GPDs (H, E), -1 for axial-vector-like GPDs (Ht, Et)</p></li>
+<li><p><strong>prty</strong> (<em>int</em>) – C parity, irrelevant at LO</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><dl class="simple">
+<dt>2x2 complex matrix ((QQ, QG),</dt><dd><p>(GQ, GG))</p>
+</dd>
+</dl>
+</p>
+</dd>
+</dl>
+<p>This will work as long as n, nf, and p can be broadcasted together.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="gumpgpd.Evolution.singlet_NLO">
+<span class="sig-prename descclassname"><span class="pre">gumpgpd.Evolution.</span></span><span class="sig-name descname"><span class="pre">singlet_NLO</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">n</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">complex</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nf</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prty</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">ndarray</span></span></span><a class="reference internal" href="_modules/gumpgpd/Evolution.html#singlet_NLO"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gumpgpd.Evolution.singlet_NLO" title="Link to this definition"></a></dt>
+<dd><p>Singlet NLO anomalous dimensions matrix.</p>
+<p>Axial-case two-loop singlet anomalous dimensions from
+<a class="reference external" href="https://arxiv.org/abs/hep-ph/9506451">https://arxiv.org/abs/hep-ph/9506451</a> Eqs. (3.75)-(3.77).
+The identity S_{12}(n) + S_{21} = S_1(n)S_2(n) + S_3 (from
+<a class="reference external" href="https://arxiv.org/abs/hep-ph/9810241">https://arxiv.org/abs/hep-ph/9810241</a> Eq. (129)) was applied in the
+axial part of gg1.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>n</strong> (<em>complex</em>) – Which moment (Mellin moment for integer n).</p></li>
+<li><p><strong>nf</strong> (<em>int</em>) – Number of active quark flavors.</p></li>
+<li><p><strong>p</strong> (<em>int</em>) – 1 for vector-like GPDs (H, E), -1 for axial-vector-like GPDs (Ht, Et).</p></li>
+<li><p><strong>prty</strong> (<em>int</em>) – C parity.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Matrix (LO, NLO) where each is in turn
+2x2 complex matrix
+((QQ, QG),
+(GQ, GG))</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="gumpgpd.Evolution.tPDF_Moment_Evo_NLO">
+<span class="sig-prename descclassname"><span class="pre">gumpgpd.Evolution.</span></span><span class="sig-name descname"><span class="pre">tPDF_Moment_Evo_NLO</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">j</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">array</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nf</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mu</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ConfFlav</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">array</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">array</span></span></span><a class="reference internal" href="_modules/gumpgpd/Evolution.html#tPDF_Moment_Evo_NLO"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gumpgpd.Evolution.tPDF_Moment_Evo_NLO" title="Link to this definition"></a></dt>
+<dd><p>FORWARD Next-to-leading order evolved conformal moments in the evolution basis (Evolved moment method)</p>
+<p>This function removes the off-diagonal pieces in Moment_Evo_NLO()</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>j</strong> – conformal spin j (conformal spin is actually j+2 but anyway): array (N,)</p></li>
+<li><p><strong>nf</strong> – number of effective fermions;</p></li>
+<li><p><strong>p</strong> (<em>int</em>) – 1 for vector-like GPD (Ht, Et), -1 for axial-vector-like GPDs (Ht, Et): scalar</p></li>
+<li><p><strong>mu</strong> – final evolution scale: scalar</p></li>
+<li><p><strong>ConfFlav</strong> – unevolved conformal moments</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Next-to-leading order evolved conformal moments in the evolution basis in the forward limit (to be combined with inverse Mellin transform wave function)
+return shape (N, 5)</p>
+</dd>
+</dl>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p><code class="docutils literal notranslate"><span class="pre">j</span></code> accepts 1-D array input for the Mellin-Barnes contour integral;
+all other arguments should be scalar (or broadcastable with <code class="docutils literal notranslate"><span class="pre">j</span></code>).</p>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="gumpgpd.Evolution.tPDF_Moment_Evo_NLO_NSp1">
+<span class="sig-prename descclassname"><span class="pre">gumpgpd.Evolution.</span></span><span class="sig-name descname"><span class="pre">tPDF_Moment_Evo_NLO_NSp1</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">j</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">array</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nf</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mu</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ConfFlav</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">array</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">array</span></span></span><a class="reference internal" href="_modules/gumpgpd/Evolution.html#tPDF_Moment_Evo_NLO_NSp1"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gumpgpd.Evolution.tPDF_Moment_Evo_NLO_NSp1" title="Link to this definition"></a></dt>
+<dd><p>FORWARD Next-to-leading order evolved conformal moments in the evolution basis (Evolved moment method)</p>
+<p>This function removes the off-diagonal pieces in Moment_Evo_NLO()</p>
+<p>Also this function deals with the j=0 singularity in the Moment_Evo_NLO(). We only evaluate the j=0 contributions for the charge odd terms</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>j</strong> – conformal spin j (conformal spin is actually j+2 but anyway): array (N,)</p></li>
+<li><p><strong>nf</strong> – number of effective fermions;</p></li>
+<li><p><strong>p</strong> (<em>int</em>) – 1 for vector-like GPD (Ht, Et), -1 for axial-vector-like GPDs (Ht, Et): scalar</p></li>
+<li><p><strong>mu</strong> – final evolution scale: scalar</p></li>
+<li><p><strong>ConfFlav</strong> – unevolved conformal moments</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Next-to-leading order evolved conformal moments in the evolution basis in the forward limit (to be combined with inverse Mellin transform wave function)
+return shape (N, 5)</p>
+</dd>
+</dl>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p><code class="docutils literal notranslate"><span class="pre">j</span></code> accepts 1-D array input for the Mellin-Barnes contour integral;
+all other arguments should be scalar (or broadcastable with <code class="docutils literal notranslate"><span class="pre">j</span></code>).</p>
+</div>
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="DVMP_xsec.html" class="btn btn-neutral float-left" title="DVMP_xsec module" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="Minimizer.html" class="btn btn-neutral float-right" title="Minimizer module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2026, Yuxun Guo. et. al..</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

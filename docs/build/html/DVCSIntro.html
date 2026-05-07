@@ -1,0 +1,189 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DVCS Quick Guide &mdash; GUMP GPD Analysis 1.0.2 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="_static/copybutton.css?v=76b2166b" />
+
+  
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=1ed6394b"></script>
+      <script src="_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
+      <script src="_static/clipboard.min.js?v=a7894cd8"></script>
+      <script src="_static/copybutton.js?v=f281be69"></script>
+      <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-mml-chtml.js"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="DVMP Quick Guide" href="DVMPIntro.html" />
+    <link rel="prev" title="Minimizer Quick Guide" href="MinimizerIntro.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            GUMP GPD Analysis
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="QuickStart.html">Quick Start</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ParametersIntro.html">Parameters Quick Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ObservablesIntro.html">Observables Quick Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="EvolutionIntro.html">Evolution Quick Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="MinimizerIntro.html">Minimizer Quick Guide</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">DVCS Quick Guide</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#dvcs-main-callables">DVCS Main Callables</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#dvcs-common-inputs">DVCS Common Inputs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#polarization-convention">Polarization Convention</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#hera-observable">HERA Observable</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="DVMPIntro.html">DVMP Quick Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="modules.html">Submodule API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Citation.html">Citation/Acknowledgement</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">GUMP GPD Analysis</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">DVCS Quick Guide</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/DVCSIntro.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="dvcs-quick-guide">
+<h1>DVCS Quick Guide<a class="headerlink" href="#dvcs-quick-guide" title="Link to this heading"></a></h1>
+<p>This page briefly introduces <a class="reference internal" href="DVCS_xsec.html#dvcs-xsec-module"><span class="std std-ref">DVCS_xsec module</span></a> for deeply virtual Compton
+scattering (DVCS) cross-section calculations. The formalism follows
+<a class="reference external" href="https://inspirehep.net/literature/1925449">Guo et al. (2022)</a>.</p>
+<p>The implementation is generated from the Mathematica master expressions and
+numerically cross-checked.</p>
+<section id="dvcs-main-callables">
+<h2>DVCS Main Callables<a class="headerlink" href="#dvcs-main-callables" title="Link to this heading"></a></h2>
+<p>The module provides three core differential cross-sections:</p>
+<ul class="simple">
+<li><p><code class="xref py py-func docutils literal notranslate"><span class="pre">DVCS_xsec.dsigma_BH()</span></code> for the Bethe-Heitler (BH) contribution.</p></li>
+<li><p><code class="xref py py-func docutils literal notranslate"><span class="pre">DVCS_xsec.dsigma_DVCS()</span></code> for the pure DVCS contribution.</p></li>
+<li><p><code class="xref py py-func docutils literal notranslate"><span class="pre">DVCS_xsec.dsigma_INT()</span></code> for the BH-DVCS interference contribution.</p></li>
+</ul>
+<p>Helpers:</p>
+<ul class="simple">
+<li><p><code class="xref py py-func docutils literal notranslate"><span class="pre">DVCS_xsec.dsigma_DVCS_TOT()</span></code> for
+<span class="math notranslate nohighlight">\(d\sigma_{\mathrm{BH}} + d\sigma_{\mathrm{DVCS}} + d\sigma_{\mathrm{INT}}\)</span>.</p></li>
+<li><p><code class="xref py py-func docutils literal notranslate"><span class="pre">DVCS_xsec.Asymmetry_DVCS_TOT()</span></code> for spin asymmetries,
+<span class="math notranslate nohighlight">\(A = d\sigma(\mathrm{pol}) / d\sigma(\mathrm{UU})\)</span>.</p></li>
+<li><p><code class="xref py py-func docutils literal notranslate"><span class="pre">DVCS_xsec.dsigma_DVCS_HERA()</span></code> for the virtual-photon-proton cross-section
+integrated over <span class="math notranslate nohighlight">\(\phi\)</span> (HERA convention).</p></li>
+</ul>
+</section>
+<section id="dvcs-common-inputs">
+<h2>DVCS Common Inputs<a class="headerlink" href="#dvcs-common-inputs" title="Link to this heading"></a></h2>
+<p>The differential functions use the following common inputs:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">y</span></code> (float): beam energy-loss variable.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">xB</span></code> (float): Bjorken <span class="math notranslate nohighlight">\(x_B\)</span>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">t</span></code> (float): momentum transfer squared.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">Q</span></code> (float): photon virtuality.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">phi</span></code> (float): azimuthal angle.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">pol</span></code> (str): polarization configuration label.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">HCFF</span></code> (complex): Compton form factor <span class="math notranslate nohighlight">\(H\)</span>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">ECFF</span></code> (complex): Compton form factor <span class="math notranslate nohighlight">\(E\)</span>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">HtCFF</span></code> (complex): Compton form factor <span class="math notranslate nohighlight">\(\widetilde{H}\)</span>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">EtCFF</span></code> (complex): Compton form factor <span class="math notranslate nohighlight">\(\widetilde{E}\)</span>.</p></li>
+</ul>
+</section>
+<section id="polarization-convention">
+<h2>Polarization Convention<a class="headerlink" href="#polarization-convention" title="Link to this heading"></a></h2>
+<p>The polarization label uses beam-target form <span class="math notranslate nohighlight">\(P_B P_T\)</span>, where
+<span class="math notranslate nohighlight">\(P_B \in \{U, L\}\)</span> and
+<span class="math notranslate nohighlight">\(P_T \in \{U, L, T_{\mathrm{in}}, T_{\mathrm{out}}\}\)</span>.</p>
+<p>Supported labels are:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">UU</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">LU</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">UL</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">LL</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">UTin</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">LTin</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">UTout</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">LTout</span></code></p></li>
+</ul>
+<p>Example: <code class="docutils literal notranslate"><span class="pre">pol</span> <span class="pre">=</span> <span class="pre">'UTout'</span></code>.</p>
+</section>
+<section id="hera-observable">
+<h2>HERA Observable<a class="headerlink" href="#hera-observable" title="Link to this heading"></a></h2>
+<p><code class="xref py py-func docutils literal notranslate"><span class="pre">DVCS_xsec.dsigma_DVCS_HERA()</span></code> integrates over <span class="math notranslate nohighlight">\(\phi\)</span>, so <code class="docutils literal notranslate"><span class="pre">phi</span></code> is
+not an input argument for this function.</p>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="MinimizerIntro.html" class="btn btn-neutral float-left" title="Minimizer Quick Guide" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="DVMPIntro.html" class="btn btn-neutral float-right" title="DVMP Quick Guide" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2026, Yuxun Guo. et. al..</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

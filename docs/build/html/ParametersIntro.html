@@ -1,0 +1,237 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Parameters Quick Guide &mdash; GUMP GPD Analysis 1.0.2 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="_static/copybutton.css?v=76b2166b" />
+
+  
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=1ed6394b"></script>
+      <script src="_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
+      <script src="_static/clipboard.min.js?v=a7894cd8"></script>
+      <script src="_static/copybutton.js?v=f281be69"></script>
+      <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-mml-chtml.js"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Observables Quick Guide" href="ObservablesIntro.html" />
+    <link rel="prev" title="Quick Start" href="QuickStart.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            GUMP GPD Analysis
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="QuickStart.html">Quick Start</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Parameters Quick Guide</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#parameter-managers">Parameter Managers</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#implementation-details-from-source-code">Implementation details from source code</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#moment-construction">Moment Construction</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#code-level-moment-formula">Code-level moment formula</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#numerics-and-shape-behavior">Numerics and shape behavior</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#typical-shape-flow">Typical shape flow</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#how-this-connects-to-the-rest-of-the-package">How this connects to the rest of the package</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="ObservablesIntro.html">Observables Quick Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="EvolutionIntro.html">Evolution Quick Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="MinimizerIntro.html">Minimizer Quick Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="DVCSIntro.html">DVCS Quick Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="DVMPIntro.html">DVMP Quick Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="modules.html">Submodule API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Citation.html">Citation/Acknowledgement</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">GUMP GPD Analysis</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Parameters Quick Guide</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/ParametersIntro.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="parameters-quick-guide">
+<h1>Parameters Quick Guide<a class="headerlink" href="#parameters-quick-guide" title="Link to this heading"></a></h1>
+<p>This page introduces <a class="reference internal" href="Parameters.html#module-gumpgpd.Parameters"><span class="std std-ref">Parameters module</span></a>, which converts fit parameters
+into conformal moments used by evolution and observable calculations.</p>
+<p>Workflow: <code class="docutils literal notranslate"><span class="pre">flat</span> <span class="pre">fit</span> <span class="pre">parameters</span> <span class="pre">-&gt;</span> <span class="pre">structured</span> <span class="pre">tensors</span> <span class="pre">-&gt;</span> <span class="pre">conformal</span> <span class="pre">moments</span></code>.</p>
+<section id="parameter-managers">
+<h2>Parameter Managers<a class="headerlink" href="#parameter-managers" title="Link to this heading"></a></h2>
+<p>The two main manager functions are:</p>
+<ul class="simple">
+<li><p><code class="xref py py-func docutils literal notranslate"><span class="pre">Parameters.ParaManager_Unp()</span></code> for vector-like GPD sector (<span class="math notranslate nohighlight">\(H, E\)</span>),</p></li>
+<li><p><code class="xref py py-func docutils literal notranslate"><span class="pre">Parameters.ParaManager_Pol()</span></code> for axial-vector-like sector (<span class="math notranslate nohighlight">\(\tilde{H}, \tilde{E}\)</span>).</p></li>
+</ul>
+<p>They map flat parameter lists into a standardized tensor layout used
+throughout the code.</p>
+<p>Manager output has shape:</p>
+<div class="math notranslate nohighlight">
+\[(2, 3, 5, n_{\rm ansatz}, 6)\]</div>
+<p>Axis meaning:</p>
+<ol class="arabic simple">
+<li><p>GPD type (for example <span class="math notranslate nohighlight">\(H/E\)</span> or <span class="math notranslate nohighlight">\(\tilde{H}/\tilde{E}\)</span>),</p></li>
+<li><p>skewness expansion block (<span class="math notranslate nohighlight">\(\xi^0\)</span>, <span class="math notranslate nohighlight">\(\xi^2\)</span>, <span class="math notranslate nohighlight">\(\xi^4\)</span>, …),</p></li>
+<li><p>flavor basis components,</p></li>
+<li><p>ansatz-term index,</p></li>
+<li><p>parameter index inside each ansatz term (normalization/intercepts/powers/slopes).</p></li>
+</ol>
+<section id="implementation-details-from-source-code">
+<h3>Implementation details from source code<a class="headerlink" href="#implementation-details-from-source-code" title="Link to this heading"></a></h3>
+<p>The managers do more than reshaping flat lists:</p>
+<ol class="arabic simple">
+<li><p>Flavor-wise ansatz blocks are assembled explicitly for each species.</p></li>
+<li><p><span class="math notranslate nohighlight">\(\xi^2\)</span> and <span class="math notranslate nohighlight">\(\xi^4\)</span> blocks are built by rescaling only the
+normalization entry via <code class="docutils literal notranslate"><span class="pre">np.einsum(...,</span> <span class="pre">[R,1,1,1,1,1])</span></code>.</p></li>
+<li><p>A placeholder ansatz row <code class="docutils literal notranslate"><span class="pre">[0,0,1,0,0,0]</span></code> is used to keep tensor shapes
+regular when some sectors use fewer active terms.</p></li>
+</ol>
+<p>For <code class="xref py py-func docutils literal notranslate"><span class="pre">Parameters.ParaManager_Unp()</span></code>:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">E</span></code> sea/gluon components are tied to <code class="docutils literal notranslate"><span class="pre">H</span></code> via multiplicative ratios
+(<span class="math notranslate nohighlight">\(R_{E,\bar u}\)</span>, <span class="math notranslate nohighlight">\(R_{E,\bar d}\)</span>, <span class="math notranslate nohighlight">\(R_{E,g}\)</span>).</p></li>
+</ul>
+<p>For <code class="xref py py-func docutils literal notranslate"><span class="pre">Parameters.ParaManager_Pol()</span></code>:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">\tilde</span> <span class="pre">E</span></code> sea/gluon components are tied to <code class="docutils literal notranslate"><span class="pre">\tilde</span> <span class="pre">H</span></code> via <code class="docutils literal notranslate"><span class="pre">R_Et_Sea</span></code>.</p></li>
+<li><p>Several higher-order skewness prefactors are currently fixed to zero in-code
+(for example gluon <span class="math notranslate nohighlight">\(\xi^2/\xi^4\)</span> prefactors), effectively turning off
+those terms in the default polarized setup.</p></li>
+</ul>
+<p>This unified structure is the direct input for moment builders.</p>
+</section>
+</section>
+<section id="moment-construction">
+<h2>Moment Construction<a class="headerlink" href="#moment-construction" title="Link to this heading"></a></h2>
+<p>Two helper functions build conformal moments from parameter sets:</p>
+<ul class="simple">
+<li><p><code class="xref py py-func docutils literal notranslate"><span class="pre">Parameters.ConfMoment()</span></code></p></li>
+<li><p><code class="xref py py-func docutils literal notranslate"><span class="pre">Parameters.Moment_Sum()</span></code></p></li>
+</ul>
+<p><code class="xref py py-func docutils literal notranslate"><span class="pre">Parameters.ConfMoment()</span></code> computes conformal moments for each ansatz term,
+while <code class="xref py py-func docutils literal notranslate"><span class="pre">Parameters.Moment_Sum()</span></code> sums over ansatz terms to obtain the total
+moment per flavor component.</p>
+<p>Both functions support scalar or vectorized conformal spin input <span class="math notranslate nohighlight">\(j\)</span>
+(for example <span class="math notranslate nohighlight">\(j \in \mathbb{C}\)</span> or an array <span class="math notranslate nohighlight">\((N,)\)</span>).</p>
+<section id="code-level-moment-formula">
+<h3>Code-level moment formula<a class="headerlink" href="#code-level-moment-formula" title="Link to this heading"></a></h3>
+<p>The implementation follows a KM-style ansatz with exponential <span class="math notranslate nohighlight">\(t\)</span>-slope
+and dipole residual factor:</p>
+<div class="math notranslate nohighlight">
+\[F(j,t)=\frac{N}{B(2-\alpha,1+\beta)}
+B\!\left(j+1-\alpha-\alpha' t,1+\beta\right)
+e^{b_{\rm exp}t}(1-t\,m^{-2})^{-2}\]</div>
+<p>where each ansatz term uses the parameter tuple
+<code class="docutils literal notranslate"><span class="pre">[norm,</span> <span class="pre">alpha,</span> <span class="pre">beta,</span> <span class="pre">alphap,</span> <span class="pre">bexp,</span> <span class="pre">invm2]</span></code>.</p>
+</section>
+<section id="numerics-and-shape-behavior">
+<h3>Numerics and shape behavior<a class="headerlink" href="#numerics-and-shape-behavior" title="Link to this heading"></a></h3>
+<ul class="simple">
+<li><p><code class="xref py py-func docutils literal notranslate"><span class="pre">Parameters.beta_loggamma()</span></code> evaluates Beta functions through
+<code class="docutils literal notranslate"><span class="pre">loggamma</span></code> for complex-number stability.</p></li>
+<li><p><code class="xref py py-func docutils literal notranslate"><span class="pre">Parameters.ConfMoment()</span></code> reshapes <code class="docutils literal notranslate"><span class="pre">j</span></code> and <code class="docutils literal notranslate"><span class="pre">t</span></code> to broadcast against
+parameter tensors; scalar and batched kinematics are both supported.</p></li>
+<li><p><code class="xref py py-func docutils literal notranslate"><span class="pre">Parameters.Moment_Sum()</span></code> performs the ansatz reduction with
+<code class="docutils literal notranslate"><span class="pre">axis=-1</span></code> after <code class="xref py py-func docutils literal notranslate"><span class="pre">Parameters.ConfMoment()</span></code> is evaluated.</p></li>
+</ul>
+</section>
+<section id="typical-shape-flow">
+<h3>Typical shape flow<a class="headerlink" href="#typical-shape-flow" title="Link to this heading"></a></h3>
+<p>For a common use case with vectorized <span class="math notranslate nohighlight">\(j\)</span>:</p>
+<ol class="arabic simple">
+<li><p>manager output (per species block): <code class="docutils literal notranslate"><span class="pre">(3,</span> <span class="pre">5,</span> <span class="pre">n_ansatz,</span> <span class="pre">6)</span></code></p></li>
+<li><p><code class="xref py py-func docutils literal notranslate"><span class="pre">Parameters.ConfMoment()</span></code> output: <code class="docutils literal notranslate"><span class="pre">(N,</span> <span class="pre">5,</span> <span class="pre">n_ansatz)</span></code></p></li>
+<li><p><code class="xref py py-func docutils literal notranslate"><span class="pre">Parameters.Moment_Sum()</span></code> output: <code class="docutils literal notranslate"><span class="pre">(N,</span> <span class="pre">5)</span></code></p></li>
+</ol>
+<p>These <code class="docutils literal notranslate"><span class="pre">(N,</span> <span class="pre">5)</span></code> moments are the direct inputs expected by evolution and
+observable reconstruction routines.</p>
+</section>
+</section>
+<section id="how-this-connects-to-the-rest-of-the-package">
+<h2>How this connects to the rest of the package<a class="headerlink" href="#how-this-connects-to-the-rest-of-the-package" title="Link to this heading"></a></h2>
+<p>Outputs from this module are consumed by:</p>
+<ul class="simple">
+<li><p><code class="xref py py-mod docutils literal notranslate"><span class="pre">Evolution</span></code> for LO/NLO scale evolution in moment space,</p></li>
+<li><p><code class="xref py py-mod docutils literal notranslate"><span class="pre">Observables</span></code> for inverse Mellin and Mellin-Barnes reconstruction of
+tPDFs, GPDs, CFFs, and TFFs.</p></li>
+</ul>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="QuickStart.html" class="btn btn-neutral float-left" title="Quick Start" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="ObservablesIntro.html" class="btn btn-neutral float-right" title="Observables Quick Guide" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2026, Yuxun Guo. et. al..</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
