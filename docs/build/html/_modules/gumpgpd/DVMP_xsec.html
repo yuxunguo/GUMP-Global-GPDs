@@ -6,7 +6,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>gumpgpd.DVMP_xsec &mdash; GUMP GPD Analysis 1.0.2 documentation</title>
-      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
 
@@ -42,16 +42,16 @@
   </form>
 </div>
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
-              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+              <p class="caption" role="heading"><span class="caption-text">Contents</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../../QuickStart.html">Quick start</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../ParametersIntro.html">Parameters Quickguide</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../ObservablesIntro.html">Observables Quickguide</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../EvolutionIntro.html">Evolution Quickguide</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../MinimizerIntro.html">Minimizer Quickguide</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../DVCSIntro.html">DVCS Quickguide</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../DVMPIntro.html">DVMP Quickguide</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../modules.html">Documentation of submodules</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../QuickStart.html">Quick Start</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../ParametersIntro.html">Parameters Quick Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../ObservablesIntro.html">Observables Quick Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../EvolutionIntro.html">Evolution Quick Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../MinimizerIntro.html">Minimizer Quick Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../DVCSIntro.html">DVCS Quick Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../DVMPIntro.html">DVMP Quick Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../modules.html">Submodule API Reference</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../Citation.html">Citation/Acknowledgement</a></li>
 </ul>
 
@@ -80,25 +80,43 @@
            <div itemprop="articleBody">
              
   <h1>Source code for gumpgpd.DVMP_xsec</h1><div class="highlight"><pre>
-<span></span><span class="c1">### Module for calculating meson production cross-sections and TFFs</span>
+<span></span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Deeply Virtual Meson Production (DVMP) cross-section calculations.</span>
 
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
-<span class="kn">import</span> <span class="nn">os</span>
-<span class="kn">from</span> <span class="nn">iminuit</span> <span class="kn">import</span> <span class="n">Minuit</span>
-<span class="kn">from</span> <span class="nn">functools</span> <span class="kn">import</span> <span class="n">cache</span>
+<span class="sd">This module implements the differential cross-sections and the</span>
+<span class="sd">:math:`R = \sigma_L / \sigma_T` ratio for exclusive meson production</span>
+<span class="sd">(:math:`\rho^0`, :math:`\phi`, :math:`J/\psi`) off the proton.  The</span>
+<span class="sd">cross-sections are expressed in terms of helicity Transition Form Factors</span>
+<span class="sd">(TFFs) :math:`\mathcal{H}` and :math:`\mathcal{E}` computed from GPDs.</span>
 
-<span class="kn">from</span> <span class="nn">numpy</span> <span class="kn">import</span> <span class="n">cos</span> <span class="k">as</span> <span class="n">Cos</span>
-<span class="kn">from</span> <span class="nn">numpy</span> <span class="kn">import</span> <span class="n">sin</span> <span class="k">as</span> <span class="n">Sin</span>
-<span class="kn">from</span> <span class="nn">numpy</span> <span class="kn">import</span> <span class="n">real</span> <span class="k">as</span> <span class="n">Real</span>
-<span class="kn">from</span> <span class="nn">numpy</span> <span class="kn">import</span> <span class="n">imag</span> <span class="k">as</span> <span class="n">Imag</span>
-<span class="kn">from</span> <span class="nn">numpy</span> <span class="kn">import</span> <span class="n">conjugate</span> <span class="k">as</span> <span class="n">Conjugate</span>
+<span class="sd">Key components:</span>
+
+<span class="sd">* :func:`R` — L/T ratio parametrization (Eq. (32) of</span>
+<span class="sd">    `arXiv:1112.2597 &lt;https://arxiv.org/abs/1112.2597&gt;`_).</span>
+<span class="sd">* :func:`R_rho_fit` — iMinuit fit of ``R`` parameters to combined H1+ZEUS data.</span>
+<span class="sd">* :func:`R_fitted` — best-fit :math:`R` with propagated uncertainty.</span>
+<span class="sd">* :func:`dsigmaL_DVMP_dt` — longitudinal differential cross-section</span>
+<span class="sd">  :math:`d\sigma_L/dt`.</span>
+<span class="sd">* :func:`dsigma_DVMP_dt` — total :math:`d\sigma/dt` after L/T unseparation.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">iminuit</span><span class="w"> </span><span class="kn">import</span> <span class="n">Minuit</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">functools</span><span class="w"> </span><span class="kn">import</span> <span class="n">cache</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="kn">import</span> <span class="n">cos</span> <span class="k">as</span> <span class="n">Cos</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="kn">import</span> <span class="n">sin</span> <span class="k">as</span> <span class="n">Sin</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="kn">import</span> <span class="n">real</span> <span class="k">as</span> <span class="n">Real</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="kn">import</span> <span class="n">imag</span> <span class="k">as</span> <span class="n">Imag</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="kn">import</span> <span class="n">conjugate</span> <span class="k">as</span> <span class="n">Conjugate</span>
 
 <span class="n">dir_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">realpath</span><span class="p">(</span><span class="vm">__file__</span><span class="p">))</span>
 
-<span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">***************************** Masses, decay constants, etc. ***********************</span>
-<span class="sd">&quot;&quot;&quot;</span>
+<span class="c1"># ---------------------------------------------------------------------------</span>
+<span class="c1"># Physical constants: masses (GeV), decay constants (GeV), and unit conversion</span>
+<span class="c1"># ---------------------------------------------------------------------------</span>
 <span class="n">M_p</span> <span class="o">=</span> <span class="mf">0.938</span>
 <span class="n">M_n</span> <span class="o">=</span> <span class="mf">0.940</span>
 <span class="n">M_rho</span> <span class="o">=</span> <span class="mf">0.775</span>
@@ -107,23 +125,33 @@
 <span class="n">gevtonb</span> <span class="o">=</span> <span class="mf">389.9</span> <span class="o">*</span> <span class="mi">1000</span>
 <span class="n">alphaEM</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">/</span> <span class="mf">137.036</span>
 
-<span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">******* R Ratio (longitudinal/transverse separation) Parametrization and Fits ************</span>
-<span class="sd">&quot;&quot;&quot;</span>
+<span class="c1"># ---------------------------------------------------------------------------</span>
+<span class="c1"># R ratio (sigma_L / sigma_T) parametrization and fit to HERA data</span>
+<span class="c1"># ---------------------------------------------------------------------------</span>
 
 <div class="viewcode-block" id="R">
 <a class="viewcode-back" href="../../DVMP_xsec.html#gumpgpd.DVMP_xsec.R">[docs]</a>
-<span class="k">def</span> <span class="nf">R</span><span class="p">(</span><span class="n">Q</span><span class="p">:</span><span class="nb">float</span><span class="p">,</span> <span class="n">a</span><span class="p">:</span><span class="nb">float</span><span class="p">,</span> <span class="n">p</span><span class="p">:</span><span class="nb">float</span><span class="p">,</span> <span class="n">meson</span><span class="p">:</span><span class="nb">int</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot; The R ratio: Longitudinal DVMP cross section/ Transverse DVMP cross section</span>
-<span class="sd">    </span>
+<span class="k">def</span><span class="w"> </span><span class="nf">R</span><span class="p">(</span><span class="n">Q</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">a</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">p</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">meson</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;L/T cross-section ratio :math:`R = \sigma_L / \sigma_T` parametrization.</span>
+
+<span class="sd">    For :math:`\rho^0` (``meson=1``) the parametrization follows Eq. (32) of</span>
+<span class="sd">    `arXiv:1112.2597 &lt;https://arxiv.org/pdf/1112.2597&gt;`_:</span>
+
+<span class="sd">    .. math::</span>
+
+<span class="sd">        R(Q) = \frac{Q^2}{M_{\rho}^2}\left(1 + e^a \frac{Q^2}{M_{\rho}^2}\right)^{-p}</span>
+
+<span class="sd">    For :math:`J/\psi` (``meson=3``) the simple ratio :math:`Q^2 / M_{J/\psi}^2` is used.</span>
+
 <span class="sd">    Args:</span>
-<span class="sd">       Q: The photon virtuality </span>
-<span class="sd">       a: Parameter</span>
-<span class="sd">       p:Parameter</span>
-<span class="sd">       meson: 1 for rho, 3 for jpsi, 2 is saved for phi to use later</span>
-<span class="sd">    </span>
-<span class="sd">    Returns: The parametrization of R factor of the  L/T separation  as in  Eq.(32) in https://arxiv.org/pdf/1112.2597&quot;</span>
-<span class="sd">    </span>
+<span class="sd">        Q (float): photon virtuality :math:`Q` in GeV.</span>
+<span class="sd">        a (float): fit parameter controlling the transition scale.</span>
+<span class="sd">        p (float): fit parameter controlling the power-law fall-off.</span>
+<span class="sd">        meson (int): meson code — ``1`` for :math:`\rho^0`, ``3`` for</span>
+<span class="sd">            :math:`J/\psi`; ``2`` is reserved for :math:`\phi`.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        float: :math:`R = \sigma_L / \sigma_T`.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="p">(</span><span class="n">meson</span><span class="o">==</span><span class="mi">1</span><span class="p">):</span> 
         <span class="k">return</span> <span class="p">(</span><span class="n">Q</span><span class="o">**</span><span class="mi">2</span> <span class="o">/</span> <span class="n">M_rho</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">a</span><span class="p">)</span> <span class="o">*</span> <span class="n">Q</span><span class="o">**</span><span class="mi">2</span> <span class="o">/</span> <span class="n">M_rho</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span> <span class="o">**</span> <span class="p">(</span><span class="o">-</span><span class="n">p</span><span class="p">)</span>
@@ -131,13 +159,9 @@
         <span class="k">return</span>  <span class="p">(</span><span class="n">Q</span><span class="o">**</span><span class="mi">2</span><span class="o">/</span><span class="n">M_jpsi</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span></div>
 
 
-<span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">************************ Preprocess the R ratio: we fit the R ratio measure from experiments and extrapolate with uncertainties ****************************</span>
-
-<span class="sd">R(Q,a,p,meson): the ratio σ_L / σ_T for meson production follows Eq.(32) in arXiv:1112.2597 for ρ, but here we handle both ρ (meson==1) and J/ψ (meson==3) cases in one function.</span>
-
-<span class="sd">This will convert all the measured total cross-sections into longitudinal cross-sections that theory predicts with dσ_L/dt= (dσ_tot/dt) / (ε + 1/R) with error propagation</span>
-<span class="sd">&quot;&quot;&quot;</span>
+<span class="c1"># Fit R to combined H1 + ZEUS rho data and propagate uncertainties.</span>
+<span class="c1"># Total cross-sections are converted to longitudinal ones via</span>
+<span class="c1">#   dsigma_L/dt = (dsigma_tot/dt) / (epsilon + 1/R)</span>
 <span class="c1">#Below we convert the raw data into the one with total errors for future use.</span>
 <span class="c1"># Loading the combined H1 and ZEUS R‐ratio data for ρ meson:</span>
 <span class="c1"># We’ve taken both the ZEUS and H1 measurements, merged them into one table, and now we are fitting a single parametrization to the combined HERA data.</span>
@@ -176,17 +200,16 @@
 <span class="c1"># Defining the chi² cost function for fitting a, p to the ρ–data:</span>
 <div class="viewcode-block" id="R_rho_cost">
 <a class="viewcode-back" href="../../DVMP_xsec.html#gumpgpd.DVMP_xsec.R_rho_cost">[docs]</a>
-<span class="k">def</span> <span class="nf">R_rho_cost</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">p</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Cost function for R(Q) using H1 and Zeus data combined.</span>
-<span class="sd">    </span>
-<span class="sd">    Parameters:</span>
-<span class="sd">      </span>
-<span class="sd">      a, p  : Free parameters in the model</span>
-<span class="sd">      </span>
+<span class="k">def</span><span class="w"> </span><span class="nf">R_rho_cost</span><span class="p">(</span><span class="n">a</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">p</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Reduced :math:`\chi^2` cost function for fitting :func:`R` to combined H1+ZEUS :math:`\rho` data.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        a (float): fit parameter :math:`a` of :func:`R`.</span>
+<span class="sd">        p (float): fit parameter :math:`p` of :func:`R`.</span>
+
 <span class="sd">    Returns:</span>
-<span class="sd">      Reduced chi2: (Sum of squared differences between model prediction and experimental data divided by the total errror)/Degrees of freedom</span>
-<span class="sd">      </span>
+<span class="sd">        float: :math:`\chi^2_{\rm red} = \sum_i [(R_i^{\rm exp} - R_i^{\rm pred}) /</span>
+<span class="sd">        \sigma_i]^2 \,/\, N_{\rm dof}`.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">Q_vals</span> <span class="o">=</span> <span class="n">RrhoZEUSnH1</span><span class="p">[</span><span class="s1">&#39;Q&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span> 
     <span class="n">R_exp_rho</span>  <span class="o">=</span> <span class="n">RrhoZEUSnH1</span><span class="p">[</span><span class="s1">&#39;R&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span>
@@ -200,12 +223,24 @@
     <span class="k">return</span> <span class="n">chi2</span> <span class="o">/</span> <span class="n">ndof</span></div>
 
 
-<span class="c1">#Using iminuit to minimize the cost function and extract best–fit values:</span>
 <div class="viewcode-block" id="R_rho_fit">
 <a class="viewcode-back" href="../../DVMP_xsec.html#gumpgpd.DVMP_xsec.R_rho_fit">[docs]</a>
 <span class="nd">@cache</span>
-<span class="k">def</span> <span class="nf">R_rho_fit</span><span class="p">():</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">R_rho_fit</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Fit :func:`R` parameters ``(a, p)`` to the combined H1+ZEUS :math:`\\rho` data.</span>
 
+<span class="sd">    Uses iMinuit ``migrad`` for minimization and ``hesse`` for uncertainty</span>
+<span class="sd">    estimation.  The result is cached so the fit runs only once per session.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        tuple: ``(val_a, var_a, val_p, var_p, corr_ap)`` where</span>
+
+<span class="sd">        * ``val_a`` — best-fit value of :math:`a`</span>
+<span class="sd">        * ``var_a`` — :math:`1\\sigma` uncertainty on :math:`a`</span>
+<span class="sd">        * ``val_p`` — best-fit value of :math:`p`</span>
+<span class="sd">        * ``var_p`` — :math:`1\\sigma` uncertainty on :math:`p`</span>
+<span class="sd">        * ``corr_ap`` — covariance between :math:`a` and :math:`p`</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">m</span> <span class="o">=</span> <span class="n">Minuit</span><span class="p">(</span><span class="n">R_rho_cost</span><span class="p">,</span> <span class="n">a</span><span class="o">=</span><span class="mf">2.5</span><span class="p">,</span> <span class="n">p</span><span class="o">=</span><span class="mf">0.7</span><span class="p">)</span> <span class="c1"># initial guesses.</span>
 
     <span class="n">m</span><span class="o">.</span><span class="n">migrad</span><span class="p">()</span>  <span class="c1"># run the minimizer</span>
@@ -225,8 +260,28 @@
 
 <div class="viewcode-block" id="R_fitted">
 <a class="viewcode-back" href="../../DVMP_xsec.html#gumpgpd.DVMP_xsec.R_fitted">[docs]</a>
-<span class="k">def</span> <span class="nf">R_fitted</span><span class="p">(</span><span class="n">Q</span><span class="p">,</span> <span class="n">meson</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span><span class="mi">1</span><span class="p">):</span>
-    
+<span class="k">def</span><span class="w"> </span><span class="nf">R_fitted</span><span class="p">(</span><span class="n">Q</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">meson</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">:</span>
+<span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Evaluate the fitted :func:`R` ratio with propagated :math:`1\sigma` uncertainty.</span>
+
+<span class="sd">    Calls :func:`R_rho_fit` to obtain best-fit parameters, then propagates</span>
+<span class="sd">    their uncertainties analytically via first-order error propagation:</span>
+
+<span class="sd">    .. math::</span>
+
+<span class="sd">        \sigma_R^2 = \left(\frac{\partial R}{\partial a}\right)^2 \sigma_a^2</span>
+<span class="sd">                   + \left(\frac{\partial R}{\partial p}\right)^2 \sigma_p^2</span>
+<span class="sd">                   + 2\,\frac{\partial R}{\partial a}\frac{\partial R}{\partial p}\,</span>
+<span class="sd">                     \mathrm{cov}(a,\,p)</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        Q (float): photon virtuality in GeV (scalar or array).</span>
+<span class="sd">        meson (int): meson code; currently only ``1`` (:math:`\rho^0`) is</span>
+<span class="sd">            implemented.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        tuple: ``(R_mean, R_std)`` — central value and :math:`1\sigma`</span>
+<span class="sd">        uncertainty of :math:`R(Q)`.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">assert</span> <span class="n">meson</span> <span class="o">==</span> <span class="mi">1</span><span class="p">,</span> <span class="s1">&#39;Not implemented yet, only rho meson (=1) now!&#39;</span>
         
     <span class="k">if</span><span class="p">(</span><span class="n">meson</span> <span class="o">==</span><span class="mi">1</span><span class="p">):</span>
@@ -278,37 +333,46 @@
 <span class="sd">    </span>
 <span class="sd">R_fit_plt()</span>
 <span class="sd">&#39;&#39;&#39;</span>
-<span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">******************************Cross-sections for proton target (currently for virtual photon scattering sub-process)*********************************</span>
-<span class="sd">&quot;&quot;&quot;</span>
+<span class="c1"># ---------------------------------------------------------------------------</span>
+<span class="c1"># Cross-sections for proton target (virtual photon sub-process)</span>
+<span class="c1"># ---------------------------------------------------------------------------</span>
 
 <div class="viewcode-block" id="epsilon">
 <a class="viewcode-back" href="../../DVMP_xsec.html#gumpgpd.DVMP_xsec.epsilon">[docs]</a>
-<span class="k">def</span> <span class="nf">epsilon</span><span class="p">(</span><span class="n">y</span><span class="p">:</span><span class="nb">float</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot; Photon polarizability.</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">epsilon</span><span class="p">(</span><span class="n">y</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Virtual photon polarization parameter :math:`\varepsilon`.</span>
+
+<span class="sd">    .. math::</span>
+
+<span class="sd">        \varepsilon = \frac{1 - y}{1 - y + y^2/2}</span>
+
+<span class="sd">    See Eq. (31) of `arXiv:1112.2597 &lt;https://arxiv.org/pdf/1112.2597&gt;`_.</span>
 
 <span class="sd">    Args:</span>
-<span class="sd">       y (float): Beam energy lost parameter</span>
-<span class="sd">     </span>
+<span class="sd">        y (float): inelasticity (beam energy loss fraction).</span>
 
 <span class="sd">    Returns:</span>
-<span class="sd">        epsilon:  &quot;Eq.(31) in https://arxiv.org/pdf/1112.2597&quot; </span>
+<span class="sd">        float: :math:`\varepsilon \in (0, 1)`.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">y</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">y</span> <span class="o">+</span> <span class="n">y</span><span class="o">**</span><span class="mi">2</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="MassCorr">
 <a class="viewcode-back" href="../../DVMP_xsec.html#gumpgpd.DVMP_xsec.MassCorr">[docs]</a>
-<span class="k">def</span> <span class="nf">MassCorr</span><span class="p">(</span><span class="n">meson</span><span class="p">:</span><span class="nb">int</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot; Mass corrections </span>
+<span class="k">def</span><span class="w"> </span><span class="nf">MassCorr</span><span class="p">(</span><span class="n">meson</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Meson mass correction entering the propagator denominator.</span>
 
-<span class="sd">     Args:</span>
-<span class="sd">         meson:The meson being produced in DVMP process: 1 for rho, 2 for phi, 3 for j/psi</span>
-<span class="sd">      </span>
+<span class="sd">    Returns :math:`M_{J/\psi}` for :math:`J/\psi` production and ``0`` for</span>
+<span class="sd">    lighter mesons, where the mass correction to :math:`Q^2` is negligible.</span>
 
-<span class="sd">     Returns:</span>
-<span class="sd">        mass correction only for j/psi</span>
-<span class="sd">     &quot;&quot;&quot;</span>
+<span class="sd">    Args:</span>
+<span class="sd">        meson (int): meson code — ``1`` for :math:`\rho^0`, ``2`` for</span>
+<span class="sd">            :math:`\phi`, ``3`` for :math:`J/\psi`.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        float: mass correction in GeV (:math:`M_{J/\psi}` for ``meson=3``,</span>
+<span class="sd">        ``0`` otherwise).</span>
+<span class="sd">    &quot;&quot;&quot;</span>
   
     <span class="k">if</span> <span class="p">(</span><span class="n">meson</span><span class="o">==</span><span class="mi">3</span><span class="p">):</span>
         <span class="k">return</span>  <span class="n">M_jpsi</span>
@@ -321,23 +385,33 @@
 <span class="c1"># -----------------------------------------------------------------------------</span>
 
 <span class="nd">@np</span><span class="o">.</span><span class="n">vectorize</span>
-<span class="k">def</span> <span class="nf">dsigmaL_DVMP_dt</span><span class="p">(</span><span class="n">y</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">xB</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">t</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">Q</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">meson</span><span class="p">:</span><span class="nb">int</span><span class="p">,</span> <span class="n">HTFF</span><span class="p">:</span> <span class="nb">complex</span><span class="p">,</span> <span class="n">ETFF</span><span class="p">:</span> <span class="nb">complex</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Longitudinal DVMP cross section differential only in t</span>
-<span class="sd">          </span>
-<span class="sd">      Args:</span>
-<span class="sd">          y (float): Beam energy lost parameter</span>
-<span class="sd">          xB (float): x_bjorken</span>
-<span class="sd">          t (float): momentum transfer square</span>
-<span class="sd">          Q (float): photon virtuality</span>
-<span class="sd">          TFF (complex): Transition form factor H </span>
-<span class="sd">          ETFF (complex): Transition form factor E</span>
-<span class="sd">          MassCorr(int): Mass corrections to the cross section.  Nonzero only for j/psi</span>
-<span class="sd">   </span>
-<span class="sd">      </span>
+<span class="k">def</span><span class="w"> </span><span class="nf">dsigmaL_DVMP_dt</span><span class="p">(</span><span class="n">y</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">xB</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">t</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">Q</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">meson</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+                    <span class="n">HTFF</span><span class="p">:</span> <span class="nb">complex</span><span class="p">,</span> <span class="n">ETFF</span><span class="p">:</span> <span class="nb">complex</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Longitudinal DVMP differential cross-section :math:`d\sigma_L/dt`.</span>
 
-<span class="sd">      Returns:</span>
-<span class="sd">          </span>
-<span class="sd">          Eq.(2.8) as in https://arxiv.org/pdf/2409.17231&quot;</span>
+<span class="sd">    Implements Eq. (2.8) of `arXiv:2409.17231 &lt;https://arxiv.org/pdf/2409.17231&gt;`_:</span>
+
+<span class="sd">    .. math::</span>
+
+<span class="sd">        \frac{d\sigma_L}{dt} = \frac{4\pi^2\alpha_{\rm EM}\,x_B^2}</span>
+<span class="sd">            {(Q^2+M_c^2)^2}\cdot\frac{Q^2}{(Q^2+M_c^2)^2}</span>
+<span class="sd">            \left[|\mathcal{H}|^2 - \frac{t}{4M_p^2}|\mathcal{E}|^2\right]</span>
+
+<span class="sd">    where :math:`M_c = M_{J/\psi}` for :math:`J/\psi` and ``0`` otherwise</span>
+<span class="sd">    (see :func:`MassCorr`).  The result is converted to nb/GeV\ :sup:`2`.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        y (float): inelasticity.</span>
+<span class="sd">        xB (float): Bjorken-:math:`x`.</span>
+<span class="sd">        t (float): squared momentum transfer :math:`t` in GeV\ :sup:`2`.</span>
+<span class="sd">        Q (float): photon virtuality :math:`Q` in GeV.</span>
+<span class="sd">        meson (int): meson code — ``1`` for :math:`\rho^0`, ``2`` for</span>
+<span class="sd">            :math:`\phi`, ``3`` for :math:`J/\psi`.</span>
+<span class="sd">        HTFF (complex): helicity-conserving TFF :math:`\mathcal{H}`.</span>
+<span class="sd">        ETFF (complex): helicity-flip TFF :math:`\mathcal{E}`.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        float: :math:`d\sigma_L/dt` in nb/GeV\ :sup:`2`.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">return</span> <span class="n">gevtonb</span> <span class="o">*</span> <span class="p">(</span> <span class="mi">4</span><span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">**</span><span class="mi">2</span>  <span class="o">*</span><span class="n">alphaEM</span> <span class="o">*</span> <span class="n">xB</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">/</span> <span class="p">((</span><span class="n">Q</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="n">MassCorr</span><span class="p">(</span><span class="n">meson</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span><span class="p">))</span> <span class="o">*</span> <span class="p">(</span><span class="n">Q</span><span class="o">/</span> <span class="p">(</span><span class="n">Q</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="n">MassCorr</span><span class="p">(</span><span class="n">meson</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span><span class="p">))</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">*</span> <span class="p">(</span><span class="n">Real</span><span class="p">(</span><span class="n">HTFF</span><span class="o">*</span> <span class="n">Conjugate</span><span class="p">(</span><span class="n">HTFF</span><span class="p">))</span> <span class="o">-</span> <span class="n">t</span><span class="o">/</span><span class="mi">4</span><span class="o">/</span> <span class="n">M_p</span><span class="o">**</span><span class="mi">2</span> <span class="o">*</span> <span class="n">Real</span><span class="p">(</span><span class="n">ETFF</span><span class="o">*</span> <span class="n">Conjugate</span><span class="p">(</span><span class="n">ETFF</span><span class="p">)))</span>
@@ -347,23 +421,36 @@
 <span class="c1"># -----------------------------------------------------------------------------</span>
 
 <span class="nd">@np</span><span class="o">.</span><span class="n">vectorize</span>
-<span class="k">def</span> <span class="nf">dsigma_DVMP_dt</span><span class="p">(</span><span class="n">y</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">xB</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">t</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">Q</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">meson</span><span class="p">:</span><span class="nb">int</span><span class="p">,</span> <span class="n">HTFF</span><span class="p">:</span> <span class="nb">complex</span><span class="p">,</span> <span class="n">ETFF</span><span class="p">:</span> <span class="nb">complex</span><span class="p">,</span><span class="n">a</span><span class="p">:</span><span class="nb">float</span><span class="p">,</span><span class="n">p</span><span class="p">:</span><span class="nb">float</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;The total DVMP cross section differential only in t</span>
-<span class="sd">          </span>
-<span class="sd">      Args:</span>
-<span class="sd">          y (float): Beam energy lost parameter</span>
-<span class="sd">          xB (float): x_bjorken</span>
-<span class="sd">          t (float): momentum transfer square</span>
-<span class="sd">          Q (float): photon virtuality</span>
-<span class="sd">          TFF (complex): Transition form factor H </span>
-<span class="sd">          ETFF (complex): Transition form factor E</span>
-<span class="sd">          MassCorr(int): Mass corrections to the cross section.  Nonzero only for j/psi</span>
-<span class="sd">   </span>
-<span class="sd">      </span>
+<span class="k">def</span><span class="w"> </span><span class="nf">dsigma_DVMP_dt</span><span class="p">(</span><span class="n">y</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">xB</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">t</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">Q</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">meson</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+                   <span class="n">HTFF</span><span class="p">:</span> <span class="nb">complex</span><span class="p">,</span> <span class="n">ETFF</span><span class="p">:</span> <span class="nb">complex</span><span class="p">,</span> <span class="n">a</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">p</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Total (L+T) DVMP differential cross-section :math:`d\sigma/dt`.</span>
 
-<span class="sd">      Returns:</span>
-<span class="sd">          </span>
-<span class="sd">          Eq.(2.16) as in https://arxiv.org/pdf/2409.17231&quot;</span>
+<span class="sd">    Obtains the longitudinal cross-section from :func:`dsigmaL_DVMP_dt` and</span>
+<span class="sd">    undoes the L/T separation using Eq. (2.16) of</span>
+<span class="sd">    `arXiv:2409.17231 &lt;https://arxiv.org/pdf/2409.17231&gt;`_:</span>
+
+<span class="sd">    .. math::</span>
+
+<span class="sd">        \frac{d\sigma}{dt} = \frac{d\sigma_L}{dt}</span>
+<span class="sd">            \left(\varepsilon + \frac{1}{R}\right)</span>
+
+<span class="sd">    where :math:`\varepsilon` is the virtual-photon polarization</span>
+<span class="sd">    (see :func:`epsilon`) and :math:`R = \sigma_L/\sigma_T` (see :func:`R`).</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        y (float): inelasticity.</span>
+<span class="sd">        xB (float): Bjorken-:math:`x`.</span>
+<span class="sd">        t (float): squared momentum transfer :math:`t` in GeV\ :sup:`2`.</span>
+<span class="sd">        Q (float): photon virtuality :math:`Q` in GeV.</span>
+<span class="sd">        meson (int): meson code — ``1`` for :math:`\rho^0`, ``2`` for</span>
+<span class="sd">            :math:`\phi`, ``3`` for :math:`J/\psi`.</span>
+<span class="sd">        HTFF (complex): helicity-conserving TFF :math:`\mathcal{H}`.</span>
+<span class="sd">        ETFF (complex): helicity-flip TFF :math:`\mathcal{E}`.</span>
+<span class="sd">        a (float): :func:`R` fit parameter :math:`a`.</span>
+<span class="sd">        p (float): :func:`R` fit parameter :math:`p`.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        float: :math:`d\sigma/dt` in nb/GeV\ :sup:`2`.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">return</span>  <span class="n">dsigmaL_DVMP_dt</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">xB</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="n">Q</span><span class="p">,</span> <span class="n">meson</span><span class="p">,</span> <span class="n">HTFF</span><span class="p">,</span> <span class="n">ETFF</span><span class="p">)</span><span class="o">*</span><span class="p">(</span><span class="n">epsilon</span><span class="p">(</span><span class="n">y</span><span class="p">)</span><span class="o">+</span><span class="mi">1</span><span class="o">/</span><span class="n">R</span><span class="p">(</span><span class="n">Q</span><span class="p">,</span><span class="n">a</span><span class="p">,</span><span class="n">p</span><span class="p">,</span><span class="n">meson</span><span class="p">))</span>

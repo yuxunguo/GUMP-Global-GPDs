@@ -1,10 +1,15 @@
-Evolution Quickguide
-====================
+Evolution Quick Guide
+=====================
 
-Here we briefly introduce the :ref:`evolution module`. 
-This can also be used as a stand-alone module that provide the evolution operators and related quantities  for general purpose.
+This page introduces :ref:`evolution module`, which can be used as a
+stand-alone module for conformal-moment evolution and Wilson-coefficient
+construction in DVCS/DVMP analyses.
 
-We roughly devide this submodules into three parts, the evolution operators, the Wilson coefficients, and GPD moment evolution.
+Core parts:
+
+- evolution operators,
+- Wilson coefficients,
+- evolved conformal moments.
 
 Evolution Operators
 -------------------
@@ -12,36 +17,93 @@ Evolution Operators
 Anomalous dimensions and evolution basis
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-The callables :func:`Evolution.singlet_LO()`, :func:`Evolution.singlet_NLO()`, :func:`Evolution.non_singlet_LO()` and :func:`Evolution.non_singlet_NLO()`
-return the anomalous dimensions of the non-singlet and singlet/gluon anomalous dimensions in the evolution basis at leading-order (LO) and next-to-leading order (NLO),
-for given vector (p=1) and axial-vector (p=-1) GPDs with certain charge parity (+1 for sinlget/gluon and non-singlet plus, and -1 for valence and non-singlet minus).
+The main anomalous-dimension callables are:
 
-In most of the time, we work in the evolution basis similarly to the forward PDFs, the basis of this work is currently 
-:math:`(q_{\rm{Val}},q^{(+)}_{du},q^{(-)}_{du},\Sigma,G)` with two active quark flavor. 
-The following evolution basis of quarks are defined:
+- :func:`Evolution.non_singlet_LO`
+- :func:`Evolution.non_singlet_NLO`
+- :func:`Evolution.singlet_LO`
+- :func:`Evolution.singlet_NLO`
 
-.. math:: 
-    \begin{align}
-    q_{\rm{Val}} \equiv \sum_{i=u,d} q_i-\bar q_i\ , \quad
-    q^{(\pm)}_{ij} \equiv q_i\pm\bar {q}_i - (q_j\pm \bar {q}_j) \ , \quad 
-    \Sigma \equiv \sum_{i=u,d} q_i+\bar q_i\ ,
-    \end{align}
+They return LO/NLO anomalous dimensions in the evolution basis for:
 
-where it's well-known that only the singlet quark (:math:`\Sigma`) mixes with the gluon under evolution,
-and the charge parity is given explicitly by the relative sign between :math:`q` and :math:`\bar q`.
+- vector channel ``p=1`` and axial-vector channel ``p=-1``;
+- parity label ``prty=+1`` (singlet/gluon and non-singlet plus) or
+    ``prty=-1`` (valence and non-singlet minus).
 
-Evolution operator
-~~~~~~~~~~~~~~~~~~~
+The flavor basis is
+:math:`(q_{\mathrm{Val}}, q^{(+)}_{du}, q^{(-)}_{du}, \Sigma, G)`.
 
-The evolution operator will be a scalar (:math:`\mathcal{E}_j`) for non-singlet and 2-by-2 matrix (:math:`\boldsymbol{\mathcal{E}}_j`) for singlet/gluons at each conformal spin j.
-In reality, we can't output the evolution operator directly starting at NLO, because it will have off-diagonal entries :math:`\mathcal{E}_{jk}` for :math:`j-k=2,4,\cdots`.
+.. math::
 
-The implementation of this works follows the gepard package, which has been discussed in the `reference <https://arxiv.org/pdf/hep-ph/0703179>`_,
-where the evolution operators are devided into the diagonal part (:math:`\mathcal{A}_j`) and off-diagonal part (:math:`\mathcal{B}_{jk}`).
-If any details of the implementation are interested, check for instance the :func:`Evolution.Moment_Evo_NLO()` where all the different pieces are added together.
+    q_{\mathrm{Val}} = \sum_{i=u,d}(q_i-\bar q_i),
+
+.. math::
+
+    q^{(\pm)}_{ij} = (q_i \pm \bar q_i) - (q_j \pm \bar q_j),
+
+.. math::
+
+    \Sigma = \sum_{i=u,d}(q_i+\bar q_i).
+
+Only :math:`\Sigma` mixes with the gluon under evolution.
+
+Evolution-operator structure
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+For each conformal spin :math:`j`:
+
+- non-singlet evolution is scalar,
+- singlet-gluon evolution is a :math:`2\times2` matrix.
+
+At NLO, off-diagonal couplings in :math:`j` appear
+(:math:`j-k=2,4,\ldots`), so practical implementations are organized in
+diagonal and off-diagonal pieces. See :func:`Evolution.Moment_Evo_NLO` for
+the combined construction used in this codebase.
 
 Wilson Coefficients
 -------------------
 
+The module provides Wilson coefficients for both processes and perturbative
+orders:
+
+- DVCS:
+    :func:`Evolution.WilsonCoef_DVCS_LO`,
+    :func:`Evolution.WilsonCoef_DVCS_NLO`
+- DVMP:
+    :func:`Evolution.WilsonCoef_DVMP_LO`,
+    :func:`Evolution.WilsonCoef_DVMP_NLO`
+
+For evolved-Wilson-coefficient workflows, use:
+
+- :func:`Evolution.DVCS_WCoef_Evo_NLO`
+- :func:`Evolution.DVMP_WCoef_Evo_NLO`
+
+and then combine with moments via:
+
+- :func:`Evolution.CFF_Evo_NLO_evWC` (DVCS),
+- :func:`Evolution.TFF_Evo_NLO_evWC` (DVMP).
+
 Moment Evolution
--------------------
+----------------
+
+For direct evolution of conformal moments, the key APIs are:
+
+- :func:`Evolution.Moment_Evo_LO`
+- :func:`Evolution.Moment_Evo_LO_NSp1`
+- :func:`Evolution.Moment_Evo_NLO`
+
+LO utilities that already combine moments with LO Wilson coefficients are also
+available:
+
+- :func:`Evolution.CFF_Evo_LO`
+- :func:`Evolution.TFF_Evo_LO`
+
+In practice:
+
+1. choose the channel and basis moments,
+2. evolve to the target scale,
+3. combine with the corresponding DVCS/DVMP Wilson coefficients,
+4. use the result as Mellin-Barnes integrand input for CFF/TFF/GPD observables.
+
+For implementation conventions, see function docstrings in
+:mod:`gumpgpd.Evolution`.

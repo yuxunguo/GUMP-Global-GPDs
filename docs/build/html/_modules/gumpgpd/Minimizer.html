@@ -6,7 +6,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>gumpgpd.Minimizer &mdash; GUMP GPD Analysis 1.0.2 documentation</title>
-      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
 
@@ -42,16 +42,16 @@
   </form>
 </div>
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
-              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+              <p class="caption" role="heading"><span class="caption-text">Contents</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../../QuickStart.html">Quick start</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../ParametersIntro.html">Parameters Quickguide</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../ObservablesIntro.html">Observables Quickguide</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../EvolutionIntro.html">Evolution Quickguide</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../MinimizerIntro.html">Minimizer Quickguide</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../DVCSIntro.html">DVCS Quickguide</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../DVMPIntro.html">DVMP Quickguide</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../modules.html">Documentation of submodules</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../QuickStart.html">Quick Start</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../ParametersIntro.html">Parameters Quick Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../ObservablesIntro.html">Observables Quick Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../EvolutionIntro.html">Evolution Quick Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../MinimizerIntro.html">Minimizer Quick Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../DVCSIntro.html">DVCS Quick Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../DVMPIntro.html">DVMP Quick Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../modules.html">Submodule API Reference</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../Citation.html">Citation/Acknowledgement</a></li>
 </ul>
 
@@ -80,20 +80,28 @@
            <div itemprop="articleBody">
              
   <h1>Source code for gumpgpd.Minimizer</h1><div class="highlight"><pre>
-<span></span><span class="kn">from</span> <span class="nn">.Parameters</span> <span class="kn">import</span> <span class="n">ParaManager_Unp</span><span class="p">,</span> <span class="n">ParaManager_Pol</span>
-<span class="kn">from</span> <span class="nn">.Observables</span> <span class="kn">import</span> <span class="n">GPDobserv</span>
-<span class="kn">from</span> <span class="nn">.DVCS_xsec</span> <span class="kn">import</span> <span class="n">dsigma_DVCS_TOT</span><span class="p">,</span> <span class="n">Asymmetry_DVCS_TOT</span><span class="p">,</span> <span class="n">dsigma_DVCS_HERA</span><span class="p">,</span> <span class="n">M</span>
-<span class="kn">from</span> <span class="nn">.DVMP_xsec</span> <span class="kn">import</span> <span class="n">dsigma_DVMP_dt</span><span class="p">,</span><span class="n">dsigmaL_DVMP_dt</span><span class="p">,</span> <span class="n">M_jpsi</span><span class="p">,</span><span class="n">epsilon</span><span class="p">,</span> <span class="n">R_fitted</span>
-<span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">config</span>
-<span class="kn">from</span> <span class="nn">._helper_</span> <span class="kn">import</span> <span class="n">cluster_DVCSAsym</span><span class="p">,</span> <span class="n">gump_msg</span>
+<span></span><span class="sd">&quot;&quot;&quot;GUMP GPD global fit: cost function and iMinuit-based fitting interface.</span>
 
-<span class="kn">from</span> <span class="nn">scipy.special</span> <span class="kn">import</span> <span class="n">beta</span>
-<span class="kn">from</span> <span class="nn">multiprocessing</span> <span class="kn">import</span> <span class="n">Pool</span>
-<span class="kn">from</span> <span class="nn">functools</span> <span class="kn">import</span> <span class="n">partial</span>
-<span class="kn">from</span> <span class="nn">iminuit</span> <span class="kn">import</span> <span class="n">Minuit</span>
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
-<span class="kn">import</span> <span class="nn">time</span><span class="o">,</span> <span class="nn">csv</span><span class="o">,</span> <span class="nn">os</span><span class="o">,</span> <span class="nn">atexit</span>
+<span class="sd">Loads and preprocesses all experimental datasets (PDFs, tPDFs, GFFs, GPDs,</span>
+<span class="sd">DVCS cross-sections and asymmetries, DVMP cross-sections for rho, phi, and</span>
+<span class="sd">J/psi), builds NLO theory predictions via :mod:`gumpgpd.Observables`,</span>
+<span class="sd">:mod:`gumpgpd.DVCS_xsec`, and :mod:`gumpgpd.DVMP_xsec`, and exposes a</span>
+<span class="sd">single iMinuit-based fit driver: :func:`off_forward_fit_withH_withHt`.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.Parameters</span><span class="w"> </span><span class="kn">import</span> <span class="n">ParaManager_Unp</span><span class="p">,</span> <span class="n">ParaManager_Pol</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.Observables</span><span class="w"> </span><span class="kn">import</span> <span class="n">GPDobserv</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.DVCS_xsec</span><span class="w"> </span><span class="kn">import</span> <span class="n">dsigma_DVCS_TOT</span><span class="p">,</span> <span class="n">Asymmetry_DVCS_TOT</span><span class="p">,</span> <span class="n">dsigma_DVCS_HERA</span><span class="p">,</span> <span class="n">M</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.DVMP_xsec</span><span class="w"> </span><span class="kn">import</span> <span class="n">dsigma_DVMP_dt</span><span class="p">,</span><span class="n">dsigmaL_DVMP_dt</span><span class="p">,</span> <span class="n">M_jpsi</span><span class="p">,</span><span class="n">epsilon</span><span class="p">,</span> <span class="n">R_fitted</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.</span><span class="w"> </span><span class="kn">import</span> <span class="n">config</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">._helper_</span><span class="w"> </span><span class="kn">import</span> <span class="n">cluster_DVCSAsym</span><span class="p">,</span> <span class="n">gump_msg</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">scipy.special</span><span class="w"> </span><span class="kn">import</span> <span class="n">beta</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">multiprocessing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Pool</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">functools</span><span class="w"> </span><span class="kn">import</span> <span class="n">partial</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">iminuit</span><span class="w"> </span><span class="kn">import</span> <span class="n">Minuit</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">time</span><span class="o">,</span><span class="w"> </span><span class="nn">csv</span><span class="o">,</span><span class="w"> </span><span class="nn">os</span><span class="o">,</span><span class="w"> </span><span class="nn">atexit</span>
 
 <span class="n">dir_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">realpath</span><span class="p">(</span><span class="vm">__file__</span><span class="p">))</span>
 <span class="n">Minuit_Counter</span> <span class="o">=</span> <span class="mi">0</span>
@@ -103,9 +111,7 @@
 <span class="n">xB_Cut</span> <span class="o">=</span> <span class="mf">0.5</span>
 <span class="n">xB_small_Cut</span> <span class="o">=</span> <span class="mf">0.0001</span>
 <span class="n">time_start</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
-<span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">************************ Some auxilary functions and variables for convience ****************************</span>
-<span class="sd">&quot;&quot;&quot;</span>
+<span class="c1"># --- Auxiliary functions and module-level variables ---</span>
 
 <span class="n">Paralst_Unp_Names</span> <span class="o">=</span> <span class="p">[</span>
     <span class="s2">&quot;Norm_HuV&quot;</span><span class="p">,</span> <span class="s2">&quot;alpha_HuV&quot;</span><span class="p">,</span> <span class="s2">&quot;beta_HuV&quot;</span><span class="p">,</span> <span class="s2">&quot;alphap_HuV&quot;</span><span class="p">,</span> <span class="s2">&quot;Invm2_HuV&quot;</span><span class="p">,</span>
@@ -142,7 +148,17 @@
 
 <div class="viewcode-block" id="validate_params">
 <a class="viewcode-back" href="../../Minimizer.html#gumpgpd.Minimizer.validate_params">[docs]</a>
-<span class="k">def</span> <span class="nf">validate_params</span><span class="p">(</span><span class="n">params</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span> <span class="n">required_names</span><span class="p">:</span> <span class="nb">set</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">validate_params</span><span class="p">(</span><span class="n">params</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span> <span class="n">required_names</span><span class="p">:</span> <span class="nb">set</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Validate that a parameter dictionary contains exactly the required keys with non-None values.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        params (dict): Dictionary of parameter names to values (typically from ``locals()``).</span>
+<span class="sd">        required_names (set): Set of parameter names that must be present and non-None.</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">        ValueError: If any required key is missing, an extra key is present, or any</span>
+<span class="sd">            required value is ``None``.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">param_keys</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">params</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
 
     <span class="n">missing</span> <span class="o">=</span> <span class="n">required_names</span> <span class="o">-</span> <span class="n">param_keys</span>
@@ -166,8 +182,18 @@
 <span class="n">SAVE_TO_FILE_PATH</span> <span class="o">=</span> <span class="s1">&#39;.&#39;</span>
 <div class="viewcode-block" id="Export_Frame_Append">
 <a class="viewcode-back" href="../../Minimizer.html#gumpgpd.Minimizer.Export_Frame_Append">[docs]</a>
-<span class="k">def</span> <span class="nf">Export_Frame_Append</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">filename</span><span class="p">,</span> <span class="n">export_path</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">Export_Frame_Append</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">filename</span><span class="p">,</span> <span class="n">export_path</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Append (or create) a CSV file inside ``&lt;export_path&gt;/GUMP_Results/``.</span>
 
+<span class="sd">    On the first call for a given *filename* the file is created and the header</span>
+<span class="sd">    row is written.  Subsequent calls append rows without repeating the header.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        df (pd.DataFrame): Data to write.</span>
+<span class="sd">        filename (str): Name of the CSV file (e.g. ``&#39;PDFcomp.csv&#39;``).</span>
+<span class="sd">        export_path (str, optional): Root directory for output.  Defaults to</span>
+<span class="sd">            the module-level :data:`SAVE_TO_FILE_PATH`.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="n">export_path</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">export_path</span> <span class="o">=</span> <span class="n">SAVE_TO_FILE_PATH</span>
 
@@ -188,7 +214,8 @@
 
 <span class="n">_pool</span> <span class="o">=</span> <span class="kc">None</span>
 
-<span class="k">def</span> <span class="nf">_cleanup_pool</span><span class="p">():</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">_cleanup_pool</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Terminate and join the global worker pool, then set it to ``None``.&quot;&quot;&quot;</span>
     <span class="k">global</span> <span class="n">_pool</span>
     <span class="k">if</span> <span class="n">_pool</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">_pool</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
@@ -197,7 +224,19 @@
 
 <div class="viewcode-block" id="get_pool">
 <a class="viewcode-back" href="../../Minimizer.html#gumpgpd.Minimizer.get_pool">[docs]</a>
-<span class="k">def</span> <span class="nf">get_pool</span><span class="p">(</span><span class="n">processes</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">get_pool</span><span class="p">(</span><span class="n">processes</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Return the module-level :class:`multiprocessing.Pool`, creating it on first call.</span>
+
+<span class="sd">    The pool is registered with :func:`atexit` so it is cleanly shut down when</span>
+<span class="sd">    the interpreter exits.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        processes (int, optional): Number of worker processes.  Defaults to</span>
+<span class="sd">            ``os.cpu_count()``.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        multiprocessing.Pool: The shared worker pool.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">global</span> <span class="n">_pool</span>
     <span class="k">if</span> <span class="n">_pool</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">_pool</span> <span class="o">=</span> <span class="n">Pool</span><span class="p">(</span><span class="n">processes</span><span class="p">)</span>
@@ -207,22 +246,24 @@
 
 <div class="viewcode-block" id="close_pool">
 <a class="viewcode-back" href="../../Minimizer.html#gumpgpd.Minimizer.close_pool">[docs]</a>
-<span class="k">def</span> <span class="nf">close_pool</span><span class="p">():</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">close_pool</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Close and join the global worker pool (calls :func:`_cleanup_pool`).&quot;&quot;&quot;</span>
     <span class="n">_cleanup_pool</span><span class="p">()</span></div>
 
 
 <div class="viewcode-block" id="group_by_unique">
 <a class="viewcode-back" href="../../Minimizer.html#gumpgpd.Minimizer.group_by_unique">[docs]</a>
-<span class="k">def</span> <span class="nf">group_by_unique</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">subset</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;xB&#39;</span><span class="p">,</span> <span class="s1">&#39;t&#39;</span><span class="p">,</span> <span class="s1">&#39;Q&#39;</span><span class="p">]):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Group a DataFrame by unique combinations of specified columns.</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">group_by_unique</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">subset</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;xB&#39;</span><span class="p">,</span> <span class="s1">&#39;t&#39;</span><span class="p">,</span> <span class="s1">&#39;Q&#39;</span><span class="p">]):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Split a DataFrame into groups of identical kinematics.</span>
 
-<span class="sd">    Parameters:</span>
-<span class="sd">        data (pd.DataFrame): The input DataFrame.</span>
-<span class="sd">        subset (List[str], optional): Columns to group by. Default is [&#39;xB&#39;, &#39;t&#39;, &#39;Q&#39;].</span>
+<span class="sd">    Args:</span>
+<span class="sd">        data (pd.DataFrame): Input data table.</span>
+<span class="sd">        subset (list of str, optional): Columns that define a unique kinematic</span>
+<span class="sd">            point.  Defaults to ``[&#39;xB&#39;, &#39;t&#39;, &#39;Q&#39;]``.</span>
 
 <span class="sd">    Returns:</span>
-<span class="sd">        List[pd.DataFrame]: A list of DataFrames, each corresponding to a unique group.</span>
+<span class="sd">        list of pd.DataFrame: One sub-DataFrame per unique combination of</span>
+<span class="sd">        *subset* values, preserving the original row order.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">unique_combinations</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">drop_duplicates</span><span class="p">(</span><span class="n">subset</span><span class="o">=</span><span class="n">subset</span><span class="p">,</span> <span class="n">keep</span><span class="o">=</span><span class="s1">&#39;first&#39;</span><span class="p">)[</span><span class="n">subset</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
     <span class="n">grouped_data</span> <span class="o">=</span> <span class="p">[</span>
@@ -232,9 +273,7 @@
     <span class="k">return</span> <span class="n">grouped_data</span></div>
 
 
-<span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">************************ PDF and tPDFs data preprocessing ****************************</span>
-<span class="sd">&quot;&quot;&quot;</span>
+<span class="c1"># --- PDF and tPDF data preprocessing ---</span>
 
 <span class="n">PDF_data</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">dir_path</span><span class="p">,</span><span class="s1">&#39;GUMPDATA/PDFdata.csv&#39;</span><span class="p">),</span> <span class="n">header</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="n">names</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;x&#39;</span><span class="p">,</span> <span class="s1">&#39;t&#39;</span><span class="p">,</span> <span class="s1">&#39;Q&#39;</span><span class="p">,</span> <span class="s1">&#39;f&#39;</span><span class="p">,</span> <span class="s1">&#39;delta f&#39;</span><span class="p">,</span> <span class="s1">&#39;spe&#39;</span><span class="p">,</span> <span class="s1">&#39;flv&#39;</span><span class="p">],</span>        <span class="n">dtype</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;x&#39;</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="s1">&#39;t&#39;</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="s1">&#39;Q&#39;</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="s1">&#39;f&#39;</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="s1">&#39;delta f&#39;</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span><span class="s1">&#39;spe&#39;</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="s1">&#39;flv&#39;</span><span class="p">:</span> <span class="nb">str</span><span class="p">})</span>
 
@@ -242,18 +281,14 @@
 
 <span class="n">GPD_data</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">dir_path</span><span class="p">,</span><span class="s1">&#39;GUMPDATA/GPDdata.csv&#39;</span><span class="p">),</span> <span class="n">header</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="n">names</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;x&#39;</span><span class="p">,</span> <span class="s1">&#39;xi&#39;</span><span class="p">,</span> <span class="s1">&#39;t&#39;</span><span class="p">,</span> <span class="s1">&#39;Q&#39;</span><span class="p">,</span> <span class="s1">&#39;f&#39;</span><span class="p">,</span> <span class="s1">&#39;delta f&#39;</span><span class="p">,</span> <span class="s1">&#39;spe&#39;</span><span class="p">,</span> <span class="s1">&#39;flv&#39;</span><span class="p">],</span>        <span class="n">dtype</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;x&#39;</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="s1">&#39;xi&#39;</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="s1">&#39;t&#39;</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="s1">&#39;Q&#39;</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="s1">&#39;f&#39;</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="s1">&#39;delta f&#39;</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span><span class="s1">&#39;spe&#39;</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="s1">&#39;flv&#39;</span><span class="p">:</span> <span class="nb">str</span><span class="p">})</span>
 
-<span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">************************ GFF data preprocessing ****************************</span>
-<span class="sd">&quot;&quot;&quot;</span>
+<span class="c1"># --- GFF data preprocessing ---</span>
 
 <span class="n">GFF_data</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">dir_path</span><span class="p">,</span><span class="s1">&#39;GUMPDATA/GFFdata.csv&#39;</span><span class="p">),</span>       <span class="n">header</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="n">names</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;j&#39;</span><span class="p">,</span> <span class="s1">&#39;t&#39;</span><span class="p">,</span> <span class="s1">&#39;Q&#39;</span><span class="p">,</span> <span class="s1">&#39;f&#39;</span><span class="p">,</span> <span class="s1">&#39;delta f&#39;</span><span class="p">,</span> <span class="s1">&#39;spe&#39;</span><span class="p">,</span> <span class="s1">&#39;flv&#39;</span><span class="p">,</span> <span class="s1">&#39;comment&#39;</span><span class="p">],</span>        <span class="n">dtype</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;j&#39;</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="s1">&#39;t&#39;</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="s1">&#39;Q&#39;</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="s1">&#39;f&#39;</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="s1">&#39;delta f&#39;</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span><span class="s1">&#39;spe&#39;</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="s1">&#39;flv&#39;</span><span class="p">:</span> <span class="nb">str</span><span class="p">})</span>
 
 <span class="k">if</span> <span class="ow">not</span> <span class="n">config</span><span class="o">.</span><span class="n">INC_gGFF</span><span class="p">:</span>
     <span class="n">GFF_data</span><span class="o">=</span> <span class="n">GFF_data</span><span class="p">[</span><span class="n">GFF_data</span><span class="p">[</span><span class="s1">&#39;flv&#39;</span><span class="p">]</span><span class="o">!=</span><span class="s1">&#39;g&#39;</span><span class="p">]</span>
 
-<span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">************************ DVCS data preprocessing ****************************</span>
-<span class="sd">&quot;&quot;&quot;</span>
+<span class="c1"># --- DVCS data preprocessing ---</span>
 
 <span class="n">DVCSxsec_data</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">dir_path</span><span class="p">,</span><span class="s1">&#39;GUMPDATA/DVCSxsec_Old.csv&#39;</span><span class="p">),</span> <span class="n">header</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">names</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;y&#39;</span><span class="p">,</span> <span class="s1">&#39;xB&#39;</span><span class="p">,</span> <span class="s1">&#39;t&#39;</span><span class="p">,</span> <span class="s1">&#39;Q&#39;</span><span class="p">,</span> <span class="s1">&#39;phi&#39;</span><span class="p">,</span> <span class="s1">&#39;f&#39;</span><span class="p">,</span> <span class="s1">&#39;delta f&#39;</span><span class="p">,</span> <span class="s1">&#39;pol&#39;</span><span class="p">]</span> <span class="p">,</span> <span class="n">dtype</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;y&#39;</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="s1">&#39;xB&#39;</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="s1">&#39;t&#39;</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="s1">&#39;Q&#39;</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="s1">&#39;phi&#39;</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="s1">&#39;f&#39;</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="s1">&#39;delta f&#39;</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="s1">&#39;pol&#39;</span><span class="p">:</span> <span class="nb">str</span><span class="p">})</span>
 <span class="n">DVCSxsec_data_invalid</span> <span class="o">=</span> <span class="n">DVCSxsec_data</span><span class="p">[</span><span class="n">DVCSxsec_data</span><span class="p">[</span><span class="s1">&#39;t&#39;</span><span class="p">]</span><span class="o">*</span><span class="p">(</span><span class="n">DVCSxsec_data</span><span class="p">[</span><span class="s1">&#39;xB&#39;</span><span class="p">]</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="o">-</span> <span class="n">M</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">DVCSxsec_data</span><span class="p">[</span><span class="s1">&#39;xB&#39;</span><span class="p">]</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">]</span>
@@ -277,13 +312,11 @@
 <span class="n">DVCSAsym_Clustered</span> <span class="o">=</span> <span class="n">cluster_DVCSAsym</span><span class="p">(</span><span class="n">DVCSAsym_data</span><span class="p">,</span><span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 <span class="n">DVCSAsym_group_data</span> <span class="o">=</span> <span class="n">group_by_unique</span><span class="p">(</span><span class="n">DVCSAsym_Clustered</span><span class="p">)</span>
 
-<span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">************************ DVMP for rho data preprocessing ****************************</span>
-<span class="sd">&quot;&quot;&quot;</span>
+<span class="c1"># --- DVMP (rho) data preprocessing ---</span>
 
 <div class="viewcode-block" id="DVMP_L_Error_Prop">
 <a class="viewcode-back" href="../../Minimizer.html#gumpgpd.Minimizer.DVMP_L_Error_Prop">[docs]</a>
-<span class="k">def</span> <span class="nf">DVMP_L_Error_Prop</span><span class="p">(</span><span class="n">DVMP_tot_xsec</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">meson</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span><span class="mi">1</span><span class="p">):</span> 
+<span class="k">def</span><span class="w"> </span><span class="nf">DVMP_L_Error_Prop</span><span class="p">(</span><span class="n">DVMP_tot_xsec</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">meson</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span><span class="mi">1</span><span class="p">):</span> 
 <span class="w">    </span><span class="sd">&quot;&quot;&quot; Error propagation for dσ_L /dt= (dσ_tot /dt) / (ε(y) + 1/R(Q;a,p,meson)).</span>
 
 <span class="sd">    Args:</span>
@@ -342,9 +375,7 @@
 <span class="n">DVrhoPH1xsecL_data</span><span class="p">[</span><span class="s1">&#39;delta f&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">dsigmaL_dt_err_H1</span>
 <span class="n">DVrhoPH1xsecL_group_data</span> <span class="o">=</span> <span class="n">group_by_unique</span><span class="p">(</span><span class="n">DVrhoPH1xsecL_data</span><span class="p">)</span>
 
-<span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">************************ DVMP for phi data preprocessing ****************************</span>
-<span class="sd">&quot;&quot;&quot;</span>
+<span class="c1"># --- DVMP (phi) data preprocessing ---</span>
 
 <span class="n">DVphiPZEUSxsec_data</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">dir_path</span><span class="p">,</span><span class="s1">&#39;GUMPDATA/DVMP_HERA/DVphiPZEUSdt.csv&#39;</span><span class="p">),</span> <span class="n">header</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">names</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;y&#39;</span><span class="p">,</span> <span class="s1">&#39;xB&#39;</span><span class="p">,</span> <span class="s1">&#39;t&#39;</span><span class="p">,</span> <span class="s1">&#39;Q&#39;</span><span class="p">,</span> <span class="s1">&#39;f&#39;</span><span class="p">,</span> <span class="s1">&#39;delta f&#39;</span><span class="p">]</span> <span class="p">,</span> <span class="n">dtype</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;y&#39;</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="s1">&#39;xB&#39;</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="s1">&#39;t&#39;</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="s1">&#39;Q&#39;</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="s1">&#39;f&#39;</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="s1">&#39;delta f&#39;</span><span class="p">:</span> <span class="nb">float</span><span class="p">})</span>
 <span class="n">DVphiPZEUSxsec_data</span><span class="p">[</span><span class="s1">&#39;Q&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">DVphiPZEUSxsec_data</span><span class="p">[</span><span class="s1">&#39;Q&#39;</span><span class="p">])</span>
@@ -358,9 +389,7 @@
 <span class="n">DVphiPH1xsec_data</span> <span class="o">=</span> <span class="n">DVphiPH1xsec_data</span><span class="p">[(</span><span class="n">DVphiPH1xsec_data</span><span class="p">[</span><span class="s1">&#39;Q&#39;</span><span class="p">]</span><span class="o">&gt;</span><span class="n">Q_threshold</span><span class="p">)]</span>
 <span class="n">DVphiPH1xsec_group_data</span> <span class="o">=</span> <span class="n">group_by_unique</span><span class="p">(</span><span class="n">DVphiPH1xsec_data</span><span class="p">)</span>
 
-<span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">************************ DVMP for Jpsi data preprocessing ****************************</span>
-<span class="sd">&quot;&quot;&quot;</span>
+<span class="c1"># --- DVMP (J/psi) data preprocessing ---</span>
 
 <span class="n">DVJpsiPH1xsec_data</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">dir_path</span><span class="p">,</span><span class="s1">&#39;GUMPDATA/DVMP_HERA/DVJpsiPH1dt_w_mass.csv&#39;</span><span class="p">),</span> <span class="n">header</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">names</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;y&#39;</span><span class="p">,</span> <span class="s1">&#39;xB&#39;</span><span class="p">,</span> <span class="s1">&#39;t&#39;</span><span class="p">,</span> <span class="s1">&#39;Q&#39;</span><span class="p">,</span> <span class="s1">&#39;f&#39;</span><span class="p">,</span> <span class="s1">&#39;delta f&#39;</span><span class="p">]</span> <span class="p">,</span> <span class="n">dtype</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;y&#39;</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="s1">&#39;xB&#39;</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="s1">&#39;t&#39;</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="s1">&#39;Q&#39;</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="s1">&#39;f&#39;</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="s1">&#39;delta f&#39;</span><span class="p">:</span> <span class="nb">float</span><span class="p">})</span>
 <span class="n">DVJpsiPH1xsec_data</span><span class="p">[</span><span class="s1">&#39;Q&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">DVJpsiPH1xsec_data</span><span class="p">[</span><span class="s1">&#39;Q&#39;</span><span class="p">])</span>
@@ -414,9 +443,7 @@
 <span class="sd">DVJpsiPZEUSxsec_L_group_data = list(map(lambda set: DVJpsiPZEUSxsec_L_data[(DVJpsiPZEUSxsec_data[&#39;xB&#39;] == set[0]) &amp; (DVJpsiPZEUSxsec_L_data[&#39;t&#39;] == set[1]) &amp; ((DVJpsiPZEUSxsec_L_data[&#39;Q&#39;] == set[2]))], xBtQlst_JpsiZ))</span>
 <span class="sd">&#39;&#39;&#39;</span>
 
-<span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">************************ Photon productions of Jpsi data preprocessing (Not in use) ****************************</span>
-<span class="sd">&quot;&quot;&quot;</span>
+<span class="c1"># --- Photoproduction of J/psi data preprocessing (not in use) ---</span>
 
 <span class="n">JpsiphotoH1xsec_data</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">dir_path</span><span class="p">,</span><span class="s1">&#39;GUMPDATA/DVMP_HERA/DVJpsiPZEUSdt_w_mass.csv&#39;</span><span class="p">),</span> <span class="n">header</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">names</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;y&#39;</span><span class="p">,</span> <span class="s1">&#39;xB&#39;</span><span class="p">,</span> <span class="s1">&#39;t&#39;</span><span class="p">,</span> <span class="s1">&#39;Q&#39;</span><span class="p">,</span> <span class="s1">&#39;f&#39;</span><span class="p">,</span> <span class="s1">&#39;delta f&#39;</span><span class="p">]</span> <span class="p">,</span> <span class="n">dtype</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;y&#39;</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="s1">&#39;xB&#39;</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="s1">&#39;t&#39;</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="s1">&#39;Q&#39;</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="s1">&#39;f&#39;</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="s1">&#39;delta f&#39;</span><span class="p">:</span> <span class="nb">float</span><span class="p">})</span>
 <span class="n">JpsiphotoH1xsec_data</span><span class="p">[</span><span class="s1">&#39;Q&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">JpsiphotoH1xsec_data</span><span class="p">[</span><span class="s1">&#39;Q&#39;</span><span class="p">])</span>
@@ -427,31 +454,92 @@
 <span class="c1"># Helper functions now take multiple arguments directly</span>
 <div class="viewcode-block" id="PDF_theo_scalar_helper">
 <a class="viewcode-back" href="../../Minimizer.html#gumpgpd.Minimizer.PDF_theo_scalar_helper">[docs]</a>
-<span class="k">def</span> <span class="nf">PDF_theo_scalar_helper</span><span class="p">(</span><span class="n">x_i</span><span class="p">,</span> <span class="n">xi_i</span><span class="p">,</span> <span class="n">t_i</span><span class="p">,</span> <span class="n">Q_i</span><span class="p">,</span> <span class="n">p_i</span><span class="p">,</span> <span class="n">flv_i</span><span class="p">,</span> <span class="n">Para_i</span><span class="p">,</span> <span class="n">p_order</span><span class="p">):</span>
-    <span class="n">_PDF_theo</span> <span class="o">=</span> <span class="n">GPDobserv</span><span class="p">(</span><span class="n">x_i</span><span class="p">,</span> <span class="n">xi_i</span><span class="p">,</span> <span class="n">t_i</span><span class="p">,</span> <span class="n">Q_i</span><span class="p">,</span> <span class="n">p_i</span><span class="p">)</span>  
+<span class="k">def</span><span class="w"> </span><span class="nf">PDF_theo_scalar_helper</span><span class="p">(</span><span class="n">x_i</span><span class="p">,</span> <span class="n">xi_i</span><span class="p">,</span> <span class="n">t_i</span><span class="p">,</span> <span class="n">Q_i</span><span class="p">,</span> <span class="n">p_i</span><span class="p">,</span> <span class="n">flv_i</span><span class="p">,</span> <span class="n">Para_i</span><span class="p">,</span> <span class="n">p_order</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Compute a single tPDF/PDF theory value for use with :func:`multiprocessing.Pool.starmap`.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        x_i (float): Longitudinal momentum fraction :math:`x`.</span>
+<span class="sd">        xi_i (float): Skewness :math:`\\xi` (zero in the forward limit).</span>
+<span class="sd">        t_i (float): Momentum transfer squared :math:`t`.</span>
+<span class="sd">        Q_i (float): Factorization/evolution scale :math:`Q`.</span>
+<span class="sd">        p_i (int): 1 for vector GPDs (H, E), -1 for axial-vector GPDs (Ht, Et).</span>
+<span class="sd">        flv_i (str): Flavor label (e.g. ``&#39;u&#39;``, ``&#39;d&#39;``, ``&#39;g&#39;``).</span>
+<span class="sd">        Para_i (np.ndarray): Parameter array for this kinematic point.</span>
+<span class="sd">        p_order (int): Perturbative order (1 = LO, 2 = NLO).</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        float: Theory prediction for the tPDF/PDF at the given kinematics.</span>
+<span class="sd">    &quot;&quot;&quot;</span>  
+    <span class="n">_PDF_theo</span> <span class="o">=</span> <span class="n">GPDobserv</span><span class="p">(</span><span class="n">x_i</span><span class="p">,</span> <span class="n">xi_i</span><span class="p">,</span> <span class="n">t_i</span><span class="p">,</span> <span class="n">Q_i</span><span class="p">,</span> <span class="n">p_i</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">_PDF_theo</span><span class="o">.</span><span class="n">tPDF</span><span class="p">(</span><span class="n">flv_i</span><span class="p">,</span> <span class="n">Para_i</span><span class="p">,</span> <span class="n">p_order</span><span class="p">)</span></div>
 
 
 <span class="c1"># Helper function for scalar computation</span>
 <div class="viewcode-block" id="GFF_theo_scalar_helper">
 <a class="viewcode-back" href="../../Minimizer.html#gumpgpd.Minimizer.GFF_theo_scalar_helper">[docs]</a>
-<span class="k">def</span> <span class="nf">GFF_theo_scalar_helper</span><span class="p">(</span><span class="n">j_i</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">xi</span><span class="p">,</span> <span class="n">t_i</span><span class="p">,</span> <span class="n">Q_i</span><span class="p">,</span> <span class="n">p_i</span><span class="p">,</span> <span class="n">flv_i</span><span class="p">,</span> <span class="n">Para_i</span><span class="p">,</span> <span class="n">p_order</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">GFF_theo_scalar_helper</span><span class="p">(</span><span class="n">j_i</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">xi</span><span class="p">,</span> <span class="n">t_i</span><span class="p">,</span> <span class="n">Q_i</span><span class="p">,</span> <span class="n">p_i</span><span class="p">,</span> <span class="n">flv_i</span><span class="p">,</span> <span class="n">Para_i</span><span class="p">,</span> <span class="n">p_order</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Compute a single GFF theory value for use with :func:`multiprocessing.Pool.starmap`.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        j_i (int): Mellin moment index :math:`j`.</span>
+<span class="sd">        x (float): Momentum fraction (set to 0 for GFFs).</span>
+<span class="sd">        xi (float): Skewness (set to 0 for GFFs).</span>
+<span class="sd">        t_i (float): Momentum transfer squared :math:`t`.</span>
+<span class="sd">        Q_i (float): Factorization/evolution scale :math:`Q`.</span>
+<span class="sd">        p_i (int): 1 for vector GPDs (H, E), -1 for axial-vector GPDs (Ht, Et).</span>
+<span class="sd">        flv_i (str): Flavor label.</span>
+<span class="sd">        Para_i (np.ndarray): Parameter array for this kinematic point.</span>
+<span class="sd">        p_order (int): Perturbative order (1 = LO, 2 = NLO).</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        float: Theory prediction for the :math:`j=0` GFF moment.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">_GFF_theo</span> <span class="o">=</span> <span class="n">GPDobserv</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">xi</span><span class="p">,</span> <span class="n">t_i</span><span class="p">,</span> <span class="n">Q_i</span><span class="p">,</span> <span class="n">p_i</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">_GFF_theo</span><span class="o">.</span><span class="n">GFFj0</span><span class="p">(</span><span class="n">j_i</span><span class="p">,</span> <span class="n">flv_i</span><span class="p">,</span> <span class="n">Para_i</span><span class="p">,</span> <span class="n">p_order</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="GPD_theo_scalar_helper">
 <a class="viewcode-back" href="../../Minimizer.html#gumpgpd.Minimizer.GPD_theo_scalar_helper">[docs]</a>
-<span class="k">def</span> <span class="nf">GPD_theo_scalar_helper</span><span class="p">(</span><span class="n">x_i</span><span class="p">,</span> <span class="n">xi_i</span><span class="p">,</span> <span class="n">t_i</span><span class="p">,</span> <span class="n">Q_i</span><span class="p">,</span> <span class="n">p_i</span><span class="p">,</span> <span class="n">flv_i</span><span class="p">,</span> <span class="n">Para_i</span><span class="p">,</span> <span class="n">p_order</span><span class="p">):</span>
-    <span class="n">_GPD_theo</span> <span class="o">=</span> <span class="n">GPDobserv</span><span class="p">(</span><span class="n">x_i</span><span class="p">,</span> <span class="n">xi_i</span><span class="p">,</span> <span class="n">t_i</span><span class="p">,</span> <span class="n">Q_i</span><span class="p">,</span> <span class="n">p_i</span><span class="p">)</span>  
+<span class="k">def</span><span class="w"> </span><span class="nf">GPD_theo_scalar_helper</span><span class="p">(</span><span class="n">x_i</span><span class="p">,</span> <span class="n">xi_i</span><span class="p">,</span> <span class="n">t_i</span><span class="p">,</span> <span class="n">Q_i</span><span class="p">,</span> <span class="n">p_i</span><span class="p">,</span> <span class="n">flv_i</span><span class="p">,</span> <span class="n">Para_i</span><span class="p">,</span> <span class="n">p_order</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Compute a single GPD theory value for use with :func:`multiprocessing.Pool.starmap`.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        x_i (float): Longitudinal momentum fraction :math:`x`.</span>
+<span class="sd">        xi_i (float): Skewness :math:`\\xi`.</span>
+<span class="sd">        t_i (float): Momentum transfer squared :math:`t`.</span>
+<span class="sd">        Q_i (float): Factorization/evolution scale :math:`Q`.</span>
+<span class="sd">        p_i (int): 1 for vector GPDs (H, E), -1 for axial-vector GPDs (Ht, Et).</span>
+<span class="sd">        flv_i (str): Flavor label.</span>
+<span class="sd">        Para_i (np.ndarray): Parameter array for this kinematic point.</span>
+<span class="sd">        p_order (int): Perturbative order (1 = LO, 2 = NLO).</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        float: Theory prediction for the off-forward GPD at the given kinematics.</span>
+<span class="sd">    &quot;&quot;&quot;</span>  
+    <span class="n">_GPD_theo</span> <span class="o">=</span> <span class="n">GPDobserv</span><span class="p">(</span><span class="n">x_i</span><span class="p">,</span> <span class="n">xi_i</span><span class="p">,</span> <span class="n">t_i</span><span class="p">,</span> <span class="n">Q_i</span><span class="p">,</span> <span class="n">p_i</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">_GPD_theo</span><span class="o">.</span><span class="n">GPD</span><span class="p">(</span><span class="n">flv_i</span><span class="p">,</span> <span class="n">Para_i</span><span class="p">,</span> <span class="n">p_order</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="PDF_theo">
 <a class="viewcode-back" href="../../Minimizer.html#gumpgpd.Minimizer.PDF_theo">[docs]</a>
-<span class="k">def</span> <span class="nf">PDF_theo</span><span class="p">(</span><span class="n">PDF_input</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">Para</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">,</span> <span class="n">p_order</span> <span class="o">=</span> <span class="mi">2</span><span class="p">,</span> <span class="n">chunksize</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
-    
-    <span class="n">PDF_input</span> <span class="o">=</span> <span class="n">PDF_input</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">PDF_theo</span><span class="p">(</span><span class="n">PDF_input</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">Para</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">,</span> <span class="n">p_order</span> <span class="o">=</span> <span class="mi">2</span><span class="p">,</span> <span class="n">chunksize</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Compute NLO tPDF/PDF theory predictions for an entire dataset in parallel.</span>
+
+<span class="sd">    Adds a ``&#39;pred f&#39;`` column with the theory prediction and, if ``&#39;f&#39;`` and</span>
+<span class="sd">    ``&#39;delta f&#39;`` columns are present, a ``&#39;cost&#39;`` column with the</span>
+<span class="sd">    per-point :math:`\\chi^2` contribution.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        PDF_input (pd.DataFrame): Input data with columns ``x``, ``t``, ``Q``,</span>
+<span class="sd">            ``flv``, ``spe`` (species index), and optionally ``f``/``delta f``.</span>
+<span class="sd">        Para (np.ndarray): Full stacked parameter array indexed by species.</span>
+<span class="sd">        p_order (int, optional): Perturbative order.  Defaults to 2 (NLO).</span>
+<span class="sd">        chunksize (int, optional): Pool map chunksize for performance tuning.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        pd.DataFrame: Copy of *PDF_input* with added ``&#39;pred f&#39;`` and</span>
+<span class="sd">        (if data present) ``&#39;cost&#39;`` columns.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     
     <span class="n">xs</span> <span class="o">=</span> <span class="n">PDF_input</span><span class="p">[</span><span class="s1">&#39;x&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">()</span>
     <span class="n">ts</span> <span class="o">=</span> <span class="n">PDF_input</span><span class="p">[</span><span class="s1">&#39;t&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">()</span>
@@ -479,9 +567,24 @@
 
 <div class="viewcode-block" id="GFF_theo">
 <a class="viewcode-back" href="../../Minimizer.html#gumpgpd.Minimizer.GFF_theo">[docs]</a>
-<span class="k">def</span> <span class="nf">GFF_theo</span><span class="p">(</span><span class="n">GFF_input</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">Para</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">,</span> <span class="n">p_order</span> <span class="o">=</span> <span class="mi">2</span><span class="p">,</span> <span class="n">chunksize</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
-    
-    <span class="n">GFF_input</span> <span class="o">=</span> <span class="n">GFF_input</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">GFF_theo</span><span class="p">(</span><span class="n">GFF_input</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">Para</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">,</span> <span class="n">p_order</span> <span class="o">=</span> <span class="mi">2</span><span class="p">,</span> <span class="n">chunksize</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Compute NLO GFF theory predictions for an entire dataset in parallel.</span>
+
+<span class="sd">    Adds a ``&#39;pred f&#39;`` column with the theory prediction and, if ``&#39;f&#39;`` and</span>
+<span class="sd">    ``&#39;delta f&#39;`` columns are present, a ``&#39;cost&#39;`` column with the</span>
+<span class="sd">    per-point :math:`\\chi^2` contribution.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        GFF_input (pd.DataFrame): Input data with columns ``j``, ``t``, ``Q``,</span>
+<span class="sd">            ``flv``, ``spe``, and optionally ``f``/``delta f``.</span>
+<span class="sd">        Para (np.ndarray): Full stacked parameter array indexed by species.</span>
+<span class="sd">        p_order (int, optional): Perturbative order.  Defaults to 2 (NLO).</span>
+<span class="sd">        chunksize (int, optional): Pool map chunksize for performance tuning.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        pd.DataFrame: Copy of *GFF_input* with added ``&#39;pred f&#39;`` and</span>
+<span class="sd">        (if data present) ``&#39;cost&#39;`` columns.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     
     <span class="n">js</span> <span class="o">=</span> <span class="n">GFF_input</span><span class="p">[</span><span class="s1">&#39;j&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">()</span>
     <span class="n">ts</span> <span class="o">=</span> <span class="n">GFF_input</span><span class="p">[</span><span class="s1">&#39;t&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">()</span>
@@ -507,9 +610,24 @@
 
 <div class="viewcode-block" id="GPD_theo">
 <a class="viewcode-back" href="../../Minimizer.html#gumpgpd.Minimizer.GPD_theo">[docs]</a>
-<span class="k">def</span> <span class="nf">GPD_theo</span><span class="p">(</span><span class="n">GPD_input</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">Para</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">,</span> <span class="n">p_order</span> <span class="o">=</span> <span class="mi">2</span><span class="p">,</span> <span class="n">chunksize</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
-    
-    <span class="n">GPD_input</span> <span class="o">=</span> <span class="n">GPD_input</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">GPD_theo</span><span class="p">(</span><span class="n">GPD_input</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">Para</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">,</span> <span class="n">p_order</span> <span class="o">=</span> <span class="mi">2</span><span class="p">,</span> <span class="n">chunksize</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Compute NLO off-forward GPD theory predictions for an entire dataset in parallel.</span>
+
+<span class="sd">    Adds a ``&#39;pred f&#39;`` column with the theory prediction and, if ``&#39;f&#39;`` and</span>
+<span class="sd">    ``&#39;delta f&#39;`` columns are present, a ``&#39;cost&#39;`` column with the</span>
+<span class="sd">    per-point :math:`\\chi^2` contribution.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        GPD_input (pd.DataFrame): Input data with columns ``x``, ``xi``, ``t``,</span>
+<span class="sd">            ``Q``, ``flv``, ``spe``, and optionally ``f``/``delta f``.</span>
+<span class="sd">        Para (np.ndarray): Full stacked parameter array indexed by species.</span>
+<span class="sd">        p_order (int, optional): Perturbative order.  Defaults to 2 (NLO).</span>
+<span class="sd">        chunksize (int, optional): Pool map chunksize for performance tuning.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        pd.DataFrame: Copy of *GPD_input* with added ``&#39;pred f&#39;`` and</span>
+<span class="sd">        (if data present) ``&#39;cost&#39;`` columns.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     
     <span class="n">xs</span> <span class="o">=</span> <span class="n">GPD_input</span><span class="p">[</span><span class="s1">&#39;x&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">()</span>
     <span class="n">xis</span> <span class="o">=</span> <span class="n">GPD_input</span><span class="p">[</span><span class="s1">&#39;xi&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">()</span>
@@ -534,10 +652,20 @@
 
 <div class="viewcode-block" id="DVCSxsec_theo_helper">
 <a class="viewcode-back" href="../../Minimizer.html#gumpgpd.Minimizer.DVCSxsec_theo_helper">[docs]</a>
-<span class="k">def</span> <span class="nf">DVCSxsec_theo_helper</span><span class="p">(</span><span class="n">DVCSxsec_input</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">CFF_input</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">):</span>
-    <span class="c1"># CFF_input is a list of np.arrays</span>
-    <span class="c1"># [y, xB, t, Q, phi, f, delta_f, pol] = DVCSxsec_input    </span>
+<span class="k">def</span><span class="w"> </span><span class="nf">DVCSxsec_theo_helper</span><span class="p">(</span><span class="n">DVCSxsec_input</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">CFF_input</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Compute DVCS differential cross-section predictions for a single kinematic group.</span>
 
+<span class="sd">    Args:</span>
+<span class="sd">        DVCSxsec_input (pd.DataFrame): Rows sharing a common :math:`(x_B, t, Q)`</span>
+<span class="sd">            with columns ``y``, ``xB``, ``t``, ``Q``, ``phi``, ``pol``.</span>
+<span class="sd">        CFF_input (list of array-like): ``[HCFF, ECFF, HtCFF, EtCFF]`` —</span>
+<span class="sd">            Compton form factors evaluated at the kinematics of this group;</span>
+<span class="sd">            each element may be a scalar or a 1-D array of shape ``(N,)``.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        np.ndarray: Theory cross-section predictions with the same length as</span>
+<span class="sd">        *DVCSxsec_input*.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">y</span> <span class="o">=</span> <span class="n">DVCSxsec_input</span><span class="p">[</span><span class="s1">&#39;y&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">()</span>
     <span class="n">xB</span> <span class="o">=</span> <span class="n">DVCSxsec_input</span><span class="p">[</span><span class="s1">&#39;xB&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">()</span>
     <span class="n">t</span> <span class="o">=</span> <span class="n">DVCSxsec_input</span><span class="p">[</span><span class="s1">&#39;t&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">()</span>
@@ -552,10 +680,19 @@
 
 <div class="viewcode-block" id="DVCSAsym_theo_helper">
 <a class="viewcode-back" href="../../Minimizer.html#gumpgpd.Minimizer.DVCSAsym_theo_helper">[docs]</a>
-<span class="k">def</span> <span class="nf">DVCSAsym_theo_helper</span><span class="p">(</span><span class="n">DVCSAsym_input</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">CFF_input</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">):</span>
-    <span class="c1"># CFF_input is a list of np.arrays</span>
-    <span class="c1"># [y, xB, t, Q, phi, f, delta_f, pol] = DVCSxsec_input    </span>
+<span class="k">def</span><span class="w"> </span><span class="nf">DVCSAsym_theo_helper</span><span class="p">(</span><span class="n">DVCSAsym_input</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">CFF_input</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Compute DVCS beam-spin asymmetry predictions for a single kinematic group.</span>
 
+<span class="sd">    Args:</span>
+<span class="sd">        DVCSAsym_input (pd.DataFrame): Rows sharing a common :math:`(x_B, t, Q)`</span>
+<span class="sd">            with columns ``y``, ``xB``, ``t``, ``Q``, ``phi``, ``pol``.</span>
+<span class="sd">        CFF_input (list of array-like): ``[HCFF, ECFF, HtCFF, EtCFF]`` —</span>
+<span class="sd">            Compton form factors; each element may be scalar or 1-D array ``(N,)``.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        np.ndarray: Theory asymmetry predictions with the same length as</span>
+<span class="sd">        *DVCSAsym_input*.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">y</span> <span class="o">=</span> <span class="n">DVCSAsym_input</span><span class="p">[</span><span class="s1">&#39;y&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">()</span>
     <span class="n">xB</span> <span class="o">=</span> <span class="n">DVCSAsym_input</span><span class="p">[</span><span class="s1">&#39;xB&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">()</span>
     <span class="n">t</span> <span class="o">=</span> <span class="n">DVCSAsym_input</span><span class="p">[</span><span class="s1">&#39;t&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">()</span>
@@ -569,8 +706,19 @@
 
 <div class="viewcode-block" id="DVCSxsec_HERA_theo_helper">
 <a class="viewcode-back" href="../../Minimizer.html#gumpgpd.Minimizer.DVCSxsec_HERA_theo_helper">[docs]</a>
-<span class="k">def</span> <span class="nf">DVCSxsec_HERA_theo_helper</span><span class="p">(</span><span class="n">DVCSxsec_HERA_input</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">CFF_input</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">):</span>
-    <span class="c1">#[y, xB, t, Q, f, delta_f, pol]  = DVCSxsec_data_HERA</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">DVCSxsec_HERA_theo_helper</span><span class="p">(</span><span class="n">DVCSxsec_HERA_input</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">CFF_input</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Compute DVCS cross-section predictions for HERA kinematics (no azimuthal angle).</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        DVCSxsec_HERA_input (pd.DataFrame): Rows sharing a common</span>
+<span class="sd">            :math:`(x_B, t, Q)` with columns ``y``, ``xB``, ``t``, ``Q``,</span>
+<span class="sd">            ``pol``.</span>
+<span class="sd">        CFF_input (list of array-like): ``[HCFF, ECFF, HtCFF, EtCFF]`` —</span>
+<span class="sd">            Compton form factors; each element may be scalar or 1-D array ``(N,)``.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        np.ndarray: Theory HERA cross-section predictions.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">y</span> <span class="o">=</span> <span class="n">DVCSxsec_HERA_input</span><span class="p">[</span><span class="s1">&#39;y&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">()</span>
     <span class="n">xB</span> <span class="o">=</span> <span class="n">DVCSxsec_HERA_input</span><span class="p">[</span><span class="s1">&#39;xB&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">()</span>
     <span class="n">t</span> <span class="o">=</span> <span class="n">DVCSxsec_HERA_input</span><span class="p">[</span><span class="s1">&#39;t&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">()</span>
@@ -585,7 +733,20 @@
 
 <div class="viewcode-block" id="DVMPxsec_theo_helper">
 <a class="viewcode-back" href="../../Minimizer.html#gumpgpd.Minimizer.DVMPxsec_theo_helper">[docs]</a>
-<span class="k">def</span> <span class="nf">DVMPxsec_theo_helper</span><span class="p">(</span><span class="n">DVMPxsec_input</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span>  <span class="n">TFF_input</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">,</span> <span class="n">meson</span><span class="p">:</span><span class="nb">int</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">DVMPxsec_theo_helper</span><span class="p">(</span><span class="n">DVMPxsec_input</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span>  <span class="n">TFF_input</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">,</span> <span class="n">meson</span><span class="p">:</span><span class="nb">int</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Compute DVMP differential cross-section predictions for a single kinematic group.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        DVMPxsec_input (pd.DataFrame): Rows sharing a common :math:`(x_B, t, Q)`</span>
+<span class="sd">            with columns ``y``, ``xB``, ``t``, ``Q``.</span>
+<span class="sd">        TFF_input (list of array-like): ``[HTFF, ETFF]`` — transition form</span>
+<span class="sd">            factors; each element may be scalar or 1-D array ``(N,)``.</span>
+<span class="sd">        meson (int): Meson type: 1 for :math:`\\rho^0`, 2 for :math:`\\phi`,</span>
+<span class="sd">            3 for J/psi.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        np.ndarray: Theory :math:`d\\sigma/dt` predictions.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">y</span> <span class="o">=</span> <span class="n">DVMPxsec_input</span><span class="p">[</span><span class="s1">&#39;y&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">()</span>
     <span class="n">xB</span> <span class="o">=</span> <span class="n">DVMPxsec_input</span><span class="p">[</span><span class="s1">&#39;xB&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">()</span>
     <span class="n">t</span> <span class="o">=</span> <span class="n">DVMPxsec_input</span><span class="p">[</span><span class="s1">&#39;t&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">()</span>
@@ -602,7 +763,24 @@
 
 <div class="viewcode-block" id="CFF_theo">
 <a class="viewcode-back" href="../../Minimizer.html#gumpgpd.Minimizer.CFF_theo">[docs]</a>
-<span class="k">def</span> <span class="nf">CFF_theo</span><span class="p">(</span><span class="n">xB</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="n">Q</span><span class="p">,</span> <span class="n">Para_Unp</span><span class="p">,</span> <span class="n">Para_Pol</span><span class="p">,</span> <span class="n">porder</span> <span class="o">=</span> <span class="mi">2</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">CFF_theo</span><span class="p">(</span><span class="n">xB</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="n">Q</span><span class="p">,</span> <span class="n">Para_Unp</span><span class="p">,</span> <span class="n">Para_Pol</span><span class="p">,</span> <span class="n">porder</span> <span class="o">=</span> <span class="mi">2</span><span class="p">):</span>
+<span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Compute the four Compton form factors (CFFs) at a given kinematic point.</span>
+
+<span class="sd">    The skewness is derived from :math:`x_B`, :math:`t`, and :math:`Q` via the</span>
+<span class="sd">    exact kinematic relation.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        xB (float): Bjorken-:math:`x` variable.</span>
+<span class="sd">        t (float): Momentum transfer squared :math:`t`.</span>
+<span class="sd">        Q (float): Photon virtuality :math:`Q`.</span>
+<span class="sd">        Para_Unp (np.ndarray): Unpolarized GPD parameter array (species-stacked).</span>
+<span class="sd">        Para_Pol (np.ndarray): Polarized GPD parameter array (species-stacked).</span>
+<span class="sd">        porder (int, optional): Perturbative order.  Defaults to 2 (NLO).</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        list: ``[HCFF, ECFF, HtCFF, EtCFF]`` — the four CFFs as scalars (or</span>
+<span class="sd">        arrays if the input parameters have a batch dimension).</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">x</span> <span class="o">=</span> <span class="mi">0</span>
     <span class="n">xi</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span><span class="o">/</span><span class="p">(</span><span class="mi">2</span> <span class="o">-</span> <span class="n">xB</span><span class="p">)</span> <span class="o">-</span> <span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="n">t</span><span class="o">*</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span> <span class="o">+</span> <span class="n">xB</span><span class="p">))</span><span class="o">/</span><span class="p">(</span><span class="n">Q</span><span class="o">**</span><span class="mi">2</span><span class="o">*</span><span class="p">(</span><span class="o">-</span><span class="mi">2</span> <span class="o">+</span> <span class="n">xB</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span><span class="p">))</span><span class="o">*</span><span class="n">xB</span>
     <span class="n">H_E</span> <span class="o">=</span> <span class="n">GPDobserv</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">xi</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="n">Q</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
@@ -618,7 +796,27 @@
 
 <div class="viewcode-block" id="TFF_theo">
 <a class="viewcode-back" href="../../Minimizer.html#gumpgpd.Minimizer.TFF_theo">[docs]</a>
-<span class="k">def</span> <span class="nf">TFF_theo</span><span class="p">(</span><span class="n">xB</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="n">Q</span><span class="p">,</span> <span class="n">Para_Unp</span><span class="p">,</span> <span class="n">meson</span><span class="p">:</span><span class="nb">int</span><span class="p">,</span> <span class="n">p_order</span> <span class="o">=</span> <span class="mi">2</span><span class="p">,</span> <span class="n">muset</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">flv</span> <span class="o">=</span> <span class="s1">&#39;All&#39;</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">TFF_theo</span><span class="p">(</span><span class="n">xB</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="n">Q</span><span class="p">,</span> <span class="n">Para_Unp</span><span class="p">,</span> <span class="n">meson</span><span class="p">:</span><span class="nb">int</span><span class="p">,</span> <span class="n">p_order</span> <span class="o">=</span> <span class="mi">2</span><span class="p">,</span> <span class="n">muset</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">flv</span> <span class="o">=</span> <span class="s1">&#39;All&#39;</span><span class="p">):</span>
+<span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Compute the two transition form factors (TFFs) for DVMP at a given kinematic point.</span>
+
+<span class="sd">    The skewness is derived from :math:`x_B`, :math:`t`, and :math:`Q`.  For</span>
+<span class="sd">    J/psi production the J/psi mass enters the skewness formula.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        xB (float): Bjorken-:math:`x` variable.</span>
+<span class="sd">        t (float): Momentum transfer squared :math:`t`.</span>
+<span class="sd">        Q (float): Photon virtuality :math:`Q`.</span>
+<span class="sd">        Para_Unp (np.ndarray): Unpolarized GPD parameter array (species-stacked).</span>
+<span class="sd">        meson (int): Meson type: 1 for :math:`\\rho^0`, 2 for :math:`\\phi`,</span>
+<span class="sd">            3 for J/psi.</span>
+<span class="sd">        p_order (int, optional): Perturbative order.  Defaults to 2 (NLO).</span>
+<span class="sd">        muset (float, optional): Scale factor applied to :math:`Q` when</span>
+<span class="sd">            evaluating the TFF (used for scale-uncertainty studies).</span>
+<span class="sd">        flv (str, optional): Flavor channel.  Defaults to ``&#39;All&#39;``.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        list: ``[HTFF, ETFF]`` — the H- and E-type TFFs.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">x</span> <span class="o">=</span> <span class="mi">0</span>
     <span class="n">xi</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span><span class="o">/</span><span class="p">(</span><span class="mi">2</span> <span class="o">-</span> <span class="n">xB</span><span class="p">)</span> <span class="o">-</span> <span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="n">t</span><span class="o">*</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span> <span class="o">+</span> <span class="n">xB</span><span class="p">))</span><span class="o">/</span><span class="p">((</span><span class="n">Q</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span><span class="o">*</span><span class="p">(</span><span class="o">-</span><span class="mi">2</span> <span class="o">+</span> <span class="n">xB</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span><span class="p">))</span><span class="o">*</span><span class="n">xB</span>
     <span class="k">if</span> <span class="p">(</span><span class="n">meson</span><span class="o">==</span><span class="mi">3</span><span class="p">):</span>
@@ -632,7 +830,21 @@
 
 <div class="viewcode-block" id="DVCSxsec_theo_xBtQ">
 <a class="viewcode-back" href="../../Minimizer.html#gumpgpd.Minimizer.DVCSxsec_theo_xBtQ">[docs]</a>
-<span class="k">def</span> <span class="nf">DVCSxsec_theo_xBtQ</span><span class="p">(</span><span class="n">DVCSxsec_data_xBtQ</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">Para_Unp</span><span class="p">,</span> <span class="n">Para_Pol</span><span class="p">,</span> <span class="n">P_order</span> <span class="o">=</span> <span class="mi">2</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">DVCSxsec_theo_xBtQ</span><span class="p">(</span><span class="n">DVCSxsec_data_xBtQ</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">Para_Unp</span><span class="p">,</span> <span class="n">Para_Pol</span><span class="p">,</span> <span class="n">P_order</span> <span class="o">=</span> <span class="mi">2</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Add DVCS cross-section theory predictions for a single :math:`(x_B, t, Q)` group.</span>
+
+<span class="sd">    Computes the CFFs once for the shared kinematics, then fills predictions</span>
+<span class="sd">    for all phi/polarization rows in the group.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        DVCSxsec_data_xBtQ (pd.DataFrame): Rows with identical ``xB``, ``t``, ``Q``.</span>
+<span class="sd">        Para_Unp (np.ndarray): Unpolarized parameter array.</span>
+<span class="sd">        Para_Pol (np.ndarray): Polarized parameter array.</span>
+<span class="sd">        P_order (int, optional): Perturbative order.  Defaults to 2.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        pd.DataFrame: Input DataFrame with added ``&#39;pred f&#39;`` and ``&#39;cost&#39;`` columns.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="p">[</span><span class="n">xB</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="n">Q</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">DVCSxsec_data_xBtQ</span><span class="p">[</span><span class="s1">&#39;xB&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">iat</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">DVCSxsec_data_xBtQ</span><span class="p">[</span><span class="s1">&#39;t&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">iat</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">DVCSxsec_data_xBtQ</span><span class="p">[</span><span class="s1">&#39;Q&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">iat</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span> 
     <span class="p">[</span><span class="n">HCFF</span><span class="p">,</span> <span class="n">ECFF</span><span class="p">,</span> <span class="n">HtCFF</span><span class="p">,</span> <span class="n">EtCFF</span><span class="p">]</span> <span class="o">=</span> <span class="n">CFF_theo</span><span class="p">(</span><span class="n">xB</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="n">Q</span><span class="p">,</span> <span class="n">Para_Unp</span><span class="p">,</span> <span class="n">Para_Pol</span><span class="p">,</span> <span class="n">porder</span><span class="o">=</span> <span class="n">P_order</span><span class="p">)</span> <span class="c1"># scalar for each of them</span>
 
@@ -645,7 +857,18 @@
 
 <div class="viewcode-block" id="DVCSAsym_theo_xBtQ">
 <a class="viewcode-back" href="../../Minimizer.html#gumpgpd.Minimizer.DVCSAsym_theo_xBtQ">[docs]</a>
-<span class="k">def</span> <span class="nf">DVCSAsym_theo_xBtQ</span><span class="p">(</span><span class="n">DVCSAsym_data_xBtQ</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">Para_Unp</span><span class="p">,</span> <span class="n">Para_Pol</span><span class="p">,</span> <span class="n">P_order</span> <span class="o">=</span> <span class="mi">2</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">DVCSAsym_theo_xBtQ</span><span class="p">(</span><span class="n">DVCSAsym_data_xBtQ</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">Para_Unp</span><span class="p">,</span> <span class="n">Para_Pol</span><span class="p">,</span> <span class="n">P_order</span> <span class="o">=</span> <span class="mi">2</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Add DVCS asymmetry theory predictions for a single :math:`(x_B, t, Q)` group.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        DVCSAsym_data_xBtQ (pd.DataFrame): Rows with identical ``xB``, ``t``, ``Q``.</span>
+<span class="sd">        Para_Unp (np.ndarray): Unpolarized parameter array.</span>
+<span class="sd">        Para_Pol (np.ndarray): Polarized parameter array.</span>
+<span class="sd">        P_order (int, optional): Perturbative order.  Defaults to 2.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        pd.DataFrame: Input DataFrame with added ``&#39;pred f&#39;`` and ``&#39;cost&#39;`` columns.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="p">[</span><span class="n">xB</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="n">Q</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">DVCSAsym_data_xBtQ</span><span class="p">[</span><span class="s1">&#39;xB&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">iat</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">DVCSAsym_data_xBtQ</span><span class="p">[</span><span class="s1">&#39;t&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">iat</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">DVCSAsym_data_xBtQ</span><span class="p">[</span><span class="s1">&#39;Q&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">iat</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span> 
     <span class="p">[</span><span class="n">HCFF</span><span class="p">,</span> <span class="n">ECFF</span><span class="p">,</span> <span class="n">HtCFF</span><span class="p">,</span> <span class="n">EtCFF</span><span class="p">]</span> <span class="o">=</span> <span class="n">CFF_theo</span><span class="p">(</span><span class="n">xB</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="n">Q</span><span class="p">,</span> <span class="n">Para_Unp</span><span class="p">,</span> <span class="n">Para_Pol</span><span class="p">,</span> <span class="n">porder</span><span class="o">=</span> <span class="n">P_order</span><span class="p">)</span> <span class="c1"># scalar for each of them</span>
 
@@ -658,8 +881,18 @@
 
 <div class="viewcode-block" id="DVCSxsecHERA_theo_xBtQ">
 <a class="viewcode-back" href="../../Minimizer.html#gumpgpd.Minimizer.DVCSxsecHERA_theo_xBtQ">[docs]</a>
-<span class="k">def</span> <span class="nf">DVCSxsecHERA_theo_xBtQ</span><span class="p">(</span><span class="n">DVCSxsec_HERA_data_xBtQ</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">Para_Unp</span><span class="p">,</span> <span class="n">Para_Pol</span> <span class="p">,</span> <span class="n">P_order</span> <span class="o">=</span> <span class="mi">2</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">DVCSxsecHERA_theo_xBtQ</span><span class="p">(</span><span class="n">DVCSxsec_HERA_data_xBtQ</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">Para_Unp</span><span class="p">,</span> <span class="n">Para_Pol</span> <span class="p">,</span> <span class="n">P_order</span> <span class="o">=</span> <span class="mi">2</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Add HERA DVCS cross-section theory predictions for a single :math:`(x_B, t, Q)` group.</span>
 
+<span class="sd">    Args:</span>
+<span class="sd">        DVCSxsec_HERA_data_xBtQ (pd.DataFrame): Rows with identical ``xB``, ``t``, ``Q``.</span>
+<span class="sd">        Para_Unp (np.ndarray): Unpolarized parameter array.</span>
+<span class="sd">        Para_Pol (np.ndarray): Polarized parameter array.</span>
+<span class="sd">        P_order (int, optional): Perturbative order.  Defaults to 2.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        pd.DataFrame: Input DataFrame with added ``&#39;pred f&#39;`` and ``&#39;cost&#39;`` columns.</span>
+<span class="sd">    &quot;&quot;&quot;</span> 
     <span class="p">[</span><span class="n">xB</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="n">Q</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">DVCSxsec_HERA_data_xBtQ</span><span class="p">[</span><span class="s1">&#39;xB&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">iat</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">DVCSxsec_HERA_data_xBtQ</span><span class="p">[</span><span class="s1">&#39;t&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">iat</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">DVCSxsec_HERA_data_xBtQ</span><span class="p">[</span><span class="s1">&#39;Q&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">iat</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span> 
     <span class="p">[</span><span class="n">HCFF</span><span class="p">,</span> <span class="n">ECFF</span><span class="p">,</span> <span class="n">HtCFF</span><span class="p">,</span> <span class="n">EtCFF</span><span class="p">]</span> <span class="o">=</span> <span class="n">CFF_theo</span><span class="p">(</span><span class="n">xB</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="n">Q</span><span class="p">,</span> <span class="n">Para_Unp</span><span class="p">,</span> <span class="n">Para_Pol</span><span class="p">,</span> <span class="n">porder</span> <span class="o">=</span> <span class="n">P_order</span><span class="p">)</span> <span class="c1"># scalar for each of them</span>
 
@@ -672,8 +905,20 @@
 
 <div class="viewcode-block" id="DVMPxsec_theo_xBtQ">
 <a class="viewcode-back" href="../../Minimizer.html#gumpgpd.Minimizer.DVMPxsec_theo_xBtQ">[docs]</a>
-<span class="k">def</span> <span class="nf">DVMPxsec_theo_xBtQ</span><span class="p">(</span><span class="n">DVMPxsec_data_xBtQ</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">Para_Unp</span><span class="p">,</span> <span class="n">xsec_norm</span><span class="p">,</span> <span class="n">meson</span><span class="p">:</span><span class="nb">int</span><span class="p">,</span> <span class="n">p_order</span> <span class="o">=</span> <span class="mi">2</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">DVMPxsec_theo_xBtQ</span><span class="p">(</span><span class="n">DVMPxsec_data_xBtQ</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">Para_Unp</span><span class="p">,</span> <span class="n">xsec_norm</span><span class="p">,</span> <span class="n">meson</span><span class="p">:</span><span class="nb">int</span><span class="p">,</span> <span class="n">p_order</span> <span class="o">=</span> <span class="mi">2</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Add DVMP cross-section theory predictions for a single :math:`(x_B, t, Q)` group.</span>
 
+<span class="sd">    Args:</span>
+<span class="sd">        DVMPxsec_data_xBtQ (pd.DataFrame): Rows with identical ``xB``, ``t``, ``Q``.</span>
+<span class="sd">        Para_Unp (np.ndarray): Unpolarized parameter array.</span>
+<span class="sd">        xsec_norm (float): Overall normalization factor applied as</span>
+<span class="sd">            ``theory *= xsec_norm**2``.</span>
+<span class="sd">        meson (int): Meson type: 1 for :math:`\\rho^0`, 3 for J/psi.</span>
+<span class="sd">        p_order (int, optional): Perturbative order.  Defaults to 2.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        pd.DataFrame: Input DataFrame with added ``&#39;pred f&#39;`` and ``&#39;cost&#39;`` columns.</span>
+<span class="sd">    &quot;&quot;&quot;</span> 
     <span class="p">[</span><span class="n">xB</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="n">Q</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">DVMPxsec_data_xBtQ</span><span class="p">[</span><span class="s1">&#39;xB&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">iat</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">DVMPxsec_data_xBtQ</span><span class="p">[</span><span class="s1">&#39;t&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">iat</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">DVMPxsec_data_xBtQ</span><span class="p">[</span><span class="s1">&#39;Q&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">iat</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span> 
     <span class="p">[</span><span class="n">HTFF</span><span class="p">,</span> <span class="n">ETFF</span><span class="p">]</span> <span class="o">=</span> <span class="n">TFF_theo</span><span class="p">(</span><span class="n">xB</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="n">Q</span><span class="p">,</span> <span class="n">Para_Unp</span><span class="p">,</span> <span class="n">meson</span><span class="p">,</span> <span class="n">p_order</span><span class="p">,</span> <span class="n">muset</span> <span class="o">=</span> <span class="mi">1</span><span class="p">)</span>
     
@@ -686,8 +931,18 @@
 
 <div class="viewcode-block" id="DVCSxsec_theo">
 <a class="viewcode-back" href="../../Minimizer.html#gumpgpd.Minimizer.DVCSxsec_theo">[docs]</a>
-<span class="k">def</span> <span class="nf">DVCSxsec_theo</span><span class="p">(</span><span class="n">DVCSxsec_data</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">Para_Unp</span><span class="p">,</span> <span class="n">Para_Pol</span><span class="p">,</span> <span class="n">P_order</span> <span class="o">=</span> <span class="mi">2</span><span class="p">):</span>
-    
+<span class="k">def</span><span class="w"> </span><span class="nf">DVCSxsec_theo</span><span class="p">(</span><span class="n">DVCSxsec_data</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">Para_Unp</span><span class="p">,</span> <span class="n">Para_Pol</span><span class="p">,</span> <span class="n">P_order</span> <span class="o">=</span> <span class="mi">2</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Compute DVCS cross-section predictions for a full dataset using a parallel pool.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        DVCSxsec_data (pd.DataFrame): Full DVCS cross-section dataset.</span>
+<span class="sd">        Para_Unp (np.ndarray): Unpolarized parameter array.</span>
+<span class="sd">        Para_Pol (np.ndarray): Polarized parameter array.</span>
+<span class="sd">        P_order (int, optional): Perturbative order.  Defaults to 2.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        pd.DataFrame: Concatenated results with ``&#39;pred f&#39;`` and ``&#39;cost&#39;`` columns.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">DVCSxsec_data_xBtQ</span> <span class="o">=</span> <span class="n">group_by_unique</span><span class="p">(</span><span class="n">DVCSxsec_data</span><span class="p">)</span>
     <span class="n">pool</span> <span class="o">=</span> <span class="n">get_pool</span><span class="p">()</span>
     <span class="n">DVCSxsec_data_xBtQ</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">pool</span><span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="n">partial</span><span class="p">(</span><span class="n">DVCSxsec_theo_xBtQ</span><span class="p">,</span> <span class="n">Para_Unp</span> <span class="o">=</span> <span class="n">Para_Unp</span><span class="p">,</span> <span class="n">Para_Pol</span> <span class="o">=</span> <span class="n">Para_Pol</span><span class="p">,</span> <span class="n">P_order</span> <span class="o">=</span> <span class="n">P_order</span><span class="p">),</span> <span class="n">DVCSxsec_data_xBtQ</span><span class="p">)),</span> <span class="n">ignore_index</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
@@ -696,8 +951,18 @@
 
 <div class="viewcode-block" id="DVCSAsym_theo">
 <a class="viewcode-back" href="../../Minimizer.html#gumpgpd.Minimizer.DVCSAsym_theo">[docs]</a>
-<span class="k">def</span> <span class="nf">DVCSAsym_theo</span><span class="p">(</span><span class="n">DVCSAsym_data</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">Para_Unp</span><span class="p">,</span> <span class="n">Para_Pol</span><span class="p">,</span> <span class="n">P_order</span> <span class="o">=</span> <span class="mi">2</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">DVCSAsym_theo</span><span class="p">(</span><span class="n">DVCSAsym_data</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">Para_Unp</span><span class="p">,</span> <span class="n">Para_Pol</span><span class="p">,</span> <span class="n">P_order</span> <span class="o">=</span> <span class="mi">2</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Compute DVCS asymmetry predictions for a full dataset using a parallel pool.</span>
 
+<span class="sd">    Args:</span>
+<span class="sd">        DVCSAsym_data (pd.DataFrame): Full DVCS asymmetry dataset.</span>
+<span class="sd">        Para_Unp (np.ndarray): Unpolarized parameter array.</span>
+<span class="sd">        Para_Pol (np.ndarray): Polarized parameter array.</span>
+<span class="sd">        P_order (int, optional): Perturbative order.  Defaults to 2.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        pd.DataFrame: Concatenated results with ``&#39;pred f&#39;`` and ``&#39;cost&#39;`` columns.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">DVCSAsym_data_xBtQ</span> <span class="o">=</span> <span class="n">group_by_unique</span><span class="p">(</span><span class="n">DVCSAsym_data</span><span class="p">)</span>
     <span class="n">pool</span> <span class="o">=</span> <span class="n">get_pool</span><span class="p">()</span>
     <span class="n">DVCSAsym_data_xBtQ</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">pool</span><span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="n">partial</span><span class="p">(</span><span class="n">DVCSAsym_theo_xBtQ</span><span class="p">,</span> <span class="n">Para_Unp</span> <span class="o">=</span> <span class="n">Para_Unp</span><span class="p">,</span> <span class="n">Para_Pol</span> <span class="o">=</span> <span class="n">Para_Pol</span><span class="p">,</span> <span class="n">P_order</span> <span class="o">=</span> <span class="n">P_order</span><span class="p">),</span> <span class="n">DVCSAsym_data_xBtQ</span><span class="p">)),</span> <span class="n">ignore_index</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
@@ -706,8 +971,19 @@
 
 <div class="viewcode-block" id="DVMPxsec_theo">
 <a class="viewcode-back" href="../../Minimizer.html#gumpgpd.Minimizer.DVMPxsec_theo">[docs]</a>
-<span class="k">def</span> <span class="nf">DVMPxsec_theo</span><span class="p">(</span><span class="n">DVMPxsec_data</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">Para_Unp</span><span class="p">,</span> <span class="n">xsec_norm</span><span class="p">,</span> <span class="n">meson</span><span class="p">:</span><span class="nb">int</span><span class="p">,</span> <span class="n">p_order</span> <span class="o">=</span> <span class="mi">2</span><span class="p">):</span>
-    
+<span class="k">def</span><span class="w"> </span><span class="nf">DVMPxsec_theo</span><span class="p">(</span><span class="n">DVMPxsec_data</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">Para_Unp</span><span class="p">,</span> <span class="n">xsec_norm</span><span class="p">,</span> <span class="n">meson</span><span class="p">:</span><span class="nb">int</span><span class="p">,</span> <span class="n">p_order</span> <span class="o">=</span> <span class="mi">2</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Compute DVMP cross-section predictions for a full dataset using a parallel pool.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        DVMPxsec_data (pd.DataFrame): Full DVMP cross-section dataset.</span>
+<span class="sd">        Para_Unp (np.ndarray): Unpolarized parameter array.</span>
+<span class="sd">        xsec_norm (float): Overall normalization applied as ``theory *= xsec_norm**2``.</span>
+<span class="sd">        meson (int): Meson type: 1 for :math:`\\rho^0`, 3 for J/psi.</span>
+<span class="sd">        p_order (int, optional): Perturbative order.  Defaults to 2.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        pd.DataFrame: Concatenated results with ``&#39;pred f&#39;`` and ``&#39;cost&#39;`` columns.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">DVMPxsec_data_xBtQ</span> <span class="o">=</span> <span class="n">group_by_unique</span><span class="p">(</span><span class="n">DVMPxsec_data</span><span class="p">)</span>
     <span class="n">pool</span> <span class="o">=</span> <span class="n">get_pool</span><span class="p">()</span>
     <span class="n">DVMPxsec_data_xBtQ</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">pool</span><span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="n">partial</span><span class="p">(</span><span class="n">DVMPxsec_theo_xBtQ</span><span class="p">,</span> <span class="n">Para_Unp</span> <span class="o">=</span> <span class="n">Para_Unp</span><span class="p">,</span> <span class="n">xsec_norm</span> <span class="o">=</span> <span class="n">xsec_norm</span><span class="p">,</span> <span class="n">meson</span> <span class="o">=</span> <span class="n">meson</span><span class="p">,</span> <span class="n">p_order</span> <span class="o">=</span> <span class="n">p_order</span><span class="p">),</span> <span class="n">DVMPxsec_data_xBtQ</span><span class="p">)),</span> <span class="n">ignore_index</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
@@ -716,8 +992,18 @@
 
 <div class="viewcode-block" id="DVCSxsecHERA_theo">
 <a class="viewcode-back" href="../../Minimizer.html#gumpgpd.Minimizer.DVCSxsecHERA_theo">[docs]</a>
-<span class="k">def</span> <span class="nf">DVCSxsecHERA_theo</span><span class="p">(</span><span class="n">DVCSxsec_HERA_data</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">Para_Unp</span><span class="p">,</span> <span class="n">Para_Pol</span><span class="p">,</span> <span class="n">P_order</span> <span class="o">=</span> <span class="mi">2</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">DVCSxsecHERA_theo</span><span class="p">(</span><span class="n">DVCSxsec_HERA_data</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">Para_Unp</span><span class="p">,</span> <span class="n">Para_Pol</span><span class="p">,</span> <span class="n">P_order</span> <span class="o">=</span> <span class="mi">2</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Compute HERA DVCS cross-section predictions for a full dataset using a parallel pool.</span>
 
+<span class="sd">    Args:</span>
+<span class="sd">        DVCSxsec_HERA_data (pd.DataFrame): Full HERA DVCS dataset.</span>
+<span class="sd">        Para_Unp (np.ndarray): Unpolarized parameter array.</span>
+<span class="sd">        Para_Pol (np.ndarray): Polarized parameter array.</span>
+<span class="sd">        P_order (int, optional): Perturbative order.  Defaults to 2.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        pd.DataFrame: Concatenated results with ``&#39;pred f&#39;`` and ``&#39;cost&#39;`` columns.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">DVCSxsec_HERA_data_xBtQ</span> <span class="o">=</span> <span class="n">group_by_unique</span><span class="p">(</span><span class="n">DVCSxsec_HERA_data</span><span class="p">)</span>
     <span class="n">pool</span> <span class="o">=</span> <span class="n">get_pool</span><span class="p">()</span>
     <span class="n">DVCSxsec_HERA_data_xBtQ</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">pool</span><span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="n">partial</span><span class="p">(</span><span class="n">DVCSxsecHERA_theo_xBtQ</span><span class="p">,</span> <span class="n">Para_Unp</span> <span class="o">=</span> <span class="n">Para_Unp</span><span class="p">,</span> <span class="n">Para_Pol</span> <span class="o">=</span> <span class="n">Para_Pol</span><span class="p">,</span> <span class="n">P_order</span> <span class="o">=</span> <span class="n">P_order</span><span class="p">),</span> <span class="n">DVCSxsec_HERA_data_xBtQ</span><span class="p">)),</span> <span class="n">ignore_index</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
@@ -726,14 +1012,26 @@
 
 <div class="viewcode-block" id="simple_dispatch">
 <a class="viewcode-back" href="../../Minimizer.html#gumpgpd.Minimizer.simple_dispatch">[docs]</a>
-<span class="k">def</span> <span class="nf">simple_dispatch</span><span class="p">(</span><span class="n">task</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">simple_dispatch</span><span class="p">(</span><span class="n">task</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Unpack and call a ``(func, arg)`` task tuple.</span>
+
+<span class="sd">    Used as the target for :meth:`multiprocessing.Pool.map` to dispatch</span>
+<span class="sd">    heterogeneous tasks in a single pool call, reducing scheduling overhead.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        task (tuple): A ``(callable, arg)`` pair where *callable* accepts a</span>
+<span class="sd">            single positional argument.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        Any: Return value of ``func(arg)``.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">func</span><span class="p">,</span> <span class="n">arg</span> <span class="o">=</span> <span class="n">task</span>
     <span class="k">return</span> <span class="n">func</span><span class="p">(</span><span class="n">arg</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="cost_off_forward_withH_withHt">
 <a class="viewcode-back" href="../../Minimizer.html#gumpgpd.Minimizer.cost_off_forward_withH_withHt">[docs]</a>
-<span class="k">def</span> <span class="nf">cost_off_forward_withH_withHt</span><span class="p">(</span><span class="n">Norm_HuV</span><span class="p">,</span>    <span class="n">alpha_HuV</span><span class="p">,</span>    <span class="n">beta_HuV</span><span class="p">,</span>    <span class="n">alphap_HuV</span><span class="p">,</span>   <span class="n">Invm2_HuV</span><span class="p">,</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">cost_off_forward_withH_withHt</span><span class="p">(</span><span class="n">Norm_HuV</span><span class="p">,</span>    <span class="n">alpha_HuV</span><span class="p">,</span>    <span class="n">beta_HuV</span><span class="p">,</span>    <span class="n">alphap_HuV</span><span class="p">,</span>   <span class="n">Invm2_HuV</span><span class="p">,</span>
                     <span class="n">Norm_Hubar</span><span class="p">,</span>  <span class="n">alpha_Hubar</span><span class="p">,</span>  <span class="n">beta_Hubar</span><span class="p">,</span>  <span class="n">alphap_Hqbar</span><span class="p">,</span>
                     <span class="n">Norm_Hubar_2</span><span class="p">,</span>  <span class="n">alpha_Hubar_2</span><span class="p">,</span>  <span class="n">beta_Hubar_2</span><span class="p">,</span>
                     <span class="n">Norm_HdV</span><span class="p">,</span>    <span class="n">alpha_HdV</span><span class="p">,</span>    <span class="n">beta_HdV</span><span class="p">,</span>    <span class="n">alphap_HdV</span><span class="p">,</span>   <span class="n">Invm2_HdV</span><span class="p">,</span>
@@ -759,7 +1057,41 @@
                     <span class="n">R_Htu_xi4</span><span class="p">,</span>   <span class="n">R_Htd_xi4</span><span class="p">,</span>    <span class="n">R_Htg_xi4</span><span class="p">,</span>
                     <span class="n">R_Etu_xi4</span><span class="p">,</span>   <span class="n">R_Etd_xi4</span><span class="p">,</span>    <span class="n">R_Etg_xi4</span><span class="p">,</span>   <span class="n">bexp_HtSea</span><span class="p">,</span>
                     <span class="n">jpsinorm</span><span class="p">):</span>
-    
+<span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Total :math:`\chi^2` cost function for the GUMP global GPD fit.</span>
+
+<span class="sd">    Accepts all GPD model parameters as individual keyword arguments (the</span>
+<span class="sd">    iMinuit interface requires a flat parameter signature).  Internally the</span>
+<span class="sd">    flat list is split into unpolarized (:data:`Paralst_Unp_Names`), polarized</span>
+<span class="sd">    (:data:`Paralst_Pol_Names`), and auxiliary (:data:`Paralst_Aux_Names`)</span>
+<span class="sd">    groups, assembled via :func:`~gumpgpd.Parameters.ParaManager_Unp` and</span>
+<span class="sd">    :func:`~gumpgpd.Parameters.ParaManager_Pol`, and passed to all theory</span>
+<span class="sd">    prediction functions in parallel.</span>
+
+<span class="sd">    The returned scalar is:</span>
+
+<span class="sd">    .. math::</span>
+
+<span class="sd">        \chi^2_\text{total} = \chi^2_\text{exp} + \chi^2_\text{PDF/GFF/GPD}</span>
+<span class="sd">        + \chi^2_\text{penalty}</span>
+
+<span class="sd">    where the penalty encodes the quark-number sum rules and the</span>
+<span class="sd">    momentum/gravitomagnetic sum rules with tolerances given by</span>
+<span class="sd">    ``tolerances``.</span>
+
+<span class="sd">    When :attr:`~gumpgpd.config.Export_Mode` is ``True`` the function prints</span>
+<span class="sd">    a per-dataset :math:`\chi^2` breakdown, saves results to CSV via</span>
+<span class="sd">    :func:`Export_Frame_Append`, and returns a ``dict`` of result DataFrames</span>
+<span class="sd">    instead of a scalar.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        Norm_HuV, alpha_HuV, beta_HuV, ..., jpsinorm: All GPD model parameters</span>
+<span class="sd">            listed in :data:`Paralst_Unp_Names`, :data:`Paralst_Pol_Names`,</span>
+<span class="sd">            and :data:`Paralst_Aux_Names`.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        float: Total :math:`\chi^2` (fit mode).</span>
+<span class="sd">        dict: Mapping of task name → result DataFrame (export mode).</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">params</span> <span class="o">=</span> <span class="nb">locals</span><span class="p">()</span>
     <span class="n">validate_params</span><span class="p">(</span><span class="n">params</span><span class="p">,</span> <span class="nb">set</span><span class="p">(</span><span class="n">Paralst_Unp_Names</span> <span class="o">+</span> <span class="n">Paralst_Pol_Names</span> <span class="o">+</span> <span class="n">Paralst_Aux_Names</span><span class="p">))</span>
     <span class="n">Para_Unp_lst</span> <span class="o">=</span> <span class="p">[</span><span class="n">params</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">Paralst_Unp_Names</span><span class="p">]</span>
@@ -968,8 +1300,35 @@
 
 <div class="viewcode-block" id="off_forward_fit_withH_withHt">
 <a class="viewcode-back" href="../../Minimizer.html#gumpgpd.Minimizer.off_forward_fit_withH_withHt">[docs]</a>
-<span class="k">def</span> <span class="nf">off_forward_fit_withH_withHt</span><span class="p">(</span><span class="n">Paralst_Unp</span><span class="p">,</span> <span class="n">Paralst_Pol</span><span class="p">,</span> <span class="n">Paralst_Aux</span><span class="o">=</span><span class="p">[</span><span class="mf">1.0</span><span class="p">]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">Paralst_Aux_Names</span><span class="p">),</span> <span class="n">export_path</span> <span class="o">=</span> <span class="s1">&#39;.&#39;</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">off_forward_fit_withH_withHt</span><span class="p">(</span><span class="n">Paralst_Unp</span><span class="p">,</span> <span class="n">Paralst_Pol</span><span class="p">,</span> <span class="n">Paralst_Aux</span><span class="o">=</span><span class="p">[</span><span class="mf">1.0</span><span class="p">]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">Paralst_Aux_Names</span><span class="p">),</span> <span class="n">export_path</span> <span class="o">=</span> <span class="s1">&#39;.&#39;</span><span class="p">):</span>
+<span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Run the GUMP global GPD fit using iMinuit (MIGRAD + HESSE).</span>
 
+<span class="sd">    Sets up a :class:`iminuit.Minuit` instance with</span>
+<span class="sd">    :func:`cost_off_forward_withH_withHt` as the cost function, applies</span>
+<span class="sd">    parameter limits and fixes (see source for details), and calls</span>
+<span class="sd">    :meth:`~iminuit.Minuit.migrad` followed by :meth:`~iminuit.Minuit.hesse`.</span>
+<span class="sd">    The fit summary (timing, :math:`\chi^2/\text{dof}`, parameter values and</span>
+<span class="sd">    uncertainties) is written to a text file under ``&lt;export_path&gt;/GUMP_Output/``.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        Paralst_Unp (array-like): Initial values for all unpolarized parameters</span>
+<span class="sd">            in the order defined by :data:`Paralst_Unp_Names`.</span>
+<span class="sd">        Paralst_Pol (array-like): Initial values for all polarized parameters</span>
+<span class="sd">            in the order defined by :data:`Paralst_Pol_Names`.</span>
+<span class="sd">        Paralst_Aux (array-like, optional): Initial values for auxiliary</span>
+<span class="sd">            parameters (currently only ``jpsinorm``).  Defaults to ``[1.0]``.</span>
+<span class="sd">        export_path (str, optional): Root directory for the output text file.</span>
+<span class="sd">            Defaults to the current working directory.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        iminuit.Minuit: The fitted Minuit object (values, errors, covariance</span>
+<span class="sd">        matrix, and status flags accessible via the standard iMinuit API).</span>
+
+<span class="sd">    Note:</span>
+<span class="sd">        :attr:`~gumpgpd.config.Export_Mode` must be ``False`` when calling</span>
+<span class="sd">        this function; use the cost function directly with</span>
+<span class="sd">        ``config.Export_Mode = True`` to export predictions after fitting.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">assert</span> <span class="n">config</span><span class="o">.</span><span class="n">Export_Mode</span> <span class="o">==</span> <span class="kc">False</span><span class="p">,</span> <span class="s2">&quot;Make sure the Export_Mode is set to False in config.py before fitting&quot;</span>
     
     <span class="c1"># Create dictionaries by zipping names and values</span>

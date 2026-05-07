@@ -1,30 +1,69 @@
-DVCS Quickguide
-===============
+DVCS Quick Guide
+================
 
-Here we briefly introduce the :ref:`dvcs_xsec_module`.
-This can be used as a stand-alone module for calculating the deeply virtual Compton scattering (DVCS) cross-section 
-where the formulae are given in `our publication <https://inspirehep.net/literature/1925449>`_.
+This page briefly introduces :ref:`dvcs_xsec_module` for deeply virtual Compton
+scattering (DVCS) cross-section calculations. The formalism follows
+`Guo et al. (2022) <https://inspirehep.net/literature/1925449>`_.
 
-The codes are generated from the Mathematica master code, and numerically checked.
+The implementation is generated from the Mathematica master expressions and
+numerically cross-checked.
 
-We have three main callables: :func:`DVCS_xsec.dsigma_DVCS`, :func:`DVCS_xsec.dsigma_INT()` and :func:`DVCS_xsec.dsigma_BH()`,
-that calcualte the pure DVCS cross-sections, the interference cross-sections, and the Bethe-Heitler (BH) cross-sections, respectively.
+DVCS Main Callables
+-------------------
 
-Each function has the following arguments:
- *   y (float): Beam energy lost parameter
- *   xB (float): x_bjorken
- *   t (float): _description_
- *   Q (float): momentum transfer squared
- *   phi (float): azimuthal angel
- *   pol (string): polarization configuration
- *   HCFF (complex): Compton form factor H 
- *   ECFF (complex): Compton form factor E
- *   HtCFF (complex): Compton form factor Ht 
- *   EtCFF (complex): Compton form factor Et
+The module provides three core differential cross-sections:
 
-The pol should be a string in the form of :math:`P_BP_T`
-such that :math:`P_B = \{U,L\}` and :math:`P_T=\{U,L,T_{\rm{in}},T_{\rm{out}}\}` for the beam and target polarization,
-e.g. ``pol = 'UTout'``.
+- :func:`DVCS_xsec.dsigma_BH` for the Bethe-Heitler (BH) contribution.
+- :func:`DVCS_xsec.dsigma_DVCS` for the pure DVCS contribution.
+- :func:`DVCS_xsec.dsigma_INT` for the BH-DVCS interference contribution.
 
-Besides the three main callables, there is also :func:`DVCS_xsec.dsigma_TOT()` that takes the same input and returns the sum of the three functions above.
-And the :func:`DVCS_xsec.dsigma_DVCS_HERA()` that return the virtual-photon-proton cross-sections and integrate over :math:`\phi`, as measured by HERA. The input :math:`\phi` will not be needed in this case.
+Helpers:
+
+- :func:`DVCS_xsec.dsigma_DVCS_TOT` for
+  :math:`d\sigma_{\mathrm{BH}} + d\sigma_{\mathrm{DVCS}} + d\sigma_{\mathrm{INT}}`.
+- :func:`DVCS_xsec.Asymmetry_DVCS_TOT` for spin asymmetries,
+  :math:`A = d\sigma(\mathrm{pol}) / d\sigma(\mathrm{UU})`.
+- :func:`DVCS_xsec.dsigma_DVCS_HERA` for the virtual-photon-proton cross-section
+  integrated over :math:`\phi` (HERA convention).
+
+DVCS Common Inputs
+------------------
+
+The differential functions use the following common inputs:
+
+- ``y`` (float): beam energy-loss variable.
+- ``xB`` (float): Bjorken :math:`x_B`.
+- ``t`` (float): momentum transfer squared.
+- ``Q`` (float): photon virtuality.
+- ``phi`` (float): azimuthal angle.
+- ``pol`` (str): polarization configuration label.
+- ``HCFF`` (complex): Compton form factor :math:`H`.
+- ``ECFF`` (complex): Compton form factor :math:`E`.
+- ``HtCFF`` (complex): Compton form factor :math:`\widetilde{H}`.
+- ``EtCFF`` (complex): Compton form factor :math:`\widetilde{E}`.
+
+Polarization Convention
+-----------------------
+
+The polarization label uses beam-target form :math:`P_B P_T`, where
+:math:`P_B \in \{U, L\}` and
+:math:`P_T \in \{U, L, T_{\mathrm{in}}, T_{\mathrm{out}}\}`.
+
+Supported labels are:
+
+- ``UU``
+- ``LU``
+- ``UL``
+- ``LL``
+- ``UTin``
+- ``LTin``
+- ``UTout``
+- ``LTout``
+
+Example: ``pol = 'UTout'``.
+
+HERA Observable
+---------------
+
+:func:`DVCS_xsec.dsigma_DVCS_HERA` integrates over :math:`\phi`, so ``phi`` is
+not an input argument for this function.

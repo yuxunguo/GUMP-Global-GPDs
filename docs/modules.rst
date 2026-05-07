@@ -1,9 +1,10 @@
-Documentation of submodules
-===========================
+Submodule API Reference
+=======================
 
-Here we have the documentation of all submodules and functions within of this package.
+This section contains API documentation for all package submodules.
 
-It's recommended that you go through the quickguide of each submodules and look up for the documentation of each function here.
+It is recommended to read the quick guides first, then use these pages as a
+function-by-function reference.
 
 .. toctree::
    :maxdepth: 4

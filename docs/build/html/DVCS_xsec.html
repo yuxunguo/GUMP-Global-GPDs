@@ -7,7 +7,7 @@
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>DVCS_xsec module &mdash; GUMP GPD Analysis 1.0.2 documentation</title>
-      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="_static/copybutton.css?v=76b2166b" />
 
@@ -19,11 +19,12 @@
       <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
       <script src="_static/clipboard.min.js?v=a7894cd8"></script>
       <script src="_static/copybutton.js?v=f281be69"></script>
+      <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-mml-chtml.js"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="DVMP_xsec module" href="DVMP_xsec.html" />
-    <link rel="prev" title="Documentation of submodules" href="modules.html" /> 
+    <link rel="prev" title="Submodule API Reference" href="modules.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -45,16 +46,16 @@
   </form>
 </div>
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
-              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+              <p class="caption" role="heading"><span class="caption-text">Contents</span></p>
 <ul class="current">
-<li class="toctree-l1"><a class="reference internal" href="QuickStart.html">Quick start</a></li>
-<li class="toctree-l1"><a class="reference internal" href="ParametersIntro.html">Parameters Quickguide</a></li>
-<li class="toctree-l1"><a class="reference internal" href="ObservablesIntro.html">Observables Quickguide</a></li>
-<li class="toctree-l1"><a class="reference internal" href="EvolutionIntro.html">Evolution Quickguide</a></li>
-<li class="toctree-l1"><a class="reference internal" href="MinimizerIntro.html">Minimizer Quickguide</a></li>
-<li class="toctree-l1"><a class="reference internal" href="DVCSIntro.html">DVCS Quickguide</a></li>
-<li class="toctree-l1"><a class="reference internal" href="DVMPIntro.html">DVMP Quickguide</a></li>
-<li class="toctree-l1 current"><a class="reference internal" href="modules.html">Documentation of submodules</a><ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="QuickStart.html">Quick Start</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ParametersIntro.html">Parameters Quick Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ObservablesIntro.html">Observables Quick Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="EvolutionIntro.html">Evolution Quick Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="MinimizerIntro.html">Minimizer Quick Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="DVCSIntro.html">DVCS Quick Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="DVMPIntro.html">DVMP Quick Guide</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="modules.html">Submodule API Reference</a><ul class="current">
 <li class="toctree-l2 current"><a class="current reference internal" href="#">DVCS_xsec module</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#gumpgpd.DVCS_xsec.A_BH"><code class="docutils literal notranslate"><span class="pre">A_BH()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#gumpgpd.DVCS_xsec.A_INT_pol"><code class="docutils literal notranslate"><span class="pre">A_INT_pol()</span></code></a></li>
@@ -118,7 +119,7 @@
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
       <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
-          <li class="breadcrumb-item"><a href="modules.html">Documentation of submodules</a></li>
+          <li class="breadcrumb-item"><a href="modules.html">Submodule API Reference</a></li>
       <li class="breadcrumb-item active">DVCS_xsec module</li>
       <li class="wy-breadcrumbs-aside">
             <a href="_sources/DVCS_xsec.rst.txt" rel="nofollow"> View page source</a>
@@ -131,8 +132,18 @@
              
   <section id="module-gumpgpd.DVCS_xsec">
 <span id="id1"></span><span id="dvcs-xsec-module"></span><h1>DVCS_xsec module<a class="headerlink" href="#module-gumpgpd.DVCS_xsec" title="Link to this heading"></a></h1>
-<p>In this module we have the DVCS cross-section formulas with twist-two Compton form factors based on our work <a class="reference external" href="https://inspirehep.net/literature/1925449">https://inspirehep.net/literature/1925449</a></p>
-<p>The five fold cross-section dsigma over dxB dt dQ dphi dphi_S will be calculated.</p>
+<p>DVCS cross-section formulas using twist-two Compton form factors.</p>
+<p>This module implements the five-fold differential cross-section
+<code class="docutils literal notranslate"><span class="pre">d</span> <span class="pre">sigma</span> <span class="pre">/</span> <span class="pre">(d</span> <span class="pre">xB</span> <span class="pre">dt</span> <span class="pre">dQ</span> <span class="pre">dphi</span> <span class="pre">dphi_S)</span></code> for deeply virtual Compton scattering
+(DVCS), following the formalism of
+<a class="reference external" href="https://inspirehep.net/literature/1925449">Guo et al. (2022)</a>.</p>
+<p>The total cross-section is decomposed into three contributions:</p>
+<ul class="simple">
+<li><p><strong>BH</strong>: Bethe–Heitler (pure QED process)</p></li>
+<li><p><strong>DVCS</strong>: pure deeply virtual Compton scattering</p></li>
+<li><p><strong>INT</strong>: BH–DVCS interference term</p></li>
+</ul>
+<p>All kinematic scalar coefficient functions are JIT-compiled with Numba.</p>
 <dl class="py function">
 <dt class="sig sig-object py" id="gumpgpd.DVCS_xsec.A_BH">
 <span class="sig-prename descclassname"><span class="pre">gumpgpd.DVCS_xsec.</span></span><span class="sig-name descname"><span class="pre">A_BH</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">y</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xB</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">t</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Q</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">phi</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gumpgpd/DVCS_xsec.html#A_BH"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gumpgpd.DVCS_xsec.A_BH" title="Link to this definition"></a></dt>
@@ -148,11 +159,11 @@
 <li><p><strong>xB</strong> (<em>float</em>) – x_bjorken</p></li>
 <li><p><strong>t</strong> (<em>float</em>) – momentum transfer square</p></li>
 <li><p><strong>Q</strong> (<em>float</em>) – photon virtuality</p></li>
-<li><p><strong>phi</strong> (<em>float</em>) – azimuthal angel</p></li>
+<li><p><strong>phi</strong> (<em>float</em>) – azimuthal angle</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>kinematical variables for BH cross-section</p>
+<dd class="field-even"><p>kinematic coefficient A for the BH cross-section</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>A_BH (float)</p>
@@ -175,11 +186,11 @@
 <li><p><strong>xB</strong> (<em>float</em>) – x_bjorken</p></li>
 <li><p><strong>t</strong> (<em>float</em>) – momentum transfer square</p></li>
 <li><p><strong>Q</strong> (<em>float</em>) – photon virtuality</p></li>
-<li><p><strong>phi</strong> (<em>float</em>) – azimuthal angel</p></li>
+<li><p><strong>phi</strong> (<em>float</em>) – azimuthal angle</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>kinematical variables for interference cross-section with polarized target</p>
+<dd class="field-even"><p>kinematic coefficient A for the unpolarized beam, longitudinally polarized target interference cross-section</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>A_INT_pol (float)</p>
@@ -202,11 +213,11 @@
 <li><p><strong>xB</strong> (<em>float</em>) – x_bjorken</p></li>
 <li><p><strong>t</strong> (<em>float</em>) – momentum transfer square</p></li>
 <li><p><strong>Q</strong> (<em>float</em>) – photon virtuality</p></li>
-<li><p><strong>phi</strong> (<em>float</em>) – azimuthal angel</p></li>
+<li><p><strong>phi</strong> (<em>float</em>) – azimuthal angle</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>kinematical variables for interference cross-section</p>
+<dd class="field-even"><p>kinematic coefficient A for the unpolarized interference cross-section</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>A_INT_unp (float)</p>
@@ -217,24 +228,29 @@
 <dl class="py function">
 <dt class="sig sig-object py" id="gumpgpd.DVCS_xsec.Asymmetry_DVCS_TOT">
 <span class="sig-prename descclassname"><span class="pre">gumpgpd.DVCS_xsec.</span></span><span class="sig-name descname"><span class="pre">Asymmetry_DVCS_TOT</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">y</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xB</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">t</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Q</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">phi</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pol</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">HCFF</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">complex</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ECFF</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">complex</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">HtCFF</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">complex</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">EtCFF</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">complex</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gumpgpd/DVCS_xsec.html#Asymmetry_DVCS_TOT"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gumpgpd.DVCS_xsec.Asymmetry_DVCS_TOT" title="Link to this definition"></a></dt>
-<dd><p>DVCS singlet/double spin asymmetries, defined by the ratio of the corresponding polarized total cross-sections to the unpolarized one.</p>
+<dd><p>DVCS single/double spin asymmetry.</p>
+<p>Defined as the ratio of the polarized total cross-section to the
+unpolarized one at the same kinematics.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>y</strong> (<em>float</em>) – Beam energy lost parameter</p></li>
 <li><p><strong>xB</strong> (<em>float</em>) – x_bjorken</p></li>
-<li><p><strong>t</strong> (<em>float</em>) – _description_</p></li>
-<li><p><strong>Q</strong> (<em>float</em>) – momentum transfer squared</p></li>
-<li><p><strong>phi</strong> (<em>float</em>) – azimuthal angel</p></li>
-<li><p><strong>pol</strong> (<em>_type_</em>) – polarization configuration</p></li>
+<li><p><strong>t</strong> (<em>float</em>) – momentum transfer squared</p></li>
+<li><p><strong>Q</strong> (<em>float</em>) – photon virtuality</p></li>
+<li><p><strong>phi</strong> (<em>float</em>) – azimuthal angle</p></li>
+<li><p><strong>pol</strong> (<em>str</em>) – polarization configuration; see <code class="xref py py-func docutils literal notranslate"><span class="pre">_pol_to_index()</span></code></p></li>
 <li><p><strong>HCFF</strong> (<em>complex</em>) – Compton form factor H</p></li>
 <li><p><strong>ECFF</strong> (<em>complex</em>) – Compton form factor E</p></li>
-<li><p><strong>HtCFF</strong> (<em>complex</em>) – Compton form factor Ht</p></li>
-<li><p><strong>EtCFF</strong> (<em>complex</em>) – Compton form factor Et</p></li>
+<li><p><strong>HtCFF</strong> (<em>complex</em>) – Compton form factor ~H</p></li>
+<li><p><strong>EtCFF</strong> (<em>complex</em>) – Compton form factor ~E</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>total differential cross-sections dsigma (float)</p>
+<dd class="field-even"><p>spin asymmetry <span class="math notranslate nohighlight">\(A = d\sigma(\text{pol}) / d\sigma(\text{UU})\)</span></p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
 </dd>
 </dl>
 </dd></dl>
@@ -254,11 +270,11 @@
 <li><p><strong>xB</strong> (<em>float</em>) – x_bjorken</p></li>
 <li><p><strong>t</strong> (<em>float</em>) – momentum transfer square</p></li>
 <li><p><strong>Q</strong> (<em>float</em>) – photon virtuality</p></li>
-<li><p><strong>phi</strong> (<em>float</em>) – azimuthal angel</p></li>
+<li><p><strong>phi</strong> (<em>float</em>) – azimuthal angle</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>kinematical variables for polarized BH cross-section</p>
+<dd class="field-even"><p>kinematic coefficient ~A for the longitudinally polarized BH cross-section</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>At_BH (float)</p>
@@ -281,11 +297,11 @@
 <li><p><strong>xB</strong> (<em>float</em>) – x_bjorken</p></li>
 <li><p><strong>t</strong> (<em>float</em>) – momentum transfer square</p></li>
 <li><p><strong>Q</strong> (<em>float</em>) – photon virtuality</p></li>
-<li><p><strong>phi</strong> (<em>float</em>) – azimuthal angel</p></li>
+<li><p><strong>phi</strong> (<em>float</em>) – azimuthal angle</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>kinematical variables for polarized BH cross-section</p>
+<dd class="field-even"><p>kinematic coefficient ~A for the transversely in-plane polarized BH cross-section</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>At_BH_Tin (float)</p>
@@ -308,11 +324,11 @@
 <li><p><strong>xB</strong> (<em>float</em>) – x_bjorken</p></li>
 <li><p><strong>t</strong> (<em>float</em>) – momentum transfer square</p></li>
 <li><p><strong>Q</strong> (<em>float</em>) – photon virtuality</p></li>
-<li><p><strong>phi</strong> (<em>float</em>) – azimuthal angel</p></li>
+<li><p><strong>phi</strong> (<em>float</em>) – azimuthal angle</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>kinematical variables for polarized BH cross-section</p>
+<dd class="field-even"><p>kinematic coefficient ~A for the transversely out-of-plane polarized BH cross-section</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>At_BH_Tout (float)</p>
@@ -323,7 +339,7 @@
 <dl class="py function">
 <dt class="sig sig-object py" id="gumpgpd.DVCS_xsec.At_INT_pol">
 <span class="sig-prename descclassname"><span class="pre">gumpgpd.DVCS_xsec.</span></span><span class="sig-name descname"><span class="pre">At_INT_pol</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">y</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xB</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">t</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Q</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">phi</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gumpgpd/DVCS_xsec.html#At_INT_pol"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gumpgpd.DVCS_xsec.At_INT_pol" title="Link to this definition"></a></dt>
-<dd><p>Kinematical variable for interference cross-section with polarized target and target</p>
+<dd><p>Kinematical variable for interference cross-section with polarized beam and longitudinally polarized target</p>
 <div class="line-block">
 <div class="line">Defined in the appendix of <a class="reference external" href="https://inspirehep.net/literature/1925449">https://inspirehep.net/literature/1925449</a></div>
 <div class="line">Code converted from the Mathematica master code and numerically checked</div>
@@ -335,11 +351,11 @@
 <li><p><strong>xB</strong> (<em>float</em>) – x_bjorken</p></li>
 <li><p><strong>t</strong> (<em>float</em>) – momentum transfer square</p></li>
 <li><p><strong>Q</strong> (<em>float</em>) – photon virtuality</p></li>
-<li><p><strong>phi</strong> (<em>float</em>) – azimuthal angel</p></li>
+<li><p><strong>phi</strong> (<em>float</em>) – azimuthal angle</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>kinematical variables for interference cross-section with polarized target and target</p>
+<dd class="field-even"><p>kinematic coefficient ~A for the polarized beam and longitudinally polarized target interference cross-section</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>At_INT_pol (float)</p>
@@ -362,11 +378,11 @@
 <li><p><strong>xB</strong> (<em>float</em>) – x_bjorken</p></li>
 <li><p><strong>t</strong> (<em>float</em>) – momentum transfer square</p></li>
 <li><p><strong>Q</strong> (<em>float</em>) – photon virtuality</p></li>
-<li><p><strong>phi</strong> (<em>float</em>) – azimuthal angel</p></li>
+<li><p><strong>phi</strong> (<em>float</em>) – azimuthal angle</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>kinematical variables for interference cross-section with polarized beam</p>
+<dd class="field-even"><p>kinematic coefficient ~A for the longitudinally polarized beam, unpolarized target interference cross-section</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>At_INT_unp (float)</p>
@@ -389,11 +405,11 @@
 <li><p><strong>xB</strong> (<em>float</em>) – x_bjorken</p></li>
 <li><p><strong>t</strong> (<em>float</em>) – momentum transfer square</p></li>
 <li><p><strong>Q</strong> (<em>float</em>) – photon virtuality</p></li>
-<li><p><strong>phi</strong> (<em>float</em>) – azimuthal angel</p></li>
+<li><p><strong>phi</strong> (<em>float</em>) – azimuthal angle</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>kinematical variables for BH cross-section</p>
+<dd class="field-even"><p>kinematic coefficient B for the BH cross-section</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>B_BH (float)</p>
@@ -416,11 +432,11 @@
 <li><p><strong>xB</strong> (<em>float</em>) – x_bjorken</p></li>
 <li><p><strong>t</strong> (<em>float</em>) – momentum transfer square</p></li>
 <li><p><strong>Q</strong> (<em>float</em>) – photon virtuality</p></li>
-<li><p><strong>phi</strong> (<em>float</em>) – azimuthal angel</p></li>
+<li><p><strong>phi</strong> (<em>float</em>) – azimuthal angle</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>kinematical variables for interference cross-section with polarized target</p>
+<dd class="field-even"><p>kinematic coefficient B for the unpolarized beam, longitudinally polarized target interference cross-section (vanishes)</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>B_INT_pol (float)</p>
@@ -443,11 +459,11 @@
 <li><p><strong>xB</strong> (<em>float</em>) – x_bjorken</p></li>
 <li><p><strong>t</strong> (<em>float</em>) – momentum transfer square</p></li>
 <li><p><strong>Q</strong> (<em>float</em>) – photon virtuality</p></li>
-<li><p><strong>phi</strong> (<em>float</em>) – azimuthal angel</p></li>
+<li><p><strong>phi</strong> (<em>float</em>) – azimuthal angle</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>kinematical variables for interference cross-section</p>
+<dd class="field-even"><p>kinematic coefficient B for the unpolarized interference cross-section</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>B_INT_unp (float)</p>
@@ -470,11 +486,11 @@
 <li><p><strong>xB</strong> (<em>float</em>) – x_bjorken</p></li>
 <li><p><strong>t</strong> (<em>float</em>) – momentum transfer square</p></li>
 <li><p><strong>Q</strong> (<em>float</em>) – photon virtuality</p></li>
-<li><p><strong>phi</strong> (<em>float</em>) – azimuthal angel</p></li>
+<li><p><strong>phi</strong> (<em>float</em>) – azimuthal angle</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>kinematical variables for polarized BH cross-section</p>
+<dd class="field-even"><p>kinematic coefficient ~B for the longitudinally polarized BH cross-section</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>Bt_BH (float)</p>
@@ -497,11 +513,11 @@
 <li><p><strong>xB</strong> (<em>float</em>) – x_bjorken</p></li>
 <li><p><strong>t</strong> (<em>float</em>) – momentum transfer square</p></li>
 <li><p><strong>Q</strong> (<em>float</em>) – photon virtuality</p></li>
-<li><p><strong>phi</strong> (<em>float</em>) – azimuthal angel</p></li>
+<li><p><strong>phi</strong> (<em>float</em>) – azimuthal angle</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>kinematical variables for polarized BH cross-section</p>
+<dd class="field-even"><p>kinematic coefficient ~B for the transversely in-plane polarized BH cross-section</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>Bt_BH_Tin (float)</p>
@@ -524,11 +540,11 @@
 <li><p><strong>xB</strong> (<em>float</em>) – x_bjorken</p></li>
 <li><p><strong>t</strong> (<em>float</em>) – momentum transfer square</p></li>
 <li><p><strong>Q</strong> (<em>float</em>) – photon virtuality</p></li>
-<li><p><strong>phi</strong> (<em>float</em>) – azimuthal angel</p></li>
+<li><p><strong>phi</strong> (<em>float</em>) – azimuthal angle</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>kinematical variables for polarized BH cross-section</p>
+<dd class="field-even"><p>kinematic coefficient ~B for the transversely out-of-plane polarized BH cross-section</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>Bt_BH_Tout (float)</p>
@@ -539,7 +555,7 @@
 <dl class="py function">
 <dt class="sig sig-object py" id="gumpgpd.DVCS_xsec.Bt_INT_pol">
 <span class="sig-prename descclassname"><span class="pre">gumpgpd.DVCS_xsec.</span></span><span class="sig-name descname"><span class="pre">Bt_INT_pol</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">y</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xB</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">t</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Q</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">phi</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gumpgpd/DVCS_xsec.html#Bt_INT_pol"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gumpgpd.DVCS_xsec.Bt_INT_pol" title="Link to this definition"></a></dt>
-<dd><p>Kinematical variable for interference cross-section with polarized target and target</p>
+<dd><p>Kinematical variable for interference cross-section with polarized beam and longitudinally polarized target</p>
 <div class="line-block">
 <div class="line">Defined in the appendix of <a class="reference external" href="https://inspirehep.net/literature/1925449">https://inspirehep.net/literature/1925449</a></div>
 <div class="line">Code converted from the Mathematica master code and numerically checked</div>
@@ -551,11 +567,11 @@
 <li><p><strong>xB</strong> (<em>float</em>) – x_bjorken</p></li>
 <li><p><strong>t</strong> (<em>float</em>) – momentum transfer square</p></li>
 <li><p><strong>Q</strong> (<em>float</em>) – photon virtuality</p></li>
-<li><p><strong>phi</strong> (<em>float</em>) – azimuthal angel</p></li>
+<li><p><strong>phi</strong> (<em>float</em>) – azimuthal angle</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>kinematical variables for interference cross-section with polarized target and target</p>
+<dd class="field-even"><p>kinematic coefficient ~B for the polarized beam and longitudinally polarized target interference cross-section</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>Bt_INT_pol (float)</p>
@@ -578,11 +594,11 @@
 <li><p><strong>xB</strong> (<em>float</em>) – x_bjorken</p></li>
 <li><p><strong>t</strong> (<em>float</em>) – momentum transfer square</p></li>
 <li><p><strong>Q</strong> (<em>float</em>) – photon virtuality</p></li>
-<li><p><strong>phi</strong> (<em>float</em>) – azimuthal angel</p></li>
+<li><p><strong>phi</strong> (<em>float</em>) – azimuthal angle</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>kinematical variables for interference cross-section with polarized beam</p>
+<dd class="field-even"><p>kinematic coefficient ~B for the longitudinally polarized beam, unpolarized target interference cross-section (vanishes)</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>Bt_INT_unp (float)</p>
@@ -605,11 +621,11 @@
 <li><p><strong>xB</strong> (<em>float</em>) – x_bjorken</p></li>
 <li><p><strong>t</strong> (<em>float</em>) – momentum transfer square</p></li>
 <li><p><strong>Q</strong> (<em>float</em>) – photon virtuality</p></li>
-<li><p><strong>phi</strong> (<em>float</em>) – azimuthal angel</p></li>
+<li><p><strong>phi</strong> (<em>float</em>) – azimuthal angle</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>kinematical variables for interference cross-section with polarized target</p>
+<dd class="field-even"><p>kinematic coefficient C for the unpolarized beam, longitudinally polarized target interference cross-section</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>C_INT_pol (float)</p>
@@ -632,11 +648,11 @@
 <li><p><strong>xB</strong> (<em>float</em>) – x_bjorken</p></li>
 <li><p><strong>t</strong> (<em>float</em>) – momentum transfer square</p></li>
 <li><p><strong>Q</strong> (<em>float</em>) – photon virtuality</p></li>
-<li><p><strong>phi</strong> (<em>float</em>) – azimuthal angel</p></li>
+<li><p><strong>phi</strong> (<em>float</em>) – azimuthal angle</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>kinematical variables for interference cross-section</p>
+<dd class="field-even"><p>kinematic coefficient C for the unpolarized interference cross-section</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>C_INT_unp (float)</p>
@@ -647,7 +663,7 @@
 <dl class="py function">
 <dt class="sig sig-object py" id="gumpgpd.DVCS_xsec.Ct_INT_pol">
 <span class="sig-prename descclassname"><span class="pre">gumpgpd.DVCS_xsec.</span></span><span class="sig-name descname"><span class="pre">Ct_INT_pol</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">y</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xB</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">t</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Q</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">phi</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gumpgpd/DVCS_xsec.html#Ct_INT_pol"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gumpgpd.DVCS_xsec.Ct_INT_pol" title="Link to this definition"></a></dt>
-<dd><p>Kinematical variable for interference cross-section with polarized target and target</p>
+<dd><p>Kinematical variable for interference cross-section with polarized beam and longitudinally polarized target</p>
 <div class="line-block">
 <div class="line">Defined in the appendix of <a class="reference external" href="https://inspirehep.net/literature/1925449">https://inspirehep.net/literature/1925449</a></div>
 <div class="line">Code converted from the Mathematica master code and numerically checked</div>
@@ -659,11 +675,11 @@
 <li><p><strong>xB</strong> (<em>float</em>) – x_bjorken</p></li>
 <li><p><strong>t</strong> (<em>float</em>) – momentum transfer square</p></li>
 <li><p><strong>Q</strong> (<em>float</em>) – photon virtuality</p></li>
-<li><p><strong>phi</strong> (<em>float</em>) – azimuthal angel</p></li>
+<li><p><strong>phi</strong> (<em>float</em>) – azimuthal angle</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>kinematical variables for interference cross-section with polarized target and target</p>
+<dd class="field-even"><p>kinematic coefficient ~C for the polarized beam and longitudinally polarized target interference cross-section</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>Ct_INT_pol (float)</p>
@@ -686,11 +702,11 @@
 <li><p><strong>xB</strong> (<em>float</em>) – x_bjorken</p></li>
 <li><p><strong>t</strong> (<em>float</em>) – momentum transfer square</p></li>
 <li><p><strong>Q</strong> (<em>float</em>) – photon virtuality</p></li>
-<li><p><strong>phi</strong> (<em>float</em>) – azimuthal angel</p></li>
+<li><p><strong>phi</strong> (<em>float</em>) – azimuthal angle</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>kinematical variables for interference cross-section with polarized beam</p>
+<dd class="field-even"><p>kinematic coefficient ~C for the longitudinally polarized beam, unpolarized target interference cross-section</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>Ct_INT_unp (float)</p>
@@ -735,13 +751,13 @@
 <dl class="py function">
 <dt class="sig sig-object py" id="gumpgpd.DVCS_xsec.GE_FF">
 <span class="sig-prename descclassname"><span class="pre">gumpgpd.DVCS_xsec.</span></span><span class="sig-name descname"><span class="pre">GE_FF</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">t</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gumpgpd/DVCS_xsec.html#GE_FF"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gumpgpd.DVCS_xsec.GE_FF" title="Link to this definition"></a></dt>
-<dd><p>Electric form factors taken from global analysis</p>
+<dd><p>Electric form factor of the proton from global analysis.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>t</strong> (<em>float</em>) – momentum transfer square</p>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>Electro-Magnetic form factors taken from global analysis <a class="reference external" href="https://inspirehep.net/literature/1613527">https://inspirehep.net/literature/1613527</a></p>
+<dd class="field-even"><p>electric form factor; fit from <a class="reference external" href="https://inspirehep.net/literature/1613527">Ye et al. (2018)</a></p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>GE (float)</p>
@@ -752,13 +768,14 @@
 <dl class="py function">
 <dt class="sig sig-object py" id="gumpgpd.DVCS_xsec.GM_FF">
 <span class="sig-prename descclassname"><span class="pre">gumpgpd.DVCS_xsec.</span></span><span class="sig-name descname"><span class="pre">GM_FF</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">t</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gumpgpd/DVCS_xsec.html#GM_FF"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gumpgpd.DVCS_xsec.GM_FF" title="Link to this definition"></a></dt>
-<dd><p>Magentic form factors taken from global analysis</p>
+<dd><p>Magnetic form factor of the proton from global analysis.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>t</strong> (<em>float</em>) – momentum transfer square</p>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>Magentic-Magnetic form factors taken from global analysis <a class="reference external" href="https://inspirehep.net/literature/1613527">https://inspirehep.net/literature/1613527</a></p>
+<dd class="field-even"><p><p>magnetic form factor; fit from <a class="reference external" href="https://inspirehep.net/literature/1613527">Ye et al. (2018)</a></p>
+</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>GM (float)</p>
@@ -812,41 +829,86 @@
 <dl class="py function">
 <dt class="sig sig-object py" id="gumpgpd.DVCS_xsec.dsigma_BH">
 <span class="sig-prename descclassname"><span class="pre">gumpgpd.DVCS_xsec.</span></span><span class="sig-name descname"><span class="pre">dsigma_BH</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">y</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xB</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">t</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Q</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">phi</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pol</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gumpgpd/DVCS_xsec.html#dsigma_BH"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gumpgpd.DVCS_xsec.dsigma_BH" title="Link to this definition"></a></dt>
-<dd><p>A helper function converting the pol to number. check __dsigma_BH() for details</p>
-<p>pol (string): polarization configuration ={U,L}{U,L,Tin,Tout}, check _pol_to_index()</p>
+<dd><p>Bethe–Heitler differential cross-section.</p>
+<p>Thin wrapper that converts the <code class="docutils literal notranslate"><span class="pre">pol</span></code> string to an integer index and
+delegates to <code class="xref py py-func docutils literal notranslate"><span class="pre">__dsigma_BH()</span></code>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>y</strong> (<em>float</em>) – Beam energy lost parameter</p></li>
+<li><p><strong>xB</strong> (<em>float</em>) – x_bjorken</p></li>
+<li><p><strong>t</strong> (<em>float</em>) – momentum transfer squared</p></li>
+<li><p><strong>Q</strong> (<em>float</em>) – photon virtuality</p></li>
+<li><p><strong>phi</strong> (<em>float</em>) – azimuthal angle</p></li>
+<li><p><strong>pol</strong> (<em>str</em>) – polarization configuration; see <code class="xref py py-func docutils literal notranslate"><span class="pre">_pol_to_index()</span></code></p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>BH differential cross-section</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="gumpgpd.DVCS_xsec.dsigma_DVCS">
 <span class="sig-prename descclassname"><span class="pre">gumpgpd.DVCS_xsec.</span></span><span class="sig-name descname"><span class="pre">dsigma_DVCS</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">y</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xB</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">t</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Q</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">phi</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pol</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">HCFF</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">complex</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ECFF</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">complex</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">HtCFF</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">complex</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">EtCFF</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">complex</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gumpgpd/DVCS_xsec.html#dsigma_DVCS"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gumpgpd.DVCS_xsec.dsigma_DVCS" title="Link to this definition"></a></dt>
-<dd><p>A helper function converting the pol to number. check __dsigma_DVCS() for details</p>
-<p>pol (string): polarization configuration ={U,L}{U,L,Tin,Tout}, check _pol_to_index()</p>
+<dd><p>Pure DVCS differential cross-section.</p>
+<p>Thin wrapper that converts the <code class="docutils literal notranslate"><span class="pre">pol</span></code> string to an integer index and
+delegates to <code class="xref py py-func docutils literal notranslate"><span class="pre">__dsigma_DVCS()</span></code>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>y</strong> (<em>float</em>) – Beam energy lost parameter</p></li>
+<li><p><strong>xB</strong> (<em>float</em>) – x_bjorken</p></li>
+<li><p><strong>t</strong> (<em>float</em>) – momentum transfer squared</p></li>
+<li><p><strong>Q</strong> (<em>float</em>) – photon virtuality</p></li>
+<li><p><strong>phi</strong> (<em>float</em>) – azimuthal angle</p></li>
+<li><p><strong>pol</strong> (<em>str</em>) – polarization configuration; see <code class="xref py py-func docutils literal notranslate"><span class="pre">_pol_to_index()</span></code></p></li>
+<li><p><strong>HCFF</strong> (<em>complex</em>) – Compton form factor H</p></li>
+<li><p><strong>ECFF</strong> (<em>complex</em>) – Compton form factor E</p></li>
+<li><p><strong>HtCFF</strong> (<em>complex</em>) – Compton form factor ~H</p></li>
+<li><p><strong>EtCFF</strong> (<em>complex</em>) – Compton form factor ~E</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>pure DVCS differential cross-section</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="gumpgpd.DVCS_xsec.dsigma_DVCS_HERA">
 <span class="sig-prename descclassname"><span class="pre">gumpgpd.DVCS_xsec.</span></span><span class="sig-name descname"><span class="pre">dsigma_DVCS_HERA</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">y</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xB</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">t</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Q</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pol</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">HCFF</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">complex</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ECFF</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">complex</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">HtCFF</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">complex</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">EtCFF</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">complex</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gumpgpd/DVCS_xsec.html#dsigma_DVCS_HERA"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gumpgpd.DVCS_xsec.dsigma_DVCS_HERA" title="Link to this definition"></a></dt>
-<dd><p>cross-sections of virtual photon and proton scattering check for instance <a class="reference external" href="https://arxiv.org/abs/2310.13837">https://arxiv.org/abs/2310.13837</a></p>
+<dd><p>Virtual-photon–proton cross-section, integrated over <span class="math notranslate nohighlight">\(\phi\)</span>.</p>
 <div class="line-block">
-<div class="line">A flux factor from leptonic emission of virtual photon will be taken out compared to the leptonic-proton cross-sections</div>
-<div class="line">HEAR only measures the virtual-photon-proton cross-sections and integrate over phi</div>
+<div class="line">The leptonic flux factor is divided out relative to the lepton–proton cross-section.</div>
+<div class="line">HERA measures the virtual-photon–proton cross-section, integrated over <span class="math notranslate nohighlight">\(\phi\)</span>.</div>
 </div>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>y</strong> (<em>float</em>) – Beam energy lost parameter</p></li>
 <li><p><strong>xB</strong> (<em>float</em>) – x_bjorken</p></li>
-<li><p><strong>t</strong> (<em>float</em>) – _description_</p></li>
-<li><p><strong>Q</strong> (<em>float</em>) – momentum transfer squared</p></li>
-<li><p><strong>pol</strong> (<em>_type_</em>) – polarization configuration</p></li>
+<li><p><strong>t</strong> (<em>float</em>) – momentum transfer squared</p></li>
+<li><p><strong>Q</strong> (<em>float</em>) – photon virtuality</p></li>
+<li><p><strong>pol</strong> (<em>str</em>) – polarization configuration; see <code class="xref py py-func docutils literal notranslate"><span class="pre">_pol_to_index()</span></code></p></li>
 <li><p><strong>HCFF</strong> (<em>complex</em>) – Compton form factor H</p></li>
 <li><p><strong>ECFF</strong> (<em>complex</em>) – Compton form factor E</p></li>
-<li><p><strong>HtCFF</strong> (<em>complex</em>) – Compton form factor Ht</p></li>
-<li><p><strong>EtCFF</strong> (<em>complex</em>) – Compton form factor Et</p></li>
+<li><p><strong>HtCFF</strong> (<em>complex</em>) – Compton form factor ~H</p></li>
+<li><p><strong>EtCFF</strong> (<em>complex</em>) – Compton form factor ~E</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>total differential cross-sections dsigma (float) of virtual-photon and proton</p>
+<dd class="field-even"><p>virtual-photon–proton differential cross-section <span class="math notranslate nohighlight">\(d\sigma/(dt)\)</span></p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
 </dd>
 </dl>
 </dd></dl>
@@ -854,24 +916,27 @@
 <dl class="py function">
 <dt class="sig sig-object py" id="gumpgpd.DVCS_xsec.dsigma_DVCS_TOT">
 <span class="sig-prename descclassname"><span class="pre">gumpgpd.DVCS_xsec.</span></span><span class="sig-name descname"><span class="pre">dsigma_DVCS_TOT</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">y</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xB</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">t</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Q</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">phi</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pol</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">HCFF</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">complex</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ECFF</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">complex</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">HtCFF</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">complex</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">EtCFF</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">complex</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gumpgpd/DVCS_xsec.html#dsigma_DVCS_TOT"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gumpgpd.DVCS_xsec.dsigma_DVCS_TOT" title="Link to this definition"></a></dt>
-<dd><p>Combining the BH, Pure DVCS and interfernce cross-sections</p>
+<dd><p>Combining the BH, pure DVCS, and interference cross-sections.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>y</strong> (<em>float</em>) – Beam energy lost parameter</p></li>
 <li><p><strong>xB</strong> (<em>float</em>) – x_bjorken</p></li>
-<li><p><strong>t</strong> (<em>float</em>) – _description_</p></li>
-<li><p><strong>Q</strong> (<em>float</em>) – momentum transfer squared</p></li>
-<li><p><strong>phi</strong> (<em>float</em>) – azimuthal angel</p></li>
-<li><p><strong>pol</strong> (<em>_type_</em>) – polarization configuration</p></li>
+<li><p><strong>t</strong> (<em>float</em>) – momentum transfer squared</p></li>
+<li><p><strong>Q</strong> (<em>float</em>) – photon virtuality</p></li>
+<li><p><strong>phi</strong> (<em>float</em>) – azimuthal angle</p></li>
+<li><p><strong>pol</strong> (<em>str</em>) – polarization configuration; see <code class="xref py py-func docutils literal notranslate"><span class="pre">_pol_to_index()</span></code></p></li>
 <li><p><strong>HCFF</strong> (<em>complex</em>) – Compton form factor H</p></li>
 <li><p><strong>ECFF</strong> (<em>complex</em>) – Compton form factor E</p></li>
-<li><p><strong>HtCFF</strong> (<em>complex</em>) – Compton form factor Ht</p></li>
-<li><p><strong>EtCFF</strong> (<em>complex</em>) – Compton form factor Et</p></li>
+<li><p><strong>HtCFF</strong> (<em>complex</em>) – Compton form factor ~H</p></li>
+<li><p><strong>EtCFF</strong> (<em>complex</em>) – Compton form factor ~E</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>total differential cross-sections dsigma (float)</p>
+<dd class="field-even"><p>total five-fold differential cross-section</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
 </dd>
 </dl>
 </dd></dl>
@@ -879,8 +944,31 @@
 <dl class="py function">
 <dt class="sig sig-object py" id="gumpgpd.DVCS_xsec.dsigma_INT">
 <span class="sig-prename descclassname"><span class="pre">gumpgpd.DVCS_xsec.</span></span><span class="sig-name descname"><span class="pre">dsigma_INT</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">y</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xB</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">t</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Q</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">phi</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pol</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">HCFF</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">complex</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ECFF</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">complex</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">HtCFF</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">complex</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">EtCFF</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">complex</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gumpgpd/DVCS_xsec.html#dsigma_INT"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gumpgpd.DVCS_xsec.dsigma_INT" title="Link to this definition"></a></dt>
-<dd><p>A helper function converting the pol to number. check __dsigma_INT() for details</p>
-<p>pol (string): polarization configuration ={U,L}{U,L,Tin,Tout}, check _pol_to_index()</p>
+<dd><p>BH–DVCS interference differential cross-section.</p>
+<p>Thin wrapper that converts the <code class="docutils literal notranslate"><span class="pre">pol</span></code> string to an integer index and
+delegates to <code class="xref py py-func docutils literal notranslate"><span class="pre">__dsigma_INT()</span></code>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>y</strong> (<em>float</em>) – Beam energy lost parameter</p></li>
+<li><p><strong>xB</strong> (<em>float</em>) – x_bjorken</p></li>
+<li><p><strong>t</strong> (<em>float</em>) – momentum transfer squared</p></li>
+<li><p><strong>Q</strong> (<em>float</em>) – photon virtuality</p></li>
+<li><p><strong>phi</strong> (<em>float</em>) – azimuthal angle</p></li>
+<li><p><strong>pol</strong> (<em>str</em>) – polarization configuration; see <code class="xref py py-func docutils literal notranslate"><span class="pre">_pol_to_index()</span></code></p></li>
+<li><p><strong>HCFF</strong> (<em>complex</em>) – Compton form factor H</p></li>
+<li><p><strong>ECFF</strong> (<em>complex</em>) – Compton form factor E</p></li>
+<li><p><strong>HtCFF</strong> (<em>complex</em>) – Compton form factor ~H</p></li>
+<li><p><strong>EtCFF</strong> (<em>complex</em>) – Compton form factor ~E</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>interference differential cross-section</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py function">
@@ -898,11 +986,11 @@
 <li><p><strong>xB</strong> (<em>float</em>) – x_bjorken</p></li>
 <li><p><strong>t</strong> (<em>float</em>) – momentum transfer square</p></li>
 <li><p><strong>Q</strong> (<em>float</em>) – photon virtuality</p></li>
-<li><p><strong>phi</strong> (<em>float</em>) – azimuthal angel</p></li>
+<li><p><strong>phi</strong> (<em>float</em>) – azimuthal angle</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>kinematical variables for pure DVCS</p>
+<dd class="field-even"><p>kinematic prefactor for the pure DVCS cross-section</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>h (float)</p>
@@ -925,11 +1013,11 @@
 <li><p><strong>xB</strong> (<em>float</em>) – x_bjorken</p></li>
 <li><p><strong>t</strong> (<em>float</em>) – momentum transfer square</p></li>
 <li><p><strong>Q</strong> (<em>float</em>) – photon virtuality</p></li>
-<li><p><strong>phi</strong> (<em>float</em>) – azimuthal angel</p></li>
+<li><p><strong>phi</strong> (<em>float</em>) – azimuthal angle</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>kinematical variables for pure DVCS</p>
+<dd class="field-even"><p>kinematic prefactor for the longitudinally polarized pure DVCS cross-section</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>h (float)</p>
@@ -964,7 +1052,7 @@
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="modules.html" class="btn btn-neutral float-left" title="Documentation of submodules" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="modules.html" class="btn btn-neutral float-left" title="Submodule API Reference" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
         <a href="DVMP_xsec.html" class="btn btn-neutral float-right" title="DVMP_xsec module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 

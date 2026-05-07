@@ -1,40 +1,118 @@
-Parameters Quickguide
-=====================
+Parameters Quick Guide
+======================
 
-Here we briefly introduce the :ref:`Parameters module`, the details can be found therein.
-This submodules provide the GPDs in the moment space in terms of given parameter sets,
-which can be devided into two parts: the parameters managers and the GPD moments.
+This page introduces :ref:`Parameters module`, which converts fit parameters
+into conformal moments used by evolution and observable calculations.
+
+Workflow: ``flat fit parameters -> structured tensors -> conformal moments``.
 
 Parameter Managers
 ------------------
-This part consists of two function :func:`Parameters.ParaManager_Unp()` and :func:`Parameters.ParaManager_Pol()`.
-They are highly alike but defined separately for the vector-like GPDs :math:`H,E` and the axial-vector-like GPDs :math:`\tilde{H},\tilde{E}`.
-Here we take the vector-like GPDs as an example.
 
-The function :func:`Parameters.ParaManager_Unp()` convert a list of all the phenomenological parameters into a set of parameters
-in the standard shape of (2,3,5,n1,n2)
+The two main manager functions are:
 
-Each rows means:
- *   #1 = [0,1] corresponds to [H, E]
- *   #2 = [0,1,2,…] corresponds to [xi^0 terms, xi^2 terms, xi^4 terms, …]
- *   #3 = [0,1,2,3,4] corresponds to [u - ubar, ubar, d - dbar, dbar, g]
- *   #4 = [0,1,…,init_NumofAnsatz-1] corresponds to different set of parameters
- *   #5 = [0,1,2,3,…] correspond to [norm, alpha, beta, alphap,…] as a set of parameters
+- :func:`Parameters.ParaManager_Unp` for vector-like GPD sector (:math:`H, E`),
+- :func:`Parameters.ParaManager_Pol` for axial-vector-like sector (:math:`\tilde{H}, \tilde{E}`).
 
-This standard shape will be handled by the remaining functions into the GPD moments.
+They map flat parameter lists into a standardized tensor layout used
+throughout the code.
 
-GPD Moment Calculation
-----------------------
+Manager output has shape:
 
-There are two more function that convert the output from the previous subsection into GPD moments.
+.. math::
 
-The function :func:`Parameters.ConfMoment()` take input in the form of (5,n1,n2), 
-which correspond to the last three dimension in the output of :func:`Parameters.ParaManager_Unp()` and :func:`Parameters.ParaManager_Pol()`.
-The last dimension contains a set of parameters that parameterize the moment of GPDs.
-Therefore, the output moment will be in the shape of (5,n1)
+   (2, 3, 5, n_{\rm ansatz}, 6)
 
-The last function :func:`Parameters.Moment_Sum()` essentially sums over the last dimension of :func:`Parameters.ConfMoment()`
---- it takes shape (5,n1) as introduced above and output shape (5,) by summing over the last dimension.
+Axis meaning:
 
-The two functions in this subsection also take vector input of j in shape (N,),
-and thus output will be (N,5,n1) and (N,5), respectively.
+1. GPD type (for example :math:`H/E` or :math:`\tilde{H}/\tilde{E}`),
+2. skewness expansion block (:math:`\xi^0`, :math:`\xi^2`, :math:`\xi^4`, ...),
+3. flavor basis components,
+4. ansatz-term index,
+5. parameter index inside each ansatz term (normalization/intercepts/powers/slopes).
+
+Implementation details from source code
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The managers do more than reshaping flat lists:
+
+1. Flavor-wise ansatz blocks are assembled explicitly for each species.
+2. :math:`\xi^2` and :math:`\xi^4` blocks are built by rescaling only the
+   normalization entry via ``np.einsum(..., [R,1,1,1,1,1])``.
+3. A placeholder ansatz row ``[0,0,1,0,0,0]`` is used to keep tensor shapes
+   regular when some sectors use fewer active terms.
+
+For :func:`Parameters.ParaManager_Unp`:
+
+- ``E`` sea/gluon components are tied to ``H`` via multiplicative ratios
+  (:math:`R_{E,\bar u}`, :math:`R_{E,\bar d}`, :math:`R_{E,g}`).
+
+For :func:`Parameters.ParaManager_Pol`:
+
+- ``\tilde E`` sea/gluon components are tied to ``\tilde H`` via ``R_Et_Sea``.
+- Several higher-order skewness prefactors are currently fixed to zero in-code
+  (for example gluon :math:`\xi^2/\xi^4` prefactors), effectively turning off
+  those terms in the default polarized setup.
+
+This unified structure is the direct input for moment builders.
+
+Moment Construction
+-------------------
+
+Two helper functions build conformal moments from parameter sets:
+
+- :func:`Parameters.ConfMoment`
+- :func:`Parameters.Moment_Sum`
+
+:func:`Parameters.ConfMoment` computes conformal moments for each ansatz term,
+while :func:`Parameters.Moment_Sum` sums over ansatz terms to obtain the total
+moment per flavor component.
+
+Both functions support scalar or vectorized conformal spin input :math:`j`
+(for example :math:`j \in \mathbb{C}` or an array :math:`(N,)`).
+
+Code-level moment formula
+~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The implementation follows a KM-style ansatz with exponential :math:`t`-slope
+and dipole residual factor:
+
+.. math::
+
+  F(j,t)=\frac{N}{B(2-\alpha,1+\beta)}
+  B\!\left(j+1-\alpha-\alpha' t,1+\beta\right)
+  e^{b_{\rm exp}t}(1-t\,m^{-2})^{-2}
+
+where each ansatz term uses the parameter tuple
+``[norm, alpha, beta, alphap, bexp, invm2]``.
+
+Numerics and shape behavior
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+- :func:`Parameters.beta_loggamma` evaluates Beta functions through
+  ``loggamma`` for complex-number stability.
+- :func:`Parameters.ConfMoment` reshapes ``j`` and ``t`` to broadcast against
+  parameter tensors; scalar and batched kinematics are both supported.
+- :func:`Parameters.Moment_Sum` performs the ansatz reduction with
+  ``axis=-1`` after :func:`Parameters.ConfMoment` is evaluated.
+
+Typical shape flow
+~~~~~~~~~~~~~~~~~~
+
+For a common use case with vectorized :math:`j`:
+
+1. manager output (per species block): ``(3, 5, n_ansatz, 6)``
+2. :func:`Parameters.ConfMoment` output: ``(N, 5, n_ansatz)``
+3. :func:`Parameters.Moment_Sum` output: ``(N, 5)``
+
+These ``(N, 5)`` moments are the direct inputs expected by evolution and
+observable reconstruction routines.
+
+How this connects to the rest of the package
+--------------------------------------------
+
+Outputs from this module are consumed by:
+
+- :mod:`Evolution` for LO/NLO scale evolution in moment space,
+- :mod:`Observables` for inverse Mellin and Mellin-Barnes reconstruction of
+  tPDFs, GPDs, CFFs, and TFFs.

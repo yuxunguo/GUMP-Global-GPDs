@@ -7,7 +7,7 @@
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Observables module &mdash; GUMP GPD Analysis 1.0.2 documentation</title>
-      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="_static/copybutton.css?v=76b2166b" />
 
@@ -19,6 +19,7 @@
       <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
       <script src="_static/clipboard.min.js?v=a7894cd8"></script>
       <script src="_static/copybutton.js?v=f281be69"></script>
+      <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-mml-chtml.js"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
@@ -45,16 +46,16 @@
   </form>
 </div>
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
-              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+              <p class="caption" role="heading"><span class="caption-text">Contents</span></p>
 <ul class="current">
-<li class="toctree-l1"><a class="reference internal" href="QuickStart.html">Quick start</a></li>
-<li class="toctree-l1"><a class="reference internal" href="ParametersIntro.html">Parameters Quickguide</a></li>
-<li class="toctree-l1"><a class="reference internal" href="ObservablesIntro.html">Observables Quickguide</a></li>
-<li class="toctree-l1"><a class="reference internal" href="EvolutionIntro.html">Evolution Quickguide</a></li>
-<li class="toctree-l1"><a class="reference internal" href="MinimizerIntro.html">Minimizer Quickguide</a></li>
-<li class="toctree-l1"><a class="reference internal" href="DVCSIntro.html">DVCS Quickguide</a></li>
-<li class="toctree-l1"><a class="reference internal" href="DVMPIntro.html">DVMP Quickguide</a></li>
-<li class="toctree-l1 current"><a class="reference internal" href="modules.html">Documentation of submodules</a><ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="QuickStart.html">Quick Start</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ParametersIntro.html">Parameters Quick Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ObservablesIntro.html">Observables Quick Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="EvolutionIntro.html">Evolution Quick Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="MinimizerIntro.html">Minimizer Quick Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="DVCSIntro.html">DVCS Quick Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="DVMPIntro.html">DVMP Quick Guide</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="modules.html">Submodule API Reference</a><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="DVCS_xsec.html">DVCS_xsec module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="DVMP_xsec.html">DVMP_xsec module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Evolution.html">Evolution module</a></li>
@@ -74,7 +75,6 @@
 <li class="toctree-l4"><a class="reference internal" href="#gumpgpd.Observables.GPDobserv.tPDF"><code class="docutils literal notranslate"><span class="pre">GPDobserv.tPDF()</span></code></a></li>
 </ul>
 </li>
-<li class="toctree-l3"><a class="reference internal" href="#gumpgpd.Observables.WF_helper3"><code class="docutils literal notranslate"><span class="pre">WF_helper3</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#gumpgpd.Observables.flv_to_indx"><code class="docutils literal notranslate"><span class="pre">flv_to_indx()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#gumpgpd.Observables.flvmask"><code class="docutils literal notranslate"><span class="pre">flvmask()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#gumpgpd.Observables.flvs_to_indx"><code class="docutils literal notranslate"><span class="pre">flvs_to_indx()</span></code></a></li>
@@ -101,7 +101,7 @@
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
       <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
-          <li class="breadcrumb-item"><a href="modules.html">Documentation of submodules</a></li>
+          <li class="breadcrumb-item"><a href="modules.html">Submodule API Reference</a></li>
       <li class="breadcrumb-item active">Observables module</li>
       <li class="wy-breadcrumbs-aside">
             <a href="_sources/Observables.rst.txt" rel="nofollow"> View page source</a>
@@ -114,15 +114,44 @@
              
   <section id="module-gumpgpd.Observables">
 <span id="observables-module"></span><h1>Observables module<a class="headerlink" href="#module-gumpgpd.Observables" title="Link to this heading"></a></h1>
-<p>Here we define the GPD ansatz based on the moment space expression norm * x^ alpha  * (1-x)^ beta.
-With the GPDs ansatz, observables with LO evolution are calculated</p>
+<p>GPD ansatz and observable calculations with QCD evolution.</p>
+<p>The GPD ansatz follows the moment-space form
+<span class="math notranslate nohighlight">\(N\,x^{-\alpha}(1-x)^{\beta}\)</span> (see <code class="xref py py-mod docutils literal notranslate"><span class="pre">Parameters</span></code>).  Starting
+from those ansatz parameters, this module computes:</p>
+<ul class="simple">
+<li><p><strong>t-dependent PDFs</strong> (<a class="reference internal" href="#gumpgpd.Observables.GPDobserv.tPDF" title="gumpgpd.Observables.GPDobserv.tPDF"><code class="xref py py-meth docutils literal notranslate"><span class="pre">GPDobserv.tPDF()</span></code></a>) via inverse Mellin transform.</p></li>
+<li><p><strong>GPDs</strong> in <span class="math notranslate nohighlight">\(x\)</span>-space (<a class="reference internal" href="#gumpgpd.Observables.GPDobserv.GPD" title="gumpgpd.Observables.GPDobserv.GPD"><code class="xref py py-meth docutils literal notranslate"><span class="pre">GPDobserv.GPD()</span></code></a>, <a class="reference internal" href="#gumpgpd.Observables.GPDobserv.GPDNLO_evMom" title="gumpgpd.Observables.GPDobserv.GPDNLO_evMom"><code class="xref py py-meth docutils literal notranslate"><span class="pre">GPDobserv.GPDNLO_evMom()</span></code></a>)
+via Mellin-Barnes contour integration.</p></li>
+<li><p><strong>Compton Form Factors</strong> (CFFs, <a class="reference internal" href="#gumpgpd.Observables.GPDobserv.CFF" title="gumpgpd.Observables.GPDobserv.CFF"><code class="xref py py-meth docutils literal notranslate"><span class="pre">GPDobserv.CFF()</span></code></a>, <a class="reference internal" href="#gumpgpd.Observables.GPDobserv.CFFNLO" title="gumpgpd.Observables.GPDobserv.CFFNLO"><code class="xref py py-meth docutils literal notranslate"><span class="pre">GPDobserv.CFFNLO()</span></code></a>,
+<a class="reference internal" href="#gumpgpd.Observables.GPDobserv.CFFNLO_evMom" title="gumpgpd.Observables.GPDobserv.CFFNLO_evMom"><code class="xref py py-meth docutils literal notranslate"><span class="pre">GPDobserv.CFFNLO_evMom()</span></code></a>) for DVCS.</p></li>
+<li><p><strong>Transition Form Factors</strong> (TFFs, <a class="reference internal" href="#gumpgpd.Observables.GPDobserv.TFF" title="gumpgpd.Observables.GPDobserv.TFF"><code class="xref py py-meth docutils literal notranslate"><span class="pre">GPDobserv.TFF()</span></code></a>, <a class="reference internal" href="#gumpgpd.Observables.GPDobserv.TFFNLO" title="gumpgpd.Observables.GPDobserv.TFFNLO"><code class="xref py py-meth docutils literal notranslate"><span class="pre">GPDobserv.TFFNLO()</span></code></a>,
+<a class="reference internal" href="#gumpgpd.Observables.GPDobserv.TFFNLO_evMom" title="gumpgpd.Observables.GPDobserv.TFFNLO_evMom"><code class="xref py py-meth docutils literal notranslate"><span class="pre">GPDobserv.TFFNLO_evMom()</span></code></a>) for DVMP.</p></li>
+<li><p><strong>Generalized Form Factors</strong> (<a class="reference internal" href="#gumpgpd.Observables.GPDobserv.GFFj0" title="gumpgpd.Observables.GPDobserv.GFFj0"><code class="xref py py-meth docutils literal notranslate"><span class="pre">GPDobserv.GFFj0()</span></code></a>).</p></li>
+</ul>
+<p>All integrals use conformal (Mellin-Barnes) contours and support both
+leading-order (LO, <code class="docutils literal notranslate"><span class="pre">p_order=1</span></code>) and next-to-leading-order (NLO,
+<code class="docutils literal notranslate"><span class="pre">p_order=2</span></code>) QCD evolution.</p>
 <dl class="py function">
 <dt class="sig sig-object py" id="gumpgpd.Observables.Flv_Intp">
-<span class="sig-prename descclassname"><span class="pre">gumpgpd.Observables.</span></span><span class="sig-name descname"><span class="pre">Flv_Intp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">Flv_array</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">array</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">flv</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gumpgpd/Observables.html#Flv_Intp"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gumpgpd.Observables.Flv_Intp" title="Link to this definition"></a></dt>
-<dd><p>Return the wave function for each flavor</p>
-<p>Flv_array: (N, 3) complex, the wave function of u,d,g
-flv: (N) str</p>
-<p>return result: (N) complex</p>
+<span class="sig-prename descclassname"><span class="pre">gumpgpd.Observables.</span></span><span class="sig-name descname"><span class="pre">Flv_Intp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">Flv_array</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">flv</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">ndarray</span></span></span><a class="reference internal" href="_modules/gumpgpd/Observables.html#Flv_Intp"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gumpgpd.Observables.Flv_Intp" title="Link to this definition"></a></dt>
+<dd><p>Extract or combine flavor components from an array in the <code class="docutils literal notranslate"><span class="pre">[u,</span> <span class="pre">d,</span> <span class="pre">g]</span></code> basis.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>Flv_array</strong> (<em>np.ndarray</em>) – shape <code class="docutils literal notranslate"><span class="pre">(...,</span> <span class="pre">5)</span></code> complex array in the flavor
+basis <code class="docutils literal notranslate"><span class="pre">[u_V</span> <span class="pre">+</span> <span class="pre">u-bar,</span> <span class="pre">u-bar,</span> <span class="pre">d_V</span> <span class="pre">+</span> <span class="pre">d-bar,</span> <span class="pre">d-bar,</span> <span class="pre">g]</span></code>.</p></li>
+<li><p><strong>flv</strong> (<em>str</em>) – flavor selector — <code class="docutils literal notranslate"><span class="pre">'u'</span></code>, <code class="docutils literal notranslate"><span class="pre">'d'</span></code>, <code class="docutils literal notranslate"><span class="pre">'g'</span></code>,
+<code class="docutils literal notranslate"><span class="pre">'NS'</span></code> (<span class="math notranslate nohighlight">\(u - d\)</span>), or <code class="docutils literal notranslate"><span class="pre">'S'</span></code> (<span class="math notranslate nohighlight">\(u + d\)</span>).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>shape <code class="docutils literal notranslate"><span class="pre">(...)</span></code> complex array for the requested flavor
+combination.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>np.ndarray</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py class">
@@ -131,350 +160,397 @@ flv: (N) str</p>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <dl class="py method">
 <dt class="sig sig-object py" id="gumpgpd.Observables.GPDobserv.CFF">
-<span class="sig-name descname"><span class="pre">CFF</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ParaAll</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">muf</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p_order</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">flv</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'All'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gumpgpd/Observables.html#GPDobserv.CFF"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gumpgpd.Observables.GPDobserv.CFF" title="Link to this definition"></a></dt>
-<dd><p>Charge averged CFF $mathcal{F}(xi, t) (mathcal{F} = Q_u^2 F_u + Q_d^2 F_d)$</p>
+<span class="sig-name descname"><span class="pre">CFF</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ParaAll</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">muf</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p_order</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">flv</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'All'</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">ndarray</span></span></span><a class="reference internal" href="_modules/gumpgpd/Observables.html#GPDobserv.CFF"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gumpgpd.Observables.GPDobserv.CFF" title="Link to this definition"></a></dt>
+<dd><p>Charge-weighted Compton Form Factor <span class="math notranslate nohighlight">\(\mathcal{F}(\xi, t)\)</span>.</p>
+<p>Computes <span class="math notranslate nohighlight">\(\mathcal{F} = Q_u^2 F_u + Q_d^2 F_d\)</span> via a
+Mellin-Barnes contour integral.  Dispatches to <a class="reference internal" href="#gumpgpd.Observables.GPDobserv.CFFNLO" title="gumpgpd.Observables.GPDobserv.CFFNLO"><code class="xref py py-meth docutils literal notranslate"><span class="pre">CFFNLO()</span></code></a>
+automatically when <code class="docutils literal notranslate"><span class="pre">p_order=2</span></code>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>ParaAll</strong> – <p>array as [Para_Forward, Para_xi2, Para_xi4]</p>
+<li><p><strong>ParaAll</strong> (<em>np.ndarray</em>) – <p>shape <code class="docutils literal notranslate"><span class="pre">(...,</span> <span class="pre">3,</span> <span class="pre">5,</span> <span class="pre">n_ansatz,</span> <span class="pre">6)</span></code> parameter
+array with slices:</p>
 <ul>
-<li><p>Para_Forward = array as [Para_Forward_uV, Para_Forward_ubar, Para_Forward_dV, Para_Forward_dbar, Para_Forward_g]
-where Para_Forward_i is forward parameter sets for valence u quark (uV), sea u quark (ubar), valence d quark (dV), sea d quark (dbar) and gluon (g)</p></li>
-<li><p>Para_xi2 = array as [Para_xi2_uV, Para_xi2_ubar, Para_xi2_dV, Para_xi2_dbar, Para_xi2_g]
-where Para_xi2_i is xi^2 parameter sets for valence u quark (uV), sea u quark (ubar), valence d quark (dV), sea d quark (dbar) and gluon (g)</p></li>
-<li><p>Para_xi4 = array as [Para_xi4_uV, Para_xi4_ubar, Para_xi4_dV, Para_xi4_dbar, Para_xi4_g]
-where Para_xi4_i is xi^4 parameter sets for valence u quark (uV), sea u quark (ubar), valence d quark (dV), sea d quark (dbar) and gluon (g)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">[...,</span> <span class="pre">0,</span> <span class="pre">...]</span></code> — <span class="math notranslate nohighlight">\(\xi^0\)</span> (forward) parameters</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">[...,</span> <span class="pre">1,</span> <span class="pre">...]</span></code> — <span class="math notranslate nohighlight">\(\xi^2\)</span> correction parameters</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">[...,</span> <span class="pre">2,</span> <span class="pre">...]</span></code> — <span class="math notranslate nohighlight">\(\xi^4\)</span> correction parameters</p></li>
 </ul>
+<p>Flavor axis order: <code class="docutils literal notranslate"><span class="pre">[uV,</span> <span class="pre">ubar,</span> <span class="pre">dV,</span> <span class="pre">dbar,</span> <span class="pre">g]</span></code>.</p>
 </p></li>
-<li><p><strong>muf</strong> – factorization scale</p></li>
-<li><p><strong>p_order</strong> – 1 for leading-order evolution (default); 2 for next-to-leading-order evolution ; higher order not implemented yet</p></li>
-<li><p><strong>flv</strong> – “q”, “g”, or “All”</p></li>
+<li><p><strong>muf</strong> (<em>float</em>) – factorization scale in GeV.</p></li>
+<li><p><strong>p_order</strong> (<em>int</em>) – perturbative order — <code class="docutils literal notranslate"><span class="pre">1</span></code> for LO (default),
+<code class="docutils literal notranslate"><span class="pre">2</span></code> for NLO.</p></li>
+<li><p><strong>flv</strong> (<em>str</em>) – flavor filter — <code class="docutils literal notranslate"><span class="pre">'All'</span></code>, <code class="docutils literal notranslate"><span class="pre">'q'</span></code>, or <code class="docutils literal notranslate"><span class="pre">'g'</span></code>.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>CFF mathcal{F}(xi, t) = Q_u^2 F_u + Q_d^2 F_d</p>
+<dd class="field-even"><p><span class="math notranslate nohighlight">\(\mathcal{F}(\xi, t) = Q_u^2 F_u + Q_d^2 F_d\)</span>.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>np.ndarray</p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="gumpgpd.Observables.GPDobserv.CFFNLO">
-<span class="sig-name descname"><span class="pre">CFFNLO</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ParaAll</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">muf</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">flv</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'All'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gumpgpd/Observables.html#GPDobserv.CFFNLO"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gumpgpd.Observables.GPDobserv.CFFNLO" title="Link to this definition"></a></dt>
-<dd><p>CFF $mathcal{F}(xi, t) (mathcal{F}$</p>
-<p>A separate function for next-to-leading order CFF, it can be called directly or with CFF() by setting p_order = 2</p>
+<span class="sig-name descname"><span class="pre">CFFNLO</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ParaAll</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">muf</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">flv</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'All'</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">ndarray</span></span></span><a class="reference internal" href="_modules/gumpgpd/Observables.html#GPDobserv.CFFNLO"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gumpgpd.Observables.GPDobserv.CFFNLO" title="Link to this definition"></a></dt>
+<dd><p>NLO Compton Form Factor <span class="math notranslate nohighlight">\(\mathcal{F}(\xi, t)\)</span> via evolved Wilson coefficients.</p>
+<p>Implements the NLO CFF using the evolved-Wilson-coefficient (evWC)
+method.  Can be called directly or via <a class="reference internal" href="#gumpgpd.Observables.GPDobserv.CFF" title="gumpgpd.Observables.GPDobserv.CFF"><code class="xref py py-meth docutils literal notranslate"><span class="pre">CFF()</span></code></a> with
+<code class="docutils literal notranslate"><span class="pre">p_order=2</span></code>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>ParaAll</strong> – <p>array as [Para_Forward, Para_xi2, Para_xi4]</p>
+<li><p><strong>ParaAll</strong> (<em>np.ndarray</em>) – <p>shape <code class="docutils literal notranslate"><span class="pre">(...,</span> <span class="pre">3,</span> <span class="pre">5,</span> <span class="pre">n_ansatz,</span> <span class="pre">6)</span></code> parameter
+array with slices:</p>
 <ul>
-<li><dl class="simple">
-<dt>Para_Forward = array as [Para_Forward_uV, Para_Forward_ubar, Para_Forward_dV, Para_Forward_dbar, Para_Forward_g]</dt><dd><p>where Para_Forward_i is forward parameter sets for valence u quark (uV), sea u quark (ubar), valence d quark (dV), sea d quark (dbar) and gluon (g)</p>
-</dd>
-</dl>
-</li>
-<li><dl class="simple">
-<dt>Para_xi2 = array as [Para_xi2_uV, Para_xi2_ubar, Para_xi2_dV, Para_xi2_dbar, Para_xi2_g]</dt><dd><p>where Para_xi2_i is xi^2 parameter sets for valence u quark (uV), sea u quark (ubar), valence d quark (dV), sea d quark (dbar) and gluon (g)</p>
-</dd>
-</dl>
-</li>
-<li><dl class="simple">
-<dt>Para_xi4 = array as [Para_xi4_uV, Para_xi4_ubar, Para_xi4_dV, Para_xi4_dbar, Para_xi4_g]</dt><dd><p>where Para_xi4_i is xi^4 parameter sets for valence u quark (uV), sea u quark (ubar), valence d quark (dV), sea d quark (dbar) and gluon (g)</p>
-</dd>
-</dl>
-</li>
+<li><p><code class="docutils literal notranslate"><span class="pre">[...,</span> <span class="pre">0,</span> <span class="pre">...]</span></code> — <span class="math notranslate nohighlight">\(\xi^0\)</span> (forward) parameters</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">[...,</span> <span class="pre">1,</span> <span class="pre">...]</span></code> — <span class="math notranslate nohighlight">\(\xi^2\)</span> correction parameters</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">[...,</span> <span class="pre">2,</span> <span class="pre">...]</span></code> — <span class="math notranslate nohighlight">\(\xi^4\)</span> correction parameters</p></li>
 </ul>
+<p>Flavor axis order: <code class="docutils literal notranslate"><span class="pre">[uV,</span> <span class="pre">ubar,</span> <span class="pre">dV,</span> <span class="pre">dbar,</span> <span class="pre">g]</span></code>.</p>
 </p></li>
-<li><p><strong>muf</strong> – factorization scale</p></li>
-<li><p><strong>flv</strong> – “q”, “g”, or “All”</p></li>
+<li><p><strong>muf</strong> (<em>float</em>) – factorization scale in GeV.</p></li>
+<li><p><strong>flv</strong> (<em>str</em>) – flavor filter — <code class="docutils literal notranslate"><span class="pre">'All'</span></code>, <code class="docutils literal notranslate"><span class="pre">'q'</span></code>, or <code class="docutils literal notranslate"><span class="pre">'g'</span></code>.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>CFF mathcal{F}(xi, t)</p>
+<dd class="field-even"><p>NLO <span class="math notranslate nohighlight">\(\mathcal{F}(\xi, t)\)</span>.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>np.ndarray</p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="gumpgpd.Observables.GPDobserv.CFFNLO_evMom">
-<span class="sig-name descname"><span class="pre">CFFNLO_evMom</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ParaAll</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">muf</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">flv</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'All'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gumpgpd/Observables.html#GPDobserv.CFFNLO_evMom"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gumpgpd.Observables.GPDobserv.CFFNLO_evMom" title="Link to this definition"></a></dt>
-<dd><p>NLOCFF $mathcal{F}(xi, t) (mathcal{F}) $</p>
-<p>A different function for next-to-leading order TFF using evolved moment method, it can be checked that it generate the same results as the evolve Wilson coefficient method</p>
+<span class="sig-name descname"><span class="pre">CFFNLO_evMom</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ParaAll</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">muf</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">flv</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'All'</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">ndarray</span></span></span><a class="reference internal" href="_modules/gumpgpd/Observables.html#GPDobserv.CFFNLO_evMom"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gumpgpd.Observables.GPDobserv.CFFNLO_evMom" title="Link to this definition"></a></dt>
+<dd><p>NLO Compton Form Factor <span class="math notranslate nohighlight">\(\mathcal{F}(\xi, t)\)</span> via evolved moments.</p>
+<p>Alternative NLO implementation using moment evolution
+(<code class="xref py py-func docutils literal notranslate"><span class="pre">Evolution.CFF_Evo_NLO_evMOM()</span></code>) instead of evolved Wilson
+coefficients.  Both methods produce numerically consistent results and
+can be used to cross-check each other.</p>
+<p>The <span class="math notranslate nohighlight">\(j = 0\)</span> pole term is added back using the evWC method
+because the double-sum formula excludes it by construction.  For the
+same reason a <span class="math notranslate nohighlight">\(j = 1\)</span> pole term is also restored.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>ParaAll</strong> – <p>array as [Para_Forward, Para_xi2, Para_xi4]</p>
+<li><p><strong>ParaAll</strong> (<em>np.ndarray</em>) – <p>shape <code class="docutils literal notranslate"><span class="pre">(...,</span> <span class="pre">3,</span> <span class="pre">5,</span> <span class="pre">n_ansatz,</span> <span class="pre">6)</span></code> parameter
+array with slices:</p>
 <ul>
-<li><dl class="simple">
-<dt>Para_Forward = array as [Para_Forward_uV, Para_Forward_ubar, Para_Forward_dV, Para_Forward_dbar, Para_Forward_g]</dt><dd><p>where Para_Forward_i is forward parameter sets for valence u quark (uV), sea u quark (ubar), valence d quark (dV), sea d quark (dbar) and gluon (g)</p>
-</dd>
-</dl>
-</li>
-<li><dl class="simple">
-<dt>Para_xi2 = array as [Para_xi2_uV, Para_xi2_ubar, Para_xi2_dV, Para_xi2_dbar, Para_xi2_g]</dt><dd><p>where Para_xi2_i is xi^2 parameter sets for valence u quark (uV), sea u quark (ubar), valence d quark (dV), sea d quark (dbar) and gluon (g)</p>
-</dd>
-</dl>
-</li>
-<li><dl class="simple">
-<dt>Para_xi4 = array as [Para_xi4_uV, Para_xi4_ubar, Para_xi4_dV, Para_xi4_dbar, Para_xi4_g]</dt><dd><p>where Para_xi4_i is xi^4 parameter sets for valence u quark (uV), sea u quark (ubar), valence d quark (dV), sea d quark (dbar) and gluon (g)</p>
-</dd>
-</dl>
-</li>
+<li><p><code class="docutils literal notranslate"><span class="pre">[...,</span> <span class="pre">0,</span> <span class="pre">...]</span></code> — <span class="math notranslate nohighlight">\(\xi^0\)</span> (forward) parameters</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">[...,</span> <span class="pre">1,</span> <span class="pre">...]</span></code> — <span class="math notranslate nohighlight">\(\xi^2\)</span> correction parameters</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">[...,</span> <span class="pre">2,</span> <span class="pre">...]</span></code> — <span class="math notranslate nohighlight">\(\xi^4\)</span> correction parameters</p></li>
 </ul>
+<p>Flavor axis order: <code class="docutils literal notranslate"><span class="pre">[uV,</span> <span class="pre">ubar,</span> <span class="pre">dV,</span> <span class="pre">dbar,</span> <span class="pre">g]</span></code>.</p>
 </p></li>
-<li><p><strong>muf</strong> – factorization scale</p></li>
-<li><p><strong>flv</strong> – “q”, “g”, or “All”</p></li>
+<li><p><strong>muf</strong> (<em>float</em>) – factorization scale in GeV.</p></li>
+<li><p><strong>flv</strong> (<em>str</em>) – flavor filter — <code class="docutils literal notranslate"><span class="pre">'All'</span></code>, <code class="docutils literal notranslate"><span class="pre">'q'</span></code>, or <code class="docutils literal notranslate"><span class="pre">'g'</span></code>.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>CFF mathcal{F}(xi, t)</p>
+<dd class="field-even"><p>NLO <span class="math notranslate nohighlight">\(\mathcal{F}(\xi, t)\)</span> (evolved-moment method).</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>np.ndarray</p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="gumpgpd.Observables.GPDobserv.GFFj0">
-<span class="sig-name descname"><span class="pre">GFFj0</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">j</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">flv</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ParaAll</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p_order</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gumpgpd/Observables.html#GPDobserv.GFFj0"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gumpgpd.Observables.GPDobserv.GFFj0" title="Link to this definition"></a></dt>
-<dd><p>Generalized Form Factors A_{j0}(t) which is the xi^0 term of the nth (n= j+1) Mellin moment of GPD int dx x^j F(x,xi,t) for quark and int dx x^(j-1) F(x,xi,t) for gluon</p>
-<p>Note for gluon, GPD reduce to x*g(x), not g(x) so the Mellin moment will have a mismatch</p>
-<p>Only leading order implemented yet NOT well-maintained (TO BE FIXED)</p>
+<span class="sig-name descname"><span class="pre">GFFj0</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">j</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">flv</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ParaAll</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p_order</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span><a class="reference internal" href="_modules/gumpgpd/Observables.html#GPDobserv.GFFj0"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gumpgpd.Observables.GPDobserv.GFFj0" title="Link to this definition"></a></dt>
+<dd><p>Generalized Form Factor <span class="math notranslate nohighlight">\(A_{j+1,0}(t)\)</span> (the <span class="math notranslate nohighlight">\(\xi^0\)</span> Mellin moment).</p>
+<p>Computes <span class="math notranslate nohighlight">\(\int dx\, x^j F(x, \xi, t)\)</span> for quarks and
+<span class="math notranslate nohighlight">\(\int dx\, x^{j-1} F(x, \xi, t)\)</span> for gluons at
+<span class="math notranslate nohighlight">\(\xi = 0\)</span>.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Only LO and NLO evolution are implemented.  Gluon GPDs reduce to
+<span class="math notranslate nohighlight">\(x g(x)\)</span>, so there is a moment index shift relative to
+quarks.  This method is <strong>not well-maintained</strong> and is marked for
+future revision.</p>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>j</strong> (<em>int</em>) – Mellin moment index (<span class="math notranslate nohighlight">\(n = j + 1\)</span>).</p></li>
+<li><p><strong>flv</strong> (<em>str</em>) – flavor — <code class="docutils literal notranslate"><span class="pre">'u'</span></code>, <code class="docutils literal notranslate"><span class="pre">'d'</span></code>, <code class="docutils literal notranslate"><span class="pre">'g'</span></code>, <code class="docutils literal notranslate"><span class="pre">'S'</span></code>, or <code class="docutils literal notranslate"><span class="pre">'NS'</span></code>.</p></li>
+<li><p><strong>ParaAll</strong> (<em>np.ndarray</em>) – shape <code class="docutils literal notranslate"><span class="pre">(...,</span> <span class="pre">3,</span> <span class="pre">5,</span> <span class="pre">n_ansatz,</span> <span class="pre">6)</span></code> parameter
+array; only the <span class="math notranslate nohighlight">\(\xi^0\)</span> slice is used.</p></li>
+<li><p><strong>p_order</strong> (<em>int</em>) – perturbative order — <code class="docutils literal notranslate"><span class="pre">1</span></code> for LO, <code class="docutils literal notranslate"><span class="pre">2</span></code> for NLO.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="math notranslate nohighlight">\(A_{j+1,0}(t)\)</span> for the requested flavor.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="gumpgpd.Observables.GPDobserv.GPD">
-<span class="sig-name descname"><span class="pre">GPD</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">flv</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ParaAll</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p_order</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gumpgpd/Observables.html#GPDobserv.GPD"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gumpgpd.Observables.GPDobserv.GPD" title="Link to this definition"></a></dt>
-<dd><p>GPD F(x, xi, t) in flavor space (flv = “u”, “d”, “S”, “NS” or “g”)</p>
+<span class="sig-name descname"><span class="pre">GPD</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">flv</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ParaAll</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p_order</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span><a class="reference internal" href="_modules/gumpgpd/Observables.html#GPDobserv.GPD"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gumpgpd.Observables.GPDobserv.GPD" title="Link to this definition"></a></dt>
+<dd><p>GPD <span class="math notranslate nohighlight">\(F(x, \xi, t)\)</span> in flavor space.</p>
+<p>Evaluates the GPD at the kinematics <code class="docutils literal notranslate"><span class="pre">(self.x,</span> <span class="pre">self.xi,</span> <span class="pre">self.t)</span></code>
+using a Mellin-Barnes contour integral.  Dispatches to
+<a class="reference internal" href="#gumpgpd.Observables.GPDobserv.GPDNLO_evMom" title="gumpgpd.Observables.GPDobserv.GPDNLO_evMom"><code class="xref py py-meth docutils literal notranslate"><span class="pre">GPDNLO_evMom()</span></code></a> automatically when <code class="docutils literal notranslate"><span class="pre">p_order=2</span></code>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>flv</strong> (<em>str</em>) – “u”, “d”, “S”, “NS” or “g”</p></li>
-<li><p><strong>ParaAll</strong> – <p>array as [Para_Forward, Para_xi2, Para_xi4]</p>
+<li><p><strong>flv</strong> (<em>str</em>) – flavor — <code class="docutils literal notranslate"><span class="pre">'u'</span></code>, <code class="docutils literal notranslate"><span class="pre">'d'</span></code>, <code class="docutils literal notranslate"><span class="pre">'g'</span></code>, <code class="docutils literal notranslate"><span class="pre">'S'</span></code>, or <code class="docutils literal notranslate"><span class="pre">'NS'</span></code>.</p></li>
+<li><p><strong>ParaAll</strong> (<em>np.ndarray</em>) – <p>shape <code class="docutils literal notranslate"><span class="pre">(...,</span> <span class="pre">3,</span> <span class="pre">5,</span> <span class="pre">n_ansatz,</span> <span class="pre">6)</span></code> parameter
+array with slices:</p>
 <ul>
-<li><p>Para_Forward = array as [Para_Forward_uV, Para_Forward_ubar, Para_Forward_dV, Para_Forward_dbar, Para_Forward_g]
-where Para_Forward_i is forward parameter sets for valence u quark (uV), sea u quark (ubar), valence d quark (dV), sea d quark (dbar) and gluon (g)</p></li>
-<li><p>Para_xi2 = array as [Para_xi2_uV, Para_xi2_ubar, Para_xi2_dV, Para_xi2_dbar, Para_xi2_g]
-where Para_xi2_i is xi^2 parameter sets for valence u quark (uV), sea u quark (ubar), valence d quark (dV), sea d quark (dbar) and gluon (g)</p></li>
-<li><p>Para_xi4 = array as [Para_xi4_uV, Para_xi4_ubar, Para_xi4_dV, Para_xi4_dbar, Para_xi4_g]
-where Para_xi4_i is xi^4 parameter sets for valence u quark (uV), sea u quark (ubar), valence d quark (dV), sea d quark (dbar) and gluon (g)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">[...,</span> <span class="pre">0,</span> <span class="pre">...]</span></code> — <span class="math notranslate nohighlight">\(\xi^0\)</span> (forward) parameters;
+flavors <code class="docutils literal notranslate"><span class="pre">[uV,</span> <span class="pre">ubar,</span> <span class="pre">dV,</span> <span class="pre">dbar,</span> <span class="pre">g]</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">[...,</span> <span class="pre">1,</span> <span class="pre">...]</span></code> — <span class="math notranslate nohighlight">\(\xi^2\)</span> correction parameters</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">[...,</span> <span class="pre">2,</span> <span class="pre">...]</span></code> — <span class="math notranslate nohighlight">\(\xi^4\)</span> correction parameters</p></li>
 </ul>
 </p></li>
-<li><p><strong>p_order</strong> – 1 for leading-order evolution (default); 2 for next-to-leading-order evolution ; higher order not implemented yet</p></li>
+<li><p><strong>p_order</strong> (<em>int</em>) – perturbative order — <code class="docutils literal notranslate"><span class="pre">1</span></code> for LO (default),
+<code class="docutils literal notranslate"><span class="pre">2</span></code> for NLO.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>f(x,xi,t) for given flavor flv</p>
+<dd class="field-even"><p><span class="math notranslate nohighlight">\(F(x, \xi, t)\)</span> for the requested flavor.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="gumpgpd.Observables.GPDobserv.GPDNLO_evMom">
-<span class="sig-name descname"><span class="pre">GPDNLO_evMom</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">flv</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ParaAll</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gumpgpd/Observables.html#GPDobserv.GPDNLO_evMom"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gumpgpd.Observables.GPDobserv.GPDNLO_evMom" title="Link to this definition"></a></dt>
-<dd><p>GPD F(x, xi, t) in flavor space (flv = “u”, “d”, “S”, “NS” or “g”)</p>
+<span class="sig-name descname"><span class="pre">GPDNLO_evMom</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">flv</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ParaAll</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span><a class="reference internal" href="_modules/gumpgpd/Observables.html#GPDobserv.GPDNLO_evMom"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gumpgpd.Observables.GPDobserv.GPDNLO_evMom" title="Link to this definition"></a></dt>
+<dd><p>NLO GPD <span class="math notranslate nohighlight">\(F(x, \xi, t)\)</span> using the evolved-moment method.</p>
+<p>Equivalent to <a class="reference internal" href="#gumpgpd.Observables.GPDobserv.GPD" title="gumpgpd.Observables.GPDobserv.GPD"><code class="xref py py-meth docutils literal notranslate"><span class="pre">GPD()</span></code></a> with <code class="docutils literal notranslate"><span class="pre">p_order=2</span></code> but uses moment evolution
+(<code class="xref py py-func docutils literal notranslate"><span class="pre">Evolution.GPD_Moment_Evo_NLO()</span></code>) instead of evolved Wilson
+coefficients.  Both approaches yield numerically consistent results.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>flv</strong> (<em>str</em>) – “u”, “d”, “S”, “NS” or “g”</p></li>
-<li><p><strong>ParaAll</strong> – <p>array as [Para_Forward, Para_xi2, Para_xi4]</p>
+<li><p><strong>flv</strong> (<em>str</em>) – flavor — <code class="docutils literal notranslate"><span class="pre">'u'</span></code>, <code class="docutils literal notranslate"><span class="pre">'d'</span></code>, <code class="docutils literal notranslate"><span class="pre">'g'</span></code>, <code class="docutils literal notranslate"><span class="pre">'S'</span></code>, or <code class="docutils literal notranslate"><span class="pre">'NS'</span></code>.</p></li>
+<li><p><strong>ParaAll</strong> (<em>np.ndarray</em>) – <p>shape <code class="docutils literal notranslate"><span class="pre">(...,</span> <span class="pre">3,</span> <span class="pre">5,</span> <span class="pre">n_ansatz,</span> <span class="pre">6)</span></code> parameter
+array with slices:</p>
 <ul>
-<li><p>Para_Forward = array as [Para_Forward_uV, Para_Forward_ubar, Para_Forward_dV, Para_Forward_dbar, Para_Forward_g]
-where Para_Forward_i is forward parameter sets for valence u quark (uV), sea u quark (ubar), valence d quark (dV), sea d quark (dbar) and gluon (g)</p></li>
-<li><p>Para_xi2 = array as [Para_xi2_uV, Para_xi2_ubar, Para_xi2_dV, Para_xi2_dbar, Para_xi2_g]
-where Para_xi2_i is xi^2 parameter sets for valence u quark (uV), sea u quark (ubar), valence d quark (dV), sea d quark (dbar) and gluon (g)</p></li>
-<li><p>Para_xi4 = array as [Para_xi4_uV, Para_xi4_ubar, Para_xi4_dV, Para_xi4_dbar, Para_xi4_g]
-where Para_xi4_i is xi^4 parameter sets for valence u quark (uV), sea u quark (ubar), valence d quark (dV), sea d quark (dbar) and gluon (g)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">[...,</span> <span class="pre">0,</span> <span class="pre">...]</span></code> — <span class="math notranslate nohighlight">\(\xi^0\)</span> (forward) parameters;
+flavors <code class="docutils literal notranslate"><span class="pre">[uV,</span> <span class="pre">ubar,</span> <span class="pre">dV,</span> <span class="pre">dbar,</span> <span class="pre">g]</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">[...,</span> <span class="pre">1,</span> <span class="pre">...]</span></code> — <span class="math notranslate nohighlight">\(\xi^2\)</span> correction parameters</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">[...,</span> <span class="pre">2,</span> <span class="pre">...]</span></code> — <span class="math notranslate nohighlight">\(\xi^4\)</span> correction parameters</p></li>
 </ul>
 </p></li>
-<li><p><strong>p_order</strong> – 1 for leading-order evolution (default); 2 for next-to-leading-order evolution ; higher order not implemented yet</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>f(x,xi,t) for given flavor flv</p>
+<dd class="field-even"><p><span class="math notranslate nohighlight">\(F(x, \xi, t)\)</span> for the requested flavor at NLO.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="gumpgpd.Observables.GPDobserv.TFF">
-<span class="sig-name descname"><span class="pre">TFF</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ParaAll</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">muf</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">meson</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p_order</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">flv</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'All'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gumpgpd/Observables.html#GPDobserv.TFF"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gumpgpd.Observables.GPDobserv.TFF" title="Link to this definition"></a></dt>
-<dd><p>TFF $mathcal{F}(xi, t) (mathcal{F}$</p>
+<span class="sig-name descname"><span class="pre">TFF</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ParaAll</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">muf</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">meson</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p_order</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">flv</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'All'</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">ndarray</span></span></span><a class="reference internal" href="_modules/gumpgpd/Observables.html#GPDobserv.TFF"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gumpgpd.Observables.GPDobserv.TFF" title="Link to this definition"></a></dt>
+<dd><p>Transition Form Factor <span class="math notranslate nohighlight">\(\mathcal{F}(\xi, t)\)</span> for meson production.</p>
+<p>Computes the TFF via a Mellin-Barnes contour integral.  Dispatches to
+<a class="reference internal" href="#gumpgpd.Observables.GPDobserv.TFFNLO" title="gumpgpd.Observables.GPDobserv.TFFNLO"><code class="xref py py-meth docutils literal notranslate"><span class="pre">TFFNLO()</span></code></a> automatically when <code class="docutils literal notranslate"><span class="pre">p_order=2</span></code>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>ParaAll</strong> – <p>array as [Para_Forward, Para_xi2, Para_xi4]</p>
+<li><p><strong>ParaAll</strong> (<em>np.ndarray</em>) – <p>shape <code class="docutils literal notranslate"><span class="pre">(...,</span> <span class="pre">3,</span> <span class="pre">5,</span> <span class="pre">n_ansatz,</span> <span class="pre">6)</span></code> parameter
+array with slices:</p>
 <ul>
-<li><dl class="simple">
-<dt>Para_Forward = array as [Para_Forward_uV, Para_Forward_ubar, Para_Forward_dV, Para_Forward_dbar, Para_Forward_g]</dt><dd><p>where Para_Forward_i is forward parameter sets for valence u quark (uV), sea u quark (ubar), valence d quark (dV), sea d quark (dbar) and gluon (g)</p>
-</dd>
-</dl>
-</li>
-<li><dl class="simple">
-<dt>Para_xi2 = array as [Para_xi2_uV, Para_xi2_ubar, Para_xi2_dV, Para_xi2_dbar, Para_xi2_g]</dt><dd><p>where Para_xi2_i is xi^2 parameter sets for valence u quark (uV), sea u quark (ubar), valence d quark (dV), sea d quark (dbar) and gluon (g)</p>
-</dd>
-</dl>
-</li>
-<li><dl class="simple">
-<dt>Para_xi4 = array as [Para_xi4_uV, Para_xi4_ubar, Para_xi4_dV, Para_xi4_dbar, Para_xi4_g]</dt><dd><p>where Para_xi4_i is xi^4 parameter sets for valence u quark (uV), sea u quark (ubar), valence d quark (dV), sea d quark (dbar) and gluon (g)</p>
-</dd>
-</dl>
-</li>
+<li><p><code class="docutils literal notranslate"><span class="pre">[...,</span> <span class="pre">0,</span> <span class="pre">...]</span></code> — <span class="math notranslate nohighlight">\(\xi^0\)</span> (forward) parameters</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">[...,</span> <span class="pre">1,</span> <span class="pre">...]</span></code> — <span class="math notranslate nohighlight">\(\xi^2\)</span> correction parameters</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">[...,</span> <span class="pre">2,</span> <span class="pre">...]</span></code> — <span class="math notranslate nohighlight">\(\xi^4\)</span> correction parameters</p></li>
 </ul>
+<p>Flavor axis order: <code class="docutils literal notranslate"><span class="pre">[uV,</span> <span class="pre">ubar,</span> <span class="pre">dV,</span> <span class="pre">dbar,</span> <span class="pre">g]</span></code>.</p>
 </p></li>
-<li><p><strong>muf</strong> – factorization scale</p></li>
-<li><p><strong>meson</strong> – [1 for rho, 2 for phi, 3 for jpsi]</p></li>
-<li><p><strong>p_order</strong> – 1 for leading-order evolution (default); 2 for next-to-leading-order evolution ; higher order not implemented yet</p></li>
-<li><p><strong>flv</strong> – “q”, “g”, or “All”</p></li>
+<li><p><strong>muf</strong> (<em>float</em>) – factorization scale in GeV.</p></li>
+<li><p><strong>meson</strong> (<em>int</em>) – meson code — <code class="docutils literal notranslate"><span class="pre">1</span></code> for <span class="math notranslate nohighlight">\(\rho^0\)</span>, <code class="docutils literal notranslate"><span class="pre">2</span></code> for
+<span class="math notranslate nohighlight">\(\phi\)</span>, <code class="docutils literal notranslate"><span class="pre">3</span></code> for <span class="math notranslate nohighlight">\(J/\psi\)</span>.</p></li>
+<li><p><strong>p_order</strong> (<em>int</em>) – perturbative order — <code class="docutils literal notranslate"><span class="pre">1</span></code> for LO (default),
+<code class="docutils literal notranslate"><span class="pre">2</span></code> for NLO.</p></li>
+<li><p><strong>flv</strong> (<em>str</em>) – flavor filter — <code class="docutils literal notranslate"><span class="pre">'All'</span></code>, <code class="docutils literal notranslate"><span class="pre">'q'</span></code>, or <code class="docutils literal notranslate"><span class="pre">'g'</span></code>.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>TFF mathcal{F}(xi, t)</p>
+<dd class="field-even"><p><span class="math notranslate nohighlight">\(\mathcal{F}(\xi, t)\)</span> for the requested meson.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>np.ndarray</p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="gumpgpd.Observables.GPDobserv.TFFNLO">
-<span class="sig-name descname"><span class="pre">TFFNLO</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ParaAll</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">muf</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">meson</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">flv</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'All'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gumpgpd/Observables.html#GPDobserv.TFFNLO"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gumpgpd.Observables.GPDobserv.TFFNLO" title="Link to this definition"></a></dt>
-<dd><p>TFF $mathcal{F}(xi, t) (mathcal{F}$</p>
-<p>A separate function for next-to-leading order TFF, it can be called directly or with TFF() by setting p_order = 2</p>
+<span class="sig-name descname"><span class="pre">TFFNLO</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ParaAll</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">muf</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">meson</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">flv</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'All'</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">ndarray</span></span></span><a class="reference internal" href="_modules/gumpgpd/Observables.html#GPDobserv.TFFNLO"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gumpgpd.Observables.GPDobserv.TFFNLO" title="Link to this definition"></a></dt>
+<dd><p>NLO Transition Form Factor <span class="math notranslate nohighlight">\(\mathcal{F}(\xi, t)\)</span> via evolved Wilson coefficients.</p>
+<p>Implements the NLO TFF using the evolved-Wilson-coefficient (evWC)
+method.  Can be called directly or via <a class="reference internal" href="#gumpgpd.Observables.GPDobserv.TFF" title="gumpgpd.Observables.GPDobserv.TFF"><code class="xref py py-meth docutils literal notranslate"><span class="pre">TFF()</span></code></a> with
+<code class="docutils literal notranslate"><span class="pre">p_order=2</span></code>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>ParaAll</strong> – <p>array as [Para_Forward, Para_xi2, Para_xi4]</p>
+<li><p><strong>ParaAll</strong> (<em>np.ndarray</em>) – <p>shape <code class="docutils literal notranslate"><span class="pre">(...,</span> <span class="pre">3,</span> <span class="pre">5,</span> <span class="pre">n_ansatz,</span> <span class="pre">6)</span></code> parameter
+array with slices:</p>
 <ul>
-<li><dl class="simple">
-<dt>Para_Forward = array as [Para_Forward_uV, Para_Forward_ubar, Para_Forward_dV, Para_Forward_dbar, Para_Forward_g]</dt><dd><p>where Para_Forward_i is forward parameter sets for valence u quark (uV), sea u quark (ubar), valence d quark (dV), sea d quark (dbar) and gluon (g)</p>
-</dd>
-</dl>
-</li>
-<li><dl class="simple">
-<dt>Para_xi2 = array as [Para_xi2_uV, Para_xi2_ubar, Para_xi2_dV, Para_xi2_dbar, Para_xi2_g]</dt><dd><p>where Para_xi2_i is xi^2 parameter sets for valence u quark (uV), sea u quark (ubar), valence d quark (dV), sea d quark (dbar) and gluon (g)</p>
-</dd>
-</dl>
-</li>
-<li><dl class="simple">
-<dt>Para_xi4 = array as [Para_xi4_uV, Para_xi4_ubar, Para_xi4_dV, Para_xi4_dbar, Para_xi4_g]</dt><dd><p>where Para_xi4_i is xi^4 parameter sets for valence u quark (uV), sea u quark (ubar), valence d quark (dV), sea d quark (dbar) and gluon (g)</p>
-</dd>
-</dl>
-</li>
+<li><p><code class="docutils literal notranslate"><span class="pre">[...,</span> <span class="pre">0,</span> <span class="pre">...]</span></code> — <span class="math notranslate nohighlight">\(\xi^0\)</span> (forward) parameters</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">[...,</span> <span class="pre">1,</span> <span class="pre">...]</span></code> — <span class="math notranslate nohighlight">\(\xi^2\)</span> correction parameters</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">[...,</span> <span class="pre">2,</span> <span class="pre">...]</span></code> — <span class="math notranslate nohighlight">\(\xi^4\)</span> correction parameters</p></li>
 </ul>
+<p>Flavor axis order: <code class="docutils literal notranslate"><span class="pre">[uV,</span> <span class="pre">ubar,</span> <span class="pre">dV,</span> <span class="pre">dbar,</span> <span class="pre">g]</span></code>.</p>
 </p></li>
-<li><p><strong>muf</strong> – factorization scale</p></li>
-<li><p><strong>meson</strong> – [1 for rho, 2 for phi, 3 for jpsi]</p></li>
-<li><p><strong>flv</strong> – “q”, “g”, or “All”</p></li>
+<li><p><strong>muf</strong> (<em>float</em>) – factorization scale in GeV.</p></li>
+<li><p><strong>meson</strong> (<em>int</em>) – meson code — <code class="docutils literal notranslate"><span class="pre">1</span></code> for <span class="math notranslate nohighlight">\(\rho^0\)</span>, <code class="docutils literal notranslate"><span class="pre">2</span></code> for
+<span class="math notranslate nohighlight">\(\phi\)</span>, <code class="docutils literal notranslate"><span class="pre">3</span></code> for <span class="math notranslate nohighlight">\(J/\psi\)</span>.</p></li>
+<li><p><strong>flv</strong> (<em>str</em>) – flavor filter — <code class="docutils literal notranslate"><span class="pre">'All'</span></code>, <code class="docutils literal notranslate"><span class="pre">'q'</span></code>, or <code class="docutils literal notranslate"><span class="pre">'g'</span></code>.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>TFF mathcal{F}(xi, t)</p>
+<dd class="field-even"><p>NLO <span class="math notranslate nohighlight">\(\mathcal{F}(\xi, t)\)</span> for the requested meson.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>np.ndarray</p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="gumpgpd.Observables.GPDobserv.TFFNLO_evMom">
-<span class="sig-name descname"><span class="pre">TFFNLO_evMom</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ParaAll</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">muf</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">meson</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">flv</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'All'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gumpgpd/Observables.html#GPDobserv.TFFNLO_evMom"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gumpgpd.Observables.GPDobserv.TFFNLO_evMom" title="Link to this definition"></a></dt>
-<dd><p>NLOTFF $mathcal{F}(xi, t) (mathcal{F}) $</p>
-<p>A different function for next-to-leading order TFF using evolved moment method, it can be checked that it generate the same results as the evolve Wilson coefficient method</p>
+<span class="sig-name descname"><span class="pre">TFFNLO_evMom</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ParaAll</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">muf</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">meson</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">flv</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'All'</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">ndarray</span></span></span><a class="reference internal" href="_modules/gumpgpd/Observables.html#GPDobserv.TFFNLO_evMom"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gumpgpd.Observables.GPDobserv.TFFNLO_evMom" title="Link to this definition"></a></dt>
+<dd><p>NLO Transition Form Factor <span class="math notranslate nohighlight">\(\mathcal{F}(\xi, t)\)</span> via evolved moments.</p>
+<p>Alternative NLO implementation using moment evolution
+(<code class="xref py py-func docutils literal notranslate"><span class="pre">Evolution.TFF_Evo_NLO_evMOM()</span></code>) instead of evolved Wilson
+coefficients.  Both methods produce numerically consistent results and
+can be used to cross-check each other.</p>
+<p>The <span class="math notranslate nohighlight">\(j = 0\)</span> and <span class="math notranslate nohighlight">\(j = 1\)</span> pole terms are added back
+separately (see <a class="reference internal" href="#gumpgpd.Observables.GPDobserv.CFFNLO_evMom" title="gumpgpd.Observables.GPDobserv.CFFNLO_evMom"><code class="xref py py-meth docutils literal notranslate"><span class="pre">CFFNLO_evMom()</span></code></a> for the rationale).</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>ParaAll</strong> – <p>array as [Para_Forward, Para_xi2, Para_xi4]</p>
+<li><p><strong>ParaAll</strong> (<em>np.ndarray</em>) – <p>shape <code class="docutils literal notranslate"><span class="pre">(...,</span> <span class="pre">3,</span> <span class="pre">5,</span> <span class="pre">n_ansatz,</span> <span class="pre">6)</span></code> parameter
+array with slices:</p>
 <ul>
-<li><dl class="simple">
-<dt>Para_Forward = array as [Para_Forward_uV, Para_Forward_ubar, Para_Forward_dV, Para_Forward_dbar, Para_Forward_g]</dt><dd><p>where Para_Forward_i is forward parameter sets for valence u quark (uV), sea u quark (ubar), valence d quark (dV), sea d quark (dbar) and gluon (g)</p>
-</dd>
-</dl>
-</li>
-<li><dl class="simple">
-<dt>Para_xi2 = array as [Para_xi2_uV, Para_xi2_ubar, Para_xi2_dV, Para_xi2_dbar, Para_xi2_g]</dt><dd><p>where Para_xi2_i is xi^2 parameter sets for valence u quark (uV), sea u quark (ubar), valence d quark (dV), sea d quark (dbar) and gluon (g)</p>
-</dd>
-</dl>
-</li>
-<li><dl class="simple">
-<dt>Para_xi4 = array as [Para_xi4_uV, Para_xi4_ubar, Para_xi4_dV, Para_xi4_dbar, Para_xi4_g]</dt><dd><p>where Para_xi4_i is xi^4 parameter sets for valence u quark (uV), sea u quark (ubar), valence d quark (dV), sea d quark (dbar) and gluon (g)</p>
-</dd>
-</dl>
-</li>
+<li><p><code class="docutils literal notranslate"><span class="pre">[...,</span> <span class="pre">0,</span> <span class="pre">...]</span></code> — <span class="math notranslate nohighlight">\(\xi^0\)</span> (forward) parameters</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">[...,</span> <span class="pre">1,</span> <span class="pre">...]</span></code> — <span class="math notranslate nohighlight">\(\xi^2\)</span> correction parameters</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">[...,</span> <span class="pre">2,</span> <span class="pre">...]</span></code> — <span class="math notranslate nohighlight">\(\xi^4\)</span> correction parameters</p></li>
 </ul>
+<p>Flavor axis order: <code class="docutils literal notranslate"><span class="pre">[uV,</span> <span class="pre">ubar,</span> <span class="pre">dV,</span> <span class="pre">dbar,</span> <span class="pre">g]</span></code>.</p>
 </p></li>
-<li><p><strong>muf</strong> – factorization scale</p></li>
-<li><p><strong>meson</strong> – [1 for rho, 2 for phi, 3 for jpsi]</p></li>
-<li><p><strong>flv</strong> – “q”, “g”, or “All”</p></li>
+<li><p><strong>muf</strong> (<em>float</em>) – factorization scale in GeV.</p></li>
+<li><p><strong>meson</strong> (<em>int</em>) – meson code — <code class="docutils literal notranslate"><span class="pre">1</span></code> for <span class="math notranslate nohighlight">\(\rho^0\)</span>, <code class="docutils literal notranslate"><span class="pre">2</span></code> for
+<span class="math notranslate nohighlight">\(\phi\)</span>, <code class="docutils literal notranslate"><span class="pre">3</span></code> for <span class="math notranslate nohighlight">\(J/\psi\)</span>.</p></li>
+<li><p><strong>flv</strong> (<em>str</em>) – flavor filter — <code class="docutils literal notranslate"><span class="pre">'All'</span></code>, <code class="docutils literal notranslate"><span class="pre">'q'</span></code>, or <code class="docutils literal notranslate"><span class="pre">'g'</span></code>.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>TFF mathcal{F}(xi, t)</p>
+<dd class="field-even"><p>NLO <span class="math notranslate nohighlight">\(\mathcal{F}(\xi, t)\)</span> for the requested
+meson (evolved-moment method).</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>np.ndarray</p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="gumpgpd.Observables.GPDobserv.tPDF">
-<span class="sig-name descname"><span class="pre">tPDF</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">flv</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ParaAll</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p_order</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gumpgpd/Observables.html#GPDobserv.tPDF"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gumpgpd.Observables.GPDobserv.tPDF" title="Link to this definition"></a></dt>
-<dd><p>t-denpendent PDF for given flavor</p>
-<p>Cross-ref: <code class="xref py py-func docutils literal notranslate"><span class="pre">Evolution.Moment_Evo_LO()</span></code> and <code class="xref py py-func docutils literal notranslate"><span class="pre">Evolution.tPDF_Moment_Evo_NLO()</span></code></p>
+<span class="sig-name descname"><span class="pre">tPDF</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">flv</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ParaAll</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p_order</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">ndarray</span></span></span><a class="reference internal" href="_modules/gumpgpd/Observables.html#GPDobserv.tPDF"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gumpgpd.Observables.GPDobserv.tPDF" title="Link to this definition"></a></dt>
+<dd><p>t-dependent PDF <span class="math notranslate nohighlight">\(f(x, t)\)</span> for a given flavor.</p>
+<p>Computes the impact-parameter-space PDF via the inverse Mellin
+transform along a straight contour with real part
+<code class="docutils literal notranslate"><span class="pre">reS</span> <span class="pre">=</span> <span class="pre">1.25</span></code>.</p>
+<p>See also: <code class="xref py py-func docutils literal notranslate"><span class="pre">Evolution.Moment_Evo_LO()</span></code>,
+<code class="xref py py-func docutils literal notranslate"><span class="pre">Evolution.tPDF_Moment_Evo_NLO()</span></code>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>flv</strong> (<em>str</em>) – “u”, “d”, “S”, “NS” or “g”</p></li>
-<li><p><strong>ParaAll</strong> – <p>array as [Para_Forward, Para_xi2,…]</p>
-<ul>
-<li><p>Para_Forward: array as [Para_Forward_uV, Para_Forward_ubar, Para_Forward_dV, Para_Forward_dbar, Para_Forward_g],
-where Para_Forward_i is parameter sets for valence u quark (uV), sea u quark (ubar), valence d quark (dV), sea d quark (dbar) and gluon (g)</p></li>
-<li><p>Para_xi2: only matter for non-zero xi (NOT needed here but the parameters are passed for consistency with GPDs)</p></li>
-</ul>
-</p></li>
-<li><p><strong>p_order</strong> – 1 for leading-order evolution (default); 2 for next-to-leading-order evolution ; higher order not implemented yet</p></li>
+<li><p><strong>flv</strong> (<em>str</em>) – flavor — <code class="docutils literal notranslate"><span class="pre">'u'</span></code>, <code class="docutils literal notranslate"><span class="pre">'d'</span></code>, <code class="docutils literal notranslate"><span class="pre">'g'</span></code>, <code class="docutils literal notranslate"><span class="pre">'S'</span></code>, or <code class="docutils literal notranslate"><span class="pre">'NS'</span></code>.</p></li>
+<li><p><strong>ParaAll</strong> (<em>np.ndarray</em>) – shape <code class="docutils literal notranslate"><span class="pre">(...,</span> <span class="pre">3,</span> <span class="pre">5,</span> <span class="pre">n_ansatz,</span> <span class="pre">6)</span></code> parameter
+array. <code class="docutils literal notranslate"><span class="pre">ParaAll[...,</span> <span class="pre">0,</span> <span class="pre">...]</span></code> contains the forward
+(<span class="math notranslate nohighlight">\(\xi^0\)</span>) parameters for the five flavors
+<code class="docutils literal notranslate"><span class="pre">[uV,</span> <span class="pre">ubar,</span> <span class="pre">dV,</span> <span class="pre">dbar,</span> <span class="pre">g]</span></code>; the <span class="math notranslate nohighlight">\(\xi^2\)</span> slice is
+accepted for interface consistency but is not used here.</p></li>
+<li><p><strong>p_order</strong> (<em>int</em>) – perturbative order — <code class="docutils literal notranslate"><span class="pre">1</span></code> for LO (default),
+<code class="docutils literal notranslate"><span class="pre">2</span></code> for NLO.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>f(x,t) in for the given flavor</p>
+<dd class="field-even"><p><span class="math notranslate nohighlight">\(f(x, t)\)</span> for the requested flavor.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>np.ndarray</p>
 </dd>
 </dl>
 </dd></dl>
 
 </dd></dl>
 
-<dl class="py data">
-<dt class="sig sig-object py" id="gumpgpd.Observables.WF_helper3">
-<span class="sig-prename descclassname"><span class="pre">gumpgpd.Observables.</span></span><span class="sig-name descname"><span class="pre">WF_helper3</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">array([[0,</span> <span class="pre">0,</span> <span class="pre">0,</span> <span class="pre">0,</span> <span class="pre">0],</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">[0,</span> <span class="pre">0,</span> <span class="pre">0,</span> <span class="pre">0,</span> <span class="pre">0],</span>&#160;&#160;&#160;&#160;&#160;&#160;&#160; <span class="pre">[0,</span> <span class="pre">0,</span> <span class="pre">0,</span> <span class="pre">0,</span> <span class="pre">1]])</span></span><a class="headerlink" href="#gumpgpd.Observables.WF_helper3" title="Link to this definition"></a></dt>
-<dd><p><strong>*********************Observables*************************************</strong></p>
-</dd></dl>
-
 <dl class="py function">
 <dt class="sig sig-object py" id="gumpgpd.Observables.flv_to_indx">
-<span class="sig-prename descclassname"><span class="pre">gumpgpd.Observables.</span></span><span class="sig-name descname"><span class="pre">flv_to_indx</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">flv</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gumpgpd/Observables.html#flv_to_indx"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gumpgpd.Observables.flv_to_indx" title="Link to this definition"></a></dt>
-<dd><p>flv is the flavor. It is a string</p>
+<span class="sig-prename descclassname"><span class="pre">gumpgpd.Observables.</span></span><span class="sig-name descname"><span class="pre">flv_to_indx</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">flv</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">int</span></span></span><a class="reference internal" href="_modules/gumpgpd/Observables.html#flv_to_indx"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gumpgpd.Observables.flv_to_indx" title="Link to this definition"></a></dt>
+<dd><p>Map a flavor string to its integer index.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>flv</strong> (<em>str</em>) – the flavor in string, e.g., ‘u’, ‘d’ , ‘g’</p>
+<dd class="field-odd"><p><strong>flv</strong> (<em>str</em>) – flavor label — <code class="docutils literal notranslate"><span class="pre">'u'</span></code>, <code class="docutils literal notranslate"><span class="pre">'d'</span></code>, <code class="docutils literal notranslate"><span class="pre">'g'</span></code>,
+<code class="docutils literal notranslate"><span class="pre">'NS'</span></code> (non-singlet), or <code class="docutils literal notranslate"><span class="pre">'S'</span></code> (singlet).</p>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>flavor converted to scalar</p>
+<dd class="field-even"><p>index <code class="docutils literal notranslate"><span class="pre">0</span></code> (u), <code class="docutils literal notranslate"><span class="pre">1</span></code> (d), <code class="docutils literal notranslate"><span class="pre">2</span></code> (g), <code class="docutils literal notranslate"><span class="pre">3</span></code> (NS), or <code class="docutils literal notranslate"><span class="pre">4</span></code> (S).</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>flv (scalar)</p>
+<dd class="field-odd"><p>int</p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="gumpgpd.Observables.flvmask">
-<span class="sig-prename descclassname"><span class="pre">gumpgpd.Observables.</span></span><span class="sig-name descname"><span class="pre">flvmask</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">flv</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gumpgpd/Observables.html#flvmask"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gumpgpd.Observables.flvmask" title="Link to this definition"></a></dt>
-<dd></dd></dl>
+<span class="sig-prename descclassname"><span class="pre">gumpgpd.Observables.</span></span><span class="sig-name descname"><span class="pre">flvmask</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">flv</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">ndarray</span></span></span><a class="reference internal" href="_modules/gumpgpd/Observables.html#flvmask"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gumpgpd.Observables.flvmask" title="Link to this definition"></a></dt>
+<dd><p>Return a binary flavor mask in the evolution basis.</p>
+<p>Used to project evolved conformal moments onto a quark, gluon, or all-flavor
+combination when computing CFFs and TFFs.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>flv</strong> (<em>str</em>) – <code class="docutils literal notranslate"><span class="pre">'All'</span></code> (all flavors), <code class="docutils literal notranslate"><span class="pre">'q'</span></code> (quarks only), or
+<code class="docutils literal notranslate"><span class="pre">'g'</span></code> (gluon only).</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>length-5 integer mask, with <code class="docutils literal notranslate"><span class="pre">1</span></code> for active and <code class="docutils literal notranslate"><span class="pre">0</span></code> for
+inactive flavors in the evolution basis
+<code class="docutils literal notranslate"><span class="pre">[uV,</span> <span class="pre">u-bar,</span> <span class="pre">dV,</span> <span class="pre">d-bar,</span> <span class="pre">g]</span></code>.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>np.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="gumpgpd.Observables.flvs_to_indx">
-<span class="sig-prename descclassname"><span class="pre">gumpgpd.Observables.</span></span><span class="sig-name descname"><span class="pre">flvs_to_indx</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">flvs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/gumpgpd/Observables.html#flvs_to_indx"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gumpgpd.Observables.flvs_to_indx" title="Link to this definition"></a></dt>
-<dd><p>Cast <a class="reference internal" href="#gumpgpd.Observables.flv_to_indx" title="gumpgpd.Observables.flv_to_indx"><code class="xref py py-func docutils literal notranslate"><span class="pre">flv_to_indx()</span></code></a> for each flv in the list flvs</p>
+<span class="sig-prename descclassname"><span class="pre">gumpgpd.Observables.</span></span><span class="sig-name descname"><span class="pre">flvs_to_indx</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">flvs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">ndarray</span></span></span><a class="reference internal" href="_modules/gumpgpd/Observables.html#flvs_to_indx"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#gumpgpd.Observables.flvs_to_indx" title="Link to this definition"></a></dt>
+<dd><p>Apply <a class="reference internal" href="#gumpgpd.Observables.flv_to_indx" title="gumpgpd.Observables.flv_to_indx"><code class="xref py py-func docutils literal notranslate"><span class="pre">flv_to_indx()</span></code></a> to every element of a flavor list.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>flvs</strong> (<em>list</em><em> of </em><em>str</em>) – list of flavors</p>
+<dd class="field-odd"><p><strong>flvs</strong> (<em>list</em><em> of </em><em>str</em>) – list of flavor labels accepted by
+<a class="reference internal" href="#gumpgpd.Observables.flv_to_indx" title="gumpgpd.Observables.flv_to_indx"><code class="xref py py-func docutils literal notranslate"><span class="pre">flv_to_indx()</span></code></a>.</p>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>flavors converted to scalar</p>
+<dd class="field-even"><p>integer index array of dtype <code class="docutils literal notranslate"><span class="pre">int32</span></code>.</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>flvs (list of scalar)</p>
+<dd class="field-odd"><p>np.ndarray</p>
 </dd>
 </dl>
 </dd></dl>

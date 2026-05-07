@@ -3,17 +3,22 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-GUMP GPD Analysis documentation
+GUMP GPD Analysis Documentation
 ===============================
-.. warning::   
-   Still Under construction!!!
 
-This is the official website for the GPDs through universal moment parameterization (GUMP) framework
-of GPD global analysis. We are still working to develop better user interface but here we provide a quick tutorial for anyone interested now. 
+.. warning::
+   This documentation is still being expanded and polished.
+
+This is the official documentation website for GUMP
+(GPDs through Universal Moment Parameterization), a framework for global GPD
+analysis.
+
+If you are new to the package, start from :doc:`QuickStart` and then continue
+through the module-specific quick guides.
 
 .. toctree::
    :maxdepth: 2
-   :caption: Contents:
+   :caption: Contents
    
    QuickStart
    ParametersIntro

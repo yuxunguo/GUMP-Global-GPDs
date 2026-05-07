@@ -6,7 +6,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>gumpgpd.Observables &mdash; GUMP GPD Analysis 1.0.2 documentation</title>
-      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
 
@@ -42,16 +42,16 @@
   </form>
 </div>
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
-              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+              <p class="caption" role="heading"><span class="caption-text">Contents</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../../QuickStart.html">Quick start</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../ParametersIntro.html">Parameters Quickguide</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../ObservablesIntro.html">Observables Quickguide</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../EvolutionIntro.html">Evolution Quickguide</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../MinimizerIntro.html">Minimizer Quickguide</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../DVCSIntro.html">DVCS Quickguide</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../DVMPIntro.html">DVMP Quickguide</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../modules.html">Documentation of submodules</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../QuickStart.html">Quick Start</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../ParametersIntro.html">Parameters Quick Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../ObservablesIntro.html">Observables Quick Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../EvolutionIntro.html">Evolution Quick Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../MinimizerIntro.html">Minimizer Quick Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../DVCSIntro.html">DVCS Quick Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../DVMPIntro.html">DVMP Quick Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../modules.html">Submodule API Reference</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../Citation.html">Citation/Acknowledgement</a></li>
 </ul>
 
@@ -80,22 +80,38 @@
            <div itemprop="articleBody">
              
   <h1>Source code for gumpgpd.Observables</h1><div class="highlight"><pre>
-<span></span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">Here we define the GPD ansatz based on the moment space expression norm * x^ alpha  * (1-x)^ beta.</span>
-<span class="sd">With the GPDs ansatz, observables with LO evolution are calculated</span>
-<span class="sd">&quot;&quot;&quot;</span>
-<span class="kn">from</span> <span class="nn">.Evolution</span> <span class="kn">import</span> <span class="n">Moment_Evo_LO</span><span class="p">,</span><span class="n">Moment_Evo_LO_NSp1</span><span class="p">,</span> <span class="n">TFF_Evo_LO</span><span class="p">,</span> <span class="n">CFF_Evo_LO</span><span class="p">,</span> <span class="n">TFF_Evo_NLO_evWC</span><span class="p">,</span> <span class="n">TFF_Evo_NLO_evMOM</span><span class="p">,</span> <span class="n">CFF_Evo_NLO_evWC</span><span class="p">,</span><span class="n">CFF_Evo_NLO_evMOM</span><span class="p">,</span> <span class="n">GPD_Moment_Evo_NLO</span><span class="p">,</span><span class="n">tPDF_Moment_Evo_NLO</span><span class="p">,</span> <span class="n">tPDF_Moment_Evo_NLO_NSp1</span><span class="p">,</span> <span class="n">fixed_quadvec</span><span class="p">,</span> <span class="n">inv_flav_trans</span>
-<span class="kn">from</span> <span class="nn">.Parameters</span> <span class="kn">import</span> <span class="n">Moment_Sum</span>
-<span class="kn">from</span> <span class="nn">.Evolution</span> <span class="kn">import</span> <span class="n">InvMellinWaveFuncQ</span><span class="p">,</span> <span class="n">InvMellinWaveFuncG</span><span class="p">,</span> <span class="n">ConfWaveFuncQ</span><span class="p">,</span> <span class="n">ConfWaveFuncG</span><span class="p">,</span> <span class="n">ConfWaveFuncQ_over_sinpij</span><span class="p">,</span> <span class="n">ConfWaveFuncG_over_sinpij</span>
+<span></span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">GPD ansatz and observable calculations with QCD evolution.</span>
 
-<span class="kn">import</span> <span class="nn">scipy</span> <span class="k">as</span> <span class="nn">sp</span>
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">from</span> <span class="nn">scipy.integrate</span> <span class="kn">import</span> <span class="n">quad_vec</span><span class="p">,</span> <span class="n">fixed_quad</span>
-<span class="kn">from</span> <span class="nn">scipy.special</span> <span class="kn">import</span> <span class="n">gamma</span>
+<span class="sd">The GPD ansatz follows the moment-space form</span>
+<span class="sd">:math:`N\,x^{-\alpha}(1-x)^{\beta}` (see :mod:`Parameters`).  Starting</span>
+<span class="sd">from those ansatz parameters, this module computes:</span>
 
+<span class="sd">* **t-dependent PDFs** (:meth:`GPDobserv.tPDF`) via inverse Mellin transform.</span>
+<span class="sd">* **GPDs** in :math:`x`-space (:meth:`GPDobserv.GPD`, :meth:`GPDobserv.GPDNLO_evMom`)</span>
+<span class="sd">  via Mellin-Barnes contour integration.</span>
+<span class="sd">* **Compton Form Factors** (CFFs, :meth:`GPDobserv.CFF`, :meth:`GPDobserv.CFFNLO`,</span>
+<span class="sd">  :meth:`GPDobserv.CFFNLO_evMom`) for DVCS.</span>
+<span class="sd">* **Transition Form Factors** (TFFs, :meth:`GPDobserv.TFF`, :meth:`GPDobserv.TFFNLO`,</span>
+<span class="sd">  :meth:`GPDobserv.TFFNLO_evMom`) for DVMP.</span>
+<span class="sd">* **Generalized Form Factors** (:meth:`GPDobserv.GFFj0`).</span>
+
+<span class="sd">All integrals use conformal (Mellin-Barnes) contours and support both</span>
+<span class="sd">leading-order (LO, ``p_order=1``) and next-to-leading-order (NLO,</span>
+<span class="sd">``p_order=2``) QCD evolution.</span>
 <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">***********************GPD moments***************************************</span>
-<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.Evolution</span><span class="w"> </span><span class="kn">import</span> <span class="n">Moment_Evo_LO</span><span class="p">,</span><span class="n">Moment_Evo_LO_NSp1</span><span class="p">,</span> <span class="n">TFF_Evo_LO</span><span class="p">,</span> <span class="n">CFF_Evo_LO</span><span class="p">,</span> <span class="n">TFF_Evo_NLO_evWC</span><span class="p">,</span> <span class="n">TFF_Evo_NLO_evMOM</span><span class="p">,</span> <span class="n">CFF_Evo_NLO_evWC</span><span class="p">,</span><span class="n">CFF_Evo_NLO_evMOM</span><span class="p">,</span> <span class="n">GPD_Moment_Evo_NLO</span><span class="p">,</span><span class="n">tPDF_Moment_Evo_NLO</span><span class="p">,</span> <span class="n">tPDF_Moment_Evo_NLO_NSp1</span><span class="p">,</span> <span class="n">fixed_quadvec</span><span class="p">,</span> <span class="n">inv_flav_trans</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.Parameters</span><span class="w"> </span><span class="kn">import</span> <span class="n">Moment_Sum</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.Evolution</span><span class="w"> </span><span class="kn">import</span> <span class="n">InvMellinWaveFuncQ</span><span class="p">,</span> <span class="n">InvMellinWaveFuncG</span><span class="p">,</span> <span class="n">ConfWaveFuncQ</span><span class="p">,</span> <span class="n">ConfWaveFuncG</span><span class="p">,</span> <span class="n">ConfWaveFuncQ_over_sinpij</span><span class="p">,</span> <span class="n">ConfWaveFuncG_over_sinpij</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">scipy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">sp</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">scipy.integrate</span><span class="w"> </span><span class="kn">import</span> <span class="n">quad_vec</span><span class="p">,</span> <span class="n">fixed_quad</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">scipy.special</span><span class="w"> </span><span class="kn">import</span> <span class="n">gamma</span>
+
+<span class="c1"># ---------------------------------------------------------------------------</span>
+<span class="c1"># Module-level contour and integration parameters</span>
+<span class="c1"># ---------------------------------------------------------------------------</span>
 <span class="c1">#intercept for inverse Mellin transformation</span>
 <span class="n">inv_Mellin_intercept</span> <span class="o">=</span> <span class="mf">0.25</span>
 
@@ -117,14 +133,15 @@
 
 <div class="viewcode-block" id="flv_to_indx">
 <a class="viewcode-back" href="../../Observables.html#gumpgpd.Observables.flv_to_indx">[docs]</a>
-<span class="k">def</span> <span class="nf">flv_to_indx</span><span class="p">(</span><span class="n">flv</span><span class="p">:</span><span class="nb">str</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;flv is the flavor. It is a string</span>
-<span class="sd">    </span>
+<span class="k">def</span><span class="w"> </span><span class="nf">flv_to_indx</span><span class="p">(</span><span class="n">flv</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Map a flavor string to its integer index.</span>
+
 <span class="sd">    Args:</span>
-<span class="sd">        flv (str): the flavor in string, e.g., &#39;u&#39;, &#39;d&#39; , &#39;g&#39;</span>
+<span class="sd">        flv (str): flavor label — ``&#39;u&#39;``, ``&#39;d&#39;``, ``&#39;g&#39;``,</span>
+<span class="sd">            ``&#39;NS&#39;`` (non-singlet), or ``&#39;S&#39;`` (singlet).</span>
 
 <span class="sd">    Returns:</span>
-<span class="sd">        flv (scalar): flavor converted to scalar </span>
+<span class="sd">        int: index ``0`` (u), ``1`` (d), ``2`` (g), ``3`` (NS), or ``4`` (S).</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">if</span><span class="p">(</span><span class="n">flv</span><span class="o">==</span><span class="s2">&quot;u&quot;</span><span class="p">):</span>
         <span class="k">return</span> <span class="mi">0</span>
@@ -140,29 +157,35 @@
 
 <div class="viewcode-block" id="flvs_to_indx">
 <a class="viewcode-back" href="../../Observables.html#gumpgpd.Observables.flvs_to_indx">[docs]</a>
-<span class="k">def</span> <span class="nf">flvs_to_indx</span><span class="p">(</span><span class="n">flvs</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot; Cast :func:`flv_to_indx` for each flv in the list flvs</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">flvs_to_indx</span><span class="p">(</span><span class="n">flvs</span><span class="p">:</span> <span class="nb">list</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Apply :func:`flv_to_indx` to every element of a flavor list.</span>
 
 <span class="sd">    Args:</span>
-<span class="sd">        flvs (list of str): list of flavors</span>
+<span class="sd">        flvs (list of str): list of flavor labels accepted by</span>
+<span class="sd">            :func:`flv_to_indx`.</span>
+
 <span class="sd">    Returns:</span>
-<span class="sd">        flvs (list of scalar): flavors converted to scalar </span>
+<span class="sd">        np.ndarray: integer index array of dtype ``int32``.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="n">output</span> <span class="o">=</span> <span class="p">[</span><span class="n">flv_to_indx</span><span class="p">(</span><span class="n">flv</span><span class="p">)</span> <span class="k">for</span> <span class="n">flv</span> <span class="ow">in</span> <span class="n">flvs</span><span class="p">]</span>
     <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">output</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int32</span><span class="p">)</span></div>
 
 
-<span class="c1">#The flavor interpreter to return the corresponding flavor combination </span>
 <div class="viewcode-block" id="Flv_Intp">
 <a class="viewcode-back" href="../../Observables.html#gumpgpd.Observables.Flv_Intp">[docs]</a>
-<span class="k">def</span> <span class="nf">Flv_Intp</span><span class="p">(</span><span class="n">Flv_array</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">,</span> <span class="n">flv</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Return the wave function for each flavor</span>
-<span class="sd">    </span>
-<span class="sd">    Flv_array: (N, 3) complex, the wave function of u,d,g</span>
-<span class="sd">    flv: (N) str</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">Flv_Intp</span><span class="p">(</span><span class="n">Flv_array</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">flv</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Extract or combine flavor components from an array in the ``[u, d, g]`` basis.</span>
 
-<span class="sd">    return result: (N) complex</span>
+<span class="sd">    Args:</span>
+<span class="sd">        Flv_array (np.ndarray): shape ``(..., 5)`` complex array in the flavor</span>
+<span class="sd">            basis ``[u_V + u-bar, u-bar, d_V + d-bar, d-bar, g]``.</span>
+<span class="sd">        flv (str): flavor selector — ``&#39;u&#39;``, ``&#39;d&#39;``, ``&#39;g&#39;``,</span>
+<span class="sd">            ``&#39;NS&#39;`` (:math:`u - d`), or ``&#39;S&#39;`` (:math:`u + d`).</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        np.ndarray: shape ``(...)`` complex array for the requested flavor</span>
+<span class="sd">        combination.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">_flv_index</span> <span class="o">=</span> <span class="n">flv_to_indx</span><span class="p">(</span><span class="n">flv</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">choose</span><span class="p">(</span><span class="n">_flv_index</span><span class="p">,</span> <span class="p">[</span><span class="n">Flv_array</span><span class="p">[</span><span class="o">...</span><span class="p">,</span><span class="mi">0</span><span class="p">],</span> <span class="n">Flv_array</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="n">Flv_array</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="mi">2</span><span class="p">],</span>\
@@ -170,10 +193,24 @@
 
     <span class="c1"># return np.einsum(&#39;...j,...j&#39;, Flv_array, _helper) # (N)</span>
     
-<span class="c1"># This is in evolution basis!!!</span>
 <div class="viewcode-block" id="flvmask">
 <a class="viewcode-back" href="../../Observables.html#gumpgpd.Observables.flvmask">[docs]</a>
-<span class="k">def</span> <span class="nf">flvmask</span><span class="p">(</span><span class="n">flv</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">flvmask</span><span class="p">(</span><span class="n">flv</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Return a binary flavor mask in the evolution basis.</span>
+
+<span class="sd">    Used to project evolved conformal moments onto a quark, gluon, or all-flavor</span>
+<span class="sd">    combination when computing CFFs and TFFs.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        flv (str): ``&#39;All&#39;`` (all flavors), ``&#39;q&#39;`` (quarks only), or</span>
+<span class="sd">            ``&#39;g&#39;`` (gluon only).</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        np.ndarray: length-5 integer mask, with ``1`` for active and ``0`` for</span>
+<span class="sd">        inactive flavors in the evolution basis</span>
+<span class="sd">        ``[uV, u-bar, dV, d-bar, g]``.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Note: this mask operates in the evolution basis.</span>
     <span class="k">if</span> <span class="p">(</span><span class="n">flv</span> <span class="o">==</span> <span class="s1">&#39;All&#39;</span><span class="p">):</span>
         <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">])</span>
     <span class="k">elif</span> <span class="p">(</span><span class="n">flv</span> <span class="o">==</span> <span class="s1">&#39;g&#39;</span><span class="p">):</span>
@@ -200,24 +237,26 @@
                     <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">]])</span>
 
 
-<span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">***********************Observables***************************************</span>
-<span class="sd">&quot;&quot;&quot;</span>
+<span class="c1"># ---------------------------------------------------------------------------</span>
+<span class="c1"># GPDobserv class</span>
+<span class="c1"># ---------------------------------------------------------------------------</span>
 
 <span class="c1"># Class for observables</span>
 <div class="viewcode-block" id="GPDobserv">
 <a class="viewcode-back" href="../../Observables.html#gumpgpd.Observables.GPDobserv">[docs]</a>
-<span class="k">class</span> <span class="nc">GPDobserv</span> <span class="p">(</span><span class="nb">object</span><span class="p">)</span> <span class="p">:</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">GPDobserv</span> <span class="p">(</span><span class="nb">object</span><span class="p">)</span> <span class="p">:</span>
     <span class="c1">#Initialization of observables. Each is a function of (x, xi ,t, Q), p for parity: p = 1 for vector GPDs (H, E) and p = -1 for axial-vector GPDs (Ht, Et)</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">init_x</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">init_xi</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">init_t</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">init_Q</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">p</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Initialization of GPD-related observables</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">init_x</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">init_xi</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">init_t</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">init_Q</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">p</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Initialize a GPD kinematics point.</span>
 
 <span class="sd">        Args:</span>
-<span class="sd">            init_x (float): the momentum fraction x</span>
-<span class="sd">            init_xi (float): the skewness parameter xi</span>
-<span class="sd">            init_t (float): the momentum transfer square t</span>
-<span class="sd">            init_Q (float): photon virtuality/the scale of this observables</span>
-<span class="sd">            p (int): p=1 for vector-like GPDs and p=-1 for axial-vector ones</span>
+<span class="sd">            init_x (float): momentum fraction :math:`x`.</span>
+<span class="sd">            init_xi (float): skewness parameter :math:`\xi`.</span>
+<span class="sd">            init_t (float): squared momentum transfer :math:`t` in GeV\ :sup:`2`.</span>
+<span class="sd">            init_Q (float): hard scale :math:`Q` (photon virtuality or</span>
+<span class="sd">                factorization scale) in GeV.</span>
+<span class="sd">            p (int): parity — ``+1`` for vector-like GPDs (:math:`H`, :math:`E`),</span>
+<span class="sd">                ``-1`` for axial-vector-like GPDs (:math:`\tilde{H}`, :math:`\tilde{E}`).</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">x</span> <span class="o">=</span> <span class="n">init_x</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">xi</span> <span class="o">=</span> <span class="n">init_xi</span>
@@ -227,23 +266,28 @@
 
 <div class="viewcode-block" id="GPDobserv.tPDF">
 <a class="viewcode-back" href="../../Observables.html#gumpgpd.Observables.GPDobserv.tPDF">[docs]</a>
-    <span class="k">def</span> <span class="nf">tPDF</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">flv</span><span class="p">,</span> <span class="n">ParaAll</span><span class="p">,</span> <span class="n">p_order</span> <span class="o">=</span> <span class="mi">1</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;t-denpendent PDF for given flavor </span>
-<span class="sd">        </span>
-<span class="sd">        Cross-ref: :func:`Evolution.Moment_Evo_LO` and :func:`Evolution.tPDF_Moment_Evo_NLO`</span>
-<span class="sd">        </span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">tPDF</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">flv</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">ParaAll</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">p_order</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;t-dependent PDF :math:`f(x, t)` for a given flavor.</span>
+
+<span class="sd">        Computes the impact-parameter-space PDF via the inverse Mellin</span>
+<span class="sd">        transform along a straight contour with real part</span>
+<span class="sd">        ``reS = 1.25``.</span>
+
+<span class="sd">        See also: :func:`Evolution.Moment_Evo_LO`,</span>
+<span class="sd">        :func:`Evolution.tPDF_Moment_Evo_NLO`.</span>
+
 <span class="sd">        Args:</span>
-<span class="sd">            flv (str): &quot;u&quot;, &quot;d&quot;, &quot;S&quot;, &quot;NS&quot; or &quot;g&quot;</span>
-<span class="sd">            ParaAll: array as [Para_Forward, Para_xi2,...] </span>
-<span class="sd">            </span>
-<span class="sd">                - Para_Forward: array as [Para_Forward_uV, Para_Forward_ubar, Para_Forward_dV, Para_Forward_dbar, Para_Forward_g],</span>
-<span class="sd">                  where Para_Forward_i is parameter sets for valence u quark (uV), sea u quark (ubar), valence d quark (dV), sea d quark (dbar) and gluon (g)</span>
-<span class="sd">                - Para_xi2: only matter for non-zero xi (NOT needed here but the parameters are passed for consistency with GPDs)</span>
-<span class="sd">                 </span>
-<span class="sd">            p_order: 1 for leading-order evolution (default); 2 for next-to-leading-order evolution ; higher order not implemented yet</span>
+<span class="sd">            flv (str): flavor — ``&#39;u&#39;``, ``&#39;d&#39;``, ``&#39;g&#39;``, ``&#39;S&#39;``, or ``&#39;NS&#39;``.</span>
+<span class="sd">            ParaAll (np.ndarray): shape ``(..., 3, 5, n_ansatz, 6)`` parameter</span>
+<span class="sd">                array. ``ParaAll[..., 0, ...]`` contains the forward</span>
+<span class="sd">                (:math:`\xi^0`) parameters for the five flavors</span>
+<span class="sd">                ``[uV, ubar, dV, dbar, g]``; the :math:`\xi^2` slice is</span>
+<span class="sd">                accepted for interface consistency but is not used here.</span>
+<span class="sd">            p_order (int): perturbative order — ``1`` for LO (default),</span>
+<span class="sd">                ``2`` for NLO.</span>
 
 <span class="sd">        Returns:</span>
-<span class="sd">            f(x,t) in for the given flavor</span>
+<span class="sd">            np.ndarray: :math:`f(x, t)` for the requested flavor.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># originally, all parameters should be (4, 3, 5, 1, 5)</span>
         <span class="c1"># ParaAll would be a ( 3, 5, 1, 5) matrix</span>
@@ -255,7 +299,7 @@
 
         <span class="n">Para_Forward</span> <span class="o">=</span> <span class="n">ParaAll</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="p">:,</span> <span class="p">:,</span> <span class="p">:]</span> <span class="c1"># (N, 3, 5, 1, 5) </span>
 
-        <span class="k">def</span> <span class="nf">InvMellinWaveConf</span><span class="p">(</span><span class="n">s</span><span class="p">:</span> <span class="nb">complex</span><span class="p">):</span>
+        <span class="k">def</span><span class="w"> </span><span class="nf">InvMellinWaveConf</span><span class="p">(</span><span class="n">s</span><span class="p">:</span> <span class="nb">complex</span><span class="p">):</span>
             <span class="c1"># s is scalar (but it actually can be an ndarray as long as broadcasting rule allows it)</span>
 
             <span class="n">InvMellinWaveC</span> <span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">einsum</span><span class="p">(</span><span class="s1">&#39;..., ij-&gt;...ij&#39;</span><span class="p">,</span> <span class="n">InvMellinWaveFuncQ</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="p">),</span> <span class="n">WF_helper1</span><span class="p">)</span> \
@@ -264,7 +308,7 @@
 
             <span class="k">return</span> <span class="n">InvMellinWaveC</span> <span class="c1">#(N, 3, 5)</span>
 
-        <span class="k">def</span> <span class="nf">Integrand_inv_Mellin</span><span class="p">(</span><span class="n">s</span><span class="p">:</span> <span class="nb">complex</span><span class="p">):</span>
+        <span class="k">def</span><span class="w"> </span><span class="nf">Integrand_inv_Mellin</span><span class="p">(</span><span class="n">s</span><span class="p">:</span> <span class="nb">complex</span><span class="p">):</span>
             <span class="c1"># Calculate the unevolved moments in the orginal flavor basis</span>
             <span class="c1"># originally, Para_Forward will have shape (5, 1, 5) now (N, 5, 1, 5)  # in previous version is is (5, 1, 4) and (N, 5, 1, 4)           </span>
 
@@ -294,23 +338,28 @@
 
 <div class="viewcode-block" id="GPDobserv.GPD">
 <a class="viewcode-back" href="../../Observables.html#gumpgpd.Observables.GPDobserv.GPD">[docs]</a>
-    <span class="k">def</span> <span class="nf">GPD</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">flv</span><span class="p">,</span> <span class="n">ParaAll</span><span class="p">,</span> <span class="n">p_order</span> <span class="o">=</span> <span class="mi">1</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;GPD F(x, xi, t) in flavor space (flv = &quot;u&quot;, &quot;d&quot;, &quot;S&quot;, &quot;NS&quot; or &quot;g&quot;)</span>
-<span class="sd">        </span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">GPD</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">flv</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">ParaAll</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">p_order</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;GPD :math:`F(x, \xi, t)` in flavor space.</span>
+
+<span class="sd">        Evaluates the GPD at the kinematics ``(self.x, self.xi, self.t)``</span>
+<span class="sd">        using a Mellin-Barnes contour integral.  Dispatches to</span>
+<span class="sd">        :meth:`GPDNLO_evMom` automatically when ``p_order=2``.</span>
+
 <span class="sd">        Args:</span>
-<span class="sd">            flv (str): &quot;u&quot;, &quot;d&quot;, &quot;S&quot;, &quot;NS&quot; or &quot;g&quot;</span>
-<span class="sd">            ParaAll: array as [Para_Forward, Para_xi2, Para_xi4]</span>
-<span class="sd">            </span>
-<span class="sd">                - Para_Forward = array as [Para_Forward_uV, Para_Forward_ubar, Para_Forward_dV, Para_Forward_dbar, Para_Forward_g]</span>
-<span class="sd">                  where Para_Forward_i is forward parameter sets for valence u quark (uV), sea u quark (ubar), valence d quark (dV), sea d quark (dbar) and gluon (g)</span>
-<span class="sd">                - Para_xi2 = array as [Para_xi2_uV, Para_xi2_ubar, Para_xi2_dV, Para_xi2_dbar, Para_xi2_g]</span>
-<span class="sd">                  where Para_xi2_i is xi^2 parameter sets for valence u quark (uV), sea u quark (ubar), valence d quark (dV), sea d quark (dbar) and gluon (g)</span>
-<span class="sd">                - Para_xi4 = array as [Para_xi4_uV, Para_xi4_ubar, Para_xi4_dV, Para_xi4_dbar, Para_xi4_g]</span>
-<span class="sd">                  where Para_xi4_i is xi^4 parameter sets for valence u quark (uV), sea u quark (ubar), valence d quark (dV), sea d quark (dbar) and gluon (g)</span>
-<span class="sd">            p_order: 1 for leading-order evolution (default); 2 for next-to-leading-order evolution ; higher order not implemented yet</span>
+<span class="sd">            flv (str): flavor — ``&#39;u&#39;``, ``&#39;d&#39;``, ``&#39;g&#39;``, ``&#39;S&#39;``, or ``&#39;NS&#39;``.</span>
+<span class="sd">            ParaAll (np.ndarray): shape ``(..., 3, 5, n_ansatz, 6)`` parameter</span>
+<span class="sd">                array with slices:</span>
+
+<span class="sd">                * ``[..., 0, ...]`` — :math:`\xi^0` (forward) parameters;</span>
+<span class="sd">                  flavors ``[uV, ubar, dV, dbar, g]``</span>
+<span class="sd">                * ``[..., 1, ...]`` — :math:`\xi^2` correction parameters</span>
+<span class="sd">                * ``[..., 2, ...]`` — :math:`\xi^4` correction parameters</span>
+
+<span class="sd">            p_order (int): perturbative order — ``1`` for LO (default),</span>
+<span class="sd">                ``2`` for NLO.</span>
 
 <span class="sd">        Returns:</span>
-<span class="sd">            f(x,xi,t) for given flavor flv</span>
+<span class="sd">            float: :math:`F(x, \xi, t)` for the requested flavor.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1">#[Para_Forward, Para_xi2, Para_xi4] = ParaAll</span>
         <span class="k">if</span> <span class="p">(</span><span class="n">p_order</span> <span class="o">==</span> <span class="mi">2</span><span class="p">):</span>
@@ -321,7 +370,7 @@
         <span class="n">Para_xi4</span>     <span class="o">=</span> <span class="n">ParaAll</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="p">:,</span> <span class="p">:,</span> <span class="p">:]</span>
 
         <span class="c1"># The contour for Mellin-Barnes integral in terms of j not n.         </span>
-        <span class="k">def</span> <span class="nf">ConfWaveConv</span><span class="p">(</span><span class="n">j</span><span class="p">:</span> <span class="nb">complex</span><span class="p">):</span>
+        <span class="k">def</span><span class="w"> </span><span class="nf">ConfWaveConv</span><span class="p">(</span><span class="n">j</span><span class="p">:</span> <span class="nb">complex</span><span class="p">):</span>
 
             <span class="n">ConfWaveC</span> <span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">einsum</span><span class="p">(</span><span class="s1">&#39;..., ij-&gt;...ij&#39;</span><span class="p">,</span> <span class="n">ConfWaveFuncQ</span><span class="p">(</span><span class="n">j</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">xi</span><span class="p">),</span> <span class="n">WF_helper1</span><span class="p">)</span> \
                      <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">einsum</span><span class="p">(</span><span class="s1">&#39;... ,ij-&gt;...ij&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">p</span> <span class="o">*</span> <span class="n">ConfWaveFuncQ</span><span class="p">(</span><span class="n">j</span><span class="p">,</span> <span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">xi</span><span class="p">),</span> <span class="n">WF_helper2</span><span class="p">)</span> \
@@ -329,7 +378,7 @@
 
             <span class="k">return</span> <span class="n">ConfWaveC</span>
         
-        <span class="k">def</span> <span class="nf">ConfWaveConv_over_sinpiji</span><span class="p">(</span><span class="n">j</span><span class="p">:</span> <span class="nb">complex</span><span class="p">):</span>
+        <span class="k">def</span><span class="w"> </span><span class="nf">ConfWaveConv_over_sinpiji</span><span class="p">(</span><span class="n">j</span><span class="p">:</span> <span class="nb">complex</span><span class="p">):</span>
 <span class="w">            </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">            This function exists for technical reasons:</span>
 <span class="sd">            </span>
@@ -346,7 +395,7 @@
             <span class="k">return</span> <span class="n">ConfWaveC</span>
         
         <span class="c1"># Put in the extra 1/sin(pi*(j+1)) factor if over_pij = 1. Included (=1) by default</span>
-        <span class="k">def</span> <span class="nf">Integrand_Mellin_Barnes</span><span class="p">(</span><span class="n">j</span><span class="p">:</span> <span class="nb">complex</span><span class="p">,</span> <span class="n">over_pij</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">):</span>
+        <span class="k">def</span><span class="w"> </span><span class="nf">Integrand_Mellin_Barnes</span><span class="p">(</span><span class="n">j</span><span class="p">:</span> <span class="nb">complex</span><span class="p">,</span> <span class="n">over_pij</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">):</span>
 
             <span class="n">ConfFlav</span>     <span class="o">=</span> <span class="n">Moment_Sum</span><span class="p">(</span><span class="n">j</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">t</span><span class="p">,</span> <span class="n">Para_Forward</span><span class="p">)</span> <span class="c1">#(N, 5)</span>
             <span class="n">ConfFlav_xi2</span> <span class="o">=</span> <span class="n">Moment_Sum</span><span class="p">(</span><span class="n">j</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">t</span><span class="p">,</span> <span class="n">Para_xi2</span><span class="p">)</span>
@@ -370,7 +419,7 @@
                         <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">xi</span> <span class="o">**</span> <span class="mi">4</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">einsum</span><span class="p">(</span><span class="s1">&#39;...ij,...j-&gt;...i&#39;</span><span class="p">,</span> <span class="n">ConfWaveConv</span><span class="p">(</span><span class="n">j</span><span class="o">+</span><span class="mi">4</span><span class="p">),</span> <span class="n">ConfFlavEv_xi4</span><span class="p">),</span><span class="n">flv</span><span class="p">)</span>
                 
         <span class="c1"># Adding a j = 0 term because the contour do not enclose the j = 0 pole which should be the 0th conformal moment.</span>
-        <span class="k">def</span> <span class="nf">GPD0</span><span class="p">():</span>
+        <span class="k">def</span><span class="w"> </span><span class="nf">GPD0</span><span class="p">():</span>
 
             <span class="c1">#Note: Naively, this function simply returns Integrand_Mellin_Barnes([0.]) like the GPD1() above.</span>
             <span class="c1">#      However, the zeroth moment is only defined for valence quark not sea quark or gluon</span>
@@ -409,23 +458,25 @@
     
 <div class="viewcode-block" id="GPDobserv.GPDNLO_evMom">
 <a class="viewcode-back" href="../../Observables.html#gumpgpd.Observables.GPDobserv.GPDNLO_evMom">[docs]</a>
-    <span class="k">def</span> <span class="nf">GPDNLO_evMom</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">flv</span><span class="p">,</span> <span class="n">ParaAll</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;GPD F(x, xi, t) in flavor space (flv = &quot;u&quot;, &quot;d&quot;, &quot;S&quot;, &quot;NS&quot; or &quot;g&quot;)</span>
-<span class="sd">        </span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">GPDNLO_evMom</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">flv</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">ParaAll</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;NLO GPD :math:`F(x, \xi, t)` using the evolved-moment method.</span>
+
+<span class="sd">        Equivalent to :meth:`GPD` with ``p_order=2`` but uses moment evolution</span>
+<span class="sd">        (:func:`Evolution.GPD_Moment_Evo_NLO`) instead of evolved Wilson</span>
+<span class="sd">        coefficients.  Both approaches yield numerically consistent results.</span>
+
 <span class="sd">        Args:</span>
-<span class="sd">            flv (str): &quot;u&quot;, &quot;d&quot;, &quot;S&quot;, &quot;NS&quot; or &quot;g&quot;</span>
-<span class="sd">            ParaAll: array as [Para_Forward, Para_xi2, Para_xi4]</span>
-<span class="sd">            </span>
-<span class="sd">                - Para_Forward = array as [Para_Forward_uV, Para_Forward_ubar, Para_Forward_dV, Para_Forward_dbar, Para_Forward_g]</span>
-<span class="sd">                  where Para_Forward_i is forward parameter sets for valence u quark (uV), sea u quark (ubar), valence d quark (dV), sea d quark (dbar) and gluon (g)</span>
-<span class="sd">                - Para_xi2 = array as [Para_xi2_uV, Para_xi2_ubar, Para_xi2_dV, Para_xi2_dbar, Para_xi2_g]</span>
-<span class="sd">                  where Para_xi2_i is xi^2 parameter sets for valence u quark (uV), sea u quark (ubar), valence d quark (dV), sea d quark (dbar) and gluon (g)</span>
-<span class="sd">                - Para_xi4 = array as [Para_xi4_uV, Para_xi4_ubar, Para_xi4_dV, Para_xi4_dbar, Para_xi4_g]</span>
-<span class="sd">                  where Para_xi4_i is xi^4 parameter sets for valence u quark (uV), sea u quark (ubar), valence d quark (dV), sea d quark (dbar) and gluon (g)</span>
-<span class="sd">            p_order: 1 for leading-order evolution (default); 2 for next-to-leading-order evolution ; higher order not implemented yet</span>
+<span class="sd">            flv (str): flavor — ``&#39;u&#39;``, ``&#39;d&#39;``, ``&#39;g&#39;``, ``&#39;S&#39;``, or ``&#39;NS&#39;``.</span>
+<span class="sd">            ParaAll (np.ndarray): shape ``(..., 3, 5, n_ansatz, 6)`` parameter</span>
+<span class="sd">                array with slices:</span>
+
+<span class="sd">                * ``[..., 0, ...]`` — :math:`\xi^0` (forward) parameters;</span>
+<span class="sd">                  flavors ``[uV, ubar, dV, dbar, g]``</span>
+<span class="sd">                * ``[..., 1, ...]`` — :math:`\xi^2` correction parameters</span>
+<span class="sd">                * ``[..., 2, ...]`` — :math:`\xi^4` correction parameters</span>
 
 <span class="sd">        Returns:</span>
-<span class="sd">            f(x,xi,t) for given flavor flv</span>
+<span class="sd">            float: :math:`F(x, \xi, t)` for the requested flavor at NLO.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         
         <span class="n">Para_Forward</span> <span class="o">=</span> <span class="n">ParaAll</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="p">:,</span> <span class="p">:,</span> <span class="p">:]</span>  <span class="c1"># each (N, 5, 1, 5)</span>
@@ -433,7 +484,7 @@
         <span class="n">Para_xi4</span>     <span class="o">=</span> <span class="n">ParaAll</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="p">:,</span> <span class="p">:,</span> <span class="p">:]</span>
 
         <span class="c1"># The contour for Mellin-Barnes integral in terms of j not n.         </span>
-        <span class="k">def</span> <span class="nf">ConfWaveConv</span><span class="p">(</span><span class="n">j</span><span class="p">:</span> <span class="nb">complex</span><span class="p">):</span>
+        <span class="k">def</span><span class="w"> </span><span class="nf">ConfWaveConv</span><span class="p">(</span><span class="n">j</span><span class="p">:</span> <span class="nb">complex</span><span class="p">):</span>
 
             <span class="n">ConfWaveC</span> <span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">einsum</span><span class="p">(</span><span class="s1">&#39;..., ij-&gt;...ij&#39;</span><span class="p">,</span> <span class="n">ConfWaveFuncQ</span><span class="p">(</span><span class="n">j</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">xi</span><span class="p">),</span> <span class="n">WF_helper1</span><span class="p">)</span> \
                      <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">einsum</span><span class="p">(</span><span class="s1">&#39;... ,ij-&gt;...ij&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">p</span> <span class="o">*</span> <span class="n">ConfWaveFuncQ</span><span class="p">(</span><span class="n">j</span><span class="p">,</span> <span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">xi</span><span class="p">),</span> <span class="n">WF_helper2</span><span class="p">)</span> \
@@ -441,7 +492,7 @@
 
             <span class="k">return</span> <span class="n">ConfWaveC</span>
         
-        <span class="k">def</span> <span class="nf">ConfWaveConv_over_sinpiji</span><span class="p">(</span><span class="n">j</span><span class="p">:</span> <span class="nb">complex</span><span class="p">):</span>
+        <span class="k">def</span><span class="w"> </span><span class="nf">ConfWaveConv_over_sinpiji</span><span class="p">(</span><span class="n">j</span><span class="p">:</span> <span class="nb">complex</span><span class="p">):</span>
 <span class="w">            </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">            This function exists for technical reasons:</span>
 <span class="sd">            </span>
@@ -458,7 +509,7 @@
             <span class="k">return</span> <span class="n">ConfWaveC</span>
         
         <span class="c1"># Put in the extra 1/sin(pi*(j+1)) factor if over_pij = 1. Included (=1) by default</span>
-        <span class="k">def</span> <span class="nf">Integrand_Mellin_Barnes</span><span class="p">(</span><span class="n">j</span><span class="p">:</span> <span class="nb">complex</span><span class="p">,</span> <span class="n">over_pij</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">):</span>
+        <span class="k">def</span><span class="w"> </span><span class="nf">Integrand_Mellin_Barnes</span><span class="p">(</span><span class="n">j</span><span class="p">:</span> <span class="nb">complex</span><span class="p">,</span> <span class="n">over_pij</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">):</span>
 
             <span class="n">ConfEv</span>     <span class="o">=</span> <span class="n">GPD_Moment_Evo_NLO</span><span class="p">(</span><span class="n">j</span><span class="p">,</span> <span class="n">NFEFF</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">p</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">Q</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">t</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">xi</span><span class="p">,</span> <span class="n">Para_Forward</span><span class="p">,</span><span class="mi">0</span><span class="p">)</span>
             <span class="n">ConfEv_xi2</span> <span class="o">=</span> <span class="n">GPD_Moment_Evo_NLO</span><span class="p">(</span><span class="n">j</span><span class="o">+</span><span class="mi">2</span><span class="p">,</span> <span class="n">NFEFF</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">p</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">Q</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">t</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">xi</span><span class="p">,</span> <span class="n">Para_xi2</span><span class="p">,</span><span class="mi">2</span><span class="p">)</span>
@@ -479,7 +530,7 @@
                         <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">xi</span> <span class="o">**</span> <span class="mi">4</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">einsum</span><span class="p">(</span><span class="s1">&#39;...ij,...j-&gt;...i&#39;</span><span class="p">,</span> <span class="n">ConfWaveConv</span><span class="p">(</span><span class="n">j</span><span class="o">+</span><span class="mi">4</span><span class="p">),</span> <span class="n">ConfFlavEv_xi4</span><span class="p">),</span><span class="n">flv</span><span class="p">)</span>
         <span class="c1"># Adding a j = 0 term because the contour do not enclose the j = 0 pole which should be the 0th conformal moment.</span>
         
-        <span class="k">def</span> <span class="nf">GPD0</span><span class="p">():</span>
+        <span class="k">def</span><span class="w"> </span><span class="nf">GPD0</span><span class="p">():</span>
 
             <span class="c1">#Note: Naively, this function simply returns Integrand_Mellin_Barnes([0.]) like the GPD1() above.</span>
             <span class="c1">#      However, the zeroth moment is only defined for valence quark not sea quark or gluon</span>
@@ -518,12 +569,28 @@
     
 <div class="viewcode-block" id="GPDobserv.GFFj0">
 <a class="viewcode-back" href="../../Observables.html#gumpgpd.Observables.GPDobserv.GFFj0">[docs]</a>
-    <span class="k">def</span> <span class="nf">GFFj0</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">j</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">flv</span><span class="p">,</span> <span class="n">ParaAll</span><span class="p">,</span> <span class="n">p_order</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Generalized Form Factors A_{j0}(t) which is the xi^0 term of the nth (n= j+1) Mellin moment of GPD int dx x^j F(x,xi,t) for quark and int dx x^(j-1) F(x,xi,t) for gluon</span>
-<span class="sd">            </span>
-<span class="sd">            Note for gluon, GPD reduce to x*g(x), not g(x) so the Mellin moment will have a mismatch</span>
-<span class="sd">            </span>
-<span class="sd">            Only leading order implemented yet NOT well-maintained (TO BE FIXED)</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">GFFj0</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">j</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">flv</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">ParaAll</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">p_order</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Generalized Form Factor :math:`A_{j+1,0}(t)` (the :math:`\xi^0` Mellin moment).</span>
+
+<span class="sd">        Computes :math:`\int dx\, x^j F(x, \xi, t)` for quarks and</span>
+<span class="sd">        :math:`\int dx\, x^{j-1} F(x, \xi, t)` for gluons at</span>
+<span class="sd">        :math:`\xi = 0`.</span>
+
+<span class="sd">        Note:</span>
+<span class="sd">            Only LO and NLO evolution are implemented.  Gluon GPDs reduce to</span>
+<span class="sd">            :math:`x g(x)`, so there is a moment index shift relative to</span>
+<span class="sd">            quarks.  This method is **not well-maintained** and is marked for</span>
+<span class="sd">            future revision.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            j (int): Mellin moment index (:math:`n = j + 1`).</span>
+<span class="sd">            flv (str): flavor — ``&#39;u&#39;``, ``&#39;d&#39;``, ``&#39;g&#39;``, ``&#39;S&#39;``, or ``&#39;NS&#39;``.</span>
+<span class="sd">            ParaAll (np.ndarray): shape ``(..., 3, 5, n_ansatz, 6)`` parameter</span>
+<span class="sd">                array; only the :math:`\xi^0` slice is used.</span>
+<span class="sd">            p_order (int): perturbative order — ``1`` for LO, ``2`` for NLO.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            float: :math:`A_{j+1,0}(t)` for the requested flavor.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="c1"># j, flv both have shape (N)</span>
@@ -565,24 +632,29 @@
     
 <div class="viewcode-block" id="GPDobserv.CFF">
 <a class="viewcode-back" href="../../Observables.html#gumpgpd.Observables.GPDobserv.CFF">[docs]</a>
-    <span class="k">def</span> <span class="nf">CFF</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ParaAll</span><span class="p">,</span> <span class="n">muf</span><span class="p">,</span> <span class="n">p_order</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">flv</span> <span class="o">=</span> <span class="s1">&#39;All&#39;</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Charge averged CFF $\mathcal{F}(xi, t) (\mathcal{F} = Q_u^2 F_u + Q_d^2 F_d)$</span>
-<span class="sd">        </span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">CFF</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ParaAll</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">muf</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">p_order</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">flv</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;All&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Charge-weighted Compton Form Factor :math:`\mathcal{F}(\xi, t)`.</span>
+
+<span class="sd">        Computes :math:`\mathcal{F} = Q_u^2 F_u + Q_d^2 F_d` via a</span>
+<span class="sd">        Mellin-Barnes contour integral.  Dispatches to :meth:`CFFNLO`</span>
+<span class="sd">        automatically when ``p_order=2``.</span>
+
 <span class="sd">        Args:</span>
-<span class="sd">            ParaAll: array as [Para_Forward, Para_xi2, Para_xi4]</span>
-<span class="sd">            </span>
-<span class="sd">                - Para_Forward = array as [Para_Forward_uV, Para_Forward_ubar, Para_Forward_dV, Para_Forward_dbar, Para_Forward_g]</span>
-<span class="sd">                  where Para_Forward_i is forward parameter sets for valence u quark (uV), sea u quark (ubar), valence d quark (dV), sea d quark (dbar) and gluon (g)</span>
-<span class="sd">                - Para_xi2 = array as [Para_xi2_uV, Para_xi2_ubar, Para_xi2_dV, Para_xi2_dbar, Para_xi2_g]</span>
-<span class="sd">                  where Para_xi2_i is xi^2 parameter sets for valence u quark (uV), sea u quark (ubar), valence d quark (dV), sea d quark (dbar) and gluon (g)</span>
-<span class="sd">                - Para_xi4 = array as [Para_xi4_uV, Para_xi4_ubar, Para_xi4_dV, Para_xi4_dbar, Para_xi4_g]</span>
-<span class="sd">                  where Para_xi4_i is xi^4 parameter sets for valence u quark (uV), sea u quark (ubar), valence d quark (dV), sea d quark (dbar) and gluon (g)</span>
-<span class="sd">            muf: factorization scale</span>
-<span class="sd">            p_order: 1 for leading-order evolution (default); 2 for next-to-leading-order evolution ; higher order not implemented yet</span>
-<span class="sd">            flv: &quot;q&quot;, &quot;g&quot;, or &quot;All&quot;</span>
+<span class="sd">            ParaAll (np.ndarray): shape ``(..., 3, 5, n_ansatz, 6)`` parameter</span>
+<span class="sd">                array with slices:</span>
+
+<span class="sd">                * ``[..., 0, ...]`` — :math:`\xi^0` (forward) parameters</span>
+<span class="sd">                * ``[..., 1, ...]`` — :math:`\xi^2` correction parameters</span>
+<span class="sd">                * ``[..., 2, ...]`` — :math:`\xi^4` correction parameters</span>
+
+<span class="sd">                Flavor axis order: ``[uV, ubar, dV, dbar, g]``.</span>
+<span class="sd">            muf (float): factorization scale in GeV.</span>
+<span class="sd">            p_order (int): perturbative order — ``1`` for LO (default),</span>
+<span class="sd">                ``2`` for NLO.</span>
+<span class="sd">            flv (str): flavor filter — ``&#39;All&#39;``, ``&#39;q&#39;``, or ``&#39;g&#39;``.</span>
 
 <span class="sd">        Returns:</span>
-<span class="sd">            CFF \mathcal{F}(xi, t) = Q_u^2 F_u + Q_d^2 F_d</span>
+<span class="sd">            np.ndarray: :math:`\mathcal{F}(\xi, t) = Q_u^2 F_u + Q_d^2 F_d`.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="p">(</span><span class="n">p_order</span> <span class="o">==</span> <span class="mi">2</span><span class="p">):</span>
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">CFFNLO</span><span class="p">(</span><span class="n">ParaAll</span><span class="p">,</span> <span class="n">muf</span><span class="p">,</span> <span class="n">flv</span><span class="p">)</span>
@@ -591,7 +663,7 @@
         <span class="n">Para_xi2</span>     <span class="o">=</span> <span class="n">ParaAll</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="p">:,</span> <span class="p">:,</span> <span class="p">:]</span>
         <span class="n">Para_xi4</span>     <span class="o">=</span> <span class="n">ParaAll</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="p">:,</span> <span class="p">:,</span> <span class="p">:]</span>
 
-        <span class="k">def</span> <span class="nf">Integrand_Mellin_Barnes_CFF</span><span class="p">(</span><span class="n">j</span><span class="p">:</span> <span class="nb">complex</span><span class="p">):</span>
+        <span class="k">def</span><span class="w"> </span><span class="nf">Integrand_Mellin_Barnes_CFF</span><span class="p">(</span><span class="n">j</span><span class="p">:</span> <span class="nb">complex</span><span class="p">):</span>
 
             <span class="n">ConfFlav</span>     <span class="o">=</span> <span class="n">Moment_Sum</span><span class="p">(</span><span class="n">j</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">t</span><span class="p">,</span> <span class="n">Para_Forward</span><span class="p">)</span> <span class="c1">#(N, 5)</span>
             <span class="n">ConfFlav_xi2</span> <span class="o">=</span> <span class="n">Moment_Sum</span><span class="p">(</span><span class="n">j</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">t</span><span class="p">,</span> <span class="n">Para_xi2</span><span class="p">)</span>
@@ -605,7 +677,7 @@
             <span class="n">fmask</span> <span class="o">=</span> <span class="n">flvmask</span><span class="p">(</span><span class="n">flv</span><span class="p">)</span>
             <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">einsum</span><span class="p">(</span><span class="s1">&#39;j, ...j&#39;</span><span class="p">,</span> <span class="n">fmask</span><span class="p">,</span> <span class="n">EvoConf_Wilson</span><span class="p">)</span>
 
-        <span class="k">def</span> <span class="nf">Integrand_CFF</span><span class="p">(</span><span class="n">imJ</span><span class="p">:</span> <span class="nb">complex</span><span class="p">):</span>
+        <span class="k">def</span><span class="w"> </span><span class="nf">Integrand_CFF</span><span class="p">(</span><span class="n">imJ</span><span class="p">:</span> <span class="nb">complex</span><span class="p">):</span>
             <span class="c1"># mask = (self.p==1) # assume p can only be either 1 or -1</span>
 
             <span class="n">result</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones_like</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">p</span><span class="p">)</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">xi</span> <span class="o">**</span> <span class="p">(</span><span class="o">-</span><span class="n">reJ</span> <span class="o">-</span> <span class="mi">1</span><span class="n">j</span> <span class="o">*</span> <span class="n">imJ</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="n">Integrand_Mellin_Barnes_CFF</span><span class="p">(</span><span class="n">reJ</span> <span class="o">+</span> <span class="mi">1</span><span class="n">j</span> <span class="o">*</span> <span class="n">imJ</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span>
@@ -618,7 +690,7 @@
             <span class="k">return</span> <span class="n">result</span>
 
         <span class="c1"># Adding extra j = 0 term for the axial vector CFFs</span>
-        <span class="k">def</span> <span class="nf">CFFj0</span><span class="p">():</span>
+        <span class="k">def</span><span class="w"> </span><span class="nf">CFFj0</span><span class="p">():</span>
 
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">p</span><span class="o">==</span><span class="mi">1</span><span class="p">:</span>
                 <span class="n">result</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones_like</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">p</span><span class="p">)</span> <span class="o">*</span> <span class="mi">0</span>
@@ -635,25 +707,30 @@
 
 <div class="viewcode-block" id="GPDobserv.TFF">
 <a class="viewcode-back" href="../../Observables.html#gumpgpd.Observables.GPDobserv.TFF">[docs]</a>
-    <span class="k">def</span> <span class="nf">TFF</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ParaAll</span><span class="p">,</span> <span class="n">muf</span> <span class="p">,</span> <span class="n">meson</span><span class="p">,</span> <span class="n">p_order</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">flv</span> <span class="o">=</span> <span class="s1">&#39;All&#39;</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;TFF $\mathcal{F}(xi, t) (\mathcal{F}$</span>
-<span class="sd">        </span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">TFF</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ParaAll</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">muf</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">meson</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">p_order</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">flv</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;All&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Transition Form Factor :math:`\mathcal{F}(\xi, t)` for meson production.</span>
+
+<span class="sd">        Computes the TFF via a Mellin-Barnes contour integral.  Dispatches to</span>
+<span class="sd">        :meth:`TFFNLO` automatically when ``p_order=2``.</span>
+
 <span class="sd">        Args:</span>
-<span class="sd">            ParaAll: array as [Para_Forward, Para_xi2, Para_xi4]</span>
-<span class="sd">        </span>
-<span class="sd">                - Para_Forward = array as [Para_Forward_uV, Para_Forward_ubar, Para_Forward_dV, Para_Forward_dbar, Para_Forward_g]</span>
-<span class="sd">                    where Para_Forward_i is forward parameter sets for valence u quark (uV), sea u quark (ubar), valence d quark (dV), sea d quark (dbar) and gluon (g)</span>
-<span class="sd">                - Para_xi2 = array as [Para_xi2_uV, Para_xi2_ubar, Para_xi2_dV, Para_xi2_dbar, Para_xi2_g]</span>
-<span class="sd">                    where Para_xi2_i is xi^2 parameter sets for valence u quark (uV), sea u quark (ubar), valence d quark (dV), sea d quark (dbar) and gluon (g)</span>
-<span class="sd">                - Para_xi4 = array as [Para_xi4_uV, Para_xi4_ubar, Para_xi4_dV, Para_xi4_dbar, Para_xi4_g]</span>
-<span class="sd">                    where Para_xi4_i is xi^4 parameter sets for valence u quark (uV), sea u quark (ubar), valence d quark (dV), sea d quark (dbar) and gluon (g)</span>
-<span class="sd">            muf: factorization scale</span>
-<span class="sd">            meson: [1 for rho, 2 for phi, 3 for jpsi]</span>
-<span class="sd">            p_order: 1 for leading-order evolution (default); 2 for next-to-leading-order evolution ; higher order not implemented yet</span>
-<span class="sd">            flv: &quot;q&quot;, &quot;g&quot;, or &quot;All&quot;</span>
-<span class="sd">            </span>
+<span class="sd">            ParaAll (np.ndarray): shape ``(..., 3, 5, n_ansatz, 6)`` parameter</span>
+<span class="sd">                array with slices:</span>
+
+<span class="sd">                * ``[..., 0, ...]`` — :math:`\xi^0` (forward) parameters</span>
+<span class="sd">                * ``[..., 1, ...]`` — :math:`\xi^2` correction parameters</span>
+<span class="sd">                * ``[..., 2, ...]`` — :math:`\xi^4` correction parameters</span>
+
+<span class="sd">                Flavor axis order: ``[uV, ubar, dV, dbar, g]``.</span>
+<span class="sd">            muf (float): factorization scale in GeV.</span>
+<span class="sd">            meson (int): meson code — ``1`` for :math:`\rho^0`, ``2`` for</span>
+<span class="sd">                :math:`\phi`, ``3`` for :math:`J/\psi`.</span>
+<span class="sd">            p_order (int): perturbative order — ``1`` for LO (default),</span>
+<span class="sd">                ``2`` for NLO.</span>
+<span class="sd">            flv (str): flavor filter — ``&#39;All&#39;``, ``&#39;q&#39;``, or ``&#39;g&#39;``.</span>
+
 <span class="sd">        Returns:</span>
-<span class="sd">            TFF \mathcal{F}(xi, t)</span>
+<span class="sd">            np.ndarray: :math:`\mathcal{F}(\xi, t)` for the requested meson.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="p">(</span><span class="n">p_order</span> <span class="o">==</span> <span class="mi">2</span><span class="p">):</span>
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">TFFNLO</span><span class="p">(</span><span class="n">ParaAll</span><span class="p">,</span> <span class="n">muf</span><span class="p">,</span> <span class="n">meson</span><span class="p">,</span> <span class="n">flv</span><span class="p">)</span>
@@ -663,7 +740,7 @@
         <span class="n">Para_xi2</span>     <span class="o">=</span> <span class="n">ParaAll</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="p">:,</span> <span class="p">:,</span> <span class="p">:]</span>
         <span class="n">Para_xi4</span>     <span class="o">=</span> <span class="n">ParaAll</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="p">:,</span> <span class="p">:,</span> <span class="p">:]</span>
 
-        <span class="k">def</span> <span class="nf">Integrand_Mellin_Barnes_TFF</span><span class="p">(</span><span class="n">j</span><span class="p">:</span> <span class="nb">complex</span><span class="p">):</span>
+        <span class="k">def</span><span class="w"> </span><span class="nf">Integrand_Mellin_Barnes_TFF</span><span class="p">(</span><span class="n">j</span><span class="p">:</span> <span class="nb">complex</span><span class="p">):</span>
 
             <span class="n">ConfFlav</span>     <span class="o">=</span> <span class="n">Moment_Sum</span><span class="p">(</span><span class="n">j</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">t</span><span class="p">,</span> <span class="n">Para_Forward</span><span class="p">)</span> <span class="c1">#(N, 5)</span>
             <span class="n">ConfFlav_xi2</span> <span class="o">=</span> <span class="n">Moment_Sum</span><span class="p">(</span><span class="n">j</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">t</span><span class="p">,</span> <span class="n">Para_xi2</span><span class="p">)</span>
@@ -676,7 +753,7 @@
             <span class="n">fmask</span> <span class="o">=</span> <span class="n">flvmask</span><span class="p">(</span><span class="n">flv</span><span class="p">)</span>
             <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">einsum</span><span class="p">(</span><span class="s1">&#39;j, ...j&#39;</span><span class="p">,</span> <span class="n">fmask</span><span class="p">,</span> <span class="n">EvoConf_Wilson</span><span class="p">)</span>  
         
-        <span class="k">def</span> <span class="nf">Integrand_TFF</span><span class="p">(</span><span class="n">imJ</span><span class="p">:</span> <span class="nb">complex</span><span class="p">):</span>
+        <span class="k">def</span><span class="w"> </span><span class="nf">Integrand_TFF</span><span class="p">(</span><span class="n">imJ</span><span class="p">:</span> <span class="nb">complex</span><span class="p">):</span>
             <span class="c1"># mask = (self.p==1) # assume p can only be either 1 or -1</span>
 
             <span class="n">result</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones_like</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">p</span><span class="p">)</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">xi</span> <span class="o">**</span> <span class="p">(</span><span class="o">-</span><span class="n">reJ</span> <span class="o">-</span> <span class="mi">1</span><span class="n">j</span> <span class="o">*</span> <span class="n">imJ</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="n">Integrand_Mellin_Barnes_TFF</span><span class="p">(</span><span class="n">reJ</span> <span class="o">+</span> <span class="mi">1</span><span class="n">j</span> <span class="o">*</span> <span class="n">imJ</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span>
@@ -689,7 +766,7 @@
             <span class="k">return</span> <span class="n">result</span>
 
         <span class="c1"># Adding extra j = 0 term for the axial vector CFFs</span>
-        <span class="k">def</span> <span class="nf">TFFj0</span><span class="p">():</span>
+        <span class="k">def</span><span class="w"> </span><span class="nf">TFFj0</span><span class="p">():</span>
 
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">p</span><span class="o">==</span><span class="mi">1</span><span class="p">:</span>
                 <span class="n">result</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones_like</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">p</span><span class="p">)</span> <span class="o">*</span> <span class="mi">0</span>
@@ -707,25 +784,27 @@
     
 <div class="viewcode-block" id="GPDobserv.CFFNLO">
 <a class="viewcode-back" href="../../Observables.html#gumpgpd.Observables.GPDobserv.CFFNLO">[docs]</a>
-    <span class="k">def</span> <span class="nf">CFFNLO</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ParaAll</span><span class="p">,</span> <span class="n">muf</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">flv</span> <span class="o">=</span> <span class="s1">&#39;All&#39;</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;CFF $\mathcal{F}(xi, t) (\mathcal{F}$</span>
-<span class="sd">        </span>
-<span class="sd">        A separate function for next-to-leading order CFF, it can be called directly or with CFF() by setting p_order = 2 </span>
-<span class="sd">        </span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">CFFNLO</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ParaAll</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">muf</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">flv</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;All&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;NLO Compton Form Factor :math:`\mathcal{F}(\xi, t)` via evolved Wilson coefficients.</span>
+
+<span class="sd">        Implements the NLO CFF using the evolved-Wilson-coefficient (evWC)</span>
+<span class="sd">        method.  Can be called directly or via :meth:`CFF` with</span>
+<span class="sd">        ``p_order=2``.</span>
+
 <span class="sd">        Args:</span>
-<span class="sd">            ParaAll: array as [Para_Forward, Para_xi2, Para_xi4]</span>
-<span class="sd">        </span>
-<span class="sd">                - Para_Forward = array as [Para_Forward_uV, Para_Forward_ubar, Para_Forward_dV, Para_Forward_dbar, Para_Forward_g]</span>
-<span class="sd">                    where Para_Forward_i is forward parameter sets for valence u quark (uV), sea u quark (ubar), valence d quark (dV), sea d quark (dbar) and gluon (g)</span>
-<span class="sd">                - Para_xi2 = array as [Para_xi2_uV, Para_xi2_ubar, Para_xi2_dV, Para_xi2_dbar, Para_xi2_g]</span>
-<span class="sd">                    where Para_xi2_i is xi^2 parameter sets for valence u quark (uV), sea u quark (ubar), valence d quark (dV), sea d quark (dbar) and gluon (g)</span>
-<span class="sd">                - Para_xi4 = array as [Para_xi4_uV, Para_xi4_ubar, Para_xi4_dV, Para_xi4_dbar, Para_xi4_g]</span>
-<span class="sd">                    where Para_xi4_i is xi^4 parameter sets for valence u quark (uV), sea u quark (ubar), valence d quark (dV), sea d quark (dbar) and gluon (g)</span>
-<span class="sd">            muf: factorization scale</span>
-<span class="sd">            flv: &quot;q&quot;, &quot;g&quot;, or &quot;All&quot;</span>
-<span class="sd">            </span>
+<span class="sd">            ParaAll (np.ndarray): shape ``(..., 3, 5, n_ansatz, 6)`` parameter</span>
+<span class="sd">                array with slices:</span>
+
+<span class="sd">                * ``[..., 0, ...]`` — :math:`\xi^0` (forward) parameters</span>
+<span class="sd">                * ``[..., 1, ...]`` — :math:`\xi^2` correction parameters</span>
+<span class="sd">                * ``[..., 2, ...]`` — :math:`\xi^4` correction parameters</span>
+
+<span class="sd">                Flavor axis order: ``[uV, ubar, dV, dbar, g]``.</span>
+<span class="sd">            muf (float): factorization scale in GeV.</span>
+<span class="sd">            flv (str): flavor filter — ``&#39;All&#39;``, ``&#39;q&#39;``, or ``&#39;g&#39;``.</span>
+
 <span class="sd">        Returns:</span>
-<span class="sd">            CFF \mathcal{F}(xi, t)</span>
+<span class="sd">            np.ndarray: NLO :math:`\mathcal{F}(\xi, t)`.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1">#[Para_Forward, Para_xi2, Para_xi4] = ParaAll  # each (N, 5, 1, 5)</span>
         <span class="n">Para_Forward</span> <span class="o">=</span> <span class="n">ParaAll</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="p">:,</span> <span class="p">:,</span> <span class="p">:]</span>  <span class="c1"># each (N, 5, 1, 5)</span>
@@ -736,7 +815,7 @@
         <span class="n">reJ</span> <span class="o">=</span> <span class="n">Mellin_Barnes_intercept</span> 
         <span class="n">Max_imJ</span> <span class="o">=</span> <span class="n">Mellin_Barnes_cutoff</span>
         
-        <span class="k">def</span> <span class="nf">Integrand_Mellin_Barnes_CFF</span><span class="p">(</span><span class="n">j</span><span class="p">:</span> <span class="nb">complex</span><span class="p">):</span>
+        <span class="k">def</span><span class="w"> </span><span class="nf">Integrand_Mellin_Barnes_CFF</span><span class="p">(</span><span class="n">j</span><span class="p">:</span> <span class="nb">complex</span><span class="p">):</span>
 
             <span class="n">ConfFlav</span>     <span class="o">=</span> <span class="n">Moment_Sum</span><span class="p">(</span><span class="n">j</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">t</span><span class="p">,</span> <span class="n">Para_Forward</span><span class="p">)</span> <span class="c1">#(N, 5)</span>
             <span class="n">ConfFlav_xi2</span> <span class="o">=</span> <span class="n">Moment_Sum</span><span class="p">(</span><span class="n">j</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">t</span><span class="p">,</span> <span class="n">Para_xi2</span><span class="p">)</span>
@@ -749,7 +828,7 @@
             <span class="n">fmask</span> <span class="o">=</span> <span class="n">flvmask</span><span class="p">(</span><span class="n">flv</span><span class="p">)</span>
             <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">einsum</span><span class="p">(</span><span class="s1">&#39;j, ...j&#39;</span><span class="p">,</span> <span class="n">fmask</span><span class="p">,</span> <span class="n">EvoConf_Wilson</span><span class="p">)</span>
         
-        <span class="k">def</span> <span class="nf">tan_factor</span><span class="p">(</span><span class="n">j</span><span class="p">):</span>
+        <span class="k">def</span><span class="w"> </span><span class="nf">tan_factor</span><span class="p">(</span><span class="n">j</span><span class="p">):</span>
             <span class="k">if</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">p</span><span class="o">==</span><span class="mi">1</span><span class="p">):</span>
                 <span class="k">return</span>  <span class="mi">1</span><span class="o">/</span><span class="p">(</span><span class="mi">2</span><span class="n">j</span><span class="p">)</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">xi</span> <span class="o">**</span> <span class="p">(</span><span class="o">-</span><span class="n">j</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="o">*</span><span class="p">(</span><span class="mi">1</span><span class="n">j</span><span class="o">+</span><span class="n">np</span><span class="o">.</span><span class="n">tan</span><span class="p">(</span><span class="n">j</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">/</span> <span class="mi">2</span><span class="p">))</span>
             <span class="k">else</span><span class="p">:</span>
@@ -757,7 +836,7 @@
         
         <span class="n">eps</span><span class="o">=</span> <span class="mf">10.</span> <span class="o">**</span><span class="p">(</span><span class="o">-</span><span class="mi">6</span><span class="p">)</span>            
         <span class="c1"># adding back the j=0 contribution            </span>
-        <span class="k">def</span> <span class="nf">CFFj0</span><span class="p">():</span>
+        <span class="k">def</span><span class="w"> </span><span class="nf">CFFj0</span><span class="p">():</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">p</span><span class="o">==</span><span class="mi">1</span><span class="p">:</span>
                 <span class="k">return</span> <span class="mi">0</span>
             <span class="k">else</span><span class="p">:</span>
@@ -772,25 +851,32 @@
 
 <div class="viewcode-block" id="GPDobserv.CFFNLO_evMom">
 <a class="viewcode-back" href="../../Observables.html#gumpgpd.Observables.GPDobserv.CFFNLO_evMom">[docs]</a>
-    <span class="k">def</span> <span class="nf">CFFNLO_evMom</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ParaAll</span><span class="p">,</span> <span class="n">muf</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">flv</span> <span class="o">=</span> <span class="s1">&#39;All&#39;</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;NLOCFF $\mathcal{F}(xi, t) (\mathcal{F}) $</span>
-<span class="sd">        </span>
-<span class="sd">        A different function for next-to-leading order TFF using evolved moment method, it can be checked that it generate the same results as the evolve Wilson coefficient method</span>
-<span class="sd">        </span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">CFFNLO_evMom</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ParaAll</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">muf</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">flv</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;All&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;NLO Compton Form Factor :math:`\mathcal{F}(\xi, t)` via evolved moments.</span>
+
+<span class="sd">        Alternative NLO implementation using moment evolution</span>
+<span class="sd">        (:func:`Evolution.CFF_Evo_NLO_evMOM`) instead of evolved Wilson</span>
+<span class="sd">        coefficients.  Both methods produce numerically consistent results and</span>
+<span class="sd">        can be used to cross-check each other.</span>
+
+<span class="sd">        The :math:`j = 0` pole term is added back using the evWC method</span>
+<span class="sd">        because the double-sum formula excludes it by construction.  For the</span>
+<span class="sd">        same reason a :math:`j = 1` pole term is also restored.</span>
+
 <span class="sd">        Args:</span>
-<span class="sd">            ParaAll: array as [Para_Forward, Para_xi2, Para_xi4]</span>
-<span class="sd">        </span>
-<span class="sd">                - Para_Forward = array as [Para_Forward_uV, Para_Forward_ubar, Para_Forward_dV, Para_Forward_dbar, Para_Forward_g]</span>
-<span class="sd">                    where Para_Forward_i is forward parameter sets for valence u quark (uV), sea u quark (ubar), valence d quark (dV), sea d quark (dbar) and gluon (g)</span>
-<span class="sd">                - Para_xi2 = array as [Para_xi2_uV, Para_xi2_ubar, Para_xi2_dV, Para_xi2_dbar, Para_xi2_g]</span>
-<span class="sd">                    where Para_xi2_i is xi^2 parameter sets for valence u quark (uV), sea u quark (ubar), valence d quark (dV), sea d quark (dbar) and gluon (g)</span>
-<span class="sd">                - Para_xi4 = array as [Para_xi4_uV, Para_xi4_ubar, Para_xi4_dV, Para_xi4_dbar, Para_xi4_g]</span>
-<span class="sd">                    where Para_xi4_i is xi^4 parameter sets for valence u quark (uV), sea u quark (ubar), valence d quark (dV), sea d quark (dbar) and gluon (g)</span>
-<span class="sd">            muf: factorization scale</span>
-<span class="sd">            flv: &quot;q&quot;, &quot;g&quot;, or &quot;All&quot;</span>
-<span class="sd">            </span>
+<span class="sd">            ParaAll (np.ndarray): shape ``(..., 3, 5, n_ansatz, 6)`` parameter</span>
+<span class="sd">                array with slices:</span>
+
+<span class="sd">                * ``[..., 0, ...]`` — :math:`\xi^0` (forward) parameters</span>
+<span class="sd">                * ``[..., 1, ...]`` — :math:`\xi^2` correction parameters</span>
+<span class="sd">                * ``[..., 2, ...]`` — :math:`\xi^4` correction parameters</span>
+
+<span class="sd">                Flavor axis order: ``[uV, ubar, dV, dbar, g]``.</span>
+<span class="sd">            muf (float): factorization scale in GeV.</span>
+<span class="sd">            flv (str): flavor filter — ``&#39;All&#39;``, ``&#39;q&#39;``, or ``&#39;g&#39;``.</span>
+
 <span class="sd">        Returns:</span>
-<span class="sd">            CFF \mathcal{F}(xi, t)</span>
+<span class="sd">            np.ndarray: NLO :math:`\mathcal{F}(\xi, t)` (evolved-moment method).</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">Para_Forward</span> <span class="o">=</span> <span class="n">ParaAll</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="p">:,</span> <span class="p">:,</span> <span class="p">:]</span>  <span class="c1"># each (N, 5, 1, 5)</span>
         <span class="n">Para_xi2</span>     <span class="o">=</span> <span class="n">ParaAll</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="p">:,</span> <span class="p">:,</span> <span class="p">:]</span>
@@ -800,7 +886,7 @@
         <span class="n">reJ</span> <span class="o">=</span> <span class="n">Mellin_Barnes_intercept</span> 
         <span class="n">Max_imJ</span> <span class="o">=</span> <span class="n">Mellin_Barnes_cutoff</span>
         
-        <span class="k">def</span> <span class="nf">Integrand_Mellin_Barnes_CFF</span><span class="p">(</span><span class="n">j</span><span class="p">:</span> <span class="nb">complex</span><span class="p">):</span>
+        <span class="k">def</span><span class="w"> </span><span class="nf">Integrand_Mellin_Barnes_CFF</span><span class="p">(</span><span class="n">j</span><span class="p">:</span> <span class="nb">complex</span><span class="p">):</span>
             
             <span class="n">EvoConf_Wilson</span> <span class="o">=</span> <span class="p">(</span><span class="n">CFF_Evo_NLO_evMOM</span><span class="p">(</span><span class="n">j</span><span class="p">,</span> <span class="n">NFEFF</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">p</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">Q</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">t</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">xi</span><span class="p">,</span> <span class="n">Para_Forward</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">muf</span><span class="p">)</span> \
                                         <span class="o">+</span>  <span class="n">CFF_Evo_NLO_evMOM</span><span class="p">(</span><span class="n">j</span><span class="o">+</span><span class="mi">2</span><span class="p">,</span> <span class="n">NFEFF</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">p</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">Q</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">t</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">xi</span><span class="p">,</span> <span class="n">Para_xi2</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="n">muf</span><span class="p">)</span> \
@@ -809,7 +895,7 @@
             <span class="n">fmask</span> <span class="o">=</span> <span class="n">flvmask</span><span class="p">(</span><span class="n">flv</span><span class="p">)</span>
             <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">einsum</span><span class="p">(</span><span class="s1">&#39;j, ...j&#39;</span><span class="p">,</span> <span class="n">fmask</span><span class="p">,</span> <span class="n">EvoConf_Wilson</span><span class="p">)</span>
         
-        <span class="k">def</span> <span class="nf">Integrand_Mellin_Barnes_CFF_evWC</span><span class="p">(</span><span class="n">j</span><span class="p">:</span> <span class="nb">complex</span><span class="p">):</span>
+        <span class="k">def</span><span class="w"> </span><span class="nf">Integrand_Mellin_Barnes_CFF_evWC</span><span class="p">(</span><span class="n">j</span><span class="p">:</span> <span class="nb">complex</span><span class="p">):</span>
 <span class="w">            </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">            It might look strange that we use the evolved-Wilson-Coefficient method in the evolved-moment module.</span>
 <span class="sd">            We only use this to calcuate the j=0 contributions which has been excluded in the double summation formula because there&#39;s a pole in the moment F_j near j=0.</span>
@@ -826,7 +912,7 @@
             <span class="n">fmask</span> <span class="o">=</span> <span class="n">flvmask</span><span class="p">(</span><span class="n">flv</span><span class="p">)</span>
             <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">einsum</span><span class="p">(</span><span class="s1">&#39;j, ...j&#39;</span><span class="p">,</span> <span class="n">fmask</span><span class="p">,</span> <span class="n">EvoConf_Wilson</span><span class="p">)</span>
         
-        <span class="k">def</span> <span class="nf">tan_factor</span><span class="p">(</span><span class="n">j</span><span class="p">):</span>
+        <span class="k">def</span><span class="w"> </span><span class="nf">tan_factor</span><span class="p">(</span><span class="n">j</span><span class="p">):</span>
             <span class="k">if</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">p</span><span class="o">==</span><span class="mi">1</span><span class="p">):</span>
                 <span class="k">return</span>  <span class="mi">1</span><span class="o">/</span><span class="p">(</span><span class="mi">2</span><span class="n">j</span><span class="p">)</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">xi</span> <span class="o">**</span> <span class="p">(</span><span class="o">-</span><span class="n">j</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="o">*</span><span class="p">(</span><span class="mi">1</span><span class="n">j</span><span class="o">+</span><span class="n">np</span><span class="o">.</span><span class="n">tan</span><span class="p">(</span><span class="n">j</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">/</span> <span class="mi">2</span><span class="p">))</span>
             <span class="k">else</span><span class="p">:</span>
@@ -835,14 +921,14 @@
         <span class="n">eps</span><span class="o">=</span> <span class="mf">10.</span> <span class="o">**</span><span class="p">(</span><span class="o">-</span><span class="mi">6</span><span class="p">)</span>
         
         <span class="c1"># adding back the j=0 contribution using the evolved-Wilson-Coefficient method. Reason explained above</span>
-        <span class="k">def</span> <span class="nf">CFFj0</span><span class="p">():</span>
+        <span class="k">def</span><span class="w"> </span><span class="nf">CFFj0</span><span class="p">():</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">p</span><span class="o">==</span><span class="mi">1</span><span class="p">:</span>
                 <span class="k">return</span> <span class="mi">0</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">xi</span> <span class="o">**</span> <span class="p">(</span><span class="o">-</span> <span class="mf">1.</span><span class="p">)</span> <span class="o">*</span> <span class="n">Integrand_Mellin_Barnes_CFF_evWC</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">0.</span><span class="o">+</span><span class="n">eps</span><span class="p">]))[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span> <span class="c1"># the last factor of 2 is the residual of -1/(2j)*np.cot(j * np.pi / 2) at j=0</span>
         
         <span class="c1"># for moment evolution, the j=1 pole is also missed because we choose 1&lt;cj&lt;2. The diagonal piece will be calculated and the off-diagonal piece is zero as expected for C_1.</span>
-        <span class="k">def</span> <span class="nf">CFFj1</span><span class="p">():</span>
+        <span class="k">def</span><span class="w"> </span><span class="nf">CFFj1</span><span class="p">():</span>
 
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">p</span><span class="o">==</span><span class="mi">1</span><span class="p">:</span>
                 <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">xi</span> <span class="o">**</span> <span class="p">(</span><span class="o">-</span> <span class="mf">2.</span><span class="p">)</span> <span class="o">*</span> <span class="n">Integrand_Mellin_Barnes_CFF</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">1.</span><span class="o">+</span><span class="n">eps</span><span class="p">]))[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span> <span class="c1"># the last factor of 2 is the residual of 1/(2j)*np.tan(j * np.pi / 2) at j=1</span>
@@ -858,26 +944,29 @@
     
 <div class="viewcode-block" id="GPDobserv.TFFNLO">
 <a class="viewcode-back" href="../../Observables.html#gumpgpd.Observables.GPDobserv.TFFNLO">[docs]</a>
-    <span class="k">def</span> <span class="nf">TFFNLO</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ParaAll</span><span class="p">,</span> <span class="n">muf</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">meson</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">flv</span> <span class="o">=</span> <span class="s1">&#39;All&#39;</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;TFF $\mathcal{F}(xi, t) (\mathcal{F}$</span>
-<span class="sd">        </span>
-<span class="sd">        A separate function for next-to-leading order TFF, it can be called directly or with TFF() by setting p_order = 2 </span>
-<span class="sd">        </span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">TFFNLO</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ParaAll</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">muf</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">meson</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">flv</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;All&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;NLO Transition Form Factor :math:`\mathcal{F}(\xi, t)` via evolved Wilson coefficients.</span>
+
+<span class="sd">        Implements the NLO TFF using the evolved-Wilson-coefficient (evWC)</span>
+<span class="sd">        method.  Can be called directly or via :meth:`TFF` with</span>
+<span class="sd">        ``p_order=2``.</span>
+
 <span class="sd">        Args:</span>
-<span class="sd">            ParaAll: array as [Para_Forward, Para_xi2, Para_xi4]</span>
-<span class="sd">        </span>
-<span class="sd">                - Para_Forward = array as [Para_Forward_uV, Para_Forward_ubar, Para_Forward_dV, Para_Forward_dbar, Para_Forward_g]</span>
-<span class="sd">                    where Para_Forward_i is forward parameter sets for valence u quark (uV), sea u quark (ubar), valence d quark (dV), sea d quark (dbar) and gluon (g)</span>
-<span class="sd">                - Para_xi2 = array as [Para_xi2_uV, Para_xi2_ubar, Para_xi2_dV, Para_xi2_dbar, Para_xi2_g]</span>
-<span class="sd">                    where Para_xi2_i is xi^2 parameter sets for valence u quark (uV), sea u quark (ubar), valence d quark (dV), sea d quark (dbar) and gluon (g)</span>
-<span class="sd">                - Para_xi4 = array as [Para_xi4_uV, Para_xi4_ubar, Para_xi4_dV, Para_xi4_dbar, Para_xi4_g]</span>
-<span class="sd">                    where Para_xi4_i is xi^4 parameter sets for valence u quark (uV), sea u quark (ubar), valence d quark (dV), sea d quark (dbar) and gluon (g)</span>
-<span class="sd">            muf: factorization scale</span>
-<span class="sd">            meson: [1 for rho, 2 for phi, 3 for jpsi]</span>
-<span class="sd">            flv: &quot;q&quot;, &quot;g&quot;, or &quot;All&quot;</span>
-<span class="sd">            </span>
+<span class="sd">            ParaAll (np.ndarray): shape ``(..., 3, 5, n_ansatz, 6)`` parameter</span>
+<span class="sd">                array with slices:</span>
+
+<span class="sd">                * ``[..., 0, ...]`` — :math:`\xi^0` (forward) parameters</span>
+<span class="sd">                * ``[..., 1, ...]`` — :math:`\xi^2` correction parameters</span>
+<span class="sd">                * ``[..., 2, ...]`` — :math:`\xi^4` correction parameters</span>
+
+<span class="sd">                Flavor axis order: ``[uV, ubar, dV, dbar, g]``.</span>
+<span class="sd">            muf (float): factorization scale in GeV.</span>
+<span class="sd">            meson (int): meson code — ``1`` for :math:`\rho^0`, ``2`` for</span>
+<span class="sd">                :math:`\phi`, ``3`` for :math:`J/\psi`.</span>
+<span class="sd">            flv (str): flavor filter — ``&#39;All&#39;``, ``&#39;q&#39;``, or ``&#39;g&#39;``.</span>
+
 <span class="sd">        Returns:</span>
-<span class="sd">            TFF \mathcal{F}(xi, t)</span>
+<span class="sd">            np.ndarray: NLO :math:`\mathcal{F}(\xi, t)` for the requested meson.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">Para_Forward</span> <span class="o">=</span> <span class="n">ParaAll</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="p">:,</span> <span class="p">:,</span> <span class="p">:]</span>  <span class="c1"># each (N, 5, 1, 5)</span>
         <span class="n">Para_xi2</span>     <span class="o">=</span> <span class="n">ParaAll</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="p">:,</span> <span class="p">:,</span> <span class="p">:]</span>
@@ -887,7 +976,7 @@
         <span class="n">reJ</span> <span class="o">=</span> <span class="n">Mellin_Barnes_intercept</span> 
         <span class="n">Max_imJ</span> <span class="o">=</span> <span class="n">Mellin_Barnes_cutoff</span>
         
-        <span class="k">def</span> <span class="nf">Integrand_Mellin_Barnes_TFF</span><span class="p">(</span><span class="n">j</span><span class="p">:</span> <span class="nb">complex</span><span class="p">):</span>
+        <span class="k">def</span><span class="w"> </span><span class="nf">Integrand_Mellin_Barnes_TFF</span><span class="p">(</span><span class="n">j</span><span class="p">:</span> <span class="nb">complex</span><span class="p">):</span>
 
             <span class="n">ConfFlav</span>     <span class="o">=</span> <span class="n">Moment_Sum</span><span class="p">(</span><span class="n">j</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">t</span><span class="p">,</span> <span class="n">Para_Forward</span><span class="p">)</span> <span class="c1">#(N, 5)</span>
             <span class="n">ConfFlav_xi2</span> <span class="o">=</span> <span class="n">Moment_Sum</span><span class="p">(</span><span class="n">j</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">t</span><span class="p">,</span> <span class="n">Para_xi2</span><span class="p">)</span>
@@ -900,7 +989,7 @@
             <span class="n">fmask</span> <span class="o">=</span> <span class="n">flvmask</span><span class="p">(</span><span class="n">flv</span><span class="p">)</span>
             <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">einsum</span><span class="p">(</span><span class="s1">&#39;j, ...j&#39;</span><span class="p">,</span> <span class="n">fmask</span><span class="p">,</span> <span class="n">EvoConf_Wilson</span><span class="p">)</span>
         
-        <span class="k">def</span> <span class="nf">tan_factor</span><span class="p">(</span><span class="n">j</span><span class="p">):</span>
+        <span class="k">def</span><span class="w"> </span><span class="nf">tan_factor</span><span class="p">(</span><span class="n">j</span><span class="p">):</span>
             <span class="k">if</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">p</span><span class="o">==</span><span class="mi">1</span><span class="p">):</span>
                 <span class="k">return</span>  <span class="mi">1</span><span class="o">/</span><span class="p">(</span><span class="mi">2</span><span class="n">j</span><span class="p">)</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">xi</span> <span class="o">**</span> <span class="p">(</span><span class="o">-</span><span class="n">j</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="o">*</span><span class="p">(</span><span class="mi">1</span><span class="n">j</span><span class="o">+</span><span class="n">np</span><span class="o">.</span><span class="n">tan</span><span class="p">(</span><span class="n">j</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">/</span> <span class="mi">2</span><span class="p">))</span>
             <span class="k">else</span><span class="p">:</span>
@@ -908,7 +997,7 @@
         
         <span class="n">eps</span><span class="o">=</span> <span class="mf">10.</span> <span class="o">**</span><span class="p">(</span><span class="o">-</span><span class="mi">6</span><span class="p">)</span>            
         <span class="c1"># adding back the j=0 contribution            </span>
-        <span class="k">def</span> <span class="nf">TFFj0</span><span class="p">():</span>
+        <span class="k">def</span><span class="w"> </span><span class="nf">TFFj0</span><span class="p">():</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">p</span><span class="o">==</span><span class="mi">1</span><span class="p">:</span>
                 <span class="k">return</span> <span class="mi">0</span>
             <span class="k">else</span><span class="p">:</span>
@@ -923,26 +1012,34 @@
 
 <div class="viewcode-block" id="GPDobserv.TFFNLO_evMom">
 <a class="viewcode-back" href="../../Observables.html#gumpgpd.Observables.GPDobserv.TFFNLO_evMom">[docs]</a>
-    <span class="k">def</span> <span class="nf">TFFNLO_evMom</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ParaAll</span><span class="p">,</span> <span class="n">muf</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">meson</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">flv</span> <span class="o">=</span> <span class="s1">&#39;All&#39;</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;NLOTFF $\mathcal{F}(xi, t) (\mathcal{F}) $</span>
-<span class="sd">        </span>
-<span class="sd">        A different function for next-to-leading order TFF using evolved moment method, it can be checked that it generate the same results as the evolve Wilson coefficient method</span>
-<span class="sd">        </span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">TFFNLO_evMom</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ParaAll</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">muf</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">meson</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">flv</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;All&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;NLO Transition Form Factor :math:`\mathcal{F}(\xi, t)` via evolved moments.</span>
+
+<span class="sd">        Alternative NLO implementation using moment evolution</span>
+<span class="sd">        (:func:`Evolution.TFF_Evo_NLO_evMOM`) instead of evolved Wilson</span>
+<span class="sd">        coefficients.  Both methods produce numerically consistent results and</span>
+<span class="sd">        can be used to cross-check each other.</span>
+
+<span class="sd">        The :math:`j = 0` and :math:`j = 1` pole terms are added back</span>
+<span class="sd">        separately (see :meth:`CFFNLO_evMom` for the rationale).</span>
+
 <span class="sd">        Args:</span>
-<span class="sd">            ParaAll: array as [Para_Forward, Para_xi2, Para_xi4]</span>
-<span class="sd">        </span>
-<span class="sd">                - Para_Forward = array as [Para_Forward_uV, Para_Forward_ubar, Para_Forward_dV, Para_Forward_dbar, Para_Forward_g]</span>
-<span class="sd">                    where Para_Forward_i is forward parameter sets for valence u quark (uV), sea u quark (ubar), valence d quark (dV), sea d quark (dbar) and gluon (g)</span>
-<span class="sd">                - Para_xi2 = array as [Para_xi2_uV, Para_xi2_ubar, Para_xi2_dV, Para_xi2_dbar, Para_xi2_g]</span>
-<span class="sd">                    where Para_xi2_i is xi^2 parameter sets for valence u quark (uV), sea u quark (ubar), valence d quark (dV), sea d quark (dbar) and gluon (g)</span>
-<span class="sd">                - Para_xi4 = array as [Para_xi4_uV, Para_xi4_ubar, Para_xi4_dV, Para_xi4_dbar, Para_xi4_g]</span>
-<span class="sd">                    where Para_xi4_i is xi^4 parameter sets for valence u quark (uV), sea u quark (ubar), valence d quark (dV), sea d quark (dbar) and gluon (g)</span>
-<span class="sd">            muf: factorization scale</span>
-<span class="sd">            meson: [1 for rho, 2 for phi, 3 for jpsi]</span>
-<span class="sd">            flv: &quot;q&quot;, &quot;g&quot;, or &quot;All&quot;</span>
-<span class="sd">            </span>
+<span class="sd">            ParaAll (np.ndarray): shape ``(..., 3, 5, n_ansatz, 6)`` parameter</span>
+<span class="sd">                array with slices:</span>
+
+<span class="sd">                * ``[..., 0, ...]`` — :math:`\xi^0` (forward) parameters</span>
+<span class="sd">                * ``[..., 1, ...]`` — :math:`\xi^2` correction parameters</span>
+<span class="sd">                * ``[..., 2, ...]`` — :math:`\xi^4` correction parameters</span>
+
+<span class="sd">                Flavor axis order: ``[uV, ubar, dV, dbar, g]``.</span>
+<span class="sd">            muf (float): factorization scale in GeV.</span>
+<span class="sd">            meson (int): meson code — ``1`` for :math:`\rho^0`, ``2`` for</span>
+<span class="sd">                :math:`\phi`, ``3`` for :math:`J/\psi`.</span>
+<span class="sd">            flv (str): flavor filter — ``&#39;All&#39;``, ``&#39;q&#39;``, or ``&#39;g&#39;``.</span>
+
 <span class="sd">        Returns:</span>
-<span class="sd">            TFF \mathcal{F}(xi, t)</span>
+<span class="sd">            np.ndarray: NLO :math:`\mathcal{F}(\xi, t)` for the requested</span>
+<span class="sd">            meson (evolved-moment method).</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="n">Para_Forward</span> <span class="o">=</span> <span class="n">ParaAll</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="p">:,</span> <span class="p">:,</span> <span class="p">:]</span>  <span class="c1"># each (N, 5, 1, 5)</span>
@@ -953,7 +1050,7 @@
         <span class="n">reJ</span> <span class="o">=</span> <span class="n">Mellin_Barnes_intercept</span> 
         <span class="n">Max_imJ</span> <span class="o">=</span> <span class="n">Mellin_Barnes_cutoff</span>
         
-        <span class="k">def</span> <span class="nf">Integrand_Mellin_Barnes_TFF</span><span class="p">(</span><span class="n">j</span><span class="p">:</span> <span class="nb">complex</span><span class="p">):</span>
+        <span class="k">def</span><span class="w"> </span><span class="nf">Integrand_Mellin_Barnes_TFF</span><span class="p">(</span><span class="n">j</span><span class="p">:</span> <span class="nb">complex</span><span class="p">):</span>
             
             <span class="n">EvoConf_Wilson</span> <span class="o">=</span> <span class="p">(</span><span class="n">TFF_Evo_NLO_evMOM</span><span class="p">(</span><span class="n">j</span><span class="p">,</span> <span class="n">NFEFF</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">p</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">Q</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">t</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">xi</span><span class="p">,</span> <span class="n">Para_Forward</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">meson</span><span class="p">,</span> <span class="n">muf</span><span class="p">)</span> \
                                         <span class="o">+</span>  <span class="n">TFF_Evo_NLO_evMOM</span><span class="p">(</span><span class="n">j</span><span class="o">+</span><span class="mi">2</span><span class="p">,</span> <span class="n">NFEFF</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">p</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">Q</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">t</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">xi</span><span class="p">,</span> <span class="n">Para_xi2</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="n">meson</span><span class="p">,</span> <span class="n">muf</span><span class="p">)</span> \
@@ -962,7 +1059,7 @@
             <span class="n">fmask</span> <span class="o">=</span> <span class="n">flvmask</span><span class="p">(</span><span class="n">flv</span><span class="p">)</span>
             <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">einsum</span><span class="p">(</span><span class="s1">&#39;j, ...j&#39;</span><span class="p">,</span> <span class="n">fmask</span><span class="p">,</span> <span class="n">EvoConf_Wilson</span><span class="p">)</span>
         
-        <span class="k">def</span> <span class="nf">tan_factor</span><span class="p">(</span><span class="n">j</span><span class="p">):</span>
+        <span class="k">def</span><span class="w"> </span><span class="nf">tan_factor</span><span class="p">(</span><span class="n">j</span><span class="p">):</span>
             <span class="k">if</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">p</span><span class="o">==</span><span class="mi">1</span><span class="p">):</span>
                 <span class="k">return</span>  <span class="mi">1</span><span class="o">/</span><span class="p">(</span><span class="mi">2</span><span class="n">j</span><span class="p">)</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">xi</span> <span class="o">**</span> <span class="p">(</span><span class="o">-</span><span class="n">j</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="o">*</span><span class="p">(</span><span class="mi">1</span><span class="n">j</span><span class="o">+</span><span class="n">np</span><span class="o">.</span><span class="n">tan</span><span class="p">(</span><span class="n">j</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">/</span> <span class="mi">2</span><span class="p">))</span>
             <span class="k">else</span><span class="p">:</span>
@@ -970,7 +1067,7 @@
         
         <span class="n">eps</span><span class="o">=</span> <span class="mf">10.</span> <span class="o">**</span><span class="p">(</span><span class="o">-</span><span class="mi">6</span><span class="p">)</span>
         
-        <span class="k">def</span> <span class="nf">Integrand_Mellin_Barnes_TFF_evWC</span><span class="p">(</span><span class="n">j</span><span class="p">:</span> <span class="nb">complex</span><span class="p">):</span>
+        <span class="k">def</span><span class="w"> </span><span class="nf">Integrand_Mellin_Barnes_TFF_evWC</span><span class="p">(</span><span class="n">j</span><span class="p">:</span> <span class="nb">complex</span><span class="p">):</span>
 <span class="w">            </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">            It might look strange that we use the evolved-Wilson-Coefficient method in the evolved-moment module.</span>
 <span class="sd">            We only use this to calcuate the j=0 contributions which has been excluded in the double summation formula because there&#39;s a pole in the moment F_j near j=0.</span>
@@ -988,14 +1085,14 @@
             <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">einsum</span><span class="p">(</span><span class="s1">&#39;j, ...j&#39;</span><span class="p">,</span> <span class="n">fmask</span><span class="p">,</span> <span class="n">EvoConf_Wilson</span><span class="p">)</span>
         
         <span class="c1"># adding back the j=0 contribution using the evolved-Wilson-Coefficient method. Reason explained above</span>
-        <span class="k">def</span> <span class="nf">TFFj0</span><span class="p">():</span>
+        <span class="k">def</span><span class="w"> </span><span class="nf">TFFj0</span><span class="p">():</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">p</span><span class="o">==</span><span class="mi">1</span><span class="p">:</span>
                 <span class="k">return</span> <span class="mi">0</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">xi</span> <span class="o">**</span> <span class="p">(</span><span class="o">-</span> <span class="mf">1.</span><span class="p">)</span> <span class="o">*</span> <span class="n">Integrand_Mellin_Barnes_TFF_evWC</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">0.</span><span class="o">+</span><span class="n">eps</span><span class="p">]))[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span> <span class="c1"># the last factor of 2 is the residual of -1/(2j)*np.cot(j * np.pi / 2) at j=0</span>
         
         <span class="c1"># for moment evolution, the j=1 pole is also missed because we choose 1&lt;cj&lt;2. The diagonal piece will be calculated and the off-diagonal piece is zero as expected for C_1.</span>
-        <span class="k">def</span> <span class="nf">TFFj1</span><span class="p">():</span>
+        <span class="k">def</span><span class="w"> </span><span class="nf">TFFj1</span><span class="p">():</span>
 
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">p</span><span class="o">==</span><span class="mi">1</span><span class="p">:</span>
                 <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">xi</span> <span class="o">**</span> <span class="p">(</span><span class="o">-</span> <span class="mf">2.</span><span class="p">)</span> <span class="o">*</span> <span class="n">Integrand_Mellin_Barnes_TFF</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">1.</span><span class="o">+</span><span class="n">eps</span><span class="p">]))[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span> <span class="c1"># the last factor of 2 is the residual of 1/(2j)*np.tan(j * np.pi / 2) at j=1</span>

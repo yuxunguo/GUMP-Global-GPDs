@@ -22,7 +22,7 @@ If you use this package in your research, please cite:
      year = "2025"
      }
 
-where the lastest developments are discussed. Also check 
+where the latest developments are discussed. See also:
 
 .. code-block:: py
      :name: bibitem2
@@ -54,12 +54,15 @@ where the lastest developments are discussed. Also check
                year = "2022"
                }
                
-for more details.
+for additional background and methodology.
 
 Acknowledgement
 ---------------
 This package benefits from the open-source `Gepard <https://gepard.phy.hr/>`_ package!
 
-Researches related to this package is supported by the U.S. Department of Energy, Office of Science, Office of Nuclear Physics, under contract number DE-SC0020682,
-and the Center for Nuclear Femtography, Southeastern Universities Research Association, Washington D.C.
+Research related to this package is supported by the U.S. Department of
+Energy, Office of Science, Office of Nuclear Physics, under contract number
+DE-SC0020682, and by the Center for Nuclear Femtography, Southeastern
+Universities Research Association, Washington, D.C.
+
 The authors also acknowledge partial support by the U.S. Department of Energy, Office of Science, Office of Nuclear Physics under the umbrella of the Quark-Gluon Tomography (QGT) Topical Collaboration with Award DE-SC0023646.

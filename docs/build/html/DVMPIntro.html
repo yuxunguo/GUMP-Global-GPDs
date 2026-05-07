@@ -6,8 +6,8 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>DVMP Quickguide &mdash; GUMP GPD Analysis 1.0.2 documentation</title>
-      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=80d5e7a1" />
+  <title>DVMP Quick Guide &mdash; GUMP GPD Analysis 1.0.2 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="_static/copybutton.css?v=76b2166b" />
 
@@ -19,11 +19,12 @@
       <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
       <script src="_static/clipboard.min.js?v=a7894cd8"></script>
       <script src="_static/copybutton.js?v=f281be69"></script>
+      <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-mml-chtml.js"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="Documentation of submodules" href="modules.html" />
-    <link rel="prev" title="DVCS Quickguide" href="DVCSIntro.html" /> 
+    <link rel="next" title="Submodule API Reference" href="modules.html" />
+    <link rel="prev" title="DVCS Quick Guide" href="DVCSIntro.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -45,16 +46,22 @@
   </form>
 </div>
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
-              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+              <p class="caption" role="heading"><span class="caption-text">Contents</span></p>
 <ul class="current">
-<li class="toctree-l1"><a class="reference internal" href="QuickStart.html">Quick start</a></li>
-<li class="toctree-l1"><a class="reference internal" href="ParametersIntro.html">Parameters Quickguide</a></li>
-<li class="toctree-l1"><a class="reference internal" href="ObservablesIntro.html">Observables Quickguide</a></li>
-<li class="toctree-l1"><a class="reference internal" href="EvolutionIntro.html">Evolution Quickguide</a></li>
-<li class="toctree-l1"><a class="reference internal" href="MinimizerIntro.html">Minimizer Quickguide</a></li>
-<li class="toctree-l1"><a class="reference internal" href="DVCSIntro.html">DVCS Quickguide</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">DVMP Quickguide</a></li>
-<li class="toctree-l1"><a class="reference internal" href="modules.html">Documentation of submodules</a></li>
+<li class="toctree-l1"><a class="reference internal" href="QuickStart.html">Quick Start</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ParametersIntro.html">Parameters Quick Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ObservablesIntro.html">Observables Quick Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="EvolutionIntro.html">Evolution Quick Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="MinimizerIntro.html">Minimizer Quick Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="DVCSIntro.html">DVCS Quick Guide</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">DVMP Quick Guide</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#dvmp-main-callables">DVMP Main Callables</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#meson-code-convention">Meson Code Convention</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#dvmp-common-inputs">DVMP Common Inputs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#references">References</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="modules.html">Submodule API Reference</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Citation.html">Citation/Acknowledgement</a></li>
 </ul>
 
@@ -72,7 +79,7 @@
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
       <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
-      <li class="breadcrumb-item active">DVMP Quickguide</li>
+      <li class="breadcrumb-item active">DVMP Quick Guide</li>
       <li class="wy-breadcrumbs-aside">
             <a href="_sources/DVMPIntro.rst.txt" rel="nofollow"> View page source</a>
       </li>
@@ -82,19 +89,76 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <section id="dvmp-quickguide">
-<h1>DVMP Quickguide<a class="headerlink" href="#dvmp-quickguide" title="Link to this heading"></a></h1>
-<p>Here we briefly introduce the <a class="reference internal" href="DVMP_xsec.html#dvmp-xsec-module"><span class="std std-ref">DVMP_xsec module</span></a>. This can be used as a stand-alone module for calculating the deeply virtual meson productions (DVMP) cross-sections,
-which can be found in <a class="reference external" href="TBA">TBA</a>.</p>
-<p>More to be added.</p>
+  <section id="dvmp-quick-guide">
+<h1>DVMP Quick Guide<a class="headerlink" href="#dvmp-quick-guide" title="Link to this heading"></a></h1>
+<p>This page briefly introduces <a class="reference internal" href="DVMP_xsec.html#dvmp-xsec-module"><span class="std std-ref">DVMP_xsec module</span></a> for deeply virtual meson
+production (DVMP) observables.</p>
+<p>The module provides:</p>
+<ul class="simple">
+<li><p>the ratio <span class="math notranslate nohighlight">\(R = \sigma_L/\sigma_T\)</span> for exclusive meson production,</p></li>
+<li><p>fitted <span class="math notranslate nohighlight">\(R\)</span> parameters from combined H1+ZEUS <span class="math notranslate nohighlight">\(\rho^0\)</span> data,</p></li>
+<li><p>longitudinal and total differential cross-sections
+<span class="math notranslate nohighlight">\(d\sigma_L/dt\)</span> and <span class="math notranslate nohighlight">\(d\sigma/dt\)</span>.</p></li>
+</ul>
+<section id="dvmp-main-callables">
+<h2>DVMP Main Callables<a class="headerlink" href="#dvmp-main-callables" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p><code class="xref py py-func docutils literal notranslate"><span class="pre">DVMP_xsec.R()</span></code>: parametrization of <span class="math notranslate nohighlight">\(R(Q)\)</span>.</p></li>
+<li><p><code class="xref py py-func docutils literal notranslate"><span class="pre">DVMP_xsec.R_rho_fit()</span></code>: iMinuit fit of <span class="math notranslate nohighlight">\((a, p)\)</span> in <code class="xref py py-func docutils literal notranslate"><span class="pre">DVMP_xsec.R()</span></code>.</p></li>
+<li><p><code class="xref py py-func docutils literal notranslate"><span class="pre">DVMP_xsec.R_fitted()</span></code>: fitted <span class="math notranslate nohighlight">\(R(Q)\)</span> with propagated uncertainty.</p></li>
+<li><p><code class="xref py py-func docutils literal notranslate"><span class="pre">DVMP_xsec.epsilon()</span></code>: virtual-photon polarization parameter
+<span class="math notranslate nohighlight">\(\varepsilon\)</span>.</p></li>
+<li><p><code class="xref py py-func docutils literal notranslate"><span class="pre">DVMP_xsec.dsigmaL_DVMP_dt()</span></code>: longitudinal cross-section
+<span class="math notranslate nohighlight">\(d\sigma_L/dt\)</span>.</p></li>
+<li><p><code class="xref py py-func docutils literal notranslate"><span class="pre">DVMP_xsec.dsigma_DVMP_dt()</span></code>: total cross-section
+<span class="math notranslate nohighlight">\(d\sigma/dt = (d\sigma_L/dt)\,(\varepsilon + 1/R)\)</span>.</p></li>
+</ul>
+</section>
+<section id="meson-code-convention">
+<h2>Meson Code Convention<a class="headerlink" href="#meson-code-convention" title="Link to this heading"></a></h2>
+<p>The <code class="docutils literal notranslate"><span class="pre">meson</span></code> argument follows the same integer convention across the module:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">1</span></code>: <span class="math notranslate nohighlight">\(\rho^0\)</span></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">2</span></code>: <span class="math notranslate nohighlight">\(\phi\)</span></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">3</span></code>: <span class="math notranslate nohighlight">\(J/\psi\)</span></p></li>
+</ul>
+<p>In <code class="xref py py-func docutils literal notranslate"><span class="pre">DVMP_xsec.MassCorr()</span></code>, the heavy-meson correction uses
+<span class="math notranslate nohighlight">\(M_{J/\psi}\)</span> for <code class="docutils literal notranslate"><span class="pre">meson=3</span></code> and <code class="docutils literal notranslate"><span class="pre">0</span></code> otherwise.</p>
+</section>
+<section id="dvmp-common-inputs">
+<h2>DVMP Common Inputs<a class="headerlink" href="#dvmp-common-inputs" title="Link to this heading"></a></h2>
+<p>The DVMP cross-section functions use:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">y</span></code> (float): inelasticity (beam energy-loss fraction).</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">xB</span></code> (float): Bjorken <span class="math notranslate nohighlight">\(x_B\)</span>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">t</span></code> (float): momentum transfer squared (GeV^2).</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">Q</span></code> (float): photon virtuality (GeV).</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">HTFF</span></code> (complex): helicity-conserving TFF <span class="math notranslate nohighlight">\(\mathcal{H}\)</span>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">ETFF</span></code> (complex): helicity-flip TFF <span class="math notranslate nohighlight">\(\mathcal{E}\)</span>.</p></li>
+</ul>
+<p>For <code class="xref py py-func docutils literal notranslate"><span class="pre">DVMP_xsec.dsigma_DVMP_dt()</span></code>, two additional fit parameters are used:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">a</span></code> (float): fit parameter <span class="math notranslate nohighlight">\(a\)</span> entering <code class="xref py py-func docutils literal notranslate"><span class="pre">DVMP_xsec.R()</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">p</span></code> (float): fit parameter <span class="math notranslate nohighlight">\(p\)</span> entering <code class="xref py py-func docutils literal notranslate"><span class="pre">DVMP_xsec.R()</span></code>.</p></li>
+</ul>
+</section>
+<section id="references">
+<h2>References<a class="headerlink" href="#references" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p><code class="xref py py-func docutils literal notranslate"><span class="pre">DVMP_xsec.R()</span></code> and <code class="xref py py-func docutils literal notranslate"><span class="pre">DVMP_xsec.epsilon()</span></code> follow
+<a class="reference external" href="https://arxiv.org/abs/1112.2597">arXiv:1112.2597</a>.</p></li>
+<li><p><code class="xref py py-func docutils literal notranslate"><span class="pre">DVMP_xsec.dsigmaL_DVMP_dt()</span></code> and <code class="xref py py-func docutils literal notranslate"><span class="pre">DVMP_xsec.dsigma_DVMP_dt()</span></code>
+follow <a class="reference external" href="https://arxiv.org/abs/2409.17231">arXiv:2409.17231</a>.</p></li>
+</ul>
+</section>
 </section>
 
 
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="DVCSIntro.html" class="btn btn-neutral float-left" title="DVCS Quickguide" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="modules.html" class="btn btn-neutral float-right" title="Documentation of submodules" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="DVCSIntro.html" class="btn btn-neutral float-left" title="DVCS Quick Guide" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="modules.html" class="btn btn-neutral float-right" title="Submodule API Reference" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>
