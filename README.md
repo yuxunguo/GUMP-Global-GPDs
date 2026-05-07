@@ -15,16 +15,16 @@ This repository contains the source code for **GUMP** (Generalized Parton Distri
 Three installation methods are available, depending on your use case:
 
 - **Recommended — install from GitHub:**  
-  Stable release:
+  Stable release (V.1.0.3):
   ```
   pip install git+https://github.com/yuxunguo/GUMP-Global-GPDs.git@GUMP1.0
   ```
-  Development version:
+  Development version (V.1.0.3):
   ```
   pip install git+https://github.com/yuxunguo/GUMP-Global-GPDs.git@GUMPdev
   ```
 
-- **Quick start — install from PyPI:**
+- **Quick start — install from PyPI:** (V1.0.0)
   ```
   pip install gumpgpd
   ```

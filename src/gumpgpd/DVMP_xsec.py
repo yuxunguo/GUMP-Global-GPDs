@@ -1,4 +1,21 @@
-### Module for calculating meson production cross-sections and TFFs
+r"""
+Deeply Virtual Meson Production (DVMP) cross-section calculations.
+
+This module implements the differential cross-sections and the
+:math:`R = \sigma_L / \sigma_T` ratio for exclusive meson production
+(:math:`\rho^0`, :math:`\phi`, :math:`J/\psi`) off the proton.  The
+cross-sections are expressed in terms of helicity Transition Form Factors
+(TFFs) :math:`\mathcal{H}` and :math:`\mathcal{E}` computed from GPDs.
+
+Key components:
+
+* :func:`R` — L/T ratio parametrization (Eq. (32) of :arxiv:`1112.2597`).
+* :func:`R_rho_fit` — iMinuit fit of ``R`` parameters to combined H1+ZEUS data.
+* :func:`R_fitted` — best-fit :math:`R` with propagated uncertainty.
+* :func:`dsigmaL_DVMP_dt` — longitudinal differential cross-section
+  :math:`d\sigma_L/dt`.
+* :func:`dsigma_DVMP_dt` — total :math:`d\sigma/dt` after L/T unseparation.
+"""
 
 import numpy as np
 import pandas as pd
@@ -14,9 +31,9 @@ from numpy import conjugate as Conjugate
 
 dir_path = os.path.dirname(os.path.realpath(__file__))
 
-"""
-***************************** Masses, decay constants, etc. ***********************
-"""
+# ---------------------------------------------------------------------------
+# Physical constants: masses (GeV), decay constants (GeV), and unit conversion
+# ---------------------------------------------------------------------------
 M_p = 0.938
 M_n = 0.940
 M_rho = 0.775
@@ -25,34 +42,40 @@ M_jpsi = 3.097
 gevtonb = 389.9 * 1000
 alphaEM = 1 / 137.036
 
-"""
-******* R Ratio (longitudinal/transverse separation) Parametrization and Fits ************
-"""
+# ---------------------------------------------------------------------------
+# R ratio (sigma_L / sigma_T) parametrization and fit to HERA data
+# ---------------------------------------------------------------------------
 
-def R(Q:float, a:float, p:float, meson:int):
-    """ The R ratio: Longitudinal DVMP cross section/ Transverse DVMP cross section
-    
+def R(Q: float, a: float, p: float, meson: int) -> float:
+    r"""L/T cross-section ratio :math:`R = \sigma_L / \sigma_T` parametrization.
+
+    For :math:`\rho^0` (``meson=1``) the parametrization follows Eq. (32) of
+    `arXiv:1112.2597 <https://arxiv.org/pdf/1112.2597>`_:
+
+    .. math::
+
+        R(Q) = \frac{Q^2}{M_{\rho}^2}\left(1 + e^a \frac{Q^2}{M_{\rho}^2}\right)^{-p}
+
+    For :math:`J/\psi` (``meson=3``) the simple ratio :math:`Q^2 / M_{J/\psi}^2` is used.
+
     Args:
-       Q: The photon virtuality 
-       a: Parameter
-       p:Parameter
-       meson: 1 for rho, 3 for jpsi, 2 is saved for phi to use later
-    
-    Returns: The parametrization of R factor of the  L/T separation  as in  Eq.(32) in https://arxiv.org/pdf/1112.2597"
-    
+        Q (float): photon virtuality :math:`Q` in GeV.
+        a (float): fit parameter controlling the transition scale.
+        p (float): fit parameter controlling the power-law fall-off.
+        meson (int): meson code — ``1`` for :math:`\rho^0`, ``3`` for
+            :math:`J/\psi`; ``2`` is reserved for :math:`\phi`.
+
+    Returns:
+        float: :math:`R = \sigma_L / \sigma_T`.
     """
     if (meson==1): 
         return (Q**2 / M_rho**2) * (1 + np.exp(a) * Q**2 / M_rho**2) ** (-p)
     if (meson==3): 
         return  (Q**2/M_jpsi**2)
 
-"""
-************************ Preprocess the R ratio: we fit the R ratio measure from experiments and extrapolate with uncertainties ****************************
-
-R(Q,a,p,meson): the ratio σ_L / σ_T for meson production follows Eq.(32) in arXiv:1112.2597 for ρ, but here we handle both ρ (meson==1) and J/ψ (meson==3) cases in one function.
-
-This will convert all the measured total cross-sections into longitudinal cross-sections that theory predicts with dσ_L/dt= (dσ_tot/dt) / (ε + 1/R) with error propagation
-"""
+# Fit R to combined H1 + ZEUS rho data and propagate uncertainties.
+# Total cross-sections are converted to longitudinal ones via
+#   dsigma_L/dt = (dsigma_tot/dt) / (epsilon + 1/R)
 #Below we convert the raw data into the one with total errors for future use.
 # Loading the combined H1 and ZEUS R‐ratio data for ρ meson:
 # We’ve taken both the ZEUS and H1 measurements, merged them into one table, and now we are fitting a single parametrization to the combined HERA data.
@@ -89,17 +112,16 @@ RrhoZEUSnH1= pd.read_csv(os.path.join(dir_path,'GUMPDATA/DVMP_HERA/R_rho_ZEUSnH1
 RrhoZEUSnH1['Q'] = np.sqrt(RrhoZEUSnH1['Q']) # Converting the Q² values in the file to Q by taking the square root.
 
 # Defining the chi² cost function for fitting a, p to the ρ–data:
-def R_rho_cost(a, p):
-    """
-    Cost function for R(Q) using H1 and Zeus data combined.
-    
-    Parameters:
-      
-      a, p  : Free parameters in the model
-      
+def R_rho_cost(a: float, p: float) -> float:
+    r"""Reduced :math:`\chi^2` cost function for fitting :func:`R` to combined H1+ZEUS :math:`\rho` data.
+
+    Args:
+        a (float): fit parameter :math:`a` of :func:`R`.
+        p (float): fit parameter :math:`p` of :func:`R`.
+
     Returns:
-      Reduced chi2: (Sum of squared differences between model prediction and experimental data divided by the total errror)/Degrees of freedom
-      
+        float: :math:`\chi^2_{\rm red} = \sum_i [(R_i^{\rm exp} - R_i^{\rm pred}) /
+        \sigma_i]^2 \,/\, N_{\rm dof}`.
     """
     Q_vals = RrhoZEUSnH1['Q'].values 
     R_exp_rho  = RrhoZEUSnH1['R'].values
@@ -112,10 +134,22 @@ def R_rho_cost(a, p):
     
     return chi2 / ndof
 
-#Using iminuit to minimize the cost function and extract best–fit values:
 @cache
-def R_rho_fit():
+def R_rho_fit() -> tuple:
+    """Fit :func:`R` parameters ``(a, p)`` to the combined H1+ZEUS :math:`\\rho` data.
 
+    Uses iMinuit ``migrad`` for minimization and ``hesse`` for uncertainty
+    estimation.  The result is cached so the fit runs only once per session.
+
+    Returns:
+        tuple: ``(val_a, var_a, val_p, var_p, corr_ap)`` where
+
+        * ``val_a`` — best-fit value of :math:`a`
+        * ``var_a`` — :math:`1\\sigma` uncertainty on :math:`a`
+        * ``val_p`` — best-fit value of :math:`p`
+        * ``var_p`` — :math:`1\\sigma` uncertainty on :math:`p`
+        * ``corr_ap`` — covariance between :math:`a` and :math:`p`
+    """
     m = Minuit(R_rho_cost, a=2.5, p=0.7) # initial guesses.
 
     m.migrad()  # run the minimizer
@@ -132,8 +166,28 @@ def R_rho_fit():
     
     return val_a, var_a, val_p, var_p, corr_ap
 
-def R_fitted(Q, meson: int =1):
-    
+def R_fitted(Q: float, meson: int = 1) -> tuple:
+    r"""Evaluate the fitted :func:`R` ratio with propagated :math:`1\sigma` uncertainty.
+
+    Calls :func:`R_rho_fit` to obtain best-fit parameters, then propagates
+    their uncertainties analytically via first-order error propagation:
+
+    .. math::
+
+        \sigma_R^2 = \left(\frac{\partial R}{\partial a}\right)^2 \sigma_a^2
+                   + \left(\frac{\partial R}{\partial p}\right)^2 \sigma_p^2
+                   + 2\,\frac{\partial R}{\partial a}\frac{\partial R}{\partial p}\,
+                     \mathrm{cov}(a,\,p)
+
+    Args:
+        Q (float): photon virtuality in GeV (scalar or array).
+        meson (int): meson code; currently only ``1`` (:math:`\rho^0`) is
+            implemented.
+
+    Returns:
+        tuple: ``(R_mean, R_std)`` — central value and :math:`1\sigma`
+        uncertainty of :math:`R(Q)`.
+    """
     assert meson == 1, 'Not implemented yet, only rho meson (=1) now!'
         
     if(meson ==1):
@@ -184,32 +238,41 @@ def R_fit_plt():
     
 R_fit_plt()
 '''
-"""
-******************************Cross-sections for proton target (currently for virtual photon scattering sub-process)*********************************
-"""
+# ---------------------------------------------------------------------------
+# Cross-sections for proton target (virtual photon sub-process)
+# ---------------------------------------------------------------------------
 
-def epsilon(y:float):
-    """ Photon polarizability.
+def epsilon(y: float) -> float:
+    r"""Virtual photon polarization parameter :math:`\varepsilon`.
+
+    .. math::
+
+        \varepsilon = \frac{1 - y}{1 - y + y^2/2}
+
+    See Eq. (31) of `arXiv:1112.2597 <https://arxiv.org/pdf/1112.2597>`_.
 
     Args:
-       y (float): Beam energy lost parameter
-     
+        y (float): inelasticity (beam energy loss fraction).
 
     Returns:
-        epsilon:  "Eq.(31) in https://arxiv.org/pdf/1112.2597" 
+        float: :math:`\varepsilon \in (0, 1)`.
     """
     return (1 - y) / (1 - y + y**2 / 2)
 
-def MassCorr(meson:int):
-    """ Mass corrections 
+def MassCorr(meson: int) -> float:
+    r"""Meson mass correction entering the propagator denominator.
 
-     Args:
-         meson:The meson being produced in DVMP process: 1 for rho, 2 for phi, 3 for j/psi
-      
+    Returns :math:`M_{J/\psi}` for :math:`J/\psi` production and ``0`` for
+    lighter mesons, where the mass correction to :math:`Q^2` is negligible.
 
-     Returns:
-        mass correction only for j/psi
-     """
+    Args:
+        meson (int): meson code — ``1`` for :math:`\rho^0`, ``2`` for
+            :math:`\phi`, ``3`` for :math:`J/\psi`.
+
+    Returns:
+        float: mass correction in GeV (:math:`M_{J/\psi}` for ``meson=3``,
+        ``0`` otherwise).
+    """
   
     if (meson==3):
         return  M_jpsi
@@ -221,23 +284,33 @@ def MassCorr(meson:int):
 # -----------------------------------------------------------------------------
 
 @np.vectorize
-def dsigmaL_DVMP_dt(y: float, xB: float, t: float, Q: float, meson:int, HTFF: complex, ETFF: complex):
-    """Longitudinal DVMP cross section differential only in t
-          
-      Args:
-          y (float): Beam energy lost parameter
-          xB (float): x_bjorken
-          t (float): momentum transfer square
-          Q (float): photon virtuality
-          TFF (complex): Transition form factor H 
-          ETFF (complex): Transition form factor E
-          MassCorr(int): Mass corrections to the cross section.  Nonzero only for j/psi
-   
-      
+def dsigmaL_DVMP_dt(y: float, xB: float, t: float, Q: float, meson: int,
+                    HTFF: complex, ETFF: complex) -> float:
+    r"""Longitudinal DVMP differential cross-section :math:`d\sigma_L/dt`.
 
-      Returns:
-          
-          Eq.(2.8) as in https://arxiv.org/pdf/2409.17231"
+    Implements Eq. (2.8) of `arXiv:2409.17231 <https://arxiv.org/pdf/2409.17231>`_:
+
+    .. math::
+
+        \frac{d\sigma_L}{dt} = \frac{4\pi^2\alpha_{\rm EM}\,x_B^2}
+            {(Q^2+M_c^2)^2}\cdot\frac{Q^2}{(Q^2+M_c^2)^2}
+            \left[|\mathcal{H}|^2 - \frac{t}{4M_p^2}|\mathcal{E}|^2\right]
+
+    where :math:`M_c = M_{J/\psi}` for :math:`J/\psi` and ``0`` otherwise
+    (see :func:`MassCorr`).  The result is converted to nb/GeV\ :sup:`2`.
+
+    Args:
+        y (float): inelasticity.
+        xB (float): Bjorken-:math:`x`.
+        t (float): squared momentum transfer :math:`t` in GeV\ :sup:`2`.
+        Q (float): photon virtuality :math:`Q` in GeV.
+        meson (int): meson code — ``1`` for :math:`\rho^0`, ``2`` for
+            :math:`\phi`, ``3`` for :math:`J/\psi`.
+        HTFF (complex): helicity-conserving TFF :math:`\mathcal{H}`.
+        ETFF (complex): helicity-flip TFF :math:`\mathcal{E}`.
+
+    Returns:
+        float: :math:`d\sigma_L/dt` in nb/GeV\ :sup:`2`.
     """
 
     return gevtonb * ( 4* np.pi**2  *alphaEM * xB ** 2 / ((Q**2 + MassCorr(meson)**2) ** 2)) * (Q/ (Q**2 + MassCorr(meson)**2)) ** 2 * (Real(HTFF* Conjugate(HTFF)) - t/4/ M_p**2 * Real(ETFF* Conjugate(ETFF)))
@@ -247,23 +320,36 @@ def dsigmaL_DVMP_dt(y: float, xB: float, t: float, Q: float, meson:int, HTFF: co
 # -----------------------------------------------------------------------------
 
 @np.vectorize
-def dsigma_DVMP_dt(y: float, xB: float, t: float, Q: float, meson:int, HTFF: complex, ETFF: complex,a:float,p:float):
-    """The total DVMP cross section differential only in t
-          
-      Args:
-          y (float): Beam energy lost parameter
-          xB (float): x_bjorken
-          t (float): momentum transfer square
-          Q (float): photon virtuality
-          TFF (complex): Transition form factor H 
-          ETFF (complex): Transition form factor E
-          MassCorr(int): Mass corrections to the cross section.  Nonzero only for j/psi
-   
-      
+def dsigma_DVMP_dt(y: float, xB: float, t: float, Q: float, meson: int,
+                   HTFF: complex, ETFF: complex, a: float, p: float) -> float:
+    r"""Total (L+T) DVMP differential cross-section :math:`d\sigma/dt`.
 
-      Returns:
-          
-          Eq.(2.16) as in https://arxiv.org/pdf/2409.17231"
+    Obtains the longitudinal cross-section from :func:`dsigmaL_DVMP_dt` and
+    undoes the L/T separation using Eq. (2.16) of
+    `arXiv:2409.17231 <https://arxiv.org/pdf/2409.17231>`_:
+
+    .. math::
+
+        \frac{d\sigma}{dt} = \frac{d\sigma_L}{dt}
+            \left(\varepsilon + \frac{1}{R}\right)
+
+    where :math:`\varepsilon` is the virtual-photon polarization
+    (see :func:`epsilon`) and :math:`R = \sigma_L/\sigma_T` (see :func:`R`).
+
+    Args:
+        y (float): inelasticity.
+        xB (float): Bjorken-:math:`x`.
+        t (float): squared momentum transfer :math:`t` in GeV\ :sup:`2`.
+        Q (float): photon virtuality :math:`Q` in GeV.
+        meson (int): meson code — ``1`` for :math:`\rho^0`, ``2`` for
+            :math:`\phi`, ``3`` for :math:`J/\psi`.
+        HTFF (complex): helicity-conserving TFF :math:`\mathcal{H}`.
+        ETFF (complex): helicity-flip TFF :math:`\mathcal{E}`.
+        a (float): :func:`R` fit parameter :math:`a`.
+        p (float): :func:`R` fit parameter :math:`p`.
+
+    Returns:
+        float: :math:`d\sigma/dt` in nb/GeV\ :sup:`2`.
     """
 
     return  dsigmaL_DVMP_dt(y, xB, t, Q, meson, HTFF, ETFF)*(epsilon(y)+1/R(Q,a,p,meson))

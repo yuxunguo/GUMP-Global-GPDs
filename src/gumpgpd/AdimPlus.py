@@ -1,3 +1,8 @@
+"""
+Not in use currently, but this module contains an alternative alpha_s implementation 
+based on interpolation of a pre-computed table using eko's implementation.
+"""
+
 import numpy as np
 from typing import Tuple, Union
 from scipy.interpolate import PchipInterpolator
@@ -9,7 +14,6 @@ from eko.quantities.couplings import CouplingEvolutionMethod, CouplingsInfo
 from eko.quantities.heavy_quarks import QuarkMassScheme
 from ekore.anomalous_dimensions.unpolarized import time_like as tl
 from ekore.anomalous_dimensions.unpolarized import space_like as sl
-
 
 from . import config
 
