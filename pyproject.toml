@@ -9,7 +9,7 @@ version = "1.0.2+dev"
 description = "GPD analysis tools for DVCS, DVMP, and lattice inputs"
 readme = "README.md"
 requires-python = ">=3.8"
-license = { text = "MIT" }
+license = { text = "GPL-3.0" }
 
 authors = [
   { name = "Yuxun Guo", email = "youuungx@gmail.com" }
@@ -17,7 +17,7 @@ authors = [
 
 classifiers = [
   "Programming Language :: Python :: 3",
-  "License :: OSI Approved :: MIT License",
+  "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",
   "Operating System :: OS Independent",
 ]
 
@@ -31,6 +31,7 @@ dependencies = [
   "scipy",
   "scikit-learn",
   "colorama",
+  "diskcache",
 ]
 
 

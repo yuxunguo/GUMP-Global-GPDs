@@ -1,3 +1,11 @@
+"""GUMP GPD global fit: cost function and iMinuit-based fitting interface.
+
+Loads and preprocesses all experimental datasets (PDFs, tPDFs, GFFs, GPDs,
+DVCS cross-sections and asymmetries, DVMP cross-sections for rho, phi, and
+J/psi), builds NLO theory predictions via :mod:`gumpgpd.Observables`,
+:mod:`gumpgpd.DVCS_xsec`, and :mod:`gumpgpd.DVMP_xsec`, and exposes a
+single iMinuit-based fit driver: :func:`off_forward_fit_withH_withHt`.
+"""
 from .Parameters import ParaManager_Unp, ParaManager_Pol
 from .Observables import GPDobserv
 from .DVCS_xsec import dsigma_DVCS_TOT, Asymmetry_DVCS_TOT, dsigma_DVCS_HERA, M
@@ -21,9 +29,7 @@ t_threshold_Jpsi = 0.6
 xB_Cut = 0.5
 xB_small_Cut = 0.0001
 time_start = time.time()
-"""
-************************ Some auxilary functions and variables for convience ****************************
-"""
+# --- Auxiliary functions and module-level variables ---
 
 Paralst_Unp_Names = [
     "Norm_HuV", "alpha_HuV", "beta_HuV", "alphap_HuV", "Invm2_HuV",
@@ -59,6 +65,16 @@ Paralst_Pol_Names = [
 Paralst_Aux_Names = ["jpsinorm"] 
 
 def validate_params(params: dict, required_names: set):
+    """Validate that a parameter dictionary contains exactly the required keys with non-None values.
+
+    Args:
+        params (dict): Dictionary of parameter names to values (typically from ``locals()``).
+        required_names (set): Set of parameter names that must be present and non-None.
+
+    Raises:
+        ValueError: If any required key is missing, an extra key is present, or any
+            required value is ``None``.
+    """
     param_keys = set(params.keys())
 
     missing = required_names - param_keys
@@ -80,7 +96,17 @@ First_Write_Flag = {}
 SAVE_TO_FILE = True
 SAVE_TO_FILE_PATH = '.'
 def Export_Frame_Append(df, filename, export_path = None):
+    """Append (or create) a CSV file inside ``<export_path>/GUMP_Results/``.
 
+    On the first call for a given *filename* the file is created and the header
+    row is written.  Subsequent calls append rows without repeating the header.
+
+    Args:
+        df (pd.DataFrame): Data to write.
+        filename (str): Name of the CSV file (e.g. ``'PDFcomp.csv'``).
+        export_path (str, optional): Root directory for output.  Defaults to
+            the module-level :data:`SAVE_TO_FILE_PATH`.
+    """
     if export_path is None:
         export_path = SAVE_TO_FILE_PATH
 
@@ -101,6 +127,7 @@ def Export_Frame_Append(df, filename, export_path = None):
 _pool = None
 
 def _cleanup_pool():
+    """Terminate and join the global worker pool, then set it to ``None``."""
     global _pool
     if _pool is not None:
         _pool.close()
@@ -108,6 +135,18 @@ def _cleanup_pool():
         _pool = None
 
 def get_pool(processes=None):
+    """Return the module-level :class:`multiprocessing.Pool`, creating it on first call.
+
+    The pool is registered with :func:`atexit` so it is cleanly shut down when
+    the interpreter exits.
+
+    Args:
+        processes (int, optional): Number of worker processes.  Defaults to
+            ``os.cpu_count()``.
+
+    Returns:
+        multiprocessing.Pool: The shared worker pool.
+    """
     global _pool
     if _pool is None:
         _pool = Pool(processes)
@@ -115,18 +154,20 @@ def get_pool(processes=None):
     return _pool
 
 def close_pool():
+    """Close and join the global worker pool (calls :func:`_cleanup_pool`)."""
     _cleanup_pool()
 
 def group_by_unique(data, subset=['xB', 't', 'Q']):
-    """
-    Group a DataFrame by unique combinations of specified columns.
+    """Split a DataFrame into groups of identical kinematics.
 
-    Parameters:
-        data (pd.DataFrame): The input DataFrame.
-        subset (List[str], optional): Columns to group by. Default is ['xB', 't', 'Q'].
+    Args:
+        data (pd.DataFrame): Input data table.
+        subset (list of str, optional): Columns that define a unique kinematic
+            point.  Defaults to ``['xB', 't', 'Q']``.
 
     Returns:
-        List[pd.DataFrame]: A list of DataFrames, each corresponding to a unique group.
+        list of pd.DataFrame: One sub-DataFrame per unique combination of
+        *subset* values, preserving the original row order.
     """
     unique_combinations = data.drop_duplicates(subset=subset, keep='first')[subset].values.tolist()
     grouped_data = [
@@ -135,9 +176,7 @@ def group_by_unique(data, subset=['xB', 't', 'Q']):
     ]
     return grouped_data
 
-"""
-************************ PDF and tPDFs data preprocessing ****************************
-"""
+# --- PDF and tPDF data preprocessing ---
 
 PDF_data = pd.read_csv(os.path.join(dir_path,'GUMPDATA/PDFdata.csv'), header = 0, names = ['x', 't', 'Q', 'f', 'delta f', 'spe', 'flv'],        dtype = {'x': float, 't': float, 'Q': float, 'f': float, 'delta f': float,'spe': int, 'flv': str})
 
@@ -145,18 +184,14 @@ tPDF_data = pd.read_csv(os.path.join(dir_path,'GUMPDATA/tPDFdata.csv'),     head
 
 GPD_data = pd.read_csv(os.path.join(dir_path,'GUMPDATA/GPDdata.csv'), header = 0, names = ['x', 'xi', 't', 'Q', 'f', 'delta f', 'spe', 'flv'],        dtype = {'x': float, 'xi': float, 't': float, 'Q': float, 'f': float, 'delta f': float,'spe': int, 'flv': str})
 
-"""
-************************ GFF data preprocessing ****************************
-"""
+# --- GFF data preprocessing ---
 
 GFF_data = pd.read_csv(os.path.join(dir_path,'GUMPDATA/GFFdata.csv'),       header = 0, names = ['j', 't', 'Q', 'f', 'delta f', 'spe', 'flv', 'comment'],        dtype = {'j': int, 't': float, 'Q': float, 'f': float, 'delta f': float,'spe': int, 'flv': str})
 
 if not config.INC_gGFF:
     GFF_data= GFF_data[GFF_data['flv']!='g']
 
-"""
-************************ DVCS data preprocessing ****************************
-"""
+# --- DVCS data preprocessing ---
 
 DVCSxsec_data = pd.read_csv(os.path.join(dir_path,'GUMPDATA/DVCSxsec_Old.csv'), header = None, names = ['y', 'xB', 't', 'Q', 'phi', 'f', 'delta f', 'pol'] , dtype = {'y': float, 'xB': float, 't': float, 'Q': float, 'phi': float, 'f': float, 'delta f': float, 'pol': str})
 DVCSxsec_data_invalid = DVCSxsec_data[DVCSxsec_data['t']*(DVCSxsec_data['xB']-1) - M ** 2 * DVCSxsec_data['xB'] ** 2 < 0]
@@ -180,9 +215,7 @@ DVCSAsym_data = DVCSAsym_data[(DVCSAsym_data['Q'] > Q_threshold) & (DVCSAsym_dat
 DVCSAsym_Clustered = cluster_DVCSAsym(DVCSAsym_data,verbose=False)
 DVCSAsym_group_data = group_by_unique(DVCSAsym_Clustered)
 
-"""
-************************ DVMP for rho data preprocessing ****************************
-"""
+# --- DVMP (rho) data preprocessing ---
 
 def DVMP_L_Error_Prop(DVMP_tot_xsec: pd.DataFrame, meson: int =1): 
     """ Error propagation for dσ_L /dt= (dσ_tot /dt) / (ε(y) + 1/R(Q;a,p,meson)).
@@ -242,9 +275,7 @@ DVrhoPH1xsecL_data['f'] = dsigmaL_dt_H1
 DVrhoPH1xsecL_data['delta f'] = dsigmaL_dt_err_H1
 DVrhoPH1xsecL_group_data = group_by_unique(DVrhoPH1xsecL_data)
 
-"""
-************************ DVMP for phi data preprocessing ****************************
-"""
+# --- DVMP (phi) data preprocessing ---
 
 DVphiPZEUSxsec_data = pd.read_csv(os.path.join(dir_path,'GUMPDATA/DVMP_HERA/DVphiPZEUSdt.csv'), header = None, names = ['y', 'xB', 't', 'Q', 'f', 'delta f'] , dtype = {'y': float, 'xB': float, 't': float, 'Q': float, 'f': float, 'delta f': float})
 DVphiPZEUSxsec_data['Q'] = np.sqrt(DVphiPZEUSxsec_data['Q'])
@@ -258,9 +289,7 @@ DVphiPH1xsec_data['t'] = -1 * DVphiPH1xsec_data['t']
 DVphiPH1xsec_data = DVphiPH1xsec_data[(DVphiPH1xsec_data['Q']>Q_threshold)]
 DVphiPH1xsec_group_data = group_by_unique(DVphiPH1xsec_data)
 
-"""
-************************ DVMP for Jpsi data preprocessing ****************************
-"""
+# --- DVMP (J/psi) data preprocessing ---
 
 DVJpsiPH1xsec_data = pd.read_csv(os.path.join(dir_path,'GUMPDATA/DVMP_HERA/DVJpsiPH1dt_w_mass.csv'), header = None, names = ['y', 'xB', 't', 'Q', 'f', 'delta f'] , dtype = {'y': float, 'xB': float, 't': float, 'Q': float, 'f': float, 'delta f': float})
 DVJpsiPH1xsec_data['Q'] = np.sqrt(DVJpsiPH1xsec_data['Q'])
@@ -314,9 +343,7 @@ DVJpsiPZEUSxsec_group_data = list(map(lambda set: DVJpsiPZEUSxsec_data[(DVJpsiPZ
 DVJpsiPZEUSxsec_L_group_data = list(map(lambda set: DVJpsiPZEUSxsec_L_data[(DVJpsiPZEUSxsec_data['xB'] == set[0]) & (DVJpsiPZEUSxsec_L_data['t'] == set[1]) & ((DVJpsiPZEUSxsec_L_data['Q'] == set[2]))], xBtQlst_JpsiZ))
 '''
 
-"""
-************************ Photon productions of Jpsi data preprocessing (Not in use) ****************************
-"""
+# --- Photoproduction of J/psi data preprocessing (not in use) ---
 
 JpsiphotoH1xsec_data = pd.read_csv(os.path.join(dir_path,'GUMPDATA/DVMP_HERA/DVJpsiPZEUSdt_w_mass.csv'), header = None, names = ['y', 'xB', 't', 'Q', 'f', 'delta f'] , dtype = {'y': float, 'xB': float, 't': float, 'Q': float, 'f': float, 'delta f': float})
 JpsiphotoH1xsec_data['Q'] = np.sqrt(JpsiphotoH1xsec_data['Q'])
@@ -326,21 +353,82 @@ xBtQlst_JpsiphotoH1 = JpsiphotoH1xsec_data.drop_duplicates(subset = ['xB', 't', 
 
 # Helper functions now take multiple arguments directly
 def PDF_theo_scalar_helper(x_i, xi_i, t_i, Q_i, p_i, flv_i, Para_i, p_order):
-    _PDF_theo = GPDobserv(x_i, xi_i, t_i, Q_i, p_i)  
+    """Compute a single tPDF/PDF theory value for use with :func:`multiprocessing.Pool.starmap`.
+
+    Args:
+        x_i (float): Longitudinal momentum fraction :math:`x`.
+        xi_i (float): Skewness :math:`\\xi` (zero in the forward limit).
+        t_i (float): Momentum transfer squared :math:`t`.
+        Q_i (float): Factorization/evolution scale :math:`Q`.
+        p_i (int): 1 for vector GPDs (H, E), -1 for axial-vector GPDs (Ht, Et).
+        flv_i (str): Flavor label (e.g. ``'u'``, ``'d'``, ``'g'``).
+        Para_i (np.ndarray): Parameter array for this kinematic point.
+        p_order (int): Perturbative order (1 = LO, 2 = NLO).
+
+    Returns:
+        float: Theory prediction for the tPDF/PDF at the given kinematics.
+    """  
+    _PDF_theo = GPDobserv(x_i, xi_i, t_i, Q_i, p_i)
     return _PDF_theo.tPDF(flv_i, Para_i, p_order)
 
 # Helper function for scalar computation
 def GFF_theo_scalar_helper(j_i, x, xi, t_i, Q_i, p_i, flv_i, Para_i, p_order):
+    """Compute a single GFF theory value for use with :func:`multiprocessing.Pool.starmap`.
+
+    Args:
+        j_i (int): Mellin moment index :math:`j`.
+        x (float): Momentum fraction (set to 0 for GFFs).
+        xi (float): Skewness (set to 0 for GFFs).
+        t_i (float): Momentum transfer squared :math:`t`.
+        Q_i (float): Factorization/evolution scale :math:`Q`.
+        p_i (int): 1 for vector GPDs (H, E), -1 for axial-vector GPDs (Ht, Et).
+        flv_i (str): Flavor label.
+        Para_i (np.ndarray): Parameter array for this kinematic point.
+        p_order (int): Perturbative order (1 = LO, 2 = NLO).
+
+    Returns:
+        float: Theory prediction for the :math:`j=0` GFF moment.
+    """
     _GFF_theo = GPDobserv(x, xi, t_i, Q_i, p_i)
     return _GFF_theo.GFFj0(j_i, flv_i, Para_i, p_order)
 
 def GPD_theo_scalar_helper(x_i, xi_i, t_i, Q_i, p_i, flv_i, Para_i, p_order):
-    _GPD_theo = GPDobserv(x_i, xi_i, t_i, Q_i, p_i)  
+    """Compute a single GPD theory value for use with :func:`multiprocessing.Pool.starmap`.
+
+    Args:
+        x_i (float): Longitudinal momentum fraction :math:`x`.
+        xi_i (float): Skewness :math:`\\xi`.
+        t_i (float): Momentum transfer squared :math:`t`.
+        Q_i (float): Factorization/evolution scale :math:`Q`.
+        p_i (int): 1 for vector GPDs (H, E), -1 for axial-vector GPDs (Ht, Et).
+        flv_i (str): Flavor label.
+        Para_i (np.ndarray): Parameter array for this kinematic point.
+        p_order (int): Perturbative order (1 = LO, 2 = NLO).
+
+    Returns:
+        float: Theory prediction for the off-forward GPD at the given kinematics.
+    """  
+    _GPD_theo = GPDobserv(x_i, xi_i, t_i, Q_i, p_i)
     return _GPD_theo.GPD(flv_i, Para_i, p_order)
 
 def PDF_theo(PDF_input: pd.DataFrame, Para: np.array, p_order = 2, chunksize = None):
-    
-    PDF_input = PDF_input.copy()
+    """Compute NLO tPDF/PDF theory predictions for an entire dataset in parallel.
+
+    Adds a ``'pred f'`` column with the theory prediction and, if ``'f'`` and
+    ``'delta f'`` columns are present, a ``'cost'`` column with the
+    per-point :math:`\\chi^2` contribution.
+
+    Args:
+        PDF_input (pd.DataFrame): Input data with columns ``x``, ``t``, ``Q``,
+            ``flv``, ``spe`` (species index), and optionally ``f``/``delta f``.
+        Para (np.ndarray): Full stacked parameter array indexed by species.
+        p_order (int, optional): Perturbative order.  Defaults to 2 (NLO).
+        chunksize (int, optional): Pool map chunksize for performance tuning.
+
+    Returns:
+        pd.DataFrame: Copy of *PDF_input* with added ``'pred f'`` and
+        (if data present) ``'cost'`` columns.
+    """
     
     xs = PDF_input['x'].to_numpy()
     ts = PDF_input['t'].to_numpy()
@@ -366,8 +454,23 @@ def PDF_theo(PDF_input: pd.DataFrame, Para: np.array, p_order = 2, chunksize = N
 tPDF_theo = PDF_theo
 
 def GFF_theo(GFF_input: pd.DataFrame, Para: np.array, p_order = 2, chunksize = None):
-    
-    GFF_input = GFF_input.copy()
+    """Compute NLO GFF theory predictions for an entire dataset in parallel.
+
+    Adds a ``'pred f'`` column with the theory prediction and, if ``'f'`` and
+    ``'delta f'`` columns are present, a ``'cost'`` column with the
+    per-point :math:`\\chi^2` contribution.
+
+    Args:
+        GFF_input (pd.DataFrame): Input data with columns ``j``, ``t``, ``Q``,
+            ``flv``, ``spe``, and optionally ``f``/``delta f``.
+        Para (np.ndarray): Full stacked parameter array indexed by species.
+        p_order (int, optional): Perturbative order.  Defaults to 2 (NLO).
+        chunksize (int, optional): Pool map chunksize for performance tuning.
+
+    Returns:
+        pd.DataFrame: Copy of *GFF_input* with added ``'pred f'`` and
+        (if data present) ``'cost'`` columns.
+    """
     
     js = GFF_input['j'].to_numpy()
     ts = GFF_input['t'].to_numpy()
@@ -391,8 +494,23 @@ def GFF_theo(GFF_input: pd.DataFrame, Para: np.array, p_order = 2, chunksize = N
     return GFF_input
 
 def GPD_theo(GPD_input: pd.DataFrame, Para: np.array, p_order = 2, chunksize = None):
-    
-    GPD_input = GPD_input.copy()
+    """Compute NLO off-forward GPD theory predictions for an entire dataset in parallel.
+
+    Adds a ``'pred f'`` column with the theory prediction and, if ``'f'`` and
+    ``'delta f'`` columns are present, a ``'cost'`` column with the
+    per-point :math:`\\chi^2` contribution.
+
+    Args:
+        GPD_input (pd.DataFrame): Input data with columns ``x``, ``xi``, ``t``,
+            ``Q``, ``flv``, ``spe``, and optionally ``f``/``delta f``.
+        Para (np.ndarray): Full stacked parameter array indexed by species.
+        p_order (int, optional): Perturbative order.  Defaults to 2 (NLO).
+        chunksize (int, optional): Pool map chunksize for performance tuning.
+
+    Returns:
+        pd.DataFrame: Copy of *GPD_input* with added ``'pred f'`` and
+        (if data present) ``'cost'`` columns.
+    """
     
     xs = GPD_input['x'].to_numpy()
     xis = GPD_input['xi'].to_numpy()
@@ -415,9 +533,19 @@ def GPD_theo(GPD_input: pd.DataFrame, Para: np.array, p_order = 2, chunksize = N
     return GPD_input
 
 def DVCSxsec_theo_helper(DVCSxsec_input: pd.DataFrame, CFF_input: np.array):
-    # CFF_input is a list of np.arrays
-    # [y, xB, t, Q, phi, f, delta_f, pol] = DVCSxsec_input    
+    """Compute DVCS differential cross-section predictions for a single kinematic group.
 
+    Args:
+        DVCSxsec_input (pd.DataFrame): Rows sharing a common :math:`(x_B, t, Q)`
+            with columns ``y``, ``xB``, ``t``, ``Q``, ``phi``, ``pol``.
+        CFF_input (list of array-like): ``[HCFF, ECFF, HtCFF, EtCFF]`` —
+            Compton form factors evaluated at the kinematics of this group;
+            each element may be a scalar or a 1-D array of shape ``(N,)``.
+
+    Returns:
+        np.ndarray: Theory cross-section predictions with the same length as
+        *DVCSxsec_input*.
+    """
     y = DVCSxsec_input['y'].to_numpy()
     xB = DVCSxsec_input['xB'].to_numpy()
     t = DVCSxsec_input['t'].to_numpy()
@@ -430,9 +558,18 @@ def DVCSxsec_theo_helper(DVCSxsec_input: pd.DataFrame, CFF_input: np.array):
     return dsigma_DVCS_TOT(y, xB, t, Q, phi, pol, HCFF, ECFF, HtCFF, EtCFF)
 
 def DVCSAsym_theo_helper(DVCSAsym_input: pd.DataFrame, CFF_input: np.array):
-    # CFF_input is a list of np.arrays
-    # [y, xB, t, Q, phi, f, delta_f, pol] = DVCSxsec_input    
+    """Compute DVCS beam-spin asymmetry predictions for a single kinematic group.
 
+    Args:
+        DVCSAsym_input (pd.DataFrame): Rows sharing a common :math:`(x_B, t, Q)`
+            with columns ``y``, ``xB``, ``t``, ``Q``, ``phi``, ``pol``.
+        CFF_input (list of array-like): ``[HCFF, ECFF, HtCFF, EtCFF]`` —
+            Compton form factors; each element may be scalar or 1-D array ``(N,)``.
+
+    Returns:
+        np.ndarray: Theory asymmetry predictions with the same length as
+        *DVCSAsym_input*.
+    """
     y = DVCSAsym_input['y'].to_numpy()
     xB = DVCSAsym_input['xB'].to_numpy()
     t = DVCSAsym_input['t'].to_numpy()
@@ -444,7 +581,18 @@ def DVCSAsym_theo_helper(DVCSAsym_input: pd.DataFrame, CFF_input: np.array):
     return Asymmetry_DVCS_TOT(y, xB, t, Q, phi, pol, HCFF, ECFF, HtCFF, EtCFF)
 
 def DVCSxsec_HERA_theo_helper(DVCSxsec_HERA_input: pd.DataFrame, CFF_input: np.array):
-    #[y, xB, t, Q, f, delta_f, pol]  = DVCSxsec_data_HERA
+    """Compute DVCS cross-section predictions for HERA kinematics (no azimuthal angle).
+
+    Args:
+        DVCSxsec_HERA_input (pd.DataFrame): Rows sharing a common
+            :math:`(x_B, t, Q)` with columns ``y``, ``xB``, ``t``, ``Q``,
+            ``pol``.
+        CFF_input (list of array-like): ``[HCFF, ECFF, HtCFF, EtCFF]`` —
+            Compton form factors; each element may be scalar or 1-D array ``(N,)``.
+
+    Returns:
+        np.ndarray: Theory HERA cross-section predictions.
+    """
     y = DVCSxsec_HERA_input['y'].to_numpy()
     xB = DVCSxsec_HERA_input['xB'].to_numpy()
     t = DVCSxsec_HERA_input['t'].to_numpy()
@@ -457,6 +605,19 @@ def DVCSxsec_HERA_theo_helper(DVCSxsec_HERA_input: pd.DataFrame, CFF_input: np.a
     return dsigma_DVCS_HERA(y, xB, t, Q, pol, HCFF, ECFF, HtCFF, EtCFF)
 
 def DVMPxsec_theo_helper(DVMPxsec_input: pd.DataFrame,  TFF_input: np.array, meson:int):
+    """Compute DVMP differential cross-section predictions for a single kinematic group.
+
+    Args:
+        DVMPxsec_input (pd.DataFrame): Rows sharing a common :math:`(x_B, t, Q)`
+            with columns ``y``, ``xB``, ``t``, ``Q``.
+        TFF_input (list of array-like): ``[HTFF, ETFF]`` — transition form
+            factors; each element may be scalar or 1-D array ``(N,)``.
+        meson (int): Meson type: 1 for :math:`\\rho^0`, 2 for :math:`\\phi`,
+            3 for J/psi.
+
+    Returns:
+        np.ndarray: Theory :math:`d\\sigma/dt` predictions.
+    """
     y = DVMPxsec_input['y'].to_numpy()
     xB = DVMPxsec_input['xB'].to_numpy()
     t = DVMPxsec_input['t'].to_numpy()
@@ -471,6 +632,23 @@ def DVMPxsec_theo_helper(DVMPxsec_input: pd.DataFrame,  TFF_input: np.array, mes
         return dsigmaL_DVMP_dt(y, xB, t, Q, meson, HTFF, ETFF)
 
 def CFF_theo(xB, t, Q, Para_Unp, Para_Pol, porder = 2):
+    r"""Compute the four Compton form factors (CFFs) at a given kinematic point.
+
+    The skewness is derived from :math:`x_B`, :math:`t`, and :math:`Q` via the
+    exact kinematic relation.
+
+    Args:
+        xB (float): Bjorken-:math:`x` variable.
+        t (float): Momentum transfer squared :math:`t`.
+        Q (float): Photon virtuality :math:`Q`.
+        Para_Unp (np.ndarray): Unpolarized GPD parameter array (species-stacked).
+        Para_Pol (np.ndarray): Polarized GPD parameter array (species-stacked).
+        porder (int, optional): Perturbative order.  Defaults to 2 (NLO).
+
+    Returns:
+        list: ``[HCFF, ECFF, HtCFF, EtCFF]`` — the four CFFs as scalars (or
+        arrays if the input parameters have a batch dimension).
+    """
     x = 0
     xi = (1/(2 - xB) - (2*t*(-1 + xB))/(Q**2*(-2 + xB)**2))*xB
     H_E = GPDobserv(x, xi, t, Q, 1)
@@ -484,6 +662,26 @@ def CFF_theo(xB, t, Q, Para_Unp, Para_Pol, porder = 2):
     # return np.stack([HCFF, ECFF, HtCFF, EtCFF], axis=-1)
 
 def TFF_theo(xB, t, Q, Para_Unp, meson:int, p_order = 2, muset = 1, flv = 'All'):
+    r"""Compute the two transition form factors (TFFs) for DVMP at a given kinematic point.
+
+    The skewness is derived from :math:`x_B`, :math:`t`, and :math:`Q`.  For
+    J/psi production the J/psi mass enters the skewness formula.
+
+    Args:
+        xB (float): Bjorken-:math:`x` variable.
+        t (float): Momentum transfer squared :math:`t`.
+        Q (float): Photon virtuality :math:`Q`.
+        Para_Unp (np.ndarray): Unpolarized GPD parameter array (species-stacked).
+        meson (int): Meson type: 1 for :math:`\\rho^0`, 2 for :math:`\\phi`,
+            3 for J/psi.
+        p_order (int, optional): Perturbative order.  Defaults to 2 (NLO).
+        muset (float, optional): Scale factor applied to :math:`Q` when
+            evaluating the TFF (used for scale-uncertainty studies).
+        flv (str, optional): Flavor channel.  Defaults to ``'All'``.
+
+    Returns:
+        list: ``[HTFF, ETFF]`` — the H- and E-type TFFs.
+    """
     x = 0
     xi = (1/(2 - xB) - (2*t*(-1 + xB))/((Q**2)*(-2 + xB)**2))*xB
     if (meson==3):
@@ -495,6 +693,20 @@ def TFF_theo(xB, t, Q, Para_Unp, meson:int, p_order = 2, muset = 1, flv = 'All')
     return  [ HTFF, ETFF]
 
 def DVCSxsec_theo_xBtQ(DVCSxsec_data_xBtQ: pd.DataFrame, Para_Unp, Para_Pol, P_order = 2):
+    """Add DVCS cross-section theory predictions for a single :math:`(x_B, t, Q)` group.
+
+    Computes the CFFs once for the shared kinematics, then fills predictions
+    for all phi/polarization rows in the group.
+
+    Args:
+        DVCSxsec_data_xBtQ (pd.DataFrame): Rows with identical ``xB``, ``t``, ``Q``.
+        Para_Unp (np.ndarray): Unpolarized parameter array.
+        Para_Pol (np.ndarray): Polarized parameter array.
+        P_order (int, optional): Perturbative order.  Defaults to 2.
+
+    Returns:
+        pd.DataFrame: Input DataFrame with added ``'pred f'`` and ``'cost'`` columns.
+    """
     [xB, t, Q] = [DVCSxsec_data_xBtQ['xB'].iat[0], DVCSxsec_data_xBtQ['t'].iat[0], DVCSxsec_data_xBtQ['Q'].iat[0]] 
     [HCFF, ECFF, HtCFF, EtCFF] = CFF_theo(xB, t, Q, Para_Unp, Para_Pol, porder= P_order) # scalar for each of them
 
@@ -505,6 +717,17 @@ def DVCSxsec_theo_xBtQ(DVCSxsec_data_xBtQ: pd.DataFrame, Para_Unp, Para_Pol, P_o
     return DVCSxsec_data_xBtQ
 
 def DVCSAsym_theo_xBtQ(DVCSAsym_data_xBtQ: pd.DataFrame, Para_Unp, Para_Pol, P_order = 2):
+    """Add DVCS asymmetry theory predictions for a single :math:`(x_B, t, Q)` group.
+
+    Args:
+        DVCSAsym_data_xBtQ (pd.DataFrame): Rows with identical ``xB``, ``t``, ``Q``.
+        Para_Unp (np.ndarray): Unpolarized parameter array.
+        Para_Pol (np.ndarray): Polarized parameter array.
+        P_order (int, optional): Perturbative order.  Defaults to 2.
+
+    Returns:
+        pd.DataFrame: Input DataFrame with added ``'pred f'`` and ``'cost'`` columns.
+    """
     [xB, t, Q] = [DVCSAsym_data_xBtQ['xB'].iat[0], DVCSAsym_data_xBtQ['t'].iat[0], DVCSAsym_data_xBtQ['Q'].iat[0]] 
     [HCFF, ECFF, HtCFF, EtCFF] = CFF_theo(xB, t, Q, Para_Unp, Para_Pol, porder= P_order) # scalar for each of them
 
@@ -515,7 +738,17 @@ def DVCSAsym_theo_xBtQ(DVCSAsym_data_xBtQ: pd.DataFrame, Para_Unp, Para_Pol, P_o
     return DVCSAsym_data_xBtQ
 
 def DVCSxsecHERA_theo_xBtQ(DVCSxsec_HERA_data_xBtQ: pd.DataFrame, Para_Unp, Para_Pol , P_order = 2):
+    """Add HERA DVCS cross-section theory predictions for a single :math:`(x_B, t, Q)` group.
 
+    Args:
+        DVCSxsec_HERA_data_xBtQ (pd.DataFrame): Rows with identical ``xB``, ``t``, ``Q``.
+        Para_Unp (np.ndarray): Unpolarized parameter array.
+        Para_Pol (np.ndarray): Polarized parameter array.
+        P_order (int, optional): Perturbative order.  Defaults to 2.
+
+    Returns:
+        pd.DataFrame: Input DataFrame with added ``'pred f'`` and ``'cost'`` columns.
+    """ 
     [xB, t, Q] = [DVCSxsec_HERA_data_xBtQ['xB'].iat[0], DVCSxsec_HERA_data_xBtQ['t'].iat[0], DVCSxsec_HERA_data_xBtQ['Q'].iat[0]] 
     [HCFF, ECFF, HtCFF, EtCFF] = CFF_theo(xB, t, Q, Para_Unp, Para_Pol, porder = P_order) # scalar for each of them
 
@@ -526,7 +759,19 @@ def DVCSxsecHERA_theo_xBtQ(DVCSxsec_HERA_data_xBtQ: pd.DataFrame, Para_Unp, Para
     return DVCSxsec_HERA_data_xBtQ
 
 def DVMPxsec_theo_xBtQ(DVMPxsec_data_xBtQ: pd.DataFrame, Para_Unp, xsec_norm, meson:int, p_order = 2):
+    """Add DVMP cross-section theory predictions for a single :math:`(x_B, t, Q)` group.
 
+    Args:
+        DVMPxsec_data_xBtQ (pd.DataFrame): Rows with identical ``xB``, ``t``, ``Q``.
+        Para_Unp (np.ndarray): Unpolarized parameter array.
+        xsec_norm (float): Overall normalization factor applied as
+            ``theory *= xsec_norm**2``.
+        meson (int): Meson type: 1 for :math:`\\rho^0`, 3 for J/psi.
+        p_order (int, optional): Perturbative order.  Defaults to 2.
+
+    Returns:
+        pd.DataFrame: Input DataFrame with added ``'pred f'`` and ``'cost'`` columns.
+    """ 
     [xB, t, Q] = [DVMPxsec_data_xBtQ['xB'].iat[0], DVMPxsec_data_xBtQ['t'].iat[0], DVMPxsec_data_xBtQ['Q'].iat[0]] 
     [HTFF, ETFF] = TFF_theo(xB, t, Q, Para_Unp, meson, p_order, muset = 1)
     
@@ -537,34 +782,87 @@ def DVMPxsec_theo_xBtQ(DVMPxsec_data_xBtQ: pd.DataFrame, Para_Unp, xsec_norm, me
     return DVMPxsec_data_xBtQ
 
 def DVCSxsec_theo(DVCSxsec_data: pd.DataFrame, Para_Unp, Para_Pol, P_order = 2):
-    
+    """Compute DVCS cross-section predictions for a full dataset using a parallel pool.
+
+    Args:
+        DVCSxsec_data (pd.DataFrame): Full DVCS cross-section dataset.
+        Para_Unp (np.ndarray): Unpolarized parameter array.
+        Para_Pol (np.ndarray): Polarized parameter array.
+        P_order (int, optional): Perturbative order.  Defaults to 2.
+
+    Returns:
+        pd.DataFrame: Concatenated results with ``'pred f'`` and ``'cost'`` columns.
+    """
     DVCSxsec_data_xBtQ = group_by_unique(DVCSxsec_data)
     pool = get_pool()
     DVCSxsec_data_xBtQ = pd.concat(list(pool.map(partial(DVCSxsec_theo_xBtQ, Para_Unp = Para_Unp, Para_Pol = Para_Pol, P_order = P_order), DVCSxsec_data_xBtQ)), ignore_index=True)
     return DVCSxsec_data_xBtQ
 
 def DVCSAsym_theo(DVCSAsym_data: pd.DataFrame, Para_Unp, Para_Pol, P_order = 2):
+    """Compute DVCS asymmetry predictions for a full dataset using a parallel pool.
 
+    Args:
+        DVCSAsym_data (pd.DataFrame): Full DVCS asymmetry dataset.
+        Para_Unp (np.ndarray): Unpolarized parameter array.
+        Para_Pol (np.ndarray): Polarized parameter array.
+        P_order (int, optional): Perturbative order.  Defaults to 2.
+
+    Returns:
+        pd.DataFrame: Concatenated results with ``'pred f'`` and ``'cost'`` columns.
+    """
     DVCSAsym_data_xBtQ = group_by_unique(DVCSAsym_data)
     pool = get_pool()
     DVCSAsym_data_xBtQ = pd.concat(list(pool.map(partial(DVCSAsym_theo_xBtQ, Para_Unp = Para_Unp, Para_Pol = Para_Pol, P_order = P_order), DVCSAsym_data_xBtQ)), ignore_index=True)
     return DVCSAsym_data_xBtQ
 
 def DVMPxsec_theo(DVMPxsec_data: pd.DataFrame, Para_Unp, xsec_norm, meson:int, p_order = 2):
-    
+    """Compute DVMP cross-section predictions for a full dataset using a parallel pool.
+
+    Args:
+        DVMPxsec_data (pd.DataFrame): Full DVMP cross-section dataset.
+        Para_Unp (np.ndarray): Unpolarized parameter array.
+        xsec_norm (float): Overall normalization applied as ``theory *= xsec_norm**2``.
+        meson (int): Meson type: 1 for :math:`\\rho^0`, 3 for J/psi.
+        p_order (int, optional): Perturbative order.  Defaults to 2.
+
+    Returns:
+        pd.DataFrame: Concatenated results with ``'pred f'`` and ``'cost'`` columns.
+    """
     DVMPxsec_data_xBtQ = group_by_unique(DVMPxsec_data)
     pool = get_pool()
     DVMPxsec_data_xBtQ = pd.concat(list(pool.map(partial(DVMPxsec_theo_xBtQ, Para_Unp = Para_Unp, xsec_norm = xsec_norm, meson = meson, p_order = p_order), DVMPxsec_data_xBtQ)), ignore_index=True)
     return DVMPxsec_data_xBtQ
 
 def DVCSxsecHERA_theo(DVCSxsec_HERA_data: pd.DataFrame, Para_Unp, Para_Pol, P_order = 2):
+    """Compute HERA DVCS cross-section predictions for a full dataset using a parallel pool.
 
+    Args:
+        DVCSxsec_HERA_data (pd.DataFrame): Full HERA DVCS dataset.
+        Para_Unp (np.ndarray): Unpolarized parameter array.
+        Para_Pol (np.ndarray): Polarized parameter array.
+        P_order (int, optional): Perturbative order.  Defaults to 2.
+
+    Returns:
+        pd.DataFrame: Concatenated results with ``'pred f'`` and ``'cost'`` columns.
+    """
     DVCSxsec_HERA_data_xBtQ = group_by_unique(DVCSxsec_HERA_data)
     pool = get_pool()
     DVCSxsec_HERA_data_xBtQ = pd.concat(list(pool.map(partial(DVCSxsecHERA_theo_xBtQ, Para_Unp = Para_Unp, Para_Pol = Para_Pol, P_order = P_order), DVCSxsec_HERA_data_xBtQ)), ignore_index=True)
     return DVCSxsec_HERA_data_xBtQ
 
 def simple_dispatch(task):
+    """Unpack and call a ``(func, arg)`` task tuple.
+
+    Used as the target for :meth:`multiprocessing.Pool.map` to dispatch
+    heterogeneous tasks in a single pool call, reducing scheduling overhead.
+
+    Args:
+        task (tuple): A ``(callable, arg)`` pair where *callable* accepts a
+            single positional argument.
+
+    Returns:
+        Any: Return value of ``func(arg)``.
+    """
     func, arg = task
     return func(arg)
 
@@ -594,7 +892,41 @@ def cost_off_forward_withH_withHt(Norm_HuV,    alpha_HuV,    beta_HuV,    alphap
                     R_Htu_xi4,   R_Htd_xi4,    R_Htg_xi4,
                     R_Etu_xi4,   R_Etd_xi4,    R_Etg_xi4,   bexp_HtSea,
                     jpsinorm):
-    
+    r"""Total :math:`\chi^2` cost function for the GUMP global GPD fit.
+
+    Accepts all GPD model parameters as individual keyword arguments (the
+    iMinuit interface requires a flat parameter signature).  Internally the
+    flat list is split into unpolarized (:data:`Paralst_Unp_Names`), polarized
+    (:data:`Paralst_Pol_Names`), and auxiliary (:data:`Paralst_Aux_Names`)
+    groups, assembled via :func:`~gumpgpd.Parameters.ParaManager_Unp` and
+    :func:`~gumpgpd.Parameters.ParaManager_Pol`, and passed to all theory
+    prediction functions in parallel.
+
+    The returned scalar is:
+
+    .. math::
+
+        \chi^2_\text{total} = \chi^2_\text{exp} + \chi^2_\text{PDF/GFF/GPD}
+        + \chi^2_\text{penalty}
+
+    where the penalty encodes the quark-number sum rules and the
+    momentum/gravitomagnetic sum rules with tolerances given by
+    ``tolerances``.
+
+    When :attr:`~gumpgpd.config.Export_Mode` is ``True`` the function prints
+    a per-dataset :math:`\chi^2` breakdown, saves results to CSV via
+    :func:`Export_Frame_Append`, and returns a ``dict`` of result DataFrames
+    instead of a scalar.
+
+    Args:
+        Norm_HuV, alpha_HuV, beta_HuV, ..., jpsinorm: All GPD model parameters
+            listed in :data:`Paralst_Unp_Names`, :data:`Paralst_Pol_Names`,
+            and :data:`Paralst_Aux_Names`.
+
+    Returns:
+        float: Total :math:`\chi^2` (fit mode).
+        dict: Mapping of task name → result DataFrame (export mode).
+    """
     params = locals()
     validate_params(params, set(Paralst_Unp_Names + Paralst_Pol_Names + Paralst_Aux_Names))
     Para_Unp_lst = [params[name] for name in Paralst_Unp_Names]
@@ -801,7 +1133,34 @@ def cost_off_forward_withH_withHt(Norm_HuV,    alpha_HuV,    beta_HuV,    alphap
     return total_cost_exp + tPDF_pred['cost'].sum() + GFF_pred['cost'].sum() + PDF_pred['cost'].sum() + GPD_pred['cost'].sum() + totpen
 
 def off_forward_fit_withH_withHt(Paralst_Unp, Paralst_Pol, Paralst_Aux=[1.0] * len(Paralst_Aux_Names), export_path = '.'):
+    r"""Run the GUMP global GPD fit using iMinuit (MIGRAD + HESSE).
 
+    Sets up a :class:`iminuit.Minuit` instance with
+    :func:`cost_off_forward_withH_withHt` as the cost function, applies
+    parameter limits and fixes (see source for details), and calls
+    :meth:`~iminuit.Minuit.migrad` followed by :meth:`~iminuit.Minuit.hesse`.
+    The fit summary (timing, :math:`\chi^2/\text{dof}`, parameter values and
+    uncertainties) is written to a text file under ``<export_path>/GUMP_Output/``.
+
+    Args:
+        Paralst_Unp (array-like): Initial values for all unpolarized parameters
+            in the order defined by :data:`Paralst_Unp_Names`.
+        Paralst_Pol (array-like): Initial values for all polarized parameters
+            in the order defined by :data:`Paralst_Pol_Names`.
+        Paralst_Aux (array-like, optional): Initial values for auxiliary
+            parameters (currently only ``jpsinorm``).  Defaults to ``[1.0]``.
+        export_path (str, optional): Root directory for the output text file.
+            Defaults to the current working directory.
+
+    Returns:
+        iminuit.Minuit: The fitted Minuit object (values, errors, covariance
+        matrix, and status flags accessible via the standard iMinuit API).
+
+    Note:
+        :attr:`~gumpgpd.config.Export_Mode` must be ``False`` when calling
+        this function; use the cost function directly with
+        ``config.Export_Mode = True`` to export predictions after fitting.
+    """
     assert config.Export_Mode == False, "Make sure the Export_Mode is set to False in config.py before fitting"
     
     # Create dictionaries by zipping names and values
