@@ -19,7 +19,7 @@ Three installation methods are available, depending on your use case:
   ```
   pip install git+https://github.com/yuxunguo/GUMP-Global-GPDs.git@GUMP1.0
   ```
-  Development version (V.1.0.3):
+  Development version (V.1.0.3+dev):
   ```
   pip install git+https://github.com/yuxunguo/GUMP-Global-GPDs.git@GUMPdev
   ```
