@@ -9,6 +9,7 @@ from gumpgpd.Minimizer import (
     Para_Unp_off_forward,
     TFF_theo,
     close_pool,
+    get_pool,
 )
 
 
@@ -43,6 +44,9 @@ def cross_section(xB: float, meson: int) -> pd.DataFrame:
 
 
 def main() -> None:
+    # The default pool uses the available CPU processes for parallel evaluation.
+    get_pool()
+
     # TFF access is available for rho0 and J/psi. `flv` can also be changed
     # to "q" (quarks only) or "g" (gluon only) for channel studies.
     print_tffs(xB=1.0e-2, t=-0.20, Q=3.0, meson=1)

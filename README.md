@@ -12,6 +12,12 @@ This repository contains the source code for **GUMP** (Generalized Parton Distri
 
 ## Installation
 
+Using a virtual environment is strongly recommended, especially on Apple
+Silicon, to keep GUMP's NumPy, Numba, and llvmlite versions isolated from
+older system installations:
+
+Run one of the installation methods below after activating the environment.
+
 Three installation methods are available, depending on your use case:
 
 - **Recommended — install from GitHub:**  

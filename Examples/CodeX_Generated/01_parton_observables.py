@@ -15,6 +15,7 @@ from gumpgpd.Minimizer import (
     PDF_theo,
     Para_Comb_off_forward,
     close_pool,
+    get_pool,
     tPDF_theo,
 )
 
@@ -37,6 +38,9 @@ def evaluate(title, function, columns, rows) -> None:
 
 
 def main() -> None:
+    # The default pool uses the available CPU processes for parallel evaluation.
+    get_pool()
+
     # ------------------------------------------------------------------
     # PDF: the xi=0, t=0 forward limit of a GPD.
     #

@@ -1,5 +1,6 @@
 # Byte-compiled / optimized / DLL files
 __pycache__/
+__cachedir__/
 _joblib_cache_
 *.py[cod]
 *$py.class

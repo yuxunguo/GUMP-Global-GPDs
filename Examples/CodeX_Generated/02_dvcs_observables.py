@@ -12,6 +12,7 @@ from gumpgpd.Minimizer import (
     Para_Pol_off_forward,
     Para_Unp_off_forward,
     close_pool,
+    get_pool,
 )
 
 
@@ -27,6 +28,9 @@ def predict(function, points):
 
 
 def main() -> None:
+    # The default pool uses the available CPU processes for parallel evaluation.
+    get_pool()
+
     # A DVCS amplitude depends on four complex Compton form factors (CFFs).
     # GUMP derives xi internally from xB, t, and Q. Para_Unp contains H/E;
     # Para_Pol contains Htilde/Etilde.

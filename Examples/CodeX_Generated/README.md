@@ -11,13 +11,25 @@ cross sections:
 3. [`03_dvmp_observables.py`](03_dvmp_observables.py) evaluates transition
    form factors (TFFs) and rho/J/psi production cross sections.
 
-Run the scripts from the repository root after an editable installation:
+Using a virtual environment is strongly recommended. It keeps GUMP's NumPy,
+Numba, and llvmlite versions isolated from older system installations, which
+is especially important on Apple Silicon.
+
+Create the environment and install GUMP from the repository root:
 
 ```bash
-python3 -m pip install -e .
-python3 Examples/CodeX_Generated/01_parton_observables.py
-python3 Examples/CodeX_Generated/02_dvcs_observables.py
-python3 Examples/CodeX_Generated/03_dvmp_observables.py
+python3 -m venv .venv
+source .venv/bin/activate
+python -m pip install --upgrade pip
+python -m pip install -e .
+```
+
+Then run any tutorial with the environment active:
+
+```bash
+python Examples/CodeX_Generated/01_parton_observables.py
+python Examples/CodeX_Generated/02_dvcs_observables.py
+python Examples/CodeX_Generated/03_dvmp_observables.py
 ```
 
 The first evaluation initializes evolution kernels and numerical caches, so it
@@ -106,8 +118,11 @@ The examples use the packaged best-fit arrays:
 - `Para_Unp_off_forward` for the H/E sector;
 - `Para_Pol_off_forward` for the Htilde/Etilde sector.
 
-The high-level functions parallelize over kinematic points. Always place calls
-inside `if __name__ == "__main__":`, especially on macOS and Windows, and call
+The high-level functions parallelize over kinematic points. These tutorials
+call `get_pool()` without an explicit process count, so the pool uses the
+available CPUs. Use a clean virtual environment with current Numba/llvmlite
+packages, particularly on Apple Silicon. Always place calls inside
+`if __name__ == "__main__":`, especially on macOS and Windows, and call
 `close_pool()` when a standalone program is done. Cross-section wrappers group
 rows with identical `(xB, t, Q)` and compute their CFFs/TFFs only once, so put
 different `phi`, `y`, or `pol` values for the same hard point in one DataFrame.
