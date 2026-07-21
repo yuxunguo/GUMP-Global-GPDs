@@ -38,7 +38,10 @@ Three installation methods are available, depending on your use case:
 
 ## Usage
 
-After installation, refer to the example scripts in `/Examples` for typical workflows.
+Start with the [observable tutorial](Examples/CodeX_Generated/README.md). Its three runnable
+examples progress from PDFs, t-dependent PDFs, GPDs, and GFFs through DVCS
+CFFs/cross sections and DVMP TFFs/cross sections. The older numbered examples
+remain available for reproducing the original analysis workflows.
 
 
 ## Changelog (Development version)
