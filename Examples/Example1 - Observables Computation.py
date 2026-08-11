@@ -42,7 +42,9 @@ if __name__ == '__main__':
     DVCS_pred_xBtQ       = DVCSxsec_theo(DVCSxsec_data,
                                          Para_Unp = Para_Unp_off_forward, 
                                          Para_Pol = Para_Pol_off_forward, 
-                                         P_order = 2)
+                                         P_order = 2,
+                                         Para_PionPole = Paralst_PionPole_off_forward,
+                                         Para_Dterm = Para_Dterm_off_forward)
     print("DVCS calculation finished the results read:")
     print(DVCS_pred_xBtQ.head())
     print('-----------------------------------------------------------------')
@@ -51,7 +53,9 @@ if __name__ == '__main__':
     DVCS_HERA_pred_xBtQ  = DVCSxsecHERA_theo(DVCSxsec_HERA_data, 
                                              Para_Unp = Para_Unp_off_forward, 
                                              Para_Pol = Para_Pol_off_forward,
-                                             P_order = 2)
+                                             P_order = 2,
+                                             Para_PionPole = Paralst_PionPole_off_forward,
+                                             Para_Dterm = Para_Dterm_off_forward)
     print("DVCS_HERA calculation finished the results read:")
     print(DVCS_HERA_pred_xBtQ.head())
     print('-----------------------------------------------------------------')
@@ -60,7 +64,9 @@ if __name__ == '__main__':
     DVCS_Asym_pred_xBtQ  = DVCSAsym_theo(DVCSAsym_data, 
                                          Para_Unp = Para_Unp_off_forward, 
                                          Para_Pol = Para_Pol_off_forward, 
-                                         P_order = 2)
+                                         P_order = 2,
+                                         Para_PionPole = Paralst_PionPole_off_forward,
+                                         Para_Dterm = Para_Dterm_off_forward)
     print("DVCS Asym calculation finished the results read:")
     print(DVCS_Asym_pred_xBtQ.head())
     print('-----------------------------------------------------------------')

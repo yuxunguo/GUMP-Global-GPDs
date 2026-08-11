@@ -13,6 +13,10 @@ from those ansatz parameters, this module computes:
 * **Transition Form Factors** (TFFs, :meth:`GPDobserv.TFF`, :meth:`GPDobserv.TFFNLO`,
   :meth:`GPDobserv.TFFNLO_evMom`) for DVMP.
 * **Generalized Form Factors** (:meth:`GPDobserv.GFFj0`).
+* The discrete :math:`j=0` pion-pole contributions to
+  :math:`\widetilde E` GFFs and CFFs.
+* The fixed :math:`j=1` C form factor and its discrete CFF and TFF
+  contributions.
 
 All integrals use conformal (Mellin-Barnes) contours and support both
 leading-order (LO, ``p_order=1``) and next-to-leading-order (NLO,
@@ -47,6 +51,11 @@ NFEFF = 2
 
 #Relative precision Goal of quad set to be 1e-3
 Prec_Goal = 1e-3
+
+# Fixed inputs for the dipole-regulated pion-pole residue (all masses in GeV).
+PION_POLE_G_A = 1.2756
+PION_POLE_NUCLEON_MASS = 0.938
+PION_MASS = 0.14
    
 
 def flv_to_indx(flv: str) -> int:
@@ -979,3 +988,311 @@ class GPDobserv (object) :
         Max_imJ = 150
 
         return 1j*fixed_quadvec(lambda imJ: tan_factor(reJ+1j*imJ)*Integrand_Mellin_Barnes_TFF(reJ+1j*imJ)+tan_factor(reJ-1j*imJ)*Integrand_Mellin_Barnes_TFF(reJ-1j*imJ), 0, Max_imJ,n = 400) + TFFj0() + TFFj1()
+
+    def pion_pole_Et_GFF_j0(self, flv: str, N: float, Lambda: float) -> float:
+        r"""Return the canonical pion-pole contribution to the :math:`j=0`
+        :math:`\widetilde E` generalized form factor.
+
+        The fitted pole residue is
+
+        .. math::
+
+            P_\pi(t) = N\,\frac{2 g_A M_N^2}{m_\pi^2-t}
+            \left(\frac{\Lambda^2-m_\pi^2}{\Lambda^2-t}\right)^2.
+
+        A single normalization ``N`` and cutoff ``Lambda`` are shared by the
+        two light flavors.  Consequently the contribution is purely
+        isovector: :math:`\widetilde E^u_\pi=P_\pi` and
+        :math:`\widetilde E^d_\pi=-P_\pi`.
+
+        Args:
+            flv: ``'u'``, ``'d'``, ``'NS'``, ``'S'``, or ``'g'``.
+            N: Universal pion-pole normalization.
+            Lambda: Dipole cutoff in GeV.
+
+        Returns:
+            The signed pole contribution for the requested flavor channel.
+
+        Raises:
+            ValueError: If this is not an axial observable (``p=-1``), or if
+                the flavor label is unknown.
+        """
+        if self.p != -1:
+            raise ValueError("The pion-pole Et GFF requires axial parity p=-1")
+
+        pole = (
+            N * 2.0 * PION_POLE_G_A * PION_POLE_NUCLEON_MASS**2 / (PION_MASS**2 - self.t)
+            * ( (Lambda**2 - PION_MASS**2) / (Lambda**2 - self.t) )**2
+        )
+
+        flavor_factor = {
+            "u": 1.0,
+            "d": -1.0,
+            "NS": 2.0,
+            "S": 0.0,
+            "g": 0.0,
+        }
+        if flv not in flavor_factor:
+            raise ValueError(f"Unknown flavor for pion-pole Et GFF: {flv}")
+        return flavor_factor[flv] * pole
+
+    def pion_pole_Et_CFF_j0(self, N: float, Lambda: float, muf: float, p_order: int = 1, flv: str = "All") -> complex:
+        r"""Return the discrete :math:`j=0` pion-pole contribution to
+        :math:`\widetilde{\mathcal E}`.
+
+        In GUMP's input flavor basis ``[uV, ubar, dV, dbar, g]`` the fixed
+        conformal moment is represented as
+
+        .. math::
+
+            \widetilde E_{0,\pi}
+            = [0, P_\pi/2, 0, -P_\pi/2, 0].
+
+        The ``ubar`` and ``dbar`` slots are basis bookkeeping, not a claim
+        that the pion pole is an ordinary antiquark PDF: for an axial
+        :math:`j=0` moment GUMP reconstructs the physical light-flavor
+        moments as ``uV + 2*ubar`` and ``dV + 2*dbar``.  The factors of one
+        half therefore recover :math:`(+P_\pi,-P_\pi)` exactly.
+
+        This is a pure axial non-singlet moment after the normal GUMP flavor
+        transformation.  It is passed through the same DVCS evolution and
+        Wilson-coefficient functions as the regular CFF.  The axial
+        Mellin--Barnes residue supplies the final factor :math:`2/\xi`; at LO
+        this gives exactly :math:`\widetilde{\mathcal E}_\pi=P_\pi(t)/\xi`.
+
+        Args:
+            N: Universal pion-pole normalization.
+            Lambda: Dipole cutoff in GeV.
+            muf: Factorization scale in GeV.
+            p_order: ``1`` for LO or ``2`` for NLO.
+            flv: Evolution-basis projection ``'All'``, ``'q'``, or ``'g'``.
+
+        Returns:
+            The charge-weighted pion-pole CFF contribution.
+
+        Raises:
+            ValueError: If the observable is not axial, if ``xi`` is zero,
+                if the perturbative order is unsupported, or if ``flv`` is
+                unknown.
+        """
+        if self.p != -1:
+            raise ValueError("The pion-pole Et CFF requires axial parity p=-1")
+        if np.any(np.asarray(self.xi) == 0):
+            raise ValueError("The pion-pole Et CFF is undefined at xi=0")
+        if p_order not in (1, 2):
+            raise ValueError("p_order must be 1 (LO) or 2 (NLO)")
+
+        fmask = flvmask(flv)
+        if fmask is None:
+            raise ValueError(f"Unknown CFF flavor projection: {flv}")
+
+        residue_u = self.pion_pole_Et_GFF_j0("u", N, Lambda)
+        residue_d = self.pion_pole_Et_GFF_j0("d", N, Lambda)
+        fixed_moment = np.array(
+            [[0.0, residue_u / 2.0, 0.0, residue_d / 2.0, 0.0]],
+            dtype=float,
+        )
+
+        if p_order == 1:
+            evolved_with_coefficient = CFF_Evo_LO( np.array([0.0]), NFEFF, self.p, self.Q, fixed_moment )
+        else:
+            # The NLO evolution kernels are evaluated infinitesimally above
+            # j=0, following the existing discrete axial-j=0 CFF treatment.
+            evolved_with_coefficient = CFF_Evo_NLO_evWC( np.array([1.0e-6]), NFEFF, self.p, self.Q, fixed_moment, muf)
+
+        projected = np.einsum(
+            "i,...i->...", fmask, evolved_with_coefficient
+        )[0]
+        return 2.0 * projected / self.xi
+
+    def dterm_C_GFF_j1(
+            self, flv: str, ParaDterm: np.ndarray,
+            multipole: float = 2.0) -> float:
+        r"""Return the fixed-:math:`j=1` C form factor
+        :math:`C_{20}^{\mathrm{flv}}(t)`.
+
+        .. math::
+
+            C_{20}^{\mathrm{flv}}(t)
+            = C_{20}^{\mathrm{flv}}(0)
+              (1-t\,\mathrm{invm2})^{-p}.
+
+        ``ParaDterm`` contains one ``[norm, invm2]`` row for each physical
+        source flavor in the order ``[u, d, g]``.
+
+        Args:
+            flv: Physical source flavor ``'u'``, ``'d'``, or ``'g'``.
+            ParaDterm: Shape ``(3, 2)`` with rows
+                ``[[N_u, invm2_u], [N_d, invm2_d], [N_g, invm2_g]]``.
+            multipole: Positive multipole power; ``2`` (dipole) by default.
+
+        Returns:
+            The requested flavor's :math:`C_{20}(t)` form factor.
+        """
+        if self.p != 1:
+            raise ValueError("The C form factor requires vector parity p=1")
+        flavor_index = {"u": 0, "d": 1, "g": 2}
+        if flv not in flavor_index:
+            raise ValueError(f"Unknown C-form-factor flavor: {flv}")
+        ParaDterm = np.asarray(ParaDterm)
+        if ParaDterm.shape != (3, 2):
+            raise ValueError(
+                "ParaDterm must have shape (3, 2) ordered as [u, d, g]"
+            )
+        norm, invm2 = ParaDterm[flavor_index[flv]]
+        if not np.isfinite(norm):
+            raise ValueError("C-form-factor norm must be finite")
+        if not np.isfinite(invm2) or invm2 < 0:
+            raise ValueError("invm2 must be finite and nonnegative")
+        if not np.isfinite(multipole) or multipole <= 0:
+            raise ValueError("multipole must be a positive finite number")
+
+        denominator = 1.0 - self.t * invm2
+        if denominator <= 0:
+            raise ValueError(
+                "The C-form-factor multipole denominator must be positive"
+            )
+        return norm * denominator ** (-multipole)
+
+    def dterm_CFF_j1(
+            self, spe: int, ParaDterm: np.ndarray, muf: float,
+            p_order: int = 1,
+            multipole: float = 2.0) -> complex:
+        r"""Return the full fixed-:math:`j=1` C-form-factor contribution
+        to :math:`\mathcal H` or :math:`\mathcal E`.
+
+        The method obtains :math:`C_{20}^{u,d,g}(t)` from
+        :meth:`dterm_C_GFF_j1`.  Polynomiality converts them to the fixed
+        conformal coefficients :math:`F_{1,2}^{u,d,g}=4C_{20}^{u,d,g}`,
+        which are embedded together as
+
+        .. math::
+
+            [0,F_{1,2}^u/2,0,F_{1,2}^d/2,F_{1,2}^g].
+
+        The complete flavor vector is evolved in one call from GUMP's input
+        scale at the physical index :math:`j=1`, so singlet--gluon mixing is
+        retained before combining with the existing LO or NLO DVCS Wilson
+        coefficient.  The fixed vector residue contributes the final factor
+        two and no residual power of :math:`\xi`.
+
+        Args:
+            spe: ``0`` for :math:`\mathcal H` or ``1`` for
+                :math:`\mathcal E=-\mathcal H`.
+            ParaDterm: Shape ``(3, 2)`` with one ``[norm, invm2]`` row for
+                each physical source flavor in the order ``[u, d, g]``.
+            muf: Factorization scale in GeV.
+            p_order: ``1`` for LO or ``2`` for NLO.
+            multipole: Positive multipole power; ``2`` (dipole) by default.
+
+        Returns:
+            The charge-weighted CFF contribution summed over all flavors.
+        """
+        if self.p != 1:
+            raise ValueError("The C-form-factor CFF requires vector parity p=1")
+        if spe not in (0, 1):
+            raise ValueError("C-form-factor CFF spe must be 0 (H) or 1 (E)")
+        if p_order not in (1, 2):
+            raise ValueError("p_order must be 1 (LO) or 2 (NLO)")
+
+        C20 = np.array([
+            self.dterm_C_GFF_j1(
+                flv, ParaDterm, multipole=multipole
+            )
+            for flv in ("u", "d", "g")
+        ])
+        F12 = 4.0 * C20
+        he_sign = 1.0 if spe == 0 else -1.0
+        fixed_moment = np.zeros((1, 5), dtype=float)
+        fixed_moment[0, 1] = he_sign * F12[0] / 2.0
+        fixed_moment[0, 3] = he_sign * F12[1] / 2.0
+        fixed_moment[0, 4] = he_sign * F12[2]
+
+        j1 = np.array([1.0])
+        if p_order == 1:
+            evolved_with_coefficient = CFF_Evo_LO(
+                j1, NFEFF, self.p, self.Q, fixed_moment
+            )
+        else:
+            evolved_with_coefficient = CFF_Evo_NLO_evWC(
+                j1, NFEFF, self.p, self.Q, fixed_moment, muf
+            )
+
+        projected = np.einsum(
+            "i,...i->...", flvmask("All"), evolved_with_coefficient
+        )[0]
+        return 2.0 * projected
+
+    def dterm_TFF_j1(
+            self, spe: int, ParaDterm: np.ndarray, muf: float, meson: int,
+            p_order: int = 1,
+            multipole: float = 2.0) -> complex:
+        r"""Return the full fixed-:math:`j=1` C-form-factor contribution
+        to the :math:`H`- or :math:`E`-type transition form factor.
+
+        As in :meth:`dterm_CFF_j1`, the three physical source form factors
+        :math:`C_{20}^{u,d,g}(t)` are converted to
+        :math:`F_{1,2}^{u,d,g}=4C_{20}^{u,d,g}` and embedded together as
+
+        .. math::
+
+            [0,F_{1,2}^u/2,0,F_{1,2}^d/2,F_{1,2}^g].
+
+        Passing the complete vector through the existing DVMP evolution and
+        Wilson-coefficient routines retains both quark evolution and
+        singlet--gluon mixing.  At NLO the coefficient is evaluated
+        infinitesimally above the physical index :math:`j=1`, following the
+        existing discrete-:math:`j=1` TFF prescription.  The fixed-vector
+        residue supplies the final factor two and leaves no residual power
+        of :math:`\xi`.
+
+        Args:
+            spe: ``0`` for the :math:`H` contribution or ``1`` for the
+                opposite-sign :math:`E` contribution.
+            ParaDterm: Shape ``(3, 2)`` with one ``[norm, invm2]`` row for
+                each physical source flavor in the order ``[u, d, g]``.
+            muf: Factorization scale in GeV.
+            meson: Meson code used by the existing TFF routines.
+            p_order: ``1`` for LO or ``2`` for NLO.
+            multipole: Positive multipole power; ``2`` (dipole) by default.
+
+        Returns:
+            The meson-weighted TFF contribution summed over all flavors.
+        """
+        if self.p != 1:
+            raise ValueError("The C-form-factor TFF requires vector parity p=1")
+        if spe not in (0, 1):
+            raise ValueError("C-form-factor TFF spe must be 0 (H) or 1 (E)")
+        if p_order not in (1, 2):
+            raise ValueError("p_order must be 1 (LO) or 2 (NLO)")
+
+        C20 = np.array([
+            self.dterm_C_GFF_j1(
+                flv, ParaDterm, multipole=multipole
+            )
+            for flv in ("u", "d", "g")
+        ])
+        F12 = 4.0 * C20
+        he_sign = 1.0 if spe == 0 else -1.0
+        fixed_moment = np.zeros((1, 5), dtype=float)
+        fixed_moment[0, 1] = he_sign * F12[0] / 2.0
+        fixed_moment[0, 3] = he_sign * F12[1] / 2.0
+        fixed_moment[0, 4] = he_sign * F12[2]
+
+        j1 = np.array([1.0])
+        if p_order == 1:
+            evolved_with_coefficient = TFF_Evo_LO(
+                j1, NFEFF, self.p, self.Q, fixed_moment, meson
+            )
+        else:
+            # WilsonCoef_DVMP_NLO has a removable singularity at exactly
+            # j=1; use the established finite-limit prescription.
+            evolved_with_coefficient = TFF_Evo_NLO_evWC(
+                j1 + 1.0e-6, NFEFF, self.p, self.Q,
+                fixed_moment, meson, muf
+            )
+
+        projected = np.einsum(
+            "i,...i->...", flvmask("All"), evolved_with_coefficient
+        )[0]
+        return 2.0 * projected

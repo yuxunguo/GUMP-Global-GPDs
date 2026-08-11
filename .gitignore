@@ -24,3 +24,10 @@ dist/
 # Otherspip 
 .venv/
 docs/
+
+# Keep the hand-written GPD/GUMP book source under version control while
+# continuing to ignore other generated documentation.
+!docs/
+docs/*
+!docs/gump-book/
+!docs/gump-book/**

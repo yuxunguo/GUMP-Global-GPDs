@@ -6,7 +6,7 @@ J/psi), builds NLO theory predictions via :mod:`gumpgpd.Observables`,
 :mod:`gumpgpd.DVCS_xsec`, and :mod:`gumpgpd.DVMP_xsec`, and exposes a
 single iMinuit-based fit driver: :func:`off_forward_fit_withH_withHt`.
 """
-from .Parameters import ParaManager_Unp, ParaManager_Pol
+from .Parameters import ParaManager_Unp, ParaManager_Pol, ParaManager_Dterm
 from .Observables import GPDobserv
 from .DVCS_xsec import dsigma_DVCS_TOT, Asymmetry_DVCS_TOT, dsigma_DVCS_HERA, M
 from .DVMP_xsec import dsigma_DVMP_dt,dsigmaL_DVMP_dt, M_jpsi,epsilon, R_fitted
@@ -62,8 +62,22 @@ Paralst_Pol_Names = [
     "R_Etu_xi4", "R_Etd_xi4", "R_Etg_xi4", "bexp_HtSea"
 ]
 
+<<<<<<< Updated upstream
 Paralst_Aux_Names = ["jpsinorm"] 
 
+=======
+Paralst_PionPole_Names = [
+    "N_PionPole", "Lambda_PionPole"
+]
+
+Paralst_Dterm_Names = [
+    "Norm_Dterm_q", "Invm2_Dterm_q",
+    "Norm_Dterm_g", "Invm2_Dterm_g",
+]
+
+Paralst_Aux_Names = ["jpsinorm"]
+
+>>>>>>> Stashed changes
 def validate_params(params: dict, required_names: set):
     """Validate that a parameter dictionary contains exactly the required keys with non-None values.
 
@@ -373,7 +387,7 @@ def PDF_theo_scalar_helper(x_i, xi_i, t_i, Q_i, p_i, flv_i, Para_i, p_order):
 
 # Helper function for scalar computation
 def GFF_theo_scalar_helper(j_i, x, xi, t_i, Q_i, p_i, flv_i, Para_i, p_order):
-    """Compute a single GFF theory value for use with :func:`multiprocessing.Pool.starmap`.
+    r"""Compute a single GFF theory value for use with :func:`multiprocessing.Pool.starmap`.
 
     Args:
         j_i (int): Mellin moment index :math:`j`.
@@ -466,6 +480,12 @@ def GFF_theo(GFF_input: pd.DataFrame, Para: np.array, p_order = 2, chunksize = N
         Para (np.ndarray): Full stacked parameter array indexed by species.
         p_order (int, optional): Perturbative order.  Defaults to 2 (NLO).
         chunksize (int, optional): Pool map chunksize for performance tuning.
+<<<<<<< Updated upstream
+=======
+        Para_PionPole (array-like, optional): Universal ``N`` and ``Lambda``
+            for the dipole pion pole.  If omitted, the original GUMP
+            prediction is returned unchanged.
+>>>>>>> Stashed changes
 
     Returns:
         pd.DataFrame: Copy of *GFF_input* with added ``'pred f'`` and
@@ -488,6 +508,23 @@ def GFF_theo(GFF_input: pd.DataFrame, Para: np.array, p_order = 2, chunksize = N
 
     pool = get_pool()
     GFF_input['pred f'] = list(pool.starmap(GFF_theo_scalar_helper, args, chunksize = chunksize))
+<<<<<<< Updated upstream
+=======
+    if Para_PionPole is not None:
+        N, Lambda = Para_PionPole
+        predictions = GFF_input['pred f'].to_numpy(copy=True)
+        pole_indices = np.flatnonzero((spes == 3) & (js == 0))
+
+        # Species 3 is Et.  The parity flag alone cannot distinguish it from
+        # Ht, so both the species and moment index are required here.
+        for index in pole_indices:
+            pion_pole = GPDobserv(x, xi, ts[index], Qs[index], ps[index])
+            predictions[index] += pion_pole.pion_pole_Et_GFF_j0(
+                flvs[index], N, Lambda
+            )
+
+        GFF_input['pred f'] = predictions
+>>>>>>> Stashed changes
     if "f" in GFF_input and "delta f" in GFF_input:
         GFF_input['cost'] = ((GFF_input["pred f"]-GFF_input["f"])/GFF_input["delta f"])**2
     
@@ -631,7 +668,9 @@ def DVMPxsec_theo_helper(DVMPxsec_input: pd.DataFrame,  TFF_input: np.array, mes
     if (meson==1):
         return dsigmaL_DVMP_dt(y, xB, t, Q, meson, HTFF, ETFF)
 
-def CFF_theo(xB, t, Q, Para_Unp, Para_Pol, porder = 2):
+def CFF_theo(
+        xB, t, Q, Para_Unp, Para_Pol, porder=2,
+        Para_PionPole=None, Para_Dterm=None):
     r"""Compute the four Compton form factors (CFFs) at a given kinematic point.
 
     The skewness is derived from :math:`x_B`, :math:`t`, and :math:`Q` via the
@@ -644,6 +683,10 @@ def CFF_theo(xB, t, Q, Para_Unp, Para_Pol, porder = 2):
         Para_Unp (np.ndarray): Unpolarized GPD parameter array (species-stacked).
         Para_Pol (np.ndarray): Polarized GPD parameter array (species-stacked).
         porder (int, optional): Perturbative order.  Defaults to 2 (NLO).
+        Para_PionPole (array-like, optional): Universal pion-pole ``N`` and
+            ``Lambda``.  If omitted, the original GUMP CFFs are returned.
+        Para_Dterm (array-like, optional): Shape ``(3, 2)`` D-term parameter
+            array ordered as ``[u, d, g]``, with ``[norm, invm2]`` per row.
 
     Returns:
         list: ``[HCFF, ECFF, HtCFF, EtCFF]`` — the four CFFs as scalars (or
@@ -657,11 +700,25 @@ def CFF_theo(xB, t, Q, Para_Unp, Para_Pol, porder = 2):
     ECFF = H_E.CFF(Para_Unp[..., 1, :, :, :, :], Q, p_order = porder)
     HtCFF = Ht_Et.CFF(Para_Pol[..., 0, :, :, :, :], Q, p_order = porder)
     EtCFF = Ht_Et.CFF(Para_Pol[..., 1, :, :, :, :], Q, p_order = porder)
+    if Para_PionPole is not None:
+        N, Lambda = Para_PionPole
+        EtCFF = EtCFF + Ht_Et.pion_pole_Et_CFF_j0(
+            N, Lambda, Q, p_order=porder
+        )
+    if Para_Dterm is not None:
+        HCFF = HCFF + H_E.dterm_CFF_j1(
+            0, Para_Dterm, Q, p_order=porder
+        )
+        ECFF = ECFF + H_E.dterm_CFF_j1(
+            1, Para_Dterm, Q, p_order=porder
+        )
 
     return [ HCFF, ECFF, HtCFF, EtCFF ] # this can be a list of arrays of shape (N)
     # return np.stack([HCFF, ECFF, HtCFF, EtCFF], axis=-1)
 
-def TFF_theo(xB, t, Q, Para_Unp, meson:int, p_order = 2, muset = 1, flv = 'All'):
+def TFF_theo(
+        xB, t, Q, Para_Unp, meson:int, p_order = 2, muset = 1,
+        flv = 'All', Para_Dterm=None):
     r"""Compute the two transition form factors (TFFs) for DVMP at a given kinematic point.
 
     The skewness is derived from :math:`x_B`, :math:`t`, and :math:`Q`.  For
@@ -678,6 +735,8 @@ def TFF_theo(xB, t, Q, Para_Unp, meson:int, p_order = 2, muset = 1, flv = 'All')
         muset (float, optional): Scale factor applied to :math:`Q` when
             evaluating the TFF (used for scale-uncertainty studies).
         flv (str, optional): Flavor channel.  Defaults to ``'All'``.
+        Para_Dterm (array-like, optional): Managed ``[u, d, g]`` D-term
+            parameter array.  If omitted, the original TFFs are returned.
 
     Returns:
         list: ``[HTFF, ETFF]`` — the H- and E-type TFFs.
@@ -686,13 +745,24 @@ def TFF_theo(xB, t, Q, Para_Unp, meson:int, p_order = 2, muset = 1, flv = 'All')
     xi = (1/(2 - xB) - (2*t*(-1 + xB))/((Q**2)*(-2 + xB)**2))*xB
     if (meson==3):
        xi = (1/(2 - xB) - (2*t*(-1 + xB))/((Q**2 + M_jpsi**2)*(-2 + xB)**2))*xB
+    if Para_Dterm is not None and flv != 'All':
+        raise ValueError("Para_Dterm is only supported for flv='All'")
     H_E = GPDobserv(x, xi, t, Q, 1)
     HTFF = H_E.TFF(Para_Unp[..., 0, :, :, :, :], muset * Q, meson, p_order, flv)
     ETFF = H_E.TFF(Para_Unp[..., 1, :, :, :, :], muset * Q, meson, p_order, flv)
+    if Para_Dterm is not None:
+        HTFF = HTFF + H_E.dterm_TFF_j1(
+            0, Para_Dterm, muset * Q, meson, p_order=p_order
+        )
+        ETFF = ETFF + H_E.dterm_TFF_j1(
+            1, Para_Dterm, muset * Q, meson, p_order=p_order
+        )
 
     return  [ HTFF, ETFF]
 
-def DVCSxsec_theo_xBtQ(DVCSxsec_data_xBtQ: pd.DataFrame, Para_Unp, Para_Pol, P_order = 2):
+def DVCSxsec_theo_xBtQ(
+        DVCSxsec_data_xBtQ: pd.DataFrame, Para_Unp, Para_Pol, P_order=2,
+        Para_PionPole=None, Para_Dterm=None):
     """Add DVCS cross-section theory predictions for a single :math:`(x_B, t, Q)` group.
 
     Computes the CFFs once for the shared kinematics, then fills predictions
@@ -703,12 +773,19 @@ def DVCSxsec_theo_xBtQ(DVCSxsec_data_xBtQ: pd.DataFrame, Para_Unp, Para_Pol, P_o
         Para_Unp (np.ndarray): Unpolarized parameter array.
         Para_Pol (np.ndarray): Polarized parameter array.
         P_order (int, optional): Perturbative order.  Defaults to 2.
+        Para_PionPole (array-like, optional): Universal pion-pole ``N`` and
+            ``Lambda`` passed to :func:`CFF_theo`.
+        Para_Dterm (array-like, optional): Managed ``[u, d, g]`` D-term
+            parameter array passed to :func:`CFF_theo`.
 
     Returns:
         pd.DataFrame: Input DataFrame with added ``'pred f'`` and ``'cost'`` columns.
     """
     [xB, t, Q] = [DVCSxsec_data_xBtQ['xB'].iat[0], DVCSxsec_data_xBtQ['t'].iat[0], DVCSxsec_data_xBtQ['Q'].iat[0]] 
-    [HCFF, ECFF, HtCFF, EtCFF] = CFF_theo(xB, t, Q, Para_Unp, Para_Pol, porder= P_order) # scalar for each of them
+    [HCFF, ECFF, HtCFF, EtCFF] = CFF_theo(
+        xB, t, Q, Para_Unp, Para_Pol, porder=P_order,
+        Para_PionPole=Para_PionPole, Para_Dterm=Para_Dterm
+    ) # scalar for each of them
 
     DVCSxsec_data_xBtQ['pred f'] = DVCSxsec_theo_helper(DVCSxsec_data_xBtQ, CFF_input = [HCFF, ECFF, HtCFF, EtCFF])
     if "f" in DVCSxsec_data_xBtQ and "delta f" in DVCSxsec_data_xBtQ:
@@ -716,7 +793,9 @@ def DVCSxsec_theo_xBtQ(DVCSxsec_data_xBtQ: pd.DataFrame, Para_Unp, Para_Pol, P_o
 
     return DVCSxsec_data_xBtQ
 
-def DVCSAsym_theo_xBtQ(DVCSAsym_data_xBtQ: pd.DataFrame, Para_Unp, Para_Pol, P_order = 2):
+def DVCSAsym_theo_xBtQ(
+        DVCSAsym_data_xBtQ: pd.DataFrame, Para_Unp, Para_Pol, P_order=2,
+        Para_PionPole=None, Para_Dterm=None):
     """Add DVCS asymmetry theory predictions for a single :math:`(x_B, t, Q)` group.
 
     Args:
@@ -724,12 +803,19 @@ def DVCSAsym_theo_xBtQ(DVCSAsym_data_xBtQ: pd.DataFrame, Para_Unp, Para_Pol, P_o
         Para_Unp (np.ndarray): Unpolarized parameter array.
         Para_Pol (np.ndarray): Polarized parameter array.
         P_order (int, optional): Perturbative order.  Defaults to 2.
+        Para_PionPole (array-like, optional): Universal pion-pole ``N`` and
+            ``Lambda`` passed to :func:`CFF_theo`.
+        Para_Dterm (array-like, optional): Managed ``[u, d, g]`` D-term
+            parameter array passed to :func:`CFF_theo`.
 
     Returns:
         pd.DataFrame: Input DataFrame with added ``'pred f'`` and ``'cost'`` columns.
     """
     [xB, t, Q] = [DVCSAsym_data_xBtQ['xB'].iat[0], DVCSAsym_data_xBtQ['t'].iat[0], DVCSAsym_data_xBtQ['Q'].iat[0]] 
-    [HCFF, ECFF, HtCFF, EtCFF] = CFF_theo(xB, t, Q, Para_Unp, Para_Pol, porder= P_order) # scalar for each of them
+    [HCFF, ECFF, HtCFF, EtCFF] = CFF_theo(
+        xB, t, Q, Para_Unp, Para_Pol, porder=P_order,
+        Para_PionPole=Para_PionPole, Para_Dterm=Para_Dterm
+    ) # scalar for each of them
 
     DVCSAsym_data_xBtQ['pred f'] = DVCSAsym_theo_helper(DVCSAsym_data_xBtQ, CFF_input = [HCFF, ECFF, HtCFF, EtCFF])
     if "f" in DVCSAsym_data_xBtQ and "delta f" in DVCSAsym_data_xBtQ:
@@ -737,7 +823,9 @@ def DVCSAsym_theo_xBtQ(DVCSAsym_data_xBtQ: pd.DataFrame, Para_Unp, Para_Pol, P_o
 
     return DVCSAsym_data_xBtQ
 
-def DVCSxsecHERA_theo_xBtQ(DVCSxsec_HERA_data_xBtQ: pd.DataFrame, Para_Unp, Para_Pol , P_order = 2):
+def DVCSxsecHERA_theo_xBtQ(
+        DVCSxsec_HERA_data_xBtQ: pd.DataFrame, Para_Unp, Para_Pol,
+        P_order=2, Para_PionPole=None, Para_Dterm=None):
     """Add HERA DVCS cross-section theory predictions for a single :math:`(x_B, t, Q)` group.
 
     Args:
@@ -745,12 +833,19 @@ def DVCSxsecHERA_theo_xBtQ(DVCSxsec_HERA_data_xBtQ: pd.DataFrame, Para_Unp, Para
         Para_Unp (np.ndarray): Unpolarized parameter array.
         Para_Pol (np.ndarray): Polarized parameter array.
         P_order (int, optional): Perturbative order.  Defaults to 2.
+        Para_PionPole (array-like, optional): Universal pion-pole ``N`` and
+            ``Lambda`` passed to :func:`CFF_theo`.
+        Para_Dterm (array-like, optional): Managed ``[u, d, g]`` D-term
+            parameter array passed to :func:`CFF_theo`.
 
     Returns:
         pd.DataFrame: Input DataFrame with added ``'pred f'`` and ``'cost'`` columns.
     """ 
     [xB, t, Q] = [DVCSxsec_HERA_data_xBtQ['xB'].iat[0], DVCSxsec_HERA_data_xBtQ['t'].iat[0], DVCSxsec_HERA_data_xBtQ['Q'].iat[0]] 
-    [HCFF, ECFF, HtCFF, EtCFF] = CFF_theo(xB, t, Q, Para_Unp, Para_Pol, porder = P_order) # scalar for each of them
+    [HCFF, ECFF, HtCFF, EtCFF] = CFF_theo(
+        xB, t, Q, Para_Unp, Para_Pol, porder=P_order,
+        Para_PionPole=Para_PionPole, Para_Dterm=Para_Dterm
+    ) # scalar for each of them
 
     DVCSxsec_HERA_data_xBtQ['pred f'] = DVCSxsec_HERA_theo_helper(DVCSxsec_HERA_data_xBtQ, CFF_input = [HCFF, ECFF, HtCFF, EtCFF])
     if "f" in DVCSxsec_HERA_data_xBtQ and "delta f" in DVCSxsec_HERA_data_xBtQ:
@@ -758,7 +853,9 @@ def DVCSxsecHERA_theo_xBtQ(DVCSxsec_HERA_data_xBtQ: pd.DataFrame, Para_Unp, Para
         
     return DVCSxsec_HERA_data_xBtQ
 
-def DVMPxsec_theo_xBtQ(DVMPxsec_data_xBtQ: pd.DataFrame, Para_Unp, xsec_norm, meson:int, p_order = 2):
+def DVMPxsec_theo_xBtQ(
+        DVMPxsec_data_xBtQ: pd.DataFrame, Para_Unp, xsec_norm, meson:int,
+        p_order = 2, Para_Dterm=None):
     """Add DVMP cross-section theory predictions for a single :math:`(x_B, t, Q)` group.
 
     Args:
@@ -768,12 +865,17 @@ def DVMPxsec_theo_xBtQ(DVMPxsec_data_xBtQ: pd.DataFrame, Para_Unp, xsec_norm, me
             ``theory *= xsec_norm**2``.
         meson (int): Meson type: 1 for :math:`\\rho^0`, 3 for J/psi.
         p_order (int, optional): Perturbative order.  Defaults to 2.
+        Para_Dterm (array-like, optional): Managed ``[u, d, g]`` D-term
+            parameter array passed to :func:`TFF_theo`.
 
     Returns:
         pd.DataFrame: Input DataFrame with added ``'pred f'`` and ``'cost'`` columns.
     """ 
     [xB, t, Q] = [DVMPxsec_data_xBtQ['xB'].iat[0], DVMPxsec_data_xBtQ['t'].iat[0], DVMPxsec_data_xBtQ['Q'].iat[0]] 
-    [HTFF, ETFF] = TFF_theo(xB, t, Q, Para_Unp, meson, p_order, muset = 1)
+    [HTFF, ETFF] = TFF_theo(
+        xB, t, Q, Para_Unp, meson, p_order, muset=1,
+        Para_Dterm=Para_Dterm
+    )
     
     DVMPxsec_data_xBtQ['pred f'] = DVMPxsec_theo_helper(DVMPxsec_data_xBtQ, [HTFF, ETFF], meson) * xsec_norm**2
     if "f" in DVMPxsec_data_xBtQ and "delta f" in DVMPxsec_data_xBtQ:
@@ -781,7 +883,9 @@ def DVMPxsec_theo_xBtQ(DVMPxsec_data_xBtQ: pd.DataFrame, Para_Unp, xsec_norm, me
 
     return DVMPxsec_data_xBtQ
 
-def DVCSxsec_theo(DVCSxsec_data: pd.DataFrame, Para_Unp, Para_Pol, P_order = 2):
+def DVCSxsec_theo(
+        DVCSxsec_data: pd.DataFrame, Para_Unp, Para_Pol, P_order=2,
+        Para_PionPole=None, Para_Dterm=None):
     """Compute DVCS cross-section predictions for a full dataset using a parallel pool.
 
     Args:
@@ -789,16 +893,29 @@ def DVCSxsec_theo(DVCSxsec_data: pd.DataFrame, Para_Unp, Para_Pol, P_order = 2):
         Para_Unp (np.ndarray): Unpolarized parameter array.
         Para_Pol (np.ndarray): Polarized parameter array.
         P_order (int, optional): Perturbative order.  Defaults to 2.
+        Para_PionPole (array-like, optional): Universal pion-pole ``N`` and
+            ``Lambda`` passed to every kinematic group.
+        Para_Dterm (array-like, optional): Managed ``[u, d, g]`` D-term
+            parameter array passed to every kinematic group.
 
     Returns:
         pd.DataFrame: Concatenated results with ``'pred f'`` and ``'cost'`` columns.
     """
     DVCSxsec_data_xBtQ = group_by_unique(DVCSxsec_data)
     pool = get_pool()
-    DVCSxsec_data_xBtQ = pd.concat(list(pool.map(partial(DVCSxsec_theo_xBtQ, Para_Unp = Para_Unp, Para_Pol = Para_Pol, P_order = P_order), DVCSxsec_data_xBtQ)), ignore_index=True)
+    DVCSxsec_data_xBtQ = pd.concat(list(pool.map(partial(
+        DVCSxsec_theo_xBtQ,
+        Para_Unp=Para_Unp,
+        Para_Pol=Para_Pol,
+        P_order=P_order,
+        Para_PionPole=Para_PionPole,
+        Para_Dterm=Para_Dterm,
+    ), DVCSxsec_data_xBtQ)), ignore_index=True)
     return DVCSxsec_data_xBtQ
 
-def DVCSAsym_theo(DVCSAsym_data: pd.DataFrame, Para_Unp, Para_Pol, P_order = 2):
+def DVCSAsym_theo(
+        DVCSAsym_data: pd.DataFrame, Para_Unp, Para_Pol, P_order=2,
+        Para_PionPole=None, Para_Dterm=None):
     """Compute DVCS asymmetry predictions for a full dataset using a parallel pool.
 
     Args:
@@ -806,16 +923,29 @@ def DVCSAsym_theo(DVCSAsym_data: pd.DataFrame, Para_Unp, Para_Pol, P_order = 2):
         Para_Unp (np.ndarray): Unpolarized parameter array.
         Para_Pol (np.ndarray): Polarized parameter array.
         P_order (int, optional): Perturbative order.  Defaults to 2.
+        Para_PionPole (array-like, optional): Universal pion-pole ``N`` and
+            ``Lambda`` passed to every kinematic group.
+        Para_Dterm (array-like, optional): Managed ``[u, d, g]`` D-term
+            parameter array passed to every kinematic group.
 
     Returns:
         pd.DataFrame: Concatenated results with ``'pred f'`` and ``'cost'`` columns.
     """
     DVCSAsym_data_xBtQ = group_by_unique(DVCSAsym_data)
     pool = get_pool()
-    DVCSAsym_data_xBtQ = pd.concat(list(pool.map(partial(DVCSAsym_theo_xBtQ, Para_Unp = Para_Unp, Para_Pol = Para_Pol, P_order = P_order), DVCSAsym_data_xBtQ)), ignore_index=True)
+    DVCSAsym_data_xBtQ = pd.concat(list(pool.map(partial(
+        DVCSAsym_theo_xBtQ,
+        Para_Unp=Para_Unp,
+        Para_Pol=Para_Pol,
+        P_order=P_order,
+        Para_PionPole=Para_PionPole,
+        Para_Dterm=Para_Dterm,
+    ), DVCSAsym_data_xBtQ)), ignore_index=True)
     return DVCSAsym_data_xBtQ
 
-def DVMPxsec_theo(DVMPxsec_data: pd.DataFrame, Para_Unp, xsec_norm, meson:int, p_order = 2):
+def DVMPxsec_theo(
+        DVMPxsec_data: pd.DataFrame, Para_Unp, xsec_norm, meson:int,
+        p_order = 2, Para_Dterm=None):
     """Compute DVMP cross-section predictions for a full dataset using a parallel pool.
 
     Args:
@@ -824,16 +954,27 @@ def DVMPxsec_theo(DVMPxsec_data: pd.DataFrame, Para_Unp, xsec_norm, meson:int, p
         xsec_norm (float): Overall normalization applied as ``theory *= xsec_norm**2``.
         meson (int): Meson type: 1 for :math:`\\rho^0`, 3 for J/psi.
         p_order (int, optional): Perturbative order.  Defaults to 2.
+        Para_Dterm (array-like, optional): Managed ``[u, d, g]`` D-term
+            parameter array passed to every kinematic group.
 
     Returns:
         pd.DataFrame: Concatenated results with ``'pred f'`` and ``'cost'`` columns.
     """
     DVMPxsec_data_xBtQ = group_by_unique(DVMPxsec_data)
     pool = get_pool()
-    DVMPxsec_data_xBtQ = pd.concat(list(pool.map(partial(DVMPxsec_theo_xBtQ, Para_Unp = Para_Unp, xsec_norm = xsec_norm, meson = meson, p_order = p_order), DVMPxsec_data_xBtQ)), ignore_index=True)
+    DVMPxsec_data_xBtQ = pd.concat(list(pool.map(partial(
+        DVMPxsec_theo_xBtQ,
+        Para_Unp=Para_Unp,
+        xsec_norm=xsec_norm,
+        meson=meson,
+        p_order=p_order,
+        Para_Dterm=Para_Dterm,
+    ), DVMPxsec_data_xBtQ)), ignore_index=True)
     return DVMPxsec_data_xBtQ
 
-def DVCSxsecHERA_theo(DVCSxsec_HERA_data: pd.DataFrame, Para_Unp, Para_Pol, P_order = 2):
+def DVCSxsecHERA_theo(
+        DVCSxsec_HERA_data: pd.DataFrame, Para_Unp, Para_Pol, P_order=2,
+        Para_PionPole=None, Para_Dterm=None):
     """Compute HERA DVCS cross-section predictions for a full dataset using a parallel pool.
 
     Args:
@@ -841,13 +982,24 @@ def DVCSxsecHERA_theo(DVCSxsec_HERA_data: pd.DataFrame, Para_Unp, Para_Pol, P_or
         Para_Unp (np.ndarray): Unpolarized parameter array.
         Para_Pol (np.ndarray): Polarized parameter array.
         P_order (int, optional): Perturbative order.  Defaults to 2.
+        Para_PionPole (array-like, optional): Universal pion-pole ``N`` and
+            ``Lambda`` passed to every kinematic group.
+        Para_Dterm (array-like, optional): Managed ``[u, d, g]`` D-term
+            parameter array passed to every kinematic group.
 
     Returns:
         pd.DataFrame: Concatenated results with ``'pred f'`` and ``'cost'`` columns.
     """
     DVCSxsec_HERA_data_xBtQ = group_by_unique(DVCSxsec_HERA_data)
     pool = get_pool()
-    DVCSxsec_HERA_data_xBtQ = pd.concat(list(pool.map(partial(DVCSxsecHERA_theo_xBtQ, Para_Unp = Para_Unp, Para_Pol = Para_Pol, P_order = P_order), DVCSxsec_HERA_data_xBtQ)), ignore_index=True)
+    DVCSxsec_HERA_data_xBtQ = pd.concat(list(pool.map(partial(
+        DVCSxsecHERA_theo_xBtQ,
+        Para_Unp=Para_Unp,
+        Para_Pol=Para_Pol,
+        P_order=P_order,
+        Para_PionPole=Para_PionPole,
+        Para_Dterm=Para_Dterm,
+    ), DVCSxsec_HERA_data_xBtQ)), ignore_index=True)
     return DVCSxsec_HERA_data_xBtQ
 
 def simple_dispatch(task):
@@ -891,16 +1043,32 @@ def cost_off_forward_withH_withHt(Norm_HuV,    alpha_HuV,    beta_HuV,    alphap
                     R_Etu_xi2,   R_Etd_xi2,    R_Etg_xi2,
                     R_Htu_xi4,   R_Htd_xi4,    R_Htg_xi4,
                     R_Etu_xi4,   R_Etd_xi4,    R_Etg_xi4,   bexp_HtSea,
+<<<<<<< Updated upstream
+=======
+                    N_PionPole, Lambda_PionPole,
+                    Norm_Dterm_q, Invm2_Dterm_q,
+                    Norm_Dterm_g, Invm2_Dterm_g,
+>>>>>>> Stashed changes
                     jpsinorm):
     r"""Total :math:`\chi^2` cost function for the GUMP global GPD fit.
 
     Accepts all GPD model parameters as individual keyword arguments (the
     iMinuit interface requires a flat parameter signature).  Internally the
     flat list is split into unpolarized (:data:`Paralst_Unp_Names`), polarized
+<<<<<<< Updated upstream
     (:data:`Paralst_Pol_Names`), and auxiliary (:data:`Paralst_Aux_Names`)
     groups, assembled via :func:`~gumpgpd.Parameters.ParaManager_Unp` and
     :func:`~gumpgpd.Parameters.ParaManager_Pol`, and passed to all theory
     prediction functions in parallel.
+=======
+    (:data:`Paralst_Pol_Names`), pion-pole
+    (:data:`Paralst_PionPole_Names`), D-term
+    (:data:`Paralst_Dterm_Names`), and auxiliary
+    (:data:`Paralst_Aux_Names`) groups, assembled via
+    :func:`~gumpgpd.Parameters.ParaManager_Unp` and
+    :func:`~gumpgpd.Parameters.ParaManager_Pol`, and passed to the applicable
+    theory prediction functions in parallel.
+>>>>>>> Stashed changes
 
     The returned scalar is:
 
@@ -921,16 +1089,31 @@ def cost_off_forward_withH_withHt(Norm_HuV,    alpha_HuV,    beta_HuV,    alphap
     Args:
         Norm_HuV, alpha_HuV, beta_HuV, ..., jpsinorm: All GPD model parameters
             listed in :data:`Paralst_Unp_Names`, :data:`Paralst_Pol_Names`,
+<<<<<<< Updated upstream
             and :data:`Paralst_Aux_Names`.
+=======
+            :data:`Paralst_PionPole_Names`, :data:`Paralst_Dterm_Names`, and
+            :data:`Paralst_Aux_Names`.
+>>>>>>> Stashed changes
 
     Returns:
         float: Total :math:`\chi^2` (fit mode).
         dict: Mapping of task name → result DataFrame (export mode).
     """
     params = locals()
+<<<<<<< Updated upstream
     validate_params(params, set(Paralst_Unp_Names + Paralst_Pol_Names + Paralst_Aux_Names))
     Para_Unp_lst = [params[name] for name in Paralst_Unp_Names]
     Para_Pol_lst = [params[name] for name in Paralst_Pol_Names]
+=======
+    validate_params(params, set(Paralst_Unp_Names + Paralst_Pol_Names
+                                + Paralst_PionPole_Names
+                                + Paralst_Dterm_Names + Paralst_Aux_Names))
+    Para_Unp_lst = [params[name] for name in Paralst_Unp_Names]
+    Para_Pol_lst = [params[name] for name in Paralst_Pol_Names]
+    Para_PionPole_lst = [params[name] for name in Paralst_PionPole_Names]
+    Para_Dterm_lst = [params[name] for name in Paralst_Dterm_Names]
+>>>>>>> Stashed changes
     jpsinorm = params["jpsinorm"]
     
     global Minuit_Counter, Time_Counter
@@ -945,6 +1128,7 @@ def cost_off_forward_withH_withHt(Norm_HuV,    alpha_HuV,    beta_HuV,    alphap
     
     Para_Unp_all = ParaManager_Unp(Para_Unp_lst)
     Para_Pol_all = ParaManager_Pol(Para_Pol_lst)
+    Para_Dterm_all = ParaManager_Dterm(Para_Dterm_lst)
     Para_Comb = np.concatenate([Para_Unp_all, Para_Pol_all], axis=0)
     
     tPDF_pred = tPDF_theo(tPDF_data, Para=Para_Comb, chunksize=1)
@@ -971,7 +1155,9 @@ def cost_off_forward_withH_withHt(Norm_HuV,    alpha_HuV,    beta_HuV,    alphap
             partial(DVCSxsec_theo_xBtQ,
                     Para_Unp=Para_Unp_all,
                     Para_Pol=Para_Pol_all,
-                    P_order=porder),
+                    P_order=porder,
+                    Para_PionPole=Para_PionPole_lst,
+                    Para_Dterm=Para_Dterm_all),
             DVCSxsec_group_data,
             "DVCSxsec.csv"
         ),
@@ -979,7 +1165,9 @@ def cost_off_forward_withH_withHt(Norm_HuV,    alpha_HuV,    beta_HuV,    alphap
             partial(DVCSxsecHERA_theo_xBtQ,
                     Para_Unp=Para_Unp_all,
                     Para_Pol=Para_Pol_all,
-                    P_order=porder),
+                    P_order=porder,
+                    Para_PionPole=Para_PionPole_lst,
+                    Para_Dterm=Para_Dterm_all),
             DVCSxsec_HERA_group_data,
             "DVCSxsec_HERA.csv"
         ),
@@ -988,7 +1176,8 @@ def cost_off_forward_withH_withHt(Norm_HuV,    alpha_HuV,    beta_HuV,    alphap
                     Para_Unp=Para_Unp_all,
                     xsec_norm=1,
                     meson=1,
-                    p_order=porder),
+                    p_order=porder,
+                    Para_Dterm=Para_Dterm_all),
             DVrhoPH1xsecL_group_data,
             "DVMPxsec.csv"
         ),
@@ -997,7 +1186,8 @@ def cost_off_forward_withH_withHt(Norm_HuV,    alpha_HuV,    beta_HuV,    alphap
                     Para_Unp=Para_Unp_all,
                     xsec_norm=1,
                     meson=1,
-                    p_order=porder),
+                    p_order=porder,
+                    Para_Dterm=Para_Dterm_all),
             DVrhoPZEUSxsecL_group_data,
             "DVMPxsec.csv"
         ),
@@ -1006,7 +1196,8 @@ def cost_off_forward_withH_withHt(Norm_HuV,    alpha_HuV,    beta_HuV,    alphap
                     Para_Unp=Para_Unp_all,
                     xsec_norm=jpsinorm,
                     meson=3,
-                    p_order=porder),
+                    p_order=porder,
+                    Para_Dterm=Para_Dterm_all),
             DVJpsiPH1xsec_group_data,
             "DVJpsiPxsec.csv"
         ),
@@ -1015,7 +1206,8 @@ def cost_off_forward_withH_withHt(Norm_HuV,    alpha_HuV,    beta_HuV,    alphap
                     Para_Unp=Para_Unp_all,
                     xsec_norm=jpsinorm,
                     meson=3,
-                    p_order=porder),
+                    p_order=porder,
+                    Para_Dterm=Para_Dterm_all),
             DVJpsiPZEUSxsec_group_data,
             "DVJpsiPZEUSxsec.csv"
         ),
@@ -1023,7 +1215,9 @@ def cost_off_forward_withH_withHt(Norm_HuV,    alpha_HuV,    beta_HuV,    alphap
             partial(DVCSxsec_theo_xBtQ,
                     Para_Unp=Para_Unp_all,
                     Para_Pol=Para_Pol_all,
-                    P_order=porder),
+                    P_order=porder,
+                    Para_PionPole=Para_PionPole_lst,
+                    Para_Dterm=Para_Dterm_all),
             DVCSxsecNew_group_data,
             "DVCSxsec_New.csv"
         ),
@@ -1031,7 +1225,9 @@ def cost_off_forward_withH_withHt(Norm_HuV,    alpha_HuV,    beta_HuV,    alphap
             partial(DVCSAsym_theo_xBtQ,
                     Para_Unp=Para_Unp_all,
                     Para_Pol=Para_Pol_all,
-                    P_order=porder),
+                    P_order=porder,
+                    Para_PionPole=Para_PionPole_lst,
+                    Para_Dterm=Para_Dterm_all),
             DVCSAsym_group_data,
             "DVCSAsym.csv"
         ),
@@ -1132,7 +1328,25 @@ def cost_off_forward_withH_withHt(Norm_HuV,    alpha_HuV,    beta_HuV,    alphap
     
     return total_cost_exp + tPDF_pred['cost'].sum() + GFF_pred['cost'].sum() + PDF_pred['cost'].sum() + GPD_pred['cost'].sum() + totpen
 
+<<<<<<< Updated upstream
 def off_forward_fit_withH_withHt(Paralst_Unp, Paralst_Pol, Paralst_Aux=[1.0] * len(Paralst_Aux_Names), export_path = '.'):
+=======
+def off_forward_fit_withH_withHt(
+        Paralst_Unp, Paralst_Pol,
+        Paralst_PionPole=[
+            1.014848729765554,
+            0.45935541548570613,
+        ],
+        # Correlated dipole seeds from the lattice Dq and Dg blocks, using
+        # Dq = 8 Cq under Cu = Cd and a negligible strange term, and Dg = 4 Cg.
+        Paralst_Dterm=[
+            -0.16140807473080018,
+            1.5063522192019976,
+            -0.5755284644,
+            3.187137301,
+        ],
+        Paralst_Aux=[1.0] * len(Paralst_Aux_Names), export_path = '.'):
+>>>>>>> Stashed changes
     r"""Run the GUMP global GPD fit using iMinuit (MIGRAD + HESSE).
 
     Sets up a :class:`iminuit.Minuit` instance with
@@ -1147,6 +1361,16 @@ def off_forward_fit_withH_withHt(Paralst_Unp, Paralst_Pol, Paralst_Aux=[1.0] * l
             in the order defined by :data:`Paralst_Unp_Names`.
         Paralst_Pol (array-like): Initial values for all polarized parameters
             in the order defined by :data:`Paralst_Pol_Names`.
+<<<<<<< Updated upstream
+=======
+        Paralst_PionPole (array-like, optional): Initial values for the
+            universal normalization and cutoff in the order defined by
+            :data:`Paralst_PionPole_Names`.
+        Paralst_Dterm (array-like, optional): Initial shared u- and d-quark
+            C-form-factor normalization and inverse dipole mass squared,
+            followed by the independent gluon pair, in the order defined by
+            :data:`Paralst_Dterm_Names`.
+>>>>>>> Stashed changes
         Paralst_Aux (array-like, optional): Initial values for auxiliary
             parameters (currently only ``jpsinorm``).  Defaults to ``[1.0]``.
         export_path (str, optional): Root directory for the output text file.
@@ -1162,18 +1386,58 @@ def off_forward_fit_withH_withHt(Paralst_Unp, Paralst_Pol, Paralst_Aux=[1.0] * l
         ``config.Export_Mode = True`` to export predictions after fitting.
     """
     assert config.Export_Mode == False, "Make sure the Export_Mode is set to False in config.py before fitting"
+
+    if len(Paralst_PionPole) != len(Paralst_PionPole_Names):
+        raise ValueError(
+            "Paralst_PionPole must contain exactly "
+            f"{len(Paralst_PionPole_Names)} values "
+            f"({', '.join(Paralst_PionPole_Names)}); "
+            f"received {len(Paralst_PionPole)}"
+        )
+
+    if len(Paralst_Dterm) != len(Paralst_Dterm_Names):
+        raise ValueError(
+            "Paralst_Dterm must contain exactly "
+            f"{len(Paralst_Dterm_Names)} values "
+            f"({', '.join(Paralst_Dterm_Names)}); "
+            f"received {len(Paralst_Dterm)}"
+        )
     
     # Create dictionaries by zipping names and values
     params_unp = dict(zip(Paralst_Unp_Names, Paralst_Unp))
     params_pol = dict(zip(Paralst_Pol_Names, Paralst_Pol))
+<<<<<<< Updated upstream
     params_aux = dict(zip(Paralst_Aux_Names, Paralst_Aux))
     
     params = {**params_unp, **params_pol, **params_aux}
+=======
+    params_pionpole = dict(zip(Paralst_PionPole_Names, Paralst_PionPole))
+    params_dterm = dict(zip(Paralst_Dterm_Names, Paralst_Dterm))
+    params_aux = dict(zip(Paralst_Aux_Names, Paralst_Aux))
+    
+    params = {
+        **params_unp,
+        **params_pol,
+        **params_pionpole,
+        **params_dterm,
+        **params_aux,
+    }
+>>>>>>> Stashed changes
 
     fit_off_forward = Minuit(cost_off_forward_withH_withHt, **params)
     
     fit_off_forward.errordef = 1
 
+<<<<<<< Updated upstream
+=======
+    fit_off_forward.limits['N_PionPole'] = (0, 10)
+    fit_off_forward.limits['Lambda_PionPole'] = (0.15, 1.5)
+    fit_off_forward.limits['Norm_Dterm_q'] = (-1, 1)
+    fit_off_forward.limits['Invm2_Dterm_q'] = (0, 5)
+    fit_off_forward.limits['Norm_Dterm_g'] = (-1, 1)
+    fit_off_forward.limits['Invm2_Dterm_g'] = (0, 5)
+
+>>>>>>> Stashed changes
     norm_max = 1
     
     fit_off_forward.limits['Norm_HuV']     = (-norm_max,norm_max)
@@ -1357,11 +1621,50 @@ def off_forward_fit_withH_withHt(Paralst_Unp, Paralst_Pol, Paralst_Aux=[1.0] * l
 
 Paralst_Unp_off_forward=pd.read_csv(os.path.join(dir_path,'GUMP_Params/Para_Unp_Off_forward_withH_withHt_NLO.csv'), header=None).to_numpy()[0]
 Paralst_Pol_off_forward=pd.read_csv(os.path.join(dir_path,'GUMP_Params/Para_Pol_Off_forward_withH_withHt_NLO.csv'), header=None).to_numpy()[0]
+<<<<<<< Updated upstream
 
 ParaErr_Unp_off_forward=pd.read_csv(os.path.join(dir_path,'GUMP_Params/Para_Unp_Off_forward_withH_withHt_NLO.csv'), header=None).to_numpy()[1]
 ParaErr_Pol_off_forward=pd.read_csv(os.path.join(dir_path,'GUMP_Params/Para_Pol_Off_forward_withH_withHt_NLO.csv'), header=None).to_numpy()[1]
+=======
+_pion_pole_parameter_table = pd.read_csv(
+    os.path.join(
+        dir_path,
+        'GUMP_Params/Para_PionPole_Off_forward_withH_withHt_NLO.csv',
+    ),
+    header=None,
+).to_numpy()
+if _pion_pole_parameter_table.shape != (2, len(Paralst_PionPole_Names)):
+    raise ValueError(
+        "The pion-pole parameter CSV must have two rows and exactly "
+        f"{len(Paralst_PionPole_Names)} columns "
+        f"({', '.join(Paralst_PionPole_Names)}); found shape "
+        f"{_pion_pole_parameter_table.shape}"
+    )
+Paralst_PionPole_off_forward = _pion_pole_parameter_table[0]
+_dterm_parameter_table = pd.read_csv(
+    os.path.join(
+        dir_path,
+        'GUMP_Params/Para_Dterm_Off_forward_withH_withHt_NLO.csv',
+    ),
+    header=None,
+).to_numpy()
+if _dterm_parameter_table.shape != (2, len(Paralst_Dterm_Names)):
+    raise ValueError(
+        "The D-term parameter CSV must have two rows and exactly "
+        f"{len(Paralst_Dterm_Names)} columns "
+        f"({', '.join(Paralst_Dterm_Names)}); found shape "
+        f"{_dterm_parameter_table.shape}"
+    )
+Paralst_Dterm_off_forward = _dterm_parameter_table[0]
+
+ParaErr_Unp_off_forward=pd.read_csv(os.path.join(dir_path,'GUMP_Params/Para_Unp_Off_forward_withH_withHt_NLO.csv'), header=None).to_numpy()[1]
+ParaErr_Pol_off_forward=pd.read_csv(os.path.join(dir_path,'GUMP_Params/Para_Pol_Off_forward_withH_withHt_NLO.csv'), header=None).to_numpy()[1]
+ParaErr_PionPole_off_forward = _pion_pole_parameter_table[1]
+ParaErr_Dterm_off_forward = _dterm_parameter_table[1]
+>>>>>>> Stashed changes
 
 Para_Unp_off_forward = ParaManager_Unp(Paralst_Unp_off_forward)
 Para_Pol_off_forward = ParaManager_Pol(Paralst_Pol_off_forward[:-1]) # exclude jpsi_norm
+Para_Dterm_off_forward = ParaManager_Dterm(Paralst_Dterm_off_forward)
 
 Para_Comb_off_forward = np.concatenate([Para_Unp_off_forward, Para_Pol_off_forward], axis=0)

@@ -20,6 +20,9 @@ has shape ``(2, 3, 5, n_ansatz, 6)`` where the axes correspond to:
 * axis 2 – flavor: ``[u_V, u-bar, d_V, d-bar, g]``
 * axis 3 – ansatz index
 * axis 4 – parameter within one ansatz: ``[norm, alpha, beta, alphap, bexp, invm2]``
+
+The D-term manager returns a separate ``(3, 2)`` array ordered as
+``[u, d, g]``, with ``[norm, invm2]`` for each physical source flavor.
 """
 # Number of GPD species, 4 leading-twist GPDs including H, E Ht, Et are needed.
 #NumofGPDSpecies = 4
@@ -236,6 +239,27 @@ def ParaManager_Pol(Paralst: np.ndarray) -> np.ndarray:
                       [Et_uV_xi4, Et_ubar_xi4, Et_dV_xi4, Et_dbar_xi4, Et_g_xi4]])
 
     return np.array([Htlst, Etlst])
+
+def ParaManager_Dterm(Paralst: np.ndarray) -> np.ndarray:
+    r"""Expand the flat D-term fit parameters into physical flavor rows.
+
+    The :math:`u` and :math:`d` C form factors share both quark parameters,
+    while the gluon has an independent normalization and inverse dipole mass
+    squared.
+
+    Args:
+        Paralst (np.ndarray): ``[norm_q, invm2_q, norm_g, invm2_g]``.
+
+    Returns:
+        np.ndarray: Shape ``(3, 2)``, ordered as ``[u, d, g]``:
+        ``[[N_u, invm2_u], [N_d, invm2_d], [N_g, invm2_g]]``.
+    """
+    [Norm_Du, Invm2_Du, Norm_Dg, Invm2_Dg] = Paralst
+    return np.array([
+        [Norm_Du, Invm2_Du],
+        [Norm_Du, Invm2_Du],
+        [Norm_Dg, Invm2_Dg],
+    ])
 
 def beta_loggamma(a: complex, b: complex) -> complex:
     """Euler Beta function evaluated via log-gamma for numerical stability.
