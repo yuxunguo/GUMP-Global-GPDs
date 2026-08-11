@@ -55,6 +55,7 @@ remain available for reproducing the original analysis workflows.
 - **V1.0.1** Fixed an issue where unwanted function calls were triggered during GPD calculations.
 - **V1.0.2** Improved caching behavior and user-facing messages.
 - **V1.0.3** Introduced hybrid caching with `diskcache`; minor code restructuring.
+- **V1.0.4** Implemented pion pole term in the u/d Et and D term in H/E. 
 
 ## Documentation
 
