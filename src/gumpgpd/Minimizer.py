@@ -62,10 +62,6 @@ Paralst_Pol_Names = [
     "R_Etu_xi4", "R_Etd_xi4", "R_Etg_xi4", "bexp_HtSea"
 ]
 
-<<<<<<< Updated upstream
-Paralst_Aux_Names = ["jpsinorm"] 
-
-=======
 Paralst_PionPole_Names = [
     "N_PionPole", "Lambda_PionPole"
 ]
@@ -77,7 +73,6 @@ Paralst_Dterm_Names = [
 
 Paralst_Aux_Names = ["jpsinorm"]
 
->>>>>>> Stashed changes
 def validate_params(params: dict, required_names: set):
     """Validate that a parameter dictionary contains exactly the required keys with non-None values.
 
@@ -467,7 +462,8 @@ def PDF_theo(PDF_input: pd.DataFrame, Para: np.array, p_order = 2, chunksize = N
 
 tPDF_theo = PDF_theo
 
-def GFF_theo(GFF_input: pd.DataFrame, Para: np.array, p_order = 2, chunksize = None):
+def GFF_theo(GFF_input: pd.DataFrame, Para: np.array, p_order = 2,
+             chunksize = None, Para_PionPole = None):
     """Compute NLO GFF theory predictions for an entire dataset in parallel.
 
     Adds a ``'pred f'`` column with the theory prediction and, if ``'f'`` and
@@ -480,12 +476,9 @@ def GFF_theo(GFF_input: pd.DataFrame, Para: np.array, p_order = 2, chunksize = N
         Para (np.ndarray): Full stacked parameter array indexed by species.
         p_order (int, optional): Perturbative order.  Defaults to 2 (NLO).
         chunksize (int, optional): Pool map chunksize for performance tuning.
-<<<<<<< Updated upstream
-=======
         Para_PionPole (array-like, optional): Universal ``N`` and ``Lambda``
             for the dipole pion pole.  If omitted, the original GUMP
             prediction is returned unchanged.
->>>>>>> Stashed changes
 
     Returns:
         pd.DataFrame: Copy of *GFF_input* with added ``'pred f'`` and
@@ -508,8 +501,6 @@ def GFF_theo(GFF_input: pd.DataFrame, Para: np.array, p_order = 2, chunksize = N
 
     pool = get_pool()
     GFF_input['pred f'] = list(pool.starmap(GFF_theo_scalar_helper, args, chunksize = chunksize))
-<<<<<<< Updated upstream
-=======
     if Para_PionPole is not None:
         N, Lambda = Para_PionPole
         predictions = GFF_input['pred f'].to_numpy(copy=True)
@@ -524,7 +515,6 @@ def GFF_theo(GFF_input: pd.DataFrame, Para: np.array, p_order = 2, chunksize = N
             )
 
         GFF_input['pred f'] = predictions
->>>>>>> Stashed changes
     if "f" in GFF_input and "delta f" in GFF_input:
         GFF_input['cost'] = ((GFF_input["pred f"]-GFF_input["f"])/GFF_input["delta f"])**2
     
@@ -1043,24 +1033,15 @@ def cost_off_forward_withH_withHt(Norm_HuV,    alpha_HuV,    beta_HuV,    alphap
                     R_Etu_xi2,   R_Etd_xi2,    R_Etg_xi2,
                     R_Htu_xi4,   R_Htd_xi4,    R_Htg_xi4,
                     R_Etu_xi4,   R_Etd_xi4,    R_Etg_xi4,   bexp_HtSea,
-<<<<<<< Updated upstream
-=======
                     N_PionPole, Lambda_PionPole,
                     Norm_Dterm_q, Invm2_Dterm_q,
                     Norm_Dterm_g, Invm2_Dterm_g,
->>>>>>> Stashed changes
                     jpsinorm):
     r"""Total :math:`\chi^2` cost function for the GUMP global GPD fit.
 
     Accepts all GPD model parameters as individual keyword arguments (the
     iMinuit interface requires a flat parameter signature).  Internally the
     flat list is split into unpolarized (:data:`Paralst_Unp_Names`), polarized
-<<<<<<< Updated upstream
-    (:data:`Paralst_Pol_Names`), and auxiliary (:data:`Paralst_Aux_Names`)
-    groups, assembled via :func:`~gumpgpd.Parameters.ParaManager_Unp` and
-    :func:`~gumpgpd.Parameters.ParaManager_Pol`, and passed to all theory
-    prediction functions in parallel.
-=======
     (:data:`Paralst_Pol_Names`), pion-pole
     (:data:`Paralst_PionPole_Names`), D-term
     (:data:`Paralst_Dterm_Names`), and auxiliary
@@ -1068,7 +1049,6 @@ def cost_off_forward_withH_withHt(Norm_HuV,    alpha_HuV,    beta_HuV,    alphap
     :func:`~gumpgpd.Parameters.ParaManager_Unp` and
     :func:`~gumpgpd.Parameters.ParaManager_Pol`, and passed to the applicable
     theory prediction functions in parallel.
->>>>>>> Stashed changes
 
     The returned scalar is:
 
@@ -1089,23 +1069,14 @@ def cost_off_forward_withH_withHt(Norm_HuV,    alpha_HuV,    beta_HuV,    alphap
     Args:
         Norm_HuV, alpha_HuV, beta_HuV, ..., jpsinorm: All GPD model parameters
             listed in :data:`Paralst_Unp_Names`, :data:`Paralst_Pol_Names`,
-<<<<<<< Updated upstream
-            and :data:`Paralst_Aux_Names`.
-=======
             :data:`Paralst_PionPole_Names`, :data:`Paralst_Dterm_Names`, and
             :data:`Paralst_Aux_Names`.
->>>>>>> Stashed changes
 
     Returns:
         float: Total :math:`\chi^2` (fit mode).
         dict: Mapping of task name → result DataFrame (export mode).
     """
     params = locals()
-<<<<<<< Updated upstream
-    validate_params(params, set(Paralst_Unp_Names + Paralst_Pol_Names + Paralst_Aux_Names))
-    Para_Unp_lst = [params[name] for name in Paralst_Unp_Names]
-    Para_Pol_lst = [params[name] for name in Paralst_Pol_Names]
-=======
     validate_params(params, set(Paralst_Unp_Names + Paralst_Pol_Names
                                 + Paralst_PionPole_Names
                                 + Paralst_Dterm_Names + Paralst_Aux_Names))
@@ -1113,7 +1084,6 @@ def cost_off_forward_withH_withHt(Norm_HuV,    alpha_HuV,    beta_HuV,    alphap
     Para_Pol_lst = [params[name] for name in Paralst_Pol_Names]
     Para_PionPole_lst = [params[name] for name in Paralst_PionPole_Names]
     Para_Dterm_lst = [params[name] for name in Paralst_Dterm_Names]
->>>>>>> Stashed changes
     jpsinorm = params["jpsinorm"]
     
     global Minuit_Counter, Time_Counter
@@ -1132,7 +1102,8 @@ def cost_off_forward_withH_withHt(Norm_HuV,    alpha_HuV,    beta_HuV,    alphap
     Para_Comb = np.concatenate([Para_Unp_all, Para_Pol_all], axis=0)
     
     tPDF_pred = tPDF_theo(tPDF_data, Para=Para_Comb, chunksize=1)
-    GFF_pred  = GFF_theo(  GFF_data, Para=Para_Comb, chunksize=1)
+    GFF_pred  = GFF_theo(  GFF_data, Para=Para_Comb, chunksize=1,
+                           Para_PionPole=Para_PionPole_lst)
     PDF_pred  = PDF_theo(  PDF_data, Para=Para_Comb, chunksize=1)
     GPD_pred  = GPD_theo(  GPD_data, Para=Para_Comb, chunksize=1)
     
@@ -1328,9 +1299,6 @@ def cost_off_forward_withH_withHt(Norm_HuV,    alpha_HuV,    beta_HuV,    alphap
     
     return total_cost_exp + tPDF_pred['cost'].sum() + GFF_pred['cost'].sum() + PDF_pred['cost'].sum() + GPD_pred['cost'].sum() + totpen
 
-<<<<<<< Updated upstream
-def off_forward_fit_withH_withHt(Paralst_Unp, Paralst_Pol, Paralst_Aux=[1.0] * len(Paralst_Aux_Names), export_path = '.'):
-=======
 def off_forward_fit_withH_withHt(
         Paralst_Unp, Paralst_Pol,
         Paralst_PionPole=[
@@ -1346,7 +1314,6 @@ def off_forward_fit_withH_withHt(
             3.187137301,
         ],
         Paralst_Aux=[1.0] * len(Paralst_Aux_Names), export_path = '.'):
->>>>>>> Stashed changes
     r"""Run the GUMP global GPD fit using iMinuit (MIGRAD + HESSE).
 
     Sets up a :class:`iminuit.Minuit` instance with
@@ -1361,8 +1328,6 @@ def off_forward_fit_withH_withHt(
             in the order defined by :data:`Paralst_Unp_Names`.
         Paralst_Pol (array-like): Initial values for all polarized parameters
             in the order defined by :data:`Paralst_Pol_Names`.
-<<<<<<< Updated upstream
-=======
         Paralst_PionPole (array-like, optional): Initial values for the
             universal normalization and cutoff in the order defined by
             :data:`Paralst_PionPole_Names`.
@@ -1370,7 +1335,6 @@ def off_forward_fit_withH_withHt(
             C-form-factor normalization and inverse dipole mass squared,
             followed by the independent gluon pair, in the order defined by
             :data:`Paralst_Dterm_Names`.
->>>>>>> Stashed changes
         Paralst_Aux (array-like, optional): Initial values for auxiliary
             parameters (currently only ``jpsinorm``).  Defaults to ``[1.0]``.
         export_path (str, optional): Root directory for the output text file.
@@ -1406,11 +1370,6 @@ def off_forward_fit_withH_withHt(
     # Create dictionaries by zipping names and values
     params_unp = dict(zip(Paralst_Unp_Names, Paralst_Unp))
     params_pol = dict(zip(Paralst_Pol_Names, Paralst_Pol))
-<<<<<<< Updated upstream
-    params_aux = dict(zip(Paralst_Aux_Names, Paralst_Aux))
-    
-    params = {**params_unp, **params_pol, **params_aux}
-=======
     params_pionpole = dict(zip(Paralst_PionPole_Names, Paralst_PionPole))
     params_dterm = dict(zip(Paralst_Dterm_Names, Paralst_Dterm))
     params_aux = dict(zip(Paralst_Aux_Names, Paralst_Aux))
@@ -1422,14 +1381,11 @@ def off_forward_fit_withH_withHt(
         **params_dterm,
         **params_aux,
     }
->>>>>>> Stashed changes
 
     fit_off_forward = Minuit(cost_off_forward_withH_withHt, **params)
     
     fit_off_forward.errordef = 1
 
-<<<<<<< Updated upstream
-=======
     fit_off_forward.limits['N_PionPole'] = (0, 10)
     fit_off_forward.limits['Lambda_PionPole'] = (0.15, 1.5)
     fit_off_forward.limits['Norm_Dterm_q'] = (-1, 1)
@@ -1437,7 +1393,6 @@ def off_forward_fit_withH_withHt(
     fit_off_forward.limits['Norm_Dterm_g'] = (-1, 1)
     fit_off_forward.limits['Invm2_Dterm_g'] = (0, 5)
 
->>>>>>> Stashed changes
     norm_max = 1
     
     fit_off_forward.limits['Norm_HuV']     = (-norm_max,norm_max)
@@ -1621,11 +1576,6 @@ def off_forward_fit_withH_withHt(
 
 Paralst_Unp_off_forward=pd.read_csv(os.path.join(dir_path,'GUMP_Params/Para_Unp_Off_forward_withH_withHt_NLO.csv'), header=None).to_numpy()[0]
 Paralst_Pol_off_forward=pd.read_csv(os.path.join(dir_path,'GUMP_Params/Para_Pol_Off_forward_withH_withHt_NLO.csv'), header=None).to_numpy()[0]
-<<<<<<< Updated upstream
-
-ParaErr_Unp_off_forward=pd.read_csv(os.path.join(dir_path,'GUMP_Params/Para_Unp_Off_forward_withH_withHt_NLO.csv'), header=None).to_numpy()[1]
-ParaErr_Pol_off_forward=pd.read_csv(os.path.join(dir_path,'GUMP_Params/Para_Pol_Off_forward_withH_withHt_NLO.csv'), header=None).to_numpy()[1]
-=======
 _pion_pole_parameter_table = pd.read_csv(
     os.path.join(
         dir_path,
@@ -1661,7 +1611,6 @@ ParaErr_Unp_off_forward=pd.read_csv(os.path.join(dir_path,'GUMP_Params/Para_Unp_
 ParaErr_Pol_off_forward=pd.read_csv(os.path.join(dir_path,'GUMP_Params/Para_Pol_Off_forward_withH_withHt_NLO.csv'), header=None).to_numpy()[1]
 ParaErr_PionPole_off_forward = _pion_pole_parameter_table[1]
 ParaErr_Dterm_off_forward = _dterm_parameter_table[1]
->>>>>>> Stashed changes
 
 Para_Unp_off_forward = ParaManager_Unp(Paralst_Unp_off_forward)
 Para_Pol_off_forward = ParaManager_Pol(Paralst_Pol_off_forward[:-1]) # exclude jpsi_norm
