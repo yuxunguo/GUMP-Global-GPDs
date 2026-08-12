@@ -30,13 +30,30 @@ if __name__ == '__main__':
 
     str = '_withH_withHt_NLO'
     Paralst_Unp=pd.read_csv(os.path.join(dir_path,f'GUMP_Params/Para_Unp_Off_forward{str}.csv'), header=None).to_numpy()[0]
-    Paralst_Pol=pd.read_csv(os.path.join(dir_path,f'GUMP_Params/Para_Pol_Off_forward{str}.csv'), header=None).to_numpy()[0]
+    Paralst_Pol_off_forward=pd.read_csv(os.path.join(dir_path,f'GUMP_Params/Para_Pol_Off_forward{str}.csv'), header=None).to_numpy()[0]
+    # The last parameter of Paralst_Pol_off_forward is the auxiliary parameter not used in the analysis
+    Paralst_Pol = Paralst_Pol_off_forward[:-1]
+    Paralst_Aux = [Paralst_Pol_off_forward[-1]]
+    Paralst_PionPole=pd.read_csv(os.path.join(dir_path,f'GUMP_Params/Para_PionPole_Off_forward{str}.csv'), header=None).to_numpy()[0]
+    Paralst_Dterm=pd.read_csv(os.path.join(dir_path,f'GUMP_Params/Para_Dterm_Off_forward{str}.csv'), header=None).to_numpy()[0]
 
-    fit_off_forward = off_forward_fit_withH_withHt(Paralst_Unp, Paralst_Pol)
+    fit_off_forward = off_forward_fit_withH_withHt(
+        Paralst_Unp=Paralst_Unp,
+        Paralst_Pol=Paralst_Pol,
+        Paralst_PionPole=Paralst_PionPole,
+        Paralst_Dterm=Paralst_Dterm,
+        Paralst_Aux=Paralst_Aux,
+    )
 
     FitVals = list([*fit_off_forward.values])
     FitErrs = list([*fit_off_forward.errors])
     UnpLength = len(Paralst_Unp)
+    PolLength = len(Paralst_Pol)
+    PionPoleLength = len(Paralst_PionPole)
+    DtermLength = len(Paralst_Dterm)
+    PolEnd = UnpLength + PolLength
+    PionPoleEnd = PolEnd + PionPoleLength
+    DtermEnd = PionPoleEnd + DtermLength
 
     with open(os.path.join(dir_path,f"GUMP_Params/Para_Unp_Off_forward{str}.csv"),"w",newline='') as my_csv:
         csvWriter = csv.writer(my_csv,delimiter=',')
@@ -46,6 +63,18 @@ if __name__ == '__main__':
 
     with open(os.path.join(dir_path,f"GUMP_Params/Para_Pol_Off_forward{str}.csv"),"w",newline='') as my_csv:
         csvWriter = csv.writer(my_csv,delimiter=',')
-        csvWriter.writerow(FitVals[UnpLength:])
-        csvWriter.writerow(FitErrs[UnpLength:])
+        csvWriter.writerow(FitVals[UnpLength:PolEnd] + FitVals[DtermEnd:])
+        csvWriter.writerow(FitErrs[UnpLength:PolEnd] + FitErrs[DtermEnd:])
         gump_msg(f"off-forward fit polarized parameters saved to Para_Pol_Off_forward{str}.csv", level="INFO")
+
+    with open(os.path.join(dir_path,f"GUMP_Params/Para_PionPole_Off_forward{str}.csv"),"w",newline='') as my_csv:
+        csvWriter = csv.writer(my_csv,delimiter=',')
+        csvWriter.writerow(FitVals[PolEnd:PionPoleEnd])
+        csvWriter.writerow(FitErrs[PolEnd:PionPoleEnd])
+        gump_msg(f"off-forward fit pion-pole parameters saved to Para_PionPole_Off_forward{str}.csv", level="INFO")
+
+    with open(os.path.join(dir_path,f"GUMP_Params/Para_Dterm_Off_forward{str}.csv"),"w",newline='') as my_csv:
+        csvWriter = csv.writer(my_csv,delimiter=',')
+        csvWriter.writerow(FitVals[PionPoleEnd:DtermEnd])
+        csvWriter.writerow(FitErrs[PionPoleEnd:DtermEnd])
+        gump_msg(f"off-forward fit D-term parameters saved to Para_Dterm_Off_forward{str}.csv", level="INFO")

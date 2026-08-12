@@ -1,4 +1,4 @@
-from .Minimizer import Paralst_Unp_Names, Paralst_Pol_Names,Paralst_Aux_Names, cost_off_forward_withH_withHt, Paralst_Unp_off_forward, Paralst_Pol_off_forward
+from .Minimizer import Paralst_Unp_Names, Paralst_Pol_Names, Paralst_PionPole_Names, Paralst_Dterm_Names, Paralst_Aux_Names, cost_off_forward_withH_withHt, Paralst_Unp_off_forward, Paralst_Pol_off_forward, Paralst_PionPole_off_forward, Paralst_Dterm_off_forward
 from ._helper_ import gump_msg
 from .config import clear_cachedir
 import time
@@ -10,14 +10,18 @@ if __name__ == '__main__':
     # The last parameter of Paralst_Pol_off_forward is the auxiliary parameter not used in the analysis
     Paralst_Pol = Paralst_Pol_off_forward[:-1]
     Paralst_Aux = [Paralst_Pol_off_forward[-1]]
+    Paralst_PionPole = Paralst_PionPole_off_forward
+    Paralst_Dterm = Paralst_Dterm_off_forward
 
     # Sythesis them with the parameter names into a dictionary
     params_unp = dict(zip(Paralst_Unp_Names, Paralst_Unp))
     params_pol = dict(zip(Paralst_Pol_Names, Paralst_Pol))
+    params_pionpole = dict(zip(Paralst_PionPole_Names, Paralst_PionPole))
+    params_dterm = dict(zip(Paralst_Dterm_Names, Paralst_Dterm))
     params_aux = dict(zip(Paralst_Aux_Names, Paralst_Aux))
 
     # Put all of them together
-    params = {**params_unp, **params_pol, **params_aux}
+    params = {**params_unp, **params_pol, **params_pionpole, **params_dterm, **params_aux}
     gump_msg("Calling the cost function to generate needed cached data. This could take several minutes...", level="INFO")
 
     gump_msg("Large memory usage is expected during this process, especially if no cache exists yet.", level="INFO")
